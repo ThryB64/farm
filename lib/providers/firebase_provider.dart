@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
@@ -47,6 +48,10 @@ class FirebaseProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      // Connexion anonyme pour simplifier
+      await FirebaseAuth.instance.signInAnonymously();
+      print('Firebase Auth: Anonymous sign-in successful');
+      
       await _firebaseService.initialize();
       await _setupRealtimeListeners();
       _isInitialized = true;

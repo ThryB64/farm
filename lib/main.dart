@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'providers/firebase_provider.dart';
 import 'screens/home_screen.dart';
 
-void main() {
+Future<void> main() async {
   // Si un widget crashe, on affiche une carte rouge au lieu d'un écran blanc
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return MaterialApp(
@@ -32,28 +33,30 @@ void main() {
     );
   };
 
-      runZonedGuarded(() async {
-        WidgetsFlutterBinding.ensureInitialized();
-        debugPrint('[BOOT] Widgets binding ready. kIsWeb=$kIsWeb');
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    debugPrint('[BOOT] Widgets binding ready. kIsWeb=$kIsWeb');
 
-        // Initialiser Firebase
-        try {
-          debugPrint('[BOOT] Initializing Firebase...');
-          await Firebase.initializeApp();
-          debugPrint('[BOOT] Firebase initialized successfully');
-        } catch (e, s) {
-          debugPrint('[BOOT] Firebase init error: $e\n$s');
-        }
+    // Initialiser Firebase avec les options générées
+    try {
+      debugPrint('[BOOT] Initializing Firebase...');
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      debugPrint('[BOOT] Firebase initialized successfully');
+    } catch (e, s) {
+      debugPrint('[BOOT] Firebase init error: $e\n$s');
+    }
 
-        // Trace le premier frame (si on n'y arrive pas, on saura que ça bloque avant)
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          debugPrint('[BOOT] First frame rendered');
-        });
+    // Trace le premier frame (si on n'y arrive pas, on saura que ça bloque avant)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('[BOOT] First frame rendered');
+    });
 
-        runApp(const MyApp());
-      }, (e, s) {
-        debugPrint('Zoned error at boot: $e\n$s');
-      });
+    runApp(const MyApp());
+  }, (e, s) {
+    debugPrint('Zoned error at boot: $e\n$s');
+  });
 }
 
 class MyApp extends StatelessWidget {
