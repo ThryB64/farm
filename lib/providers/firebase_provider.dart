@@ -60,6 +60,10 @@ class FirebaseProvider with ChangeNotifier {
       
       await _databaseService.initialize();
       await _setupRealtimeListeners();
+      
+      // Synchroniser les données existantes
+      await _databaseService.syncData();
+      
       _isInitialized = true;
       print('Firebase Provider initialized successfully');
     } catch (e) {
@@ -188,6 +192,9 @@ class FirebaseProvider with ChangeNotifier {
       // Générer un ID local pour la compatibilité
       parcelle.id = DateTime.now().millisecondsSinceEpoch;
       print('Parcelle ajoutée avec ID Firebase: $firebaseId (ID local: ${parcelle.id})');
+      
+      // Synchroniser automatiquement
+      await _databaseService.syncData();
     } catch (e) {
       _error = 'Erreur ajout parcelle: $e';
       notifyListeners();

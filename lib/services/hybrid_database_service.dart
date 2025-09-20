@@ -31,6 +31,10 @@ class HybridDatabaseService {
       );
       print('Hybrid Database: Firebase instance created with URL: https://farmgaec-default-rtdb.firebaseio.com');
 
+      // Activer la persistance pour le mode hors ligne
+      _database.setPersistenceEnabled(true);
+      print('Hybrid Database: Persistence enabled for offline mode');
+
       // Vérifier la connexion
       _database.ref('.info/connected').onValue.listen((event) {
         print('Hybrid Database connected: ${event.snapshot.value}');
@@ -72,6 +76,149 @@ class HybridDatabaseService {
     } catch (e) {
       print('❌ Hybrid Database write test failed: $e');
     }
+  }
+
+  // Synchroniser les données entre Firebase et localStorage
+  Future<void> syncData() async {
+    if (_userRef == null) {
+      print('Hybrid Database: No user reference, skipping sync');
+      return;
+    }
+
+    try {
+      print('Hybrid Database: Starting data synchronization...');
+      
+      // Synchroniser les parcelles
+      await _syncParcelles();
+      
+      // Synchroniser les cellules
+      await _syncCellules();
+      
+      // Synchroniser les chargements
+      await _syncChargements();
+      
+      // Synchroniser les semis
+      await _syncSemis();
+      
+      // Synchroniser les variétés
+      await _syncVarietes();
+      
+      print('✅ Hybrid Database: Data synchronization completed');
+    } catch (e) {
+      print('❌ Hybrid Database: Sync failed: $e');
+    }
+  }
+
+  // Synchroniser les parcelles
+  Future<void> _syncParcelles() async {
+    try {
+      // Charger depuis localStorage
+      final localData = await _loadDataFromStorage();
+      final localParcelles = localData['parcelles'] as List<dynamic>? ?? [];
+      
+      // Sauvegarder dans Firebase
+      for (final parcelleData in localParcelles) {
+        if (parcelleData['firebaseId'] == null) {
+          // Créer une nouvelle entrée Firebase
+          final ref = _userRef!.child('parcelles').push();
+          await ref.set(parcelleData);
+          print('Hybrid Database: Synced parcelle to Firebase: ${ref.key}');
+        }
+      }
+    } catch (e) {
+      print('Hybrid Database: Error syncing parcelles: $e');
+    }
+  }
+
+  // Synchroniser les cellules
+  Future<void> _syncCellules() async {
+    try {
+      final localData = await _loadDataFromStorage();
+      final localCellules = localData['cellules'] as List<dynamic>? ?? [];
+      
+      for (final celluleData in localCellules) {
+        if (celluleData['firebaseId'] == null) {
+          final ref = _userRef!.child('cellules').push();
+          await ref.set(celluleData);
+          print('Hybrid Database: Synced cellule to Firebase: ${ref.key}');
+        }
+      }
+    } catch (e) {
+      print('Hybrid Database: Error syncing cellules: $e');
+    }
+  }
+
+  // Synchroniser les chargements
+  Future<void> _syncChargements() async {
+    try {
+      final localData = await _loadDataFromStorage();
+      final localChargements = localData['chargements'] as List<dynamic>? ?? [];
+      
+      for (final chargementData in localChargements) {
+        if (chargementData['firebaseId'] == null) {
+          final ref = _userRef!.child('chargements').push();
+          await ref.set(chargementData);
+          print('Hybrid Database: Synced chargement to Firebase: ${ref.key}');
+        }
+      }
+    } catch (e) {
+      print('Hybrid Database: Error syncing chargements: $e');
+    }
+  }
+
+  // Synchroniser les semis
+  Future<void> _syncSemis() async {
+    try {
+      final localData = await _loadDataFromStorage();
+      final localSemis = localData['semis'] as List<dynamic>? ?? [];
+      
+      for (final semisData in localSemis) {
+        if (semisData['firebaseId'] == null) {
+          final ref = _userRef!.child('semis').push();
+          await ref.set(semisData);
+          print('Hybrid Database: Synced semis to Firebase: ${ref.key}');
+        }
+      }
+    } catch (e) {
+      print('Hybrid Database: Error syncing semis: $e');
+    }
+  }
+
+  // Synchroniser les variétés
+  Future<void> _syncVarietes() async {
+    try {
+      final localData = await _loadDataFromStorage();
+      final localVarietes = localData['varietes'] as List<dynamic>? ?? [];
+      
+      for (final varieteData in localVarietes) {
+        if (varieteData['firebaseId'] == null) {
+          final ref = _userRef!.child('varietes').push();
+          await ref.set(varieteData);
+          print('Hybrid Database: Synced variete to Firebase: ${ref.key}');
+        }
+      }
+    } catch (e) {
+      print('Hybrid Database: Error syncing varietes: $e');
+    }
+  }
+
+  // Charger les données depuis localStorage
+  Future<Map<String, dynamic>> _loadDataFromStorage() async {
+    try {
+      final stored = html.window.localStorage[_storageKey];
+      if (stored != null) {
+        return jsonDecode(stored);
+      }
+    } catch (e) {
+      print('Hybrid Database: Error loading from localStorage: $e');
+    }
+    return {
+      'parcelles': [],
+      'cellules': [],
+      'chargements': [],
+      'semis': [],
+      'varietes': [],
+    };
   }
 
   // Méthodes pour les parcelles
