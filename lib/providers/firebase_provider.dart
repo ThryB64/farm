@@ -195,6 +195,9 @@ class FirebaseProvider with ChangeNotifier {
       
       // Synchroniser automatiquement
       await _databaseService.syncData();
+      
+      // Forcer la mise à jour de l'interface
+      notifyListeners();
     } catch (e) {
       _error = 'Erreur ajout parcelle: $e';
       notifyListeners();
@@ -438,6 +441,20 @@ class FirebaseProvider with ChangeNotifier {
       await _databaseService.updateAllChargementsPoidsNormes();
     } catch (e) {
       _error = 'Erreur mise à jour poids normes: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Forcer la synchronisation manuelle
+  Future<void> forceSync() async {
+    try {
+      print('Firebase Provider: Forcing manual synchronization...');
+      await _databaseService.syncData();
+      notifyListeners();
+      print('Firebase Provider: Manual synchronization completed');
+    } catch (e) {
+      _error = 'Erreur synchronisation manuelle: $e';
       notifyListeners();
       rethrow;
     }

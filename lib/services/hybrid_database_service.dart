@@ -31,9 +31,9 @@ class HybridDatabaseService {
       );
       print('Hybrid Database: Firebase instance created with URL: https://farmgaec-default-rtdb.firebaseio.com');
 
-      // Activer la persistance pour le mode hors ligne
-      _database.setPersistenceEnabled(true);
-      print('Hybrid Database: Persistence enabled for offline mode');
+      // Note: setPersistenceEnabled() n'est pas supporté sur le web
+      // La persistance est gérée automatiquement par Firebase sur le web
+      print('Hybrid Database: Web platform - persistence handled automatically');
 
       // Vérifier la connexion
       _database.ref('.info/connected').onValue.listen((event) {
@@ -60,6 +60,13 @@ class HybridDatabaseService {
           print('Hybrid Database: Auth failed, using localStorage: $authError');
         }
       }
+      
+      // Vérifier que _userRef est défini
+      if (_userRef != null) {
+        print('Hybrid Database: User reference created successfully');
+      } else {
+        print('Hybrid Database: No user reference - will use localStorage only');
+      }
     } catch (e) {
       print('Hybrid Database: Firebase init failed, using localStorage: $e');
     }
@@ -81,8 +88,16 @@ class HybridDatabaseService {
   // Synchroniser les données entre Firebase et localStorage
   Future<void> syncData() async {
     if (_userRef == null) {
-      print('Hybrid Database: No user reference, skipping sync');
-      return;
+      print('Hybrid Database: No user reference, trying to reconnect...');
+      // Essayer de reconnecter
+      final user = _auth.currentUser;
+      if (user != null) {
+        _userRef = _database.ref('users/${user.uid}');
+        print('Hybrid Database: Reconnected with user: ${user.uid}');
+      } else {
+        print('Hybrid Database: No user available, skipping sync');
+        return;
+      }
     }
 
     try {
