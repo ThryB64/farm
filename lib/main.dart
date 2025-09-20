@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/simple_realtime_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'providers/firebase_provider.dart';
 import 'screens/home_screen.dart';
 
 void main() {
@@ -31,28 +32,28 @@ void main() {
     );
   };
 
-  runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    debugPrint('[BOOT] Widgets binding ready. kIsWeb=$kIsWeb');
+      runZonedGuarded(() async {
+        WidgetsFlutterBinding.ensureInitialized();
+        debugPrint('[BOOT] Widgets binding ready. kIsWeb=$kIsWeb');
 
-        // Initialisation de la base de données temps réel
+        // Initialiser Firebase
         try {
-          debugPrint('[BOOT] Init realtime DB…');
-          // Le provider s'initialise automatiquement dans son constructeur
-          debugPrint('[BOOT] Realtime DB initialized successfully');
+          debugPrint('[BOOT] Initializing Firebase...');
+          await Firebase.initializeApp();
+          debugPrint('[BOOT] Firebase initialized successfully');
         } catch (e, s) {
-          debugPrint('[BOOT] DB init error: $e\n$s');
+          debugPrint('[BOOT] Firebase init error: $e\n$s');
         }
 
-    // Trace le premier frame (si on n'y arrive pas, on saura que ça bloque avant)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('[BOOT] First frame rendered');
-    });
+        // Trace le premier frame (si on n'y arrive pas, on saura que ça bloque avant)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          debugPrint('[BOOT] First frame rendered');
+        });
 
-    runApp(const MyApp());
-  }, (e, s) {
-    debugPrint('Zoned error at boot: $e\n$s');
-  });
+        runApp(const MyApp());
+      }, (e, s) {
+        debugPrint('Zoned error at boot: $e\n$s');
+      });
 }
 
 class MyApp extends StatelessWidget {
@@ -60,15 +61,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return ChangeNotifierProvider(
-        create: (context) => SimpleRealtimeProvider(),
+    return ChangeNotifierProvider(
+      create: (context) => FirebaseProvider(),
       child: MaterialApp(
         title: 'Maïs Tracker',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
           useMaterial3: true,
         ),
-            home: const SplashScreen(),
+        home: const SplashScreen(),
       ),
     );
   }
@@ -134,8 +135,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     try {
-      final provider = Provider.of<SimpleRealtimeProvider>(context, listen: false);
-      // Le provider s'initialise automatiquement
+      final provider = Provider.of<FirebaseProvider>(context, listen: false);
+      await provider.initialize();
       
       if (mounted) {
         Navigator.of(context).pushReplacement(
