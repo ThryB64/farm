@@ -14,9 +14,35 @@ class DatabaseProvider with ChangeNotifier {
   List<Chargement> _chargements = [];
   List<Semis> _semis = [];
   List<Variete> _varietes = [];
+  bool _enabled = false;
 
   DatabaseProvider() : _db = DatabaseService() {
-    _loadData();
+    if (!kIsWeb) {
+      _enabled = true;
+      _loadData();
+    } else {
+      _enabled = false;
+      print('Web build: DatabaseProvider désactivé');
+    }
+  }
+
+  static final DatabaseProvider instance = DatabaseProvider._();
+  DatabaseProvider._() : _db = DatabaseService() {
+    if (!kIsWeb) {
+      _enabled = true;
+    } else {
+      _enabled = false;
+      print('Web build: DatabaseProvider désactivé');
+    }
+  }
+
+  Future<void> init() async {
+    if (kIsWeb) {
+      _enabled = false;
+      return;
+    }
+    _enabled = true;
+    await _loadData();
   }
 
   List<Parcelle> get parcelles => _parcelles;
@@ -79,6 +105,11 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> _loadData() async {
+    if (!_enabled) {
+      print("Web build: _loadData skipped");
+      return;
+    }
+    
     try {
       print("Loading data from database...");
       
@@ -112,6 +143,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> ajouterParcelle(Parcelle parcelle) async {
+    if (!_enabled) return;
     final id = await _db.insertParcelle(parcelle);
     parcelle.id = id;
     _parcelles.add(parcelle);
@@ -119,6 +151,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> modifierParcelle(Parcelle parcelle) async {
+    if (!_enabled) return;
     if (parcelle.id != null) {
       await _db.updateParcelle(parcelle);
       final index = _parcelles.indexWhere((p) => p.id == parcelle.id);
@@ -130,12 +163,14 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> supprimerParcelle(int id) async {
+    if (!_enabled) return;
     await _db.deleteParcelle(id);
     _parcelles.removeWhere((p) => p.id == id);
     notifyListeners();
   }
 
   Future<void> ajouterCellule(Cellule cellule) async {
+    if (!_enabled) return;
     final id = await _db.insertCellule(cellule);
     cellule.id = id;
     _cellules.add(cellule);
@@ -143,6 +178,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> modifierCellule(Cellule cellule) async {
+    if (!_enabled) return;
     if (cellule.id != null) {
       await _db.updateCellule(cellule);
       final index = _cellules.indexWhere((c) => c.id == cellule.id);
@@ -154,12 +190,14 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> supprimerCellule(int id) async {
+    if (!_enabled) return;
     await _db.deleteCellule(id);
     _cellules.removeWhere((c) => c.id == id);
     notifyListeners();
   }
 
   Future<void> ajouterChargement(Chargement chargement) async {
+    if (!_enabled) return;
     try {
       // Valider les données
       if (!PoidsUtils.estPoidsValide(chargement.poidsPlein)) {
@@ -194,6 +232,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> modifierChargement(Chargement chargement) async {
+    if (!_enabled) return;
     try {
       if (chargement.id != null) {
         // Valider les données
@@ -232,6 +271,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> supprimerChargement(int id) async {
+    if (!_enabled) return;
     try {
       await _db.deleteChargement(id);
       _chargements.removeWhere((c) => c.id == id);
@@ -242,6 +282,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> ajouterSemis(Semis semis) async {
+    if (!_enabled) return;
     final id = await _db.insertSemis(semis);
     semis.id = id;
     _semis.add(semis);
@@ -249,6 +290,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> modifierSemis(Semis semis) async {
+    if (!_enabled) return;
     if (semis.id != null) {
       await _db.updateSemis(semis);
       final index = _semis.indexWhere((s) => s.id == semis.id);
@@ -260,12 +302,14 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> supprimerSemis(int id) async {
+    if (!_enabled) return;
     await _db.deleteSemis(id);
     _semis.removeWhere((s) => s.id == id);
     notifyListeners();
   }
 
   Future<void> deleteAllData() async {
+    if (!_enabled) return;
     final db = await _db.database;
     await db.transaction((txn) async {
       await txn.rawDelete('DELETE FROM chargements');
@@ -278,6 +322,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> importData(Map<String, dynamic> data) async {
+    if (!_enabled) return;
     final db = await _db.database;
     await db.transaction((txn) async {
       // Supprimer les données existantes
@@ -369,6 +414,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> ajouterVariete(Variete variete) async {
+    if (!_enabled) return;
     final id = await _db.insertVariete(variete);
     variete.id = id;
     _varietes.add(variete);
@@ -376,6 +422,7 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> modifierVariete(Variete variete) async {
+    if (!_enabled) return;
     if (variete.id != null) {
       await _db.updateVariete(variete);
       final index = _varietes.indexWhere((v) => v.id == variete.id);
@@ -387,12 +434,14 @@ class DatabaseProvider with ChangeNotifier {
   }
 
   Future<void> supprimerVariete(int id) async {
+    if (!_enabled) return;
     await _db.deleteVariete(id);
     _varietes.removeWhere((v) => v.id == id);
     notifyListeners();
   }
 
   Future<void> updateAllChargementsPoidsNormes() async {
+    if (!_enabled) return;
     try {
       // print('Début de la mise à jour des poids aux normes');
       await _db.updateAllChargementsPoidsNormes();

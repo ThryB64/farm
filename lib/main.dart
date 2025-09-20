@@ -1,20 +1,35 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/database_provider.dart';
 import 'screens/home_screen.dart';
-import 'package:flutter/foundation.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Capturer les erreurs non gérées
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint('Erreur non gérée: $error');
-    debugPrint('Stack trace: $stack');
-    return true;
+  FlutterError.onError = (details) {
+    // Logge les erreurs au démarrage (utile sur Web)
+    // ignore: avoid_print
+    print('FlutterError: ${details.exceptionAsString()}');
   };
 
-  runApp(const MyApp());
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    if (!kIsWeb) {
+      // Mobile/Desktop : on garde sqflite
+      await DatabaseProvider.instance.init();
+    } else {
+      // Web : on NE lance PAS sqflite ni dart:io
+      // TODO: brancher Firestore/Supabase ou Hive plus tard
+      // ignore: avoid_print
+      print('Web build: DB locale désactivée');
+    }
+
+    runApp(const MyApp());
+  }, (e, s) {
+    // ignore: avoid_print
+    print('Zoned error: $e\n$s');
+  });
 }
 
 class MyApp extends StatelessWidget {
