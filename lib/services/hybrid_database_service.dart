@@ -3,6 +3,7 @@ import 'dart:html' as html;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
@@ -31,20 +32,25 @@ class HybridDatabaseService {
       );
       print('Hybrid Database: Firebase instance created with URL: https://farmgaec-default-rtdb.firebaseio.com');
 
-      // Note: setPersistenceEnabled() n'est pas supporté sur le web
-      // La persistance est gérée automatiquement par Firebase sur le web
-      print('Hybrid Database: Web platform - persistence handled automatically');
+      // Persistance : seulement sur les plateformes natives
+      if (!kIsWeb) {
+        _database.setPersistenceEnabled(true);
+        _database.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
+        print('Hybrid Database: Persistence enabled for native platforms');
+      } else {
+        print('Hybrid Database: Web platform - persistence handled automatically');
+      }
 
       // Vérifier la connexion
       _database.ref('.info/connected').onValue.listen((event) {
         print('Hybrid Database connected: ${event.snapshot.value}');
       });
 
-      // Essayer Firebase d'abord
+      // Authentification et création de userRef
       final user = _auth.currentUser;
       if (user != null) {
         _userRef = _database.ref('users/${user.uid}');
-        print('Hybrid Database: Firebase initialized for user: ${user.uid}');
+        print('Hybrid Database: Firebase initialized for existing user: ${user.uid}');
         await _testWrite();
       } else {
         // Essayer l'auth anonyme
@@ -64,6 +70,7 @@ class HybridDatabaseService {
       // Vérifier que _userRef est défini
       if (_userRef != null) {
         print('Hybrid Database: User reference created successfully');
+        print('Hybrid Database: User path: ${_userRef!.path}');
       } else {
         print('Hybrid Database: No user reference - will use localStorage only');
       }
@@ -256,9 +263,18 @@ class HybridDatabaseService {
 
   Future<String> insertParcelle(Parcelle parcelle) async {
     if (_userRef != null) {
-      final ref = _userRef!.child('parcelles').push();
-      await ref.set(parcelle.toMap());
-      return ref.key!;
+      // Utiliser une clé stable basée sur le nom et la surface pour éviter les doublons
+      final stableKey = '${parcelle.nom.replaceAll(' ', '_')}_${parcelle.surface.toString().replaceAll('.', '_')}';
+      final ref = _userRef!.child('parcelles').child(stableKey);
+      
+      // Utiliser update() au lieu de set() pour éviter les doublons
+      await ref.update({
+        ...parcelle.toMap(),
+        'updatedAt': ServerValue.timestamp,
+      });
+      
+      print('Hybrid Database: Parcelle upserted with stable key: $stableKey');
+      return stableKey;
     } else {
       // Mode localStorage
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -270,8 +286,22 @@ class HybridDatabaseService {
 
   Future<void> updateParcelle(Parcelle parcelle) async {
     if (_userRef != null) {
-      if (parcelle.id == null) throw Exception('Parcelle ID is required for update');
-      await _userRef!.child('parcelles').child(parcelle.id.toString()).set(parcelle.toMap());
+      if (parcelle.firebaseId != null) {
+        // Utiliser l'ID Firebase si disponible
+        await _userRef!.child('parcelles').child(parcelle.firebaseId!).update({
+          ...parcelle.toMap(),
+          'updatedAt': ServerValue.timestamp,
+        });
+        print('Hybrid Database: Parcelle updated with Firebase ID: ${parcelle.firebaseId}');
+      } else {
+        // Créer une nouvelle clé stable
+        final stableKey = '${parcelle.nom.replaceAll(' ', '_')}_${parcelle.surface.toString().replaceAll('.', '_')}';
+        await _userRef!.child('parcelles').child(stableKey).update({
+          ...parcelle.toMap(),
+          'updatedAt': ServerValue.timestamp,
+        });
+        print('Hybrid Database: Parcelle updated with stable key: $stableKey');
+      }
     } else {
       // Mode localStorage
       _saveParcelleToStorage(parcelle);

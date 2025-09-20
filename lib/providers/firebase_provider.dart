@@ -191,7 +191,7 @@ class FirebaseProvider with ChangeNotifier {
       parcelle.firebaseId = firebaseId;
       // Générer un ID local pour la compatibilité
       parcelle.id = DateTime.now().millisecondsSinceEpoch;
-      print('Parcelle ajoutée avec ID Firebase: $firebaseId (ID local: ${parcelle.id})');
+      print('Parcelle ajoutée avec ID Firebase stable: $firebaseId (ID local: ${parcelle.id})');
       
       // Synchroniser automatiquement
       await _databaseService.syncData();
