@@ -1,16 +1,52 @@
-# mais_tracker
+# 🌽 Maïs Tracker - PWA
 
-A new Flutter project.
+Application de gestion des récoltes de maïs - Progressive Web App
 
-## Getting Started
+## 📱 Installation sur iPhone
 
-This project is a starting point for a Flutter application.
+### Méthode 1: GitHub Pages (Recommandée)
+1. Ouvrez Safari sur votre iPhone
+2. Allez sur : `https://[votre-username].github.io/mais-tracker`
+3. Menu "Partager" → "Ajouter à l'écran d'accueil"
+4. L'app s'installe comme une app native !
 
-A few resources to get you started if this is your first Flutter project:
+### Méthode 2: Local
+1. Ouvrez `build/web/index.html` dans Safari
+2. Menu "Partager" → "Ajouter à l'écran d'accueil"
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🚀 Déploiement automatique
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Cette PWA se déploie automatiquement sur GitHub Pages à chaque push sur la branche `main`.
+
+## 🛠️ Développement local
+
+```bash
+# Installer les dépendances
+flutter pub get
+
+# Build pour le web
+flutter build web --release
+
+# Tester localement
+cd build/web
+python -m http.server 8000
+# Ouvrir http://localhost:8000
+```
+
+## 📋 Fonctionnalités
+
+- ✅ Gestion des parcelles
+- ✅ Gestion des cellules de stockage
+- ✅ Suivi des chargements
+- ✅ Gestion des semis
+- ✅ Statistiques et rapports
+- ✅ Export PDF
+- ✅ Base de données SQLite (IndexedDB sur web)
+
+## 🔧 Technologies
+
+- Flutter Web
+- Progressive Web App (PWA)
+- SQLite (IndexedDB)
+- GitHub Pages
+- GitHub Actions
