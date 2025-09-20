@@ -379,31 +379,31 @@ class DatabaseService {
     await db.transaction((txn) async {
       // Récupérer tous les chargements
       final List<Map<String, dynamic>> chargements = await txn.query('chargements');
-      print('Nombre de chargements à mettre à jour : ${chargements.length}');
+      // print('Nombre de chargements à mettre à jour : ${chargements.length}');
       
       // Mettre à jour chaque chargement
       for (var chargement in chargements) {
-        print('Chargement ID: ${chargement['id']}');
-        print('Poids plein initial: ${chargement['poids_plein']}');
-        print('Poids vide initial: ${chargement['poids_vide']}');
-        print('Humidité initiale: ${chargement['humidite']}');
+        // print('Chargement ID: ${chargement['id']}');
+        // print('Poids plein initial: ${chargement['poids_plein']}');
+        // print('Poids vide initial: ${chargement['poids_vide']}');
+        // print('Humidité initiale: ${chargement['humidite']}');
         
         // Convertir explicitement en double pour éviter les problèmes de type
         final double poidsPlein = double.tryParse(chargement['poids_plein'].toString()) ?? 0.0;
         final double poidsVide = double.tryParse(chargement['poids_vide'].toString()) ?? 0.0;
         final double humidite = double.tryParse(chargement['humidite'].toString()) ?? 0.0;
         
-        print('Poids plein converti: $poidsPlein');
-        print('Poids vide converti: $poidsVide');
-        print('Humidité convertie: $humidite');
+        // print('Poids plein converti: $poidsPlein');
+        // print('Poids vide converti: $poidsVide');
+        // print('Humidité convertie: $humidite');
         
         // Calculer le poids net
         final double poidsNet = PoidsUtils.calculPoidsNet(poidsPlein, poidsVide);
-        print('Poids net calculé: $poidsNet');
+        // print('Poids net calculé: $poidsNet');
         
         // Calculer le poids aux normes (15% d'humidité)
         final double poidsNormes = PoidsUtils.calculPoidsNormes(poidsNet, humidite);
-        print('Poids aux normes calculé: $poidsNormes');
+        // print('Poids aux normes calculé: $poidsNormes');
         
         // Mettre à jour le chargement
         await txn.update(
@@ -415,7 +415,7 @@ class DatabaseService {
           where: 'id = ?',
           whereArgs: [chargement['id']],
         );
-        print('Chargement mis à jour avec succès');
+        // print('Chargement mis à jour avec succès');
       }
     });
   }

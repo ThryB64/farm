@@ -32,7 +32,7 @@ class ParcellesScreen extends StatelessWidget {
                     size: 64,
                     color: Colors.grey[400],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Text(
                     'Aucune parcelle enregistrée',
                     style: TextStyle(
@@ -75,7 +75,7 @@ class ParcellesScreen extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 parcelle.nom,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -85,12 +85,12 @@ class ParcellesScreen extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit),
+                                  icon: Icon(Icons.edit),
                                   color: Colors.blue,
                                   onPressed: () => _modifierParcelle(context, parcelle),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete),
+                                  icon: Icon(Icons.delete),
                                   color: Colors.red,
                                   onPressed: () => _confirmerSuppression(context, parcelle),
                                 ),
@@ -98,7 +98,7 @@ class ParcellesScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Row(
                           children: [
                             Icon(
@@ -106,7 +106,7 @@ class ParcellesScreen extends StatelessWidget {
                               size: 16,
                               color: Colors.grey[600],
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: 4),
                             Text(
                               '${parcelle.surface} ha',
                               style: TextStyle(
@@ -114,13 +114,13 @@ class ParcellesScreen extends StatelessWidget {
                                 fontSize: 14,
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: 16),
                             Icon(
                               Icons.calendar_today,
                               size: 16,
                               color: Colors.grey[600],
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: 4),
                             Text(
                               'Créée le ${_formatDate(parcelle.dateCreation)}',
                               style: TextStyle(
@@ -142,7 +142,7 @@ class ParcellesScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _ajouterParcelle(context),
         backgroundColor: Colors.green,
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -181,7 +181,7 @@ class ParcellesScreen extends StatelessWidget {
                 },
                 onSaved: (value) => nom = value!,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: 'Surface (ha)',
@@ -262,7 +262,7 @@ class ParcellesScreen extends StatelessWidget {
                 },
                 onSaved: (value) => nom = value!,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: parcelle.surface.toString(),
                 decoration: const InputDecoration(

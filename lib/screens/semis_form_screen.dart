@@ -25,13 +25,13 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   void initState() {
     super.initState();
     _dateController = TextEditingController(
-      text: widget.semis?.date != null
+      text: widget.semis.date != null
           ? _formatDate(widget.semis!.date)
           : _formatDate(DateTime.now()),
     );
-    _notesController = TextEditingController(text: widget.semis?.notes ?? '');
-    _selectedParcelleId = widget.semis?.parcelleId;
-    _selectedVarietesSurfaces = widget.semis?.varietesSurfaces ?? [];
+    _notesController = TextEditingController(text: widget.semis.notes ?? '');
+    _selectedParcelleId = widget.semis.parcelleId;
+    _selectedVarietesSurfaces = widget.semis.varietesSurfaces ?? [];
     _showPourcentages = _selectedVarietesSurfaces.isNotEmpty;
   }
 
@@ -49,11 +49,11 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: widget.semis?.date ?? DateTime.now(),
+      initialDate: widget.semis.date ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    if (picked != null && picked != widget.semis?.date) {
+    if (picked != null && picked != widget.semis.date) {
       setState(() {
         _dateController.text = _formatDate(picked);
       });
@@ -259,20 +259,20 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _buildVarietesSection(provider),
                   if (_showPourcentages) ...[
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     _buildPourcentagesSection(),
                   ],
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: _dateController,
                     decoration: InputDecoration(
                       labelText: 'Date',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.calendar_today),
+                        icon: Icon(Icons.calendar_today),
                         onPressed: () => _selectDate(context),
                       ),
                     ),
@@ -284,7 +284,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: _notesController,
                     decoration: const InputDecoration(
@@ -299,7 +299,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
@@ -333,7 +333,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                           );
 
                           final semis = Semis(
-                            id: widget.semis?.id,
+                            id: widget.semis.id,
                             parcelleId: _selectedParcelleId!,
                             varietesSurfaces: _selectedVarietesSurfaces,
                             date: date,
@@ -367,7 +367,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                     ),
                     child: Text(
                       widget.semis == null ? 'Ajouter' : 'Modifier',
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
                 ],

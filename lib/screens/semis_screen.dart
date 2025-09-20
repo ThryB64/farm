@@ -102,14 +102,14 @@ class _SemisScreenState extends State<SemisScreen> {
                                 children: [
                                   Text('Date: ${_formatDate(semis.date)}'),
                                   Text('Variétés: ${semis.varietes.join(", ")}'),
-                                  if (semis.notes?.isNotEmpty ?? false) Text('Notes: ${semis.notes}'),
+                                  if (semis.notes.isNotEmpty ?? false) Text('Notes: ${semis.notes}'),
                                 ],
                               ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.edit),
+                                    icon: Icon(Icons.edit),
                                     onPressed: () {
                                       Navigator.push(
                                         context,
@@ -122,7 +122,7 @@ class _SemisScreenState extends State<SemisScreen> {
                                     },
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete),
+                                    icon: Icon(Icons.delete),
                                     onPressed: () {
                                       _showDeleteConfirmation(context, semis);
                                     },
@@ -148,7 +148,7 @@ class _SemisScreenState extends State<SemisScreen> {
           );
         },
         backgroundColor: Colors.purple,
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

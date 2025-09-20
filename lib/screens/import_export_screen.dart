@@ -38,7 +38,7 @@ class ImportExportScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Consumer<DatabaseProvider>(
                       builder: (context, provider, child) {
                         return Column(
@@ -49,35 +49,35 @@ class ImportExportScreen extends StatelessWidget {
                               Icons.landscape,
                               Colors.green,
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             _buildDataSummary(
                               'Cellules',
                               provider.cellules.length,
                               Icons.warehouse,
                               Colors.blue,
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             _buildDataSummary(
                               'Chargements',
                               provider.chargements.length,
                               Icons.local_shipping,
                               Colors.orange,
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             _buildDataSummary(
                               'Semis',
                               provider.semis.length,
                               Icons.agriculture,
                               Colors.brown,
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             _buildDataSummary(
                               'Variétés',
                               provider.varietes.length,
                               Icons.eco,
                               Colors.purple,
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24),
                             ElevatedButton.icon(
                               onPressed: () async {
                                 try {
@@ -104,7 +104,7 @@ class ImportExportScreen extends StatelessWidget {
                                   }
                                 }
                               },
-                              icon: const Icon(Icons.refresh),
+                              icon: Icon(Icons.refresh),
                               label: const Text('Mettre à jour les poids aux normes'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
@@ -119,7 +119,7 @@ class ImportExportScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -133,15 +133,15 @@ class ImportExportScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     const Text(
                       'Exporte toutes les données de la base dans un fichier JSON',
                       style: TextStyle(color: Colors.grey),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () => _exportData(context),
-                      icon: const Icon(Icons.download),
+                      icon: Icon(Icons.download),
                       label: const Text('Exporter la base'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
@@ -152,7 +152,7 @@ class ImportExportScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -166,15 +166,15 @@ class ImportExportScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     const Text(
                       'Importe toutes les données depuis un fichier JSON',
                       style: TextStyle(color: Colors.grey),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () => _importData(context),
-                      icon: const Icon(Icons.upload),
+                      icon: Icon(Icons.upload),
                       label: const Text('Importer la base'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
@@ -195,10 +195,10 @@ class ImportExportScreen extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, color: color),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text(
           '$title : $count',
-          style: const TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 16),
         ),
       ],
     );
@@ -293,13 +293,13 @@ class ImportExportScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Version du fichier: ${data['version'] ?? '1.0'}'),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text('Parcelles : ${data['parcelles'].length}'),
               Text('Cellules : ${data['cellules'].length}'),
               Text('Chargements : ${data['chargements'].length}'),
               Text('Semis : ${data['semis'].length}'),
               Text('Variétés : ${data['varietes'].length}'),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               const Text(
                 'Les données existantes seront remplacées. '
                 'Voulez-vous continuer ?',

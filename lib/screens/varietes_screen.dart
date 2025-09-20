@@ -37,7 +37,7 @@ class VarietesScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit),
+                        icon: Icon(Icons.edit),
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -50,7 +50,7 @@ class VarietesScreen extends StatelessWidget {
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete),
+                        icon: Icon(Icons.delete),
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -92,7 +92,7 @@ class VarietesScreen extends StatelessWidget {
           );
         },
         backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

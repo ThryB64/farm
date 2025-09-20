@@ -19,7 +19,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedYear = widget.cellule?.dateCreation.year ?? DateTime.now().year;
+    _selectedYear = widget.cellule.dateCreation.year ?? DateTime.now().year;
   }
 
   @override
@@ -61,14 +61,14 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {
                       final dateCreation = DateTime(_selectedYear!, DateTime.now().month, DateTime.now().day);
                       final cellule = Cellule(
-                        id: widget.cellule?.id,
+                        id: widget.cellule.id,
                         dateCreation: dateCreation,
                       );
 
@@ -99,7 +99,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                 ),
                 child: Text(
                   widget.cellule == null ? 'Ajouter' : 'Modifier',
-                  style: const TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ],

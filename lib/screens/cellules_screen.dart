@@ -40,7 +40,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                     size: 64,
                     color: Colors.grey[400],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Text(
                     'Aucune cellule enregistrée',
                     style: TextStyle(
@@ -96,7 +96,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 child: Column(
                   children: [
                     DropdownButtonFormField<int>(
@@ -106,7 +106,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        prefixIcon: const Icon(Icons.calendar_today),
+                        prefixIcon: Icon(Icons.calendar_today),
                         filled: true,
                         fillColor: Colors.white,
                       ),
@@ -123,7 +123,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                       },
                     ),
                     if (_selectedYear != null) ...[
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -141,10 +141,10 @@ class _CellulesScreenState extends State<CellulesScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       if (cellulesParAnnee[_selectedYear] != null) Text(
                         '${cellulesParAnnee[_selectedYear]!.length} cellules en $_selectedYear',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
                         ),
@@ -213,7 +213,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                             Expanded(
                                               child: Text(
                                                 'Cellule ${cellule.reference}',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -223,7 +223,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 IconButton(
-                                                  icon: const Icon(Icons.info),
+                                                  icon: Icon(Icons.info),
                                                   color: Colors.blue,
                                                   onPressed: () {
                                                     Navigator.push(
@@ -237,7 +237,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                                   },
                                                 ),
                                                 IconButton(
-                                                  icon: const Icon(Icons.delete),
+                                                  icon: Icon(Icons.delete),
                                                   color: Colors.red,
                                                   onPressed: () => _showDeleteConfirmation(context, cellule),
                                                 ),
@@ -245,7 +245,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 8),
+                                        SizedBox(height: 8),
                                         Row(
                                           children: [
                                             Icon(
@@ -253,7 +253,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                               size: 16,
                                               color: Colors.grey[600],
                                             ),
-                                            const SizedBox(width: 4),
+                                            SizedBox(width: 4),
                                             Text(
                                               '${(cellule.capacite / 1000).toStringAsFixed(2)} T',
                                               style: TextStyle(
@@ -261,13 +261,13 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                                 fontSize: 14,
                                               ),
                                             ),
-                                            const SizedBox(width: 16),
+                                            SizedBox(width: 16),
                                             Icon(
                                               Icons.calendar_today,
                                               size: 16,
                                               color: Colors.grey[600],
                                             ),
-                                            const SizedBox(width: 4),
+                                            SizedBox(width: 4),
                                             Text(
                                               'Créée le ${_formatDate(cellule.dateCreation)}',
                                               style: TextStyle(
@@ -278,10 +278,10 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                           ],
                                         ),
                                         if (chargementsCellule.isNotEmpty) ...[
-                                          const SizedBox(height: 8),
+                                          SizedBox(height: 8),
                                           LinearProgressIndicator(
                                             value: tauxRemplissage / 100,
-                                            backgroundColor: Colors.blue.withOpacity(0.2),
+                                            backgroundColor: Colors.blue.withValues(alpha: 0.2),
                                             valueColor: AlwaysStoppedAnimation<Color>(
                                               tauxRemplissage > 90
                                                   ? Colors.red
@@ -291,7 +291,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                             ),
                                             minHeight: 8,
                                           ),
-                                          const SizedBox(height: 8),
+                                          SizedBox(height: 8),
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
@@ -312,7 +312,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: 4),
+                                          SizedBox(height: 4),
                                           Text(
                                             'Humidité moyenne: ${humiditeMoyenne.toStringAsFixed(1)}%',
                                             style: TextStyle(
@@ -343,7 +343,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
           );
         },
         backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -386,10 +386,10 @@ class _CellulesScreenState extends State<CellulesScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: color.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -400,7 +400,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, color: color, size: 16),
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               Text(
                 label,
                 style: TextStyle(
@@ -410,7 +410,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             value,
             style: TextStyle(

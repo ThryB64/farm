@@ -114,7 +114,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                       ),
                     ),
                     if (_tabController.index == 1) ...[
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<int>(
                           value: _selectedParcelleId,
@@ -150,7 +150,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildEvolutionRendementChart(statsParAnnee),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
                           _buildEvolutionHumiditeChart(statsParAnnee),
                         ],
                       ),
@@ -162,7 +162,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildComparaisonRendementsParcellesChart(chargements, parcelles),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
                           Card(
                             child: Padding(
                               padding: const EdgeInsets.all(16),
@@ -173,7 +173,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                                     'Sélectionnez une parcelle pour voir ses statistiques détaillées',
                                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
-                                  const SizedBox(height: 16),
+                                  SizedBox(height: 16),
                                   DropdownButtonFormField<int>(
                                     value: _selectedParcelleId,
                                     decoration: const InputDecoration(
@@ -197,9 +197,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                             ),
                           ),
                           if (_selectedParcelleId != null) ...[
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24),
                             _buildEvolutionRendementParcelleChart(chargements, _selectedParcelleId!, parcelles),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24),
                             _buildEvolutionHumiditeParcelleChart(chargements, _selectedParcelleId!, parcelles),
                           ],
                         ],
@@ -212,7 +212,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildComparaisonRendementsVarietesChart(chargements, semis, parcelles),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
                           _buildRepartitionSurfacesVarietesChart(semis, parcelles),
                         ],
                       ),
@@ -240,7 +240,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                 'Évolution du rendement total par an (T/ha)',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               const Center(
                 child: Text(
                   'Aucune donnée disponible',
@@ -262,7 +262,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
               'Évolution du rendement total par an (T/ha)',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             SizedBox(
               height: 300,
               child: LineChart(
@@ -276,7 +276,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             annees[value.toInt()].toString(),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -288,7 +288,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -333,7 +333,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                 'Évolution de l\'humidité moyenne annuelle (%)',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               const Center(
                 child: Text(
                   'Aucune donnée disponible',
@@ -355,7 +355,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
               'Évolution de l\'humidité moyenne annuelle (%)',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             SizedBox(
               height: 300,
               child: LineChart(
@@ -369,7 +369,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             annees[value.toInt()].toString(),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -381,7 +381,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -437,9 +437,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             children: [
               Text(
                 'Comparaison du rendement (T/ha) entre toutes les parcelles pour $_selectedYear',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               const Center(
                 child: Text(
                   'Aucune donnée disponible',
@@ -460,9 +460,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           children: [
             Text(
               'Comparaison du rendement (T/ha) entre toutes les parcelles pour $_selectedYear',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             SizedBox(
               height: 300,
               child: BarChart(
@@ -480,7 +480,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
                               parcelle.nom,
-                              style: const TextStyle(fontSize: 10),
+                              style: TextStyle(fontSize: 10),
                             ),
                           );
                         },
@@ -493,7 +493,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -547,9 +547,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             children: [
               Text(
                 'Évolution du rendement par an pour ${parcelle.nom} (T/ha)',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               const Center(
                 child: Text(
                   'Aucune donnée disponible',
@@ -572,9 +572,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           children: [
             Text(
               'Évolution du rendement par an pour ${parcelle.nom} (T/ha)',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             SizedBox(
               height: 300,
               child: LineChart(
@@ -588,7 +588,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             annees[value.toInt()].toString(),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -600,7 +600,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -667,9 +667,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             children: [
               Text(
                 'Évolution de l\'humidité moyenne par an pour ${parcelle.nom} (%)',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               const Center(
                 child: Text(
                   'Aucune donnée disponible',
@@ -692,9 +692,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           children: [
             Text(
               'Évolution de l\'humidité moyenne par an pour ${parcelle.nom} (%)',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             SizedBox(
               height: 300,
               child: LineChart(
@@ -708,7 +708,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             annees[value.toInt()].toString(),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -720,7 +720,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                           );
                         },
                       ),
@@ -802,7 +802,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           'Rendements par variété',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         SizedBox(
           height: 300,
           child: BarChart(
@@ -835,7 +835,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             rendementsMoyens.keys.elementAt(value.toInt()),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(fontSize: 10),
                             textAlign: TextAlign.center,
                           ),
                         );
@@ -851,7 +851,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                     getTitlesWidget: (value, meta) {
                       return Text(
                         '${value.toStringAsFixed(1)} T/ha',
-                        style: const TextStyle(fontSize: 10),
+                        style: TextStyle(fontSize: 10),
                       );
                     },
                   ),
@@ -908,7 +908,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           'Répartition des surfaces par variété',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         SizedBox(
           height: 300,
           child: PieChart(
@@ -929,7 +929,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Wrap(
           spacing: 16,
           children: surfacesParVariete.entries.map((entry) {
@@ -941,10 +941,10 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                   height: 16,
                   color: Colors.orange,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Text(
                   '${entry.key}: ${entry.value.toStringAsFixed(1)} ha',
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 12),
                 ),
               ],
             );

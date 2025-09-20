@@ -21,9 +21,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
   @override
   void initState() {
     super.initState();
-    _nomController = TextEditingController(text: widget.parcelle?.nom ?? '');
-    _surfaceController = TextEditingController(text: widget.parcelle?.surface.toString() ?? '');
-    _notesController = TextEditingController(text: widget.parcelle?.notes ?? '');
+    _nomController = TextEditingController(text: widget.parcelle.nom ?? '');
+    _surfaceController = TextEditingController(text: widget.parcelle.surface.toString() ?? '');
+    _notesController = TextEditingController(text: widget.parcelle.notes ?? '');
   }
 
   @override
@@ -67,7 +67,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _surfaceController,
                 decoration: const InputDecoration(
@@ -92,7 +92,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _notesController,
                 decoration: const InputDecoration(
@@ -107,16 +107,16 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {
                       final parcelle = Parcelle(
-                        id: widget.parcelle?.id,
+                        id: widget.parcelle.id,
                         nom: _nomController.text.trim(),
                         surface: double.parse(_surfaceController.text),
-                        dateCreation: widget.parcelle?.dateCreation ?? DateTime.now(),
+                        dateCreation: widget.parcelle.dateCreation ?? DateTime.now(),
                         notes: _notesController.text.isEmpty ? null : _notesController.text.trim(),
                       );
 
@@ -147,7 +147,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                 ),
                 child: Text(
                   widget.parcelle == null ? 'Ajouter' : 'Modifier',
-                  style: const TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ],

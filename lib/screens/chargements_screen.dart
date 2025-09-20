@@ -79,7 +79,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> {
                         },
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
@@ -87,8 +87,8 @@ class _ChargementsScreenState extends State<ChargementsScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        '${chargementsParAnnee[_selectedYear]?.length ?? 0} chargements',
-                        style: const TextStyle(
+                        '${chargementsParAnnee[_selectedYear].length ?? 0} chargements',
+                        style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
@@ -131,7 +131,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.edit),
+                                    icon: Icon(Icons.edit),
                                     onPressed: () {
                                       Navigator.push(
                                         context,
@@ -144,7 +144,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> {
                                     },
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete),
+                                    icon: Icon(Icons.delete),
                                     onPressed: () {
                                       _showDeleteConfirmation(context, chargement);
                                     },
@@ -170,7 +170,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> {
           );
         },
         backgroundColor: Colors.green,
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

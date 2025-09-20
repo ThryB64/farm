@@ -206,7 +206,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   DropdownButtonFormField<int>(
                     value: _selectedParcelleId,
                     decoration: const InputDecoration(
@@ -232,7 +232,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: _selectedVariete,
                     decoration: const InputDecoration(
@@ -257,7 +257,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   DropdownButtonFormField<int>(
                     value: _selectedCelluleId,
                     decoration: const InputDecoration(
@@ -282,7 +282,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: _selectedRemorque,
                     decoration: const InputDecoration(
@@ -307,7 +307,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: _poidsPleinController,
                     decoration: const InputDecoration(
@@ -327,7 +327,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     },
                     onChanged: _calculerPoidsNet,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: _poidsVideController,
                     decoration: const InputDecoration(
@@ -347,7 +347,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     },
                     onChanged: _calculerPoidsNet,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: _humiditeController,
                     decoration: const InputDecoration(
@@ -367,7 +367,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     },
                     onChanged: _calculerPoidsNet,
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
@@ -379,7 +379,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                           final poidsNormes = PoidsUtils.calculPoidsNormes(poidsNet, humidite);
 
                           final chargement = Chargement(
-                            id: widget.chargement?.id,
+                            id: widget.chargement.id,
                             celluleId: _selectedCelluleId!,
                             parcelleId: _selectedParcelleId!,
                             remorque: _selectedRemorque!,
@@ -420,7 +420,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     ),
                     child: Text(
                       widget.chargement == null ? 'Ajouter' : 'Modifier',
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
                 ],

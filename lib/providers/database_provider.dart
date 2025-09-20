@@ -29,7 +29,7 @@ class DatabaseProvider with ChangeNotifier {
     try {
       await _loadData();
     } catch (e) {
-      print('Erreur lors de l\'initialisation: $e');
+      // print('Erreur lors de l\'initialisation: $e');
       rethrow;
     }
   }
@@ -71,7 +71,7 @@ class DatabaseProvider with ChangeNotifier {
         'rendementMoyenNorme': rendementMoyenNorme,
       };
     } catch (e) {
-      print('Erreur lors du calcul des statistiques: $e');
+      // print('Erreur lors du calcul des statistiques: $e');
       rethrow;
     }
   }
@@ -92,7 +92,7 @@ class DatabaseProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Erreur lors du chargement des données: $e');
+      // print('Erreur lors du chargement des données: $e');
       rethrow;
     }
   }
@@ -380,16 +380,16 @@ class DatabaseProvider with ChangeNotifier {
 
   Future<void> updateAllChargementsPoidsNormes() async {
     try {
-      print('Début de la mise à jour des poids aux normes');
+      // print('Début de la mise à jour des poids aux normes');
       await _db.updateAllChargementsPoidsNormes();
-      print('Mise à jour des poids aux normes terminée');
+      // print('Mise à jour des poids aux normes terminée');
       // Recharger les données après la mise à jour
       await _loadData();
-      print('Données rechargées après la mise à jour');
+      // print('Données rechargées après la mise à jour');
       notifyListeners();
-      print('Listeners notifiés');
+      // print('Listeners notifiés');
     } catch (e) {
-      print('Erreur lors de la mise à jour des poids aux normes: $e');
+      // print('Erreur lors de la mise à jour des poids aux normes: $e');
       rethrow;
     }
   }

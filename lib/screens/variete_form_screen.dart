@@ -20,8 +20,8 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
   @override
   void initState() {
     super.initState();
-    _nomController = TextEditingController(text: widget.variete?.nom ?? '');
-    _descriptionController = TextEditingController(text: widget.variete?.description ?? '');
+    _nomController = TextEditingController(text: widget.variete.nom ?? '');
+    _descriptionController = TextEditingController(text: widget.variete.description ?? '');
   }
 
   @override
@@ -64,7 +64,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(
@@ -79,16 +79,16 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {
                       final variete = Variete(
-                        id: widget.variete?.id,
+                        id: widget.variete.id,
                         nom: _nomController.text.trim(),
                         description: _descriptionController.text.isEmpty ? null : _descriptionController.text.trim(),
-                        dateCreation: widget.variete?.dateCreation ?? DateTime.now(),
+                        dateCreation: widget.variete.dateCreation ?? DateTime.now(),
                       );
 
                       if (widget.variete == null) {
@@ -118,7 +118,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                 ),
                 child: Text(
                   widget.variete == null ? 'Ajouter' : 'Modifier',
-                  style: const TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ],

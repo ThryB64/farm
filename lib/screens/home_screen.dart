@@ -147,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: Colors.grey.withValues(alpha: 0.2),
                           spreadRadius: 2,
                           blurRadius: 10,
                           offset: const Offset(0, 3),
@@ -164,16 +164,16 @@ class _HomeScreenState extends State<HomeScreen> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
+                                  color: Colors.green.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.analytics,
                                   color: Colors.green,
                                   size: 24,
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               const Text(
                                 'Aperçu',
                                 style: TextStyle(
@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Center(
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
@@ -199,14 +199,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Icons.landscape,
                                       Colors.green,
                                     ),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: 12),
                                     _buildStatCard(
                                       'Rendement $derniereAnnee',
                                       '${rendementMoyenNorme.toStringAsFixed(3)} T/ha',
                                       Icons.trending_up,
                                       Colors.blue,
                                     ),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: 12),
                                     _buildStatCard(
                                       'Poids total $derniereAnnee',
                                       '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(2)} T',
@@ -234,16 +234,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: Colors.green.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.menu,
                                 color: Colors.green,
                                 size: 24,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12),
                             const Text(
                               'Menu principal',
                               style: TextStyle(
@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         GridView.count(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
@@ -370,10 +370,10 @@ class _HomeScreenState extends State<HomeScreen> {
       width: 160,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: color.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -383,12 +383,12 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
@@ -398,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
@@ -424,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -444,7 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -453,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: color,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   title,
                   style: TextStyle(

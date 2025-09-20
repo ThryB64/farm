@@ -229,11 +229,11 @@ class _ExportScreenState extends State<ExportScreen> {
                           children: [
                             _buildDataCell('${c.dateChargement.day}/${c.dateChargement.month}'),
                             _buildDataCell(c.remorque ?? ''),
-                            _buildDataCell('${c.poidsPlein?.toStringAsFixed(2) ?? ''}'),
-                            _buildDataCell('${c.poidsVide?.toStringAsFixed(2) ?? ''}'),
-                            _buildDataCell('${c.poidsNet?.toStringAsFixed(2) ?? ''}'),
-                            _buildDataCell('${c.humidite?.toStringAsFixed(1) ?? ''}%'),
-                            _buildDataCell('${c.poidsNormes?.toStringAsFixed(2) ?? ''}'),
+                            _buildDataCell('${c.poidsPlein.toStringAsFixed(2) ?? ''}'),
+                            _buildDataCell('${c.poidsVide.toStringAsFixed(2) ?? ''}'),
+                            _buildDataCell('${c.poidsNet.toStringAsFixed(2) ?? ''}'),
+                            _buildDataCell('${c.humidite.toStringAsFixed(1) ?? ''}%'),
+                            _buildDataCell('${c.poidsNormes.toStringAsFixed(2) ?? ''}'),
                             _buildDataCell(c.variete ?? 'Inconnue'),
                           ],
                         )),
@@ -370,7 +370,7 @@ class _ExportScreenState extends State<ExportScreen> {
                           children: [
                             _buildDataCell(p.nom),
                             _buildDataCell(p.surface.toStringAsFixed(2)),
-                            _buildDataCell(db.getVarieteForParcelle(p.id)?.nom ?? "Inconnue"),
+                            _buildDataCell(db.getVarieteForParcelle(p.id).nom ?? "Inconnue"),
                             _buildDataCell((poidsNet / 1000).toStringAsFixed(2)),
                             _buildDataCell((poidsNormes / 1000).toStringAsFixed(2)),
                             _buildDataCell((poidsNormes / 1000 / p.surface).toStringAsFixed(2)),
@@ -655,7 +655,7 @@ class _ExportScreenState extends State<ExportScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 ElevatedButton.icon(
                   onPressed: _selectedYear == null
                       ? null
@@ -667,7 +667,7 @@ class _ExportScreenState extends State<ExportScreen> {
                       vertical: 16,
                     ),
                   ),
-                  icon: const Icon(Icons.picture_as_pdf),
+                  icon: Icon(Icons.picture_as_pdf),
                   label: const Text('Générer PDF'),
                 ),
               ],

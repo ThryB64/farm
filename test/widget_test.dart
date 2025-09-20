@@ -1,30 +1,51 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:mais_tracker/main.dart';
+import 'package:provider/provider.dart';
+import 'package:mais_tracker/providers/database_provider.dart';
+import 'package:mais_tracker/screens/home_screen.dart';
+import 'helper/test_database_helper.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('Maïs Tracker Widget Tests', () {
+    setUpAll(() async {
+      // Initialiser la base de données de test
+      await TestDatabaseHelper.initializeTestDatabase();
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    tearDownAll(() async {
+      // Nettoyer la base de données de test
+      await TestDatabaseHelper.closeTestDatabase();
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    testWidgets('HomeScreen loads without crashing', (WidgetTester tester) async {
+      // Créer un provider de base de données pour les tests
+      final databaseProvider = DatabaseProvider();
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider<DatabaseProvider>(
+            create: (context) => databaseProvider,
+            child: const HomeScreen(),
+          ),
+        ),
+      );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      // Vérifier que l'écran se charge
+      expect(find.byType(HomeScreen), findsOneWidget);
+    });
+
+    testWidgets('DatabaseProvider initializes correctly', (WidgetTester tester) async {
+      final databaseProvider = DatabaseProvider();
+      
+      // Initialiser le provider
+      await databaseProvider.initialize();
+      
+      // Vérifier que les listes sont initialisées
+      expect(databaseProvider.parcelles, isA<List>());
+      expect(databaseProvider.cellules, isA<List>());
+      expect(databaseProvider.chargements, isA<List>());
+      expect(databaseProvider.semis, isA<List>());
+      expect(databaseProvider.varietes, isA<List>());
+    });
   });
 }

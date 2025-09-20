@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'providers/database_provider.dart';
 import 'screens/home_screen.dart';
-import 'screens/semis_screen.dart';
-import 'screens/import_export_screen.dart';
 import 'package:flutter/foundation.dart';
 
 void main() {
@@ -99,30 +97,30 @@ class _SplashScreenState extends State<SplashScreen> {
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.error_outline,
                       color: Colors.white,
                       size: 64,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
+                    SizedBox(height: 16),
+                    const Text(
                       'Erreur lors de l\'initialisation',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       _errorMessage,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white70,
                         fontSize: 16,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: _initializeApp,
                       child: const Text('Réessayer'),
@@ -137,18 +135,18 @@ class _SplashScreenState extends State<SplashScreen> {
                       width: 120,
                       height: 120,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
+                        return Icon(
                           Icons.agriculture,
                           color: Colors.white,
                           size: 64,
                         );
                       },
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     const CircularProgressIndicator(
                       color: Colors.white,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     const Text(
                       'Chargement...',
                       style: TextStyle(

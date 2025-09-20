@@ -30,9 +30,9 @@ class CelluleDetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildInfoCard(context),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 _buildStatistiquesCard(context, chargements),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 _buildChargementsCard(context, chargements, parcelles),
               ],
             ),
@@ -53,16 +53,16 @@ class CelluleDetailsScreen extends StatelessWidget {
               'Informations',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             _buildInfoRow('Capacité', '${(cellule.capacite / 1000).toStringAsFixed(2)} T'),
             _buildInfoRow('Date de création', _formatDate(cellule.dateCreation)),
             if (cellule.notes != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 'Notes:',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(cellule.notes!),
             ],
           ],
@@ -98,7 +98,7 @@ class CelluleDetailsScreen extends StatelessWidget {
               'Statistiques par année',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             ...chargementsParAnnee.entries.map((entry) {
               final annee = entry.key;
               final chargementsAnnee = entry.value;
@@ -123,13 +123,13 @@ class CelluleDetailsScreen extends StatelessWidget {
                     annee.toString(),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   _buildInfoRow('Poids total net', '${(poidsTotalNet / 1000).toStringAsFixed(2)} T'),
                   _buildInfoRow('Poids total normé', '${(poidsTotalNorme / 1000).toStringAsFixed(2)} T'),
                   _buildInfoRow('Taux de remplissage', '${tauxRemplissage.toStringAsFixed(1)}%'),
                   _buildInfoRow('Humidité moyenne', '${humiditeMoyenne.toStringAsFixed(1)}%'),
                   _buildInfoRow('Nombre de chargements', chargementsAnnee.length.toString()),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                 ],
               );
             }).toList(),
@@ -172,7 +172,7 @@ class CelluleDetailsScreen extends StatelessWidget {
               'Historique des chargements',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             ...annees.map((annee) {
               final chargementsAnnee = chargementsParAnnee[annee]!;
               chargementsAnnee.sort((a, b) => b.dateChargement.compareTo(a.dateChargement));
@@ -195,16 +195,16 @@ class CelluleDetailsScreen extends StatelessWidget {
                 children: [
                   Text(
                     annee.toString(),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium.copyWith(
                       color: Colors.blue,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.blue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
@@ -214,15 +214,15 @@ class CelluleDetailsScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Poids total net: ${(poidsTotalNet / 1000).toStringAsFixed(2)} T',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
                               'Poids total normé: ${(poidsTotalNorme / 1000).toStringAsFixed(2)} T',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -237,7 +237,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   ...chargementsAnnee.map((chargement) {
                     final parcelle = parcelles.firstWhere(
                       (p) => p.id == chargement.parcelleId,
@@ -260,7 +260,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Parcelle: ${parcelle.nom}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -295,7 +295,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                       ),
                     );
                   }).toList(),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                 ],
               );
             }).toList(),
@@ -313,7 +313,7 @@ class CelluleDetailsScreen extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Text(value),
         ],
