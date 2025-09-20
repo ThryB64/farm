@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/database_provider.dart';
+import 'providers/simple_realtime_provider.dart';
 import 'screens/home_screen.dart';
 
 void main() {
@@ -35,17 +35,14 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
     debugPrint('[BOOT] Widgets binding ready. kIsWeb=$kIsWeb');
 
-    // IMPORTANT : ne JAMAIS toucher à sqflite sur le web
-    if (!kIsWeb) {
-      try {
-        debugPrint('[BOOT] Init local DB (mobile)…');
-        await DatabaseProvider.instance.init();
-      } catch (e, s) {
-        debugPrint('[BOOT] DB init error (mobile): $e\n$s');
-      }
-    } else {
-      debugPrint('[BOOT] Web build -> DB locale désactivée');
-    }
+        // Initialisation de la base de données temps réel
+        try {
+          debugPrint('[BOOT] Init realtime DB…');
+          // Le provider s'initialise automatiquement dans son constructeur
+          debugPrint('[BOOT] Realtime DB initialized successfully');
+        } catch (e, s) {
+          debugPrint('[BOOT] DB init error: $e\n$s');
+        }
 
     // Trace le premier frame (si on n'y arrive pas, on saura que ça bloque avant)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -63,8 +60,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => DatabaseProvider(),
+      return ChangeNotifierProvider(
+        create: (context) => SimpleRealtimeProvider(),
       child: MaterialApp(
         title: 'Maïs Tracker',
         theme: ThemeData(
@@ -137,8 +134,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     try {
-      final provider = Provider.of<DatabaseProvider>(context, listen: false);
-      await provider.initialize();
+      final provider = Provider.of<SimpleRealtimeProvider>(context, listen: false);
+      // Le provider s'initialise automatiquement
       
       if (mounted) {
         Navigator.of(context).pushReplacement(
