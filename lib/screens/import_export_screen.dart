@@ -25,6 +25,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   late Animation<double> _fadeAnimation;
   bool _isExporting = false;
   bool _isImporting = false;
+  bool _showDebugInfo = false; // Ajout du debug dans l'écran
 
   @override
   void initState() {
@@ -61,6 +62,17 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(_showDebugInfo ? Icons.bug_report : Icons.bug_report_outlined),
+            tooltip: 'Afficher les infos de debug',
+            onPressed: () {
+              setState(() {
+                _showDebugInfo = !_showDebugInfo;
+              });
+            },
+          ),
+        ],
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -76,6 +88,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               _buildImportSection(),
               const SizedBox(height: AppTheme.spacingL),
               _buildActionsSection(),
+              if (_showDebugInfo) ...[
+                const SizedBox(height: AppTheme.spacingL),
+                _buildDebugSection(),
+              ],
             ],
           ),
         ),
@@ -362,6 +378,72 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             textColor: AppTheme.error,
             onPressed: _clearCacheAndReload,
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDebugSection() {
+    return ModernCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.bug_report,
+                  color: AppTheme.error,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'Informations de debug',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          Consumer<FirebaseProviderV3>(
+            builder: (context, provider, child) {
+              return Column(
+                children: [
+                  _buildDebugInfo('État du provider', provider.isInitialized ? 'Initialisé' : 'Non initialisé', AppTheme.info),
+                  _buildDebugInfo('En cours de chargement', provider.isLoading ? 'Oui' : 'Non', AppTheme.warning),
+                  _buildDebugInfo('Erreur', provider.error ?? 'Aucune', provider.error != null ? AppTheme.error : AppTheme.success),
+                  const SizedBox(height: AppTheme.spacingM),
+                  _buildDebugInfo('Parcelles en mémoire', '${provider.parcelles.length}', AppTheme.info),
+                  _buildDebugInfo('Cellules en mémoire', '${provider.cellules.length}', AppTheme.info),
+                  _buildDebugInfo('Chargements en mémoire', '${provider.chargements.length}', AppTheme.info),
+                  _buildDebugInfo('Semis en mémoire', '${provider.semis.length}', AppTheme.info),
+                  _buildDebugInfo('Variétés en mémoire', '${provider.varietes.length}', AppTheme.info),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDebugInfo(String label, String value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingXS),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontSize: 14, color: AppTheme.textPrimary)),
+          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
         ],
       ),
     );

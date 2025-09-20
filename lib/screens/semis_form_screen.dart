@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../models/semis.dart';
 import '../models/variete_surface.dart';
+import '../models/variete_surface_ha.dart';
 
 class SemisFormScreen extends StatefulWidget {
   final Semis? semis;
@@ -19,7 +20,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   late TextEditingController _notesController;
   int? _selectedParcelleId;
   List<VarieteSurface> _selectedVarietesSurfaces = [];
+  List<VarieteSurfaceHa> _selectedVarietesSurfacesHa = [];
   bool _showPourcentages = false;
+  bool _useHectares = false; // Nouveau: utiliser les hectares au lieu des pourcentages
 
   @override
   void initState() {
@@ -32,7 +35,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     _notesController = TextEditingController(text: widget.semis?.notes ?? '');
     _selectedParcelleId = widget.semis?.parcelleId;
     _selectedVarietesSurfaces = widget.semis?.varietesSurfaces ?? [];
+    _selectedVarietesSurfacesHa = widget.semis?.varietesSurfacesHa ?? [];
     _showPourcentages = _selectedVarietesSurfaces.isNotEmpty;
+    _useHectares = _selectedVarietesSurfacesHa.isNotEmpty;
   }
 
   @override
@@ -95,8 +100,23 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       ));
                     } else {
                       _selectedVarietesSurfaces.removeWhere((v) => v.nom == variete.nom);
+                      _selectedVarietesSurfacesHa.removeWhere((v) => v.nom == variete.nom);
                     }
                     _showPourcentages = _selectedVarietesSurfaces.isNotEmpty;
+                    
+                    // Si plus d'une variété, utiliser les hectares
+                    if (_selectedVarietesSurfaces.length > 1) {
+                      _useHectares = true;
+                      // Initialiser les hectares si pas déjà fait
+                      if (_selectedVarietesSurfacesHa.isEmpty) {
+                        _selectedVarietesSurfacesHa = _selectedVarietesSurfaces.map((v) => 
+                          VarieteSurfaceHa(nom: v.nom, hectares: 0.0)
+                        ).toList();
+                      }
+                    } else {
+                      _useHectares = false;
+                      _selectedVarietesSurfacesHa.clear();
+                    }
                   });
                 },
               );
@@ -127,11 +147,11 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(8.0),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Pourcentages de surface',
-              style: TextStyle(
+              _useHectares ? 'Hectares par variété' : 'Pourcentages de surface',
+              style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 12,
               ),
@@ -140,53 +160,95 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: _selectedVarietesSurfaces.length,
+            itemCount: _useHectares ? _selectedVarietesSurfacesHa.length : _selectedVarietesSurfaces.length,
             itemBuilder: (context, index) {
-              final varieteSurface = _selectedVarietesSurfaces[index];
-              return ListTile(
-                title: Text(varieteSurface.nom),
-                trailing: SizedBox(
-                  width: 100,
-                  child: TextFormField(
-                    initialValue: varieteSurface.pourcentage > 0 
-                        ? varieteSurface.pourcentage.toString()
-                        : '',
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      suffix: Text('%'),
-                      isDense: true,
-                    ),
-                    onChanged: (value) {
-                      final pourcentage = double.tryParse(value) ?? 0;
-                      setState(() {
-                        _selectedVarietesSurfaces[index] = VarieteSurface(
-                          nom: varieteSurface.nom,
-                          pourcentage: pourcentage,
-                        );
-                      });
-                    },
-                    validator: (value) {
-                      if (value != null && value.isNotEmpty) {
-                        final pourcentage = double.tryParse(value);
-                        if (pourcentage == null || pourcentage < 0 || pourcentage > 100) {
-                          return 'Pourcentage invalide';
+              if (_useHectares) {
+                final varieteSurfaceHa = _selectedVarietesSurfacesHa[index];
+                return ListTile(
+                  title: Text(varieteSurfaceHa.nom),
+                  trailing: SizedBox(
+                    width: 100,
+                    child: TextFormField(
+                      initialValue: varieteSurfaceHa.hectares > 0 
+                          ? varieteSurfaceHa.hectares.toString()
+                          : '',
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        suffix: Text('ha'),
+                        isDense: true,
+                      ),
+                      onChanged: (value) {
+                        final hectares = double.tryParse(value) ?? 0;
+                        setState(() {
+                          _selectedVarietesSurfacesHa[index] = VarieteSurfaceHa(
+                            nom: varieteSurfaceHa.nom,
+                            hectares: hectares,
+                          );
+                        });
+                      },
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          final hectares = double.tryParse(value);
+                          if (hectares == null || hectares < 0) {
+                            return 'Hectares invalides';
+                          }
                         }
-                      }
-                      return null;
-                    },
+                        return null;
+                      },
+                    ),
                   ),
-                ),
-              );
+                );
+              } else {
+                final varieteSurface = _selectedVarietesSurfaces[index];
+                return ListTile(
+                  title: Text(varieteSurface.nom),
+                  trailing: SizedBox(
+                    width: 100,
+                    child: TextFormField(
+                      initialValue: varieteSurface.pourcentage > 0 
+                          ? varieteSurface.pourcentage.toString()
+                          : '',
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        suffix: Text('%'),
+                        isDense: true,
+                      ),
+                      onChanged: (value) {
+                        final pourcentage = double.tryParse(value) ?? 0;
+                        setState(() {
+                          _selectedVarietesSurfaces[index] = VarieteSurface(
+                            nom: varieteSurface.nom,
+                            pourcentage: pourcentage,
+                          );
+                        });
+                      },
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          final pourcentage = double.tryParse(value);
+                          if (pourcentage == null || pourcentage < 0 || pourcentage > 100) {
+                            return 'Pourcentage invalide';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                );
+              }
             },
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Total : ${_selectedVarietesSurfaces.fold<double>(0, (sum, v) => sum + v.pourcentage)}%',
+              _useHectares 
+                ? 'Total : ${_selectedVarietesSurfacesHa.fold<double>(0, (sum, v) => sum + v.hectares)} ha'
+                : 'Total : ${_selectedVarietesSurfaces.fold<double>(0, (sum, v) => sum + v.pourcentage)}%',
               style: TextStyle(
-                color: _selectedVarietesSurfaces.fold<double>(0, (sum, v) => sum + v.pourcentage) == 100
-                    ? Colors.green
-                    : Colors.red,
+                color: _useHectares 
+                  ? Colors.blue // Pour les hectares, on ne vérifie pas le total
+                  : (_selectedVarietesSurfaces.fold<double>(0, (sum, v) => sum + v.pourcentage) == 100
+                      ? Colors.green
+                      : Colors.red),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -313,15 +375,31 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                           return;
                         }
 
-                        final total = _selectedVarietesSurfaces.fold<double>(0, (sum, v) => sum + v.pourcentage);
-                        if (total != 100) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Le total des pourcentages doit être égal à 100%'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
+                        // Validation différente selon le mode
+                        if (_useHectares) {
+                          // Pour les hectares, on vérifie que le total ne dépasse pas la surface de la parcelle
+                          final totalHectares = _selectedVarietesSurfacesHa.fold<double>(0, (sum, v) => sum + v.hectares);
+                          if (totalHectares <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Veuillez saisir les hectares pour chaque variété'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+                        } else {
+                          // Pour les pourcentages, on vérifie que le total fait 100%
+                          final total = _selectedVarietesSurfaces.fold<double>(0, (sum, v) => sum + v.pourcentage);
+                          if (total != 100) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Le total des pourcentages doit être égal à 100%'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
                         }
 
                         try {
@@ -336,6 +414,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                             id: widget.semis?.id,
                             parcelleId: _selectedParcelleId!,
                             varietesSurfaces: _selectedVarietesSurfaces,
+                            varietesSurfacesHa: _useHectares ? _selectedVarietesSurfacesHa : null,
                             date: date,
                             notes: _notesController.text.isEmpty ? null : _notesController.text.trim(),
                           );
