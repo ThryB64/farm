@@ -4,11 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import '../providers/firebase_provider_v3.dart';
-import '../models/parcelle.dart';
-import '../models/cellule.dart';
-import '../models/chargement.dart';
-import '../models/semis.dart';
-import '../models/variete.dart';
 
 class ImportExportScreen extends StatelessWidget {
   const ImportExportScreen({Key? key}) : super(key: key);

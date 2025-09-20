@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
-import '../models/parcelle.dart';
-import '../models/cellule.dart';
-import '../models/chargement.dart';
-import '../models/semis.dart';
-import '../models/variete.dart';
-import '../utils/poids_utils.dart';
 import 'parcelles_screen.dart';
 import 'cellules_screen.dart';
 import 'chargements_screen.dart';
@@ -24,8 +18,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isLoading = false;
-  Map<String, dynamic> _stats = {};
 
   @override
   void initState() {
@@ -34,35 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadStats() async {
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
-
-    try {
-      final provider = Provider.of<FirebaseProviderV3>(context, listen: false);
-      final stats = await provider.getStats();
-      
-      if (mounted) {
-        setState(() {
-          _stats = stats;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors du chargement des statistiques: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    // Les statistiques sont maintenant calculées en temps réel dans le Consumer
+    // Plus besoin de charger les stats séparément
   }
 
   @override
@@ -89,10 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
           final parcelles = provider.parcelles;
-          final cellules = provider.cellules;
           final chargements = provider.chargements;
-          final semis = provider.semis;
-          final varietes = provider.varietes;
+          // final semis = provider.semis;
 
           // Calculer les statistiques globales
           final surfaceTotale = parcelles.fold<double>(
@@ -123,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
               : 0.0;
 
           // Calculer le nombre de variétés utilisées
-          final varietesUtilisees = semis.expand((s) => s.varietes).toSet().length;
+          // final varietesUtilisees = semis.expand((s) => s.varietes).toSet().length;
 
           return Container(
             decoration: BoxDecoration(

@@ -4,7 +4,6 @@ import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
-import 'parcelle_form_screen.dart';
 
 class ParcelleDetailsScreen extends StatefulWidget {
   final Parcelle parcelle;

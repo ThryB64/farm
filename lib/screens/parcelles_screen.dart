@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
 import 'parcelle_details_screen.dart';
-import 'parcelle_form_screen.dart';
 
 class ParcellesScreen extends StatelessWidget {
   const ParcellesScreen({Key? key}) : super(key: key);
