@@ -18,6 +18,10 @@ class FirebaseServiceV3 {
   late final FirebaseDatabase _database;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference? _userRef;
+  DatabaseReference? _farmRef;
+  
+  // ID de la ferme partagée
+  static const String _farmId = 'gaec_berard';
   
   static const String _storageKey = 'mais_tracker_data';
   bool _isInitialized = false;
@@ -54,7 +58,12 @@ class FirebaseServiceV3 {
       final user = _auth.currentUser;
       if (user != null) {
         _userRef = _database.ref('users/${user.uid}');
+        _farmRef = _database.ref('farms/$_farmId');
         print('FirebaseService V3: Firebase initialized for existing user: ${user.uid}');
+        print('FirebaseService V3: Farm reference created: /farms/$_farmId');
+        
+        // Ajouter l'utilisateur comme membre de la ferme
+        await _addUserToFarm(user.uid);
       } else {
         // Essayer l'auth anonyme
         try {
@@ -62,7 +71,12 @@ class FirebaseServiceV3 {
           final newUser = userCred.user;
           if (newUser != null) {
             _userRef = _database.ref('users/${newUser.uid}');
+            _farmRef = _database.ref('farms/$_farmId');
             print('FirebaseService V3: Firebase initialized for anonymous user: ${newUser.uid}');
+            print('FirebaseService V3: Farm reference created: /farms/$_farmId');
+            
+            // Ajouter l'utilisateur comme membre de la ferme
+            await _addUserToFarm(newUser.uid);
           }
         } catch (authError) {
           print('FirebaseService V3: Auth failed, using localStorage: $authError');
@@ -70,7 +84,7 @@ class FirebaseServiceV3 {
       }
       
       // Test de connexion
-      if (_userRef != null) {
+      if (_farmRef != null) {
         await _testConnection();
         print('FirebaseService V3: User reference created successfully');
         print('FirebaseService V3: User path: ${_userRef!.path}');
@@ -84,6 +98,16 @@ class FirebaseServiceV3 {
     } catch (e) {
       print('❌ FirebaseService V3: Firebase init failed, using localStorage: $e');
       _isInitialized = true; // Permettre l'utilisation hors ligne
+    }
+  }
+
+  // Ajouter l'utilisateur comme membre de la ferme
+  Future<void> _addUserToFarm(String uid) async {
+    try {
+      await _database.ref('farmMembers/$_farmId/$uid').set(true);
+      print('FirebaseService V3: User $uid added to farm $_farmId');
+    } catch (e) {
+      print('FirebaseService V3: Failed to add user to farm: $e');
     }
   }
 
@@ -115,8 +139,8 @@ class FirebaseServiceV3 {
 
   // Méthodes pour les parcelles
   Stream<List<Parcelle>> getParcellesStream() {
-    if (_userRef != null) {
-      return _userRef!.child('parcelles').onValue.map((event) {
+    if (_farmRef != null) {
+      return _farmRef!.child('parcelles').onValue.map((event) {
         if (event.snapshot.value == null) return <Parcelle>[];
         final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
         return data.entries.map((entry) {
@@ -131,9 +155,9 @@ class FirebaseServiceV3 {
   }
 
   Future<String> insertParcelle(Parcelle parcelle) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       final key = generateStableKey(parcelle);
-      final ref = _userRef!.child('parcelles').child(key);
+      final ref = _farmRef!.child('parcelles').child(key);
       
       await ref.set({
         ...parcelle.toMap(),
@@ -154,9 +178,9 @@ class FirebaseServiceV3 {
   }
 
   Future<void> updateParcelle(Parcelle parcelle) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       final key = generateStableKey(parcelle);
-      await _userRef!.child('parcelles').child(key).update({
+      await _farmRef!.child('parcelles').child(key).update({
         ...parcelle.toMap(),
         'id': key,
         'updatedAt': ServerValue.timestamp,
@@ -168,8 +192,8 @@ class FirebaseServiceV3 {
   }
 
   Future<void> deleteParcelle(String key) async {
-    if (_userRef != null) {
-      await _userRef!.child('parcelles').child(key).remove();
+    if (_farmRef != null) {
+      await _farmRef!.child('parcelles').child(key).remove();
       print('FirebaseService V3: Parcelle deleted: $key');
     } else {
       _deleteParcelleFromStorage(key);
@@ -178,8 +202,8 @@ class FirebaseServiceV3 {
 
   // Méthodes pour les cellules
   Stream<List<Cellule>> getCellulesStream() {
-    if (_userRef != null) {
-      return _userRef!.child('cellules').onValue.map((event) {
+    if (_farmRef != null) {
+      return _farmRef!.child('cellules').onValue.map((event) {
         if (event.snapshot.value == null) return <Cellule>[];
         final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
         return data.entries.map((entry) {
@@ -194,9 +218,9 @@ class FirebaseServiceV3 {
   }
 
   Future<String> insertCellule(Cellule cellule) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       final key = generateStableKeyForEntity('cellule', cellule.toMap());
-      final ref = _userRef!.child('cellules').child(key);
+      final ref = _farmRef!.child('cellules').child(key);
       await ref.set({
         ...cellule.toMap(),
         'id': key,
@@ -213,9 +237,9 @@ class FirebaseServiceV3 {
   }
 
   Future<void> updateCellule(Cellule cellule) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       if (cellule.id == null) throw Exception('Cellule ID is required for update');
-      await _userRef!.child('cellules').child(cellule.id.toString()).update({
+      await _farmRef!.child('cellules').child(cellule.id.toString()).update({
         ...cellule.toMap(),
         'updatedAt': ServerValue.timestamp,
       });
@@ -225,8 +249,8 @@ class FirebaseServiceV3 {
   }
 
   Future<void> deleteCellule(String key) async {
-    if (_userRef != null) {
-      await _userRef!.child('cellules').child(key).remove();
+    if (_farmRef != null) {
+      await _farmRef!.child('cellules').child(key).remove();
     } else {
       _deleteCelluleFromStorage(key);
     }
@@ -234,8 +258,8 @@ class FirebaseServiceV3 {
 
   // Méthodes pour les chargements
   Stream<List<Chargement>> getChargementsStream() {
-    if (_userRef != null) {
-      return _userRef!.child('chargements').onValue.map((event) {
+    if (_farmRef != null) {
+      return _farmRef!.child('chargements').onValue.map((event) {
         if (event.snapshot.value == null) return <Chargement>[];
         final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
         return data.entries.map((entry) {
@@ -250,9 +274,9 @@ class FirebaseServiceV3 {
   }
 
   Future<String> insertChargement(Chargement chargement) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       final key = generateStableKeyForEntity('chargement', chargement.toMap());
-      final ref = _userRef!.child('chargements').child(key);
+      final ref = _farmRef!.child('chargements').child(key);
       await ref.set({
         ...chargement.toMap(),
         'id': key,
@@ -269,9 +293,9 @@ class FirebaseServiceV3 {
   }
 
   Future<void> updateChargement(Chargement chargement) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       if (chargement.id == null) throw Exception('Chargement ID is required for update');
-      await _userRef!.child('chargements').child(chargement.id.toString()).update({
+      await _farmRef!.child('chargements').child(chargement.id.toString()).update({
         ...chargement.toMap(),
         'updatedAt': ServerValue.timestamp,
       });
@@ -281,8 +305,8 @@ class FirebaseServiceV3 {
   }
 
   Future<void> deleteChargement(String key) async {
-    if (_userRef != null) {
-      await _userRef!.child('chargements').child(key).remove();
+    if (_farmRef != null) {
+      await _farmRef!.child('chargements').child(key).remove();
     } else {
       _deleteChargementFromStorage(key);
     }
@@ -290,8 +314,8 @@ class FirebaseServiceV3 {
 
   // Méthodes pour les semis
   Stream<List<Semis>> getSemisStream() {
-    if (_userRef != null) {
-      return _userRef!.child('semis').onValue.map((event) {
+    if (_farmRef != null) {
+      return _farmRef!.child('semis').onValue.map((event) {
         if (event.snapshot.value == null) return <Semis>[];
         final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
         return data.entries.map((entry) {
@@ -306,9 +330,9 @@ class FirebaseServiceV3 {
   }
 
   Future<String> insertSemis(Semis semis) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       final key = generateStableKeyForEntity('semis', semis.toMap());
-      final ref = _userRef!.child('semis').child(key);
+      final ref = _farmRef!.child('semis').child(key);
       await ref.set({
         ...semis.toMap(),
         'id': key,
@@ -325,9 +349,9 @@ class FirebaseServiceV3 {
   }
 
   Future<void> updateSemis(Semis semis) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       if (semis.id == null) throw Exception('Semis ID is required for update');
-      await _userRef!.child('semis').child(semis.id.toString()).update({
+      await _farmRef!.child('semis').child(semis.id.toString()).update({
         ...semis.toMap(),
         'updatedAt': ServerValue.timestamp,
       });
@@ -337,8 +361,8 @@ class FirebaseServiceV3 {
   }
 
   Future<void> deleteSemis(String key) async {
-    if (_userRef != null) {
-      await _userRef!.child('semis').child(key).remove();
+    if (_farmRef != null) {
+      await _farmRef!.child('semis').child(key).remove();
     } else {
       _deleteSemisFromStorage(key);
     }
@@ -346,8 +370,8 @@ class FirebaseServiceV3 {
 
   // Méthodes pour les variétés
   Stream<List<Variete>> getVarietesStream() {
-    if (_userRef != null) {
-      return _userRef!.child('varietes').onValue.map((event) {
+    if (_farmRef != null) {
+      return _farmRef!.child('varietes').onValue.map((event) {
         if (event.snapshot.value == null) return <Variete>[];
         final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
         return data.entries.map((entry) {
@@ -362,9 +386,9 @@ class FirebaseServiceV3 {
   }
 
   Future<String> insertVariete(Variete variete) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       final key = generateStableKeyForEntity('variete', variete.toMap());
-      final ref = _userRef!.child('varietes').child(key);
+      final ref = _farmRef!.child('varietes').child(key);
       await ref.set({
         ...variete.toMap(),
         'id': key,
@@ -381,9 +405,9 @@ class FirebaseServiceV3 {
   }
 
   Future<void> updateVariete(Variete variete) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       if (variete.id == null) throw Exception('Variete ID is required for update');
-      await _userRef!.child('varietes').child(variete.id.toString()).update({
+      await _farmRef!.child('varietes').child(variete.id.toString()).update({
         ...variete.toMap(),
         'updatedAt': ServerValue.timestamp,
       });
@@ -393,8 +417,8 @@ class FirebaseServiceV3 {
   }
 
   Future<void> deleteVariete(String key) async {
-    if (_userRef != null) {
-      await _userRef!.child('varietes').child(key).remove();
+    if (_farmRef != null) {
+      await _farmRef!.child('varietes').child(key).remove();
     } else {
       _deleteVarieteFromStorage(key);
     }
@@ -402,7 +426,7 @@ class FirebaseServiceV3 {
 
   // Méthodes utilitaires
   Future<void> deleteAllData() async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       await _userRef!.remove();
     } else {
       html.window.localStorage.remove(_storageKey);
@@ -410,7 +434,7 @@ class FirebaseServiceV3 {
   }
 
   Future<void> importData(Map<String, dynamic> data) async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       await _userRef!.set(data);
     } else {
       html.window.localStorage[_storageKey] = jsonEncode(data);
@@ -418,7 +442,7 @@ class FirebaseServiceV3 {
   }
 
   Future<Map<String, dynamic>> exportData() async {
-    if (_userRef != null) {
+    if (_farmRef != null) {
       final snapshot = await _userRef!.get();
       return Map<String, dynamic>.from(snapshot.value as Map? ?? {});
     } else {
