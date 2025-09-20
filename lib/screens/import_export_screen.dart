@@ -671,32 +671,60 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     if (mounted) {
       String message;
       if (totalData == 0) {
-        message = 'Import réussi ! Base de données vidée.';
+        message = 'Import réussi ! Base de données vidée. Rechargement de la page...';
+        
+        // Pour les bases vides, forcer un rechargement complet de la page
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        
+        // Recharger la page après 2 secondes
+        Future.delayed(const Duration(seconds: 2), () {
+          html.window.location.reload();
+        });
       } else {
         message = 'Import réussi ! $totalData éléments importés.';
-      }
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: AppTheme.success,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 
   // Fonction pour forcer le refresh des données
   Future<void> _forceDataRefresh(FirebaseProviderV3 provider) async {
     try {
+      print('🔄 Début du refresh forcé...');
+      
       // Forcer le rechargement des données depuis Firebase
       await provider.refreshAllData();
       
       // Attendre un peu pour que les listeners se mettent à jour
       await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Vérifier l'état des données après refresh
+      print('📊 État après refresh:');
+      print('   - Parcelles: ${provider.parcelles.length}');
+      print('   - Cellules: ${provider.cellules.length}');
+      print('   - Chargements: ${provider.chargements.length}');
+      print('   - Semis: ${provider.semis.length}');
+      print('   - Variétés: ${provider.varietes.length}');
       
       print('✅ Données rafraîchies avec succès');
     } catch (e) {

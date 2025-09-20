@@ -601,6 +601,12 @@ class FirebaseProviderV3 with ChangeNotifier {
   Future<void> refreshAllData() async {
     try {
       print('🔄 FirebaseProviderV3: Forcing data refresh...');
+      print('📊 État avant refresh:');
+      print('   - Parcelles: ${_parcellesMap.length}');
+      print('   - Cellules: ${_cellulesMap.length}');
+      print('   - Chargements: ${_chargementsMap.length}');
+      print('   - Semis: ${_semisMap.length}');
+      print('   - Variétés: ${_varietesMap.length}');
       
       // Vider les maps locales
       _parcellesMap.clear();
@@ -609,11 +615,22 @@ class FirebaseProviderV3 with ChangeNotifier {
       _semisMap.clear();
       _varietesMap.clear();
       
+      print('🧹 Maps vidées');
+      
       // Notifier les listeners que les données ont changé
       notifyListeners();
       
+      print('📢 Listeners notifiés');
+      
       // Attendre un peu pour que les streams se mettent à jour
       await Future.delayed(const Duration(milliseconds: 200));
+      
+      print('📊 État après refresh:');
+      print('   - Parcelles: ${_parcellesMap.length}');
+      print('   - Cellules: ${_cellulesMap.length}');
+      print('   - Chargements: ${_chargementsMap.length}');
+      print('   - Semis: ${_semisMap.length}');
+      print('   - Variétés: ${_varietesMap.length}');
       
       print('✅ FirebaseProviderV3: Data refresh completed');
     } catch (e) {
