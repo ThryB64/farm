@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../theme/app_theme.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
+import '../widgets/app_layout.dart';
 import '../models/parcelle.dart';
 import 'parcelle_details_screen.dart';
 
@@ -14,127 +13,164 @@ class ParcellesScreen extends StatefulWidget {
   State<ParcellesScreen> createState() => _ParcellesScreenState();
 }
 
-class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
+class _ParcellesScreenState extends State<ParcellesScreen> {
+  String _searchQuery = '';
+  String _selectedFilter = 'Toutes';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.surface,
-      appBar: AppBar(
-        title: const Text('Parcelles'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () => _showAddParcelleDialog(),
-            icon: const Icon(Icons.add),
-            tooltip: 'Ajouter une parcelle',
-          ),
-        ],
-      ),
-      body: Consumer<FirebaseProviderV3>(
-        builder: (context, provider, child) {
-          final parcelles = List<Parcelle>.from(provider.parcelles)
-            ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
-
-          if (parcelles.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          return FadeTransition(
-            opacity: _fadeAnimation,
-            child: ListView.builder(
-              padding: const EdgeInsets.all(AppTheme.spacingM),
-              itemCount: parcelles.length,
-              itemBuilder: (context, index) {
-                final parcelle = parcelles[index];
-                return _buildParcelleCard(parcelle, provider);
-              },
-            ),
-          );
-        },
-      ),
+    return AppLayout(
+      title: 'Parcelles',
+      actions: [
+        IconButton(
+          onPressed: () => _showAddParcelleDialog(),
+          icon: const Icon(Icons.add),
+          tooltip: 'Ajouter une parcelle',
+        ),
+      ],
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddParcelleDialog(),
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
+      child: Consumer<FirebaseProviderV3>(
+        builder: (context, provider, child) {
+          final parcelles = _filterParcelles(provider.parcelles);
+
+          return Column(
+            children: [
+              _buildHeader(),
+              const SizedBox(height: AppTheme.spacingL),
+              _buildToolbar(),
+              const SizedBox(height: AppTheme.spacingL),
+              if (parcelles.isEmpty)
+                _buildEmptyState()
+              else
+                _buildParcellesList(parcelles, provider),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Parcelles',
+          style: AppTheme.h1,
+        ),
+        ElevatedButton.icon(
+          onPressed: () => _showAddParcelleDialog(),
+          icon: const Icon(Icons.add, size: 20),
+          label: const Text('Ajouter'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToolbar() {
+    return Row(
+      children: [
+        // Recherche
+        Expanded(
+          flex: 2,
+          child: TextField(
+            onChanged: (value) => setState(() => _searchQuery = value),
+            decoration: InputDecoration(
+              hintText: 'Rechercher une parcelle...',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingM,
+                vertical: AppTheme.spacingS,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppTheme.spacingM),
+        // Filtres
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _selectedFilter,
+            decoration: const InputDecoration(
+              labelText: 'Filtrer',
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingM,
+                vertical: AppTheme.spacingS,
+              ),
+            ),
+            items: const [
+              DropdownMenuItem(value: 'Toutes', child: Text('Toutes')),
+              DropdownMenuItem(value: 'Actives', child: Text('Actives')),
+              DropdownMenuItem(value: 'En jachère', child: Text('En jachère')),
+            ],
+            onChanged: (value) => setState(() => _selectedFilter = value ?? 'Toutes'),
+          ),
+        ),
+        const SizedBox(width: AppTheme.spacingM),
+        // Export CSV
+        OutlinedButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.download, size: 20),
+          label: const Text('Export'),
+        ),
+      ],
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppTheme.spacingXL),
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
+    return Expanded(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.landscape,
+                size: 64,
+                color: AppTheme.primary.withOpacity(0.6),
+              ),
             ),
-            child: Icon(
-              Icons.landscape,
-              size: 64,
-              color: AppTheme.primary.withOpacity(0.6),
+            const SizedBox(height: AppTheme.spacingXL),
+            Text(
+              'Aucune parcelle pour l\'instant',
+              style: AppTheme.h2.copyWith(color: AppTheme.textMuted),
             ),
-          ),
-          const SizedBox(height: AppTheme.spacingL),
-          Text(
-            'Aucune parcelle enregistrée',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+            const SizedBox(height: AppTheme.spacingS),
+            Text(
+              'Créez votre première parcelle pour commencer à suivre vos cultures.',
+              style: AppTheme.body.copyWith(color: AppTheme.textMuted),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: AppTheme.spacingS),
-          Text(
-            'Commencez par ajouter votre première parcelle',
-            style: TextStyle(
-              fontSize: 16,
-              color: AppTheme.textSecondary,
+            const SizedBox(height: AppTheme.spacingXL),
+            ElevatedButton.icon(
+              onPressed: () => _showAddParcelleDialog(),
+              icon: const Icon(Icons.add),
+              label: const Text('Créer une parcelle'),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppTheme.spacingXL),
-          ModernButton(
-            text: 'Ajouter une parcelle',
-            icon: Icons.add,
-            onPressed: () => _showAddParcelleDialog(),
-            isFullWidth: false,
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildParcellesList(List<Parcelle> parcelles, FirebaseProviderV3 provider) {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: parcelles.length,
+        itemBuilder: (context, index) {
+          final parcelle = parcelles[index];
+          return _buildParcelleCard(parcelle, provider);
+        },
       ),
     );
   }
@@ -142,54 +178,75 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
   Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV3 provider) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
-      child: ModernCard(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        boxShadow: AppTheme.cardShadow,
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
+            ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spacingM),
+            child: Row(
               children: [
+                // Icône
                 Container(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusChip),
                   ),
                   child: const Icon(
                     Icons.landscape,
                     color: AppTheme.primary,
-                    size: 32,
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: AppTheme.spacingM),
+                // Contenu principal
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         parcelle.nom,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
-                        ),
+                        style: AppTheme.h3,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppTheme.spacingXS),
                       Text(
                         'Créée le ${_formatDate(parcelle.dateCreation)}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppTheme.textSecondary,
-                        ),
+                        style: AppTheme.meta,
                       ),
                     ],
                   ),
                 ),
+                // Tags info
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    AppTheme.buildStatusBadge(
+                      '${parcelle.surface} ha',
+                      AppTheme.success,
+                    ),
+                    const SizedBox(height: AppTheme.spacingXS),
+                    AppTheme.buildStatusBadge(
+                      'Surface',
+                      AppTheme.textMuted,
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppTheme.spacingM),
+                // Actions
                 PopupMenuButton<String>(
                   onSelected: (value) {
                     if (value == 'edit') {
@@ -203,7 +260,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, color: AppTheme.primary),
+                          Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
                           SizedBox(width: AppTheme.spacingS),
                           Text('Modifier'),
                         ],
@@ -213,7 +270,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete, color: AppTheme.error),
+                          Icon(Icons.delete_outline, color: AppTheme.danger, size: 20),
                           SizedBox(width: AppTheme.spacingS),
                           Text('Supprimer'),
                         ],
@@ -223,62 +280,21 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.spacingM),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildInfoChip(
-                    '${parcelle.surface} ha',
-                    Icons.area_chart,
-                    AppTheme.primary,
-                  ),
-                ),
-                const SizedBox(width: AppTheme.spacingS),
-                Expanded(
-                  child: _buildInfoChip(
-                    'Surface',
-                    Icons.info_outline,
-                    AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInfoChip(String text, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.spacingM,
-        vertical: AppTheme.spacingS,
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: AppTheme.spacingS),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
+  List<Parcelle> _filterParcelles(List<Parcelle> parcelles) {
+    var filtered = parcelles.where((p) {
+      final matchesSearch = _searchQuery.isEmpty || 
+          p.nom.toLowerCase().contains(_searchQuery.toLowerCase());
+      return matchesSearch;
+    }).toList();
+    
+    filtered.sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
+    return filtered;
   }
 
   String _formatDate(DateTime date) {
@@ -295,7 +311,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       builder: (context) => AlertDialog(
         title: const Text('Nouvelle Parcelle'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          borderRadius: BorderRadius.circular(AppTheme.radiusModal),
         ),
         content: Form(
           key: formKey,
@@ -306,7 +322,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 decoration: const InputDecoration(
                   labelText: 'Nom de la parcelle',
                   hintText: 'Ex: Parcelle Nord',
-                  prefixIcon: Icon(Icons.landscape),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -321,7 +336,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 decoration: const InputDecoration(
                   labelText: 'Surface (hectares)',
                   hintText: 'Ex: 2.5',
-                  prefixIcon: Icon(Icons.area_chart),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -340,12 +354,11 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           ),
         ),
         actions: [
-          ModernTextButton(
-            text: 'Annuler',
+          TextButton(
             onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
           ),
-          ModernButton(
-            text: 'Ajouter',
+          ElevatedButton(
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 formKey.currentState!.save();
@@ -361,12 +374,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     backgroundColor: AppTheme.success,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                     ),
                   ),
                 );
               }
             },
+            child: const Text('Ajouter'),
           ),
         ],
       ),
@@ -383,7 +397,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       builder: (context) => AlertDialog(
         title: const Text('Modifier la Parcelle'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          borderRadius: BorderRadius.circular(AppTheme.radiusModal),
         ),
         content: Form(
           key: formKey,
@@ -394,7 +408,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 initialValue: parcelle.nom,
                 decoration: const InputDecoration(
                   labelText: 'Nom de la parcelle',
-                  prefixIcon: Icon(Icons.landscape),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -409,7 +422,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 initialValue: parcelle.surface.toString(),
                 decoration: const InputDecoration(
                   labelText: 'Surface (hectares)',
-                  prefixIcon: Icon(Icons.area_chart),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -428,12 +440,11 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           ),
         ),
         actions: [
-          ModernTextButton(
-            text: 'Annuler',
+          TextButton(
             onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
           ),
-          ModernButton(
-            text: 'Modifier',
+          ElevatedButton(
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 formKey.currentState!.save();
@@ -451,12 +462,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     backgroundColor: AppTheme.success,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                     ),
                   ),
                 );
               }
             },
+            child: const Text('Modifier'),
           ),
         ],
       ),
@@ -469,18 +481,21 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       builder: (context) => AlertDialog(
         title: const Text('Confirmer la suppression'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          borderRadius: BorderRadius.circular(AppTheme.radiusModal),
         ),
         content: Text('Voulez-vous vraiment supprimer la parcelle "${parcelle.nom}" ?'),
         actions: [
-          ModernTextButton(
-            text: 'Annuler',
+          TextButton(
             onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
           ),
-          ModernButton(
-            text: 'Supprimer',
-            backgroundColor: AppTheme.error,
+          ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.danger,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Supprimer'),
           ),
         ],
       ),
@@ -491,10 +506,10 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Parcelle supprimée'),
-          backgroundColor: AppTheme.error,
+          backgroundColor: AppTheme.danger,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           ),
         ),
       );

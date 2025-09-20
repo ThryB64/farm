@@ -43,7 +43,7 @@ class ModernButton extends StatelessWidget {
             vertical: AppTheme.spacingM,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           ),
         ),
         child: isLoading
@@ -118,7 +118,7 @@ class ModernOutlinedButton extends StatelessWidget {
             vertical: AppTheme.spacingM,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           ),
         ),
         child: isLoading
@@ -184,7 +184,7 @@ class ModernTextButton extends StatelessWidget {
           vertical: AppTheme.spacingS,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+          borderRadius: BorderRadius.circular(AppTheme.radiusChip),
         ),
       ),
       child: Row(
