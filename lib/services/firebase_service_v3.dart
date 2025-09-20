@@ -426,16 +426,29 @@ class FirebaseServiceV3 {
 
   // Méthodes utilitaires
   Future<void> deleteAllData() async {
-    if (_farmRef != null) {
-      await _userRef!.remove();
-    } else {
-      html.window.localStorage.remove(_storageKey);
+    try {
+      print('🗑️ Suppression de toutes les données...');
+      
+      if (_farmRef != null) {
+        // Supprimer toutes les données de la ferme
+        await _farmRef!.remove();
+        print('✅ Données de la ferme supprimées de Firebase');
+      } else {
+        // Supprimer du localStorage
+        html.window.localStorage.remove(_storageKey);
+        print('✅ Données supprimées du localStorage');
+      }
+      
+      print('✅ Suppression terminée');
+    } catch (e) {
+      print('❌ Erreur lors de la suppression: $e');
+      rethrow;
     }
   }
 
   Future<void> importData(Map<String, dynamic> data) async {
     if (_farmRef != null) {
-      await _userRef!.set(data);
+      await _farmRef!.set(data);
     } else {
       html.window.localStorage[_storageKey] = jsonEncode(data);
     }
@@ -443,7 +456,7 @@ class FirebaseServiceV3 {
 
   Future<Map<String, dynamic>> exportData() async {
     if (_farmRef != null) {
-      final snapshot = await _userRef!.get();
+      final snapshot = await _farmRef!.get();
       return Map<String, dynamic>.from(snapshot.value as Map? ?? {});
     } else {
       final stored = html.window.localStorage[_storageKey];
