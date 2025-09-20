@@ -1,147 +1,122 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // === COULEURS (selon brief) ===
-  
-  // Vert principal pour actions et accents
-  static const Color primary = Color(0xFF1F8A48);
-  
-  // Gris clair pour fond de page
-  static const Color background = Color(0xFFF5F7F6);
-  
-  // Texte bleu-gris foncé pour contenu
-  static const Color textMain = Color(0xFF1B2B34);
-  
-  // Accent jaune/ambre pour KPI importants
-  static const Color accent = Color(0xFFF4A737);
+  // Couleurs principales
+  static const Color primary = Color(0xFF2E7D32); // Vert foncé
+  static const Color primaryLight = Color(0xFF4CAF50); // Vert clair
+  static const Color primaryDark = Color(0xFF1B5E20); // Vert très foncé
   
   // Couleurs secondaires
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color textMuted = Color(0xFF6B7C87);
-  static const Color border = Color(0xFFE4E8EA);
+  static const Color secondary = Color(0xFF1976D2); // Bleu
+  static const Color secondaryLight = Color(0xFF42A5F5); // Bleu clair
   
-  // États
-  static const Color success = Color(0xFF1F8A48);
-  static const Color warning = Color(0xFFE57E25);
-  static const Color danger = Color(0xFFC7423A);
+  // Couleurs d'accent
+  static const Color accent = Color(0xFFFF9800); // Orange
+  static const Color accentLight = Color(0xFFFFB74D); // Orange clair
   
-  // === TYPOGRAPHIE ===
+  // Couleurs de surface
+  static const Color surface = Color(0xFFFAFAFA); // Gris très clair
+  static const Color surfaceDark = Color(0xFFF5F5F5); // Gris clair
+  static const Color background = Color(0xFFFFFFFF); // Blanc
   
-  static const String fontFamily = 'Inter';
+  // Couleurs de texte
+  static const Color textPrimary = Color(0xFF212121); // Noir
+  static const Color textSecondary = Color(0xFF757575); // Gris
+  static const Color textLight = Color(0xFF9E9E9E); // Gris clair
   
-  // Hiérarchie typographique
-  static const TextStyle displayKPI = TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.bold,
-    color: textMain,
-    fontFamily: fontFamily,
+  // Couleurs d'état
+  static const Color success = Color(0xFF4CAF50); // Vert
+  static const Color warning = Color(0xFFFF9800); // Orange
+  static const Color error = Color(0xFFF44336); // Rouge
+  static const Color info = Color(0xFF2196F3); // Bleu
+  
+  // Gradients
+  static const LinearGradient primaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [primary, primaryLight],
   );
   
-  static const TextStyle h1 = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: textMain,
-    fontFamily: fontFamily,
+  static const LinearGradient secondaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [secondary, secondaryLight],
   );
   
-  static const TextStyle h2 = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.bold,
-    color: textMain,
-    fontFamily: fontFamily,
+  static const LinearGradient accentGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [accent, accentLight],
   );
   
-  static const TextStyle h3 = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    color: textMain,
-    fontFamily: fontFamily,
-  );
-  
-  static const TextStyle body = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.normal,
-    color: textMain,
-    fontFamily: fontFamily,
-  );
-  
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-    color: textMain,
-    fontFamily: fontFamily,
-  );
-  
-  static const TextStyle meta = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.normal,
-    color: textMuted,
-    fontFamily: fontFamily,
-  );
-  
-  // === RAYONS, OMBRES, ESPACEMENTS ===
-  
-  // Rayons (selon brief)
-  static const double radiusCard = 16.0;
-  
-  // Ombres douces
+  // Ombres
   static const List<BoxShadow> cardShadow = [
     BoxShadow(
-      color: Color(0x0A000000),
+      color: Color(0x1A000000),
       offset: Offset(0, 2),
       blurRadius: 8,
       spreadRadius: 0,
     ),
   ];
   
-  // Espacements généreux (selon brief)
+  static const List<BoxShadow> elevatedShadow = [
+    BoxShadow(
+      color: Color(0x1A000000),
+      offset: Offset(0, 4),
+      blurRadius: 12,
+      spreadRadius: 0,
+    ),
+  ];
+  
+  // Rayons de bordure
+  static const double radiusSmall = 8.0;
+  static const double radiusMedium = 12.0;
+  static const double radiusLarge = 16.0;
+  static const double radiusXLarge = 24.0;
+  
+  // Espacements
+  static const double spacingXS = 4.0;
   static const double spacingS = 8.0;
   static const double spacingM = 16.0;
   static const double spacingL = 24.0;
   static const double spacingXL = 32.0;
+  static const double spacingXXL = 48.0;
   
-  // === THÈME PRINCIPAL ===
-  
+  // Thème principal
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      fontFamily: fontFamily,
       colorScheme: const ColorScheme.light(
         primary: primary,
-        secondary: accent,
+        secondary: secondary,
         surface: surface,
         background: background,
-        error: danger,
+        error: error,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: textMain,
-        onBackground: textMain,
+        onSurface: textPrimary,
+        onBackground: textPrimary,
         onError: Colors.white,
       ),
-      
-      // AppBar (fond blanc, ombre subtile)
       appBarTheme: const AppBarTheme(
-        backgroundColor: surface,
-        foregroundColor: textMain,
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
         elevation: 0,
-        centerTitle: false,
-        titleTextStyle: h2,
-        surfaceTintColor: Colors.transparent,
-        shadowColor: Color(0x0A000000),
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
       ),
-      
-      // Cards (blanches, arrondies, ombre douce)
       cardTheme: CardTheme(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radiusCard),
+          borderRadius: BorderRadius.circular(radiusMedium),
         ),
-        color: surface,
+        color: background,
         shadowColor: Colors.black.withOpacity(0.1),
-        margin: EdgeInsets.zero,
       ),
-      
-      // Buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
@@ -152,27 +127,31 @@ class AppTheme {
             vertical: spacingM,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radiusCard),
+            borderRadius: BorderRadius.circular(radiusMedium),
           ),
-          textStyle: h3,
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
-      
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: textMuted,
-          side: const BorderSide(color: border, width: 1),
+          foregroundColor: primary,
+          side: const BorderSide(color: primary, width: 2),
           padding: const EdgeInsets.symmetric(
             horizontal: spacingL,
             vertical: spacingM,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radiusCard),
+            borderRadius: BorderRadius.circular(radiusMedium),
           ),
-          textStyle: h3,
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
-      
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
@@ -181,175 +160,50 @@ class AppTheme {
             vertical: spacingS,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(radiusSmall),
           ),
-          textStyle: body,
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
-      
-      // Inputs
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surface,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusCard),
-          borderSide: const BorderSide(color: border),
+          borderRadius: BorderRadius.circular(radiusMedium),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusCard),
-          borderSide: const BorderSide(color: border),
+          borderRadius: BorderRadius.circular(radiusMedium),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusCard),
+          borderRadius: BorderRadius.circular(radiusMedium),
           borderSide: const BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusCard),
-          borderSide: const BorderSide(color: danger, width: 2),
+          borderRadius: BorderRadius.circular(radiusMedium),
+          borderSide: const BorderSide(color: error, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: spacingM,
           vertical: spacingM,
         ),
-        labelStyle: meta,
-        hintStyle: TextStyle(
-          color: textMuted,
-          fontSize: 14,
+        labelStyle: const TextStyle(
+          color: textSecondary,
+          fontSize: 16,
+        ),
+        hintStyle: const TextStyle(
+          color: textLight,
+          fontSize: 16,
         ),
       ),
-      
-      // FloatingActionButton
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: primary,
         foregroundColor: Colors.white,
         elevation: 4,
-      ),
-    );
-  }
-  
-  // === COMPOSANTS RÉUTILISABLES ===
-  
-  // Carte KPI (selon brief)
-  static Widget buildKPICard({
-    required String label,
-    required String value,
-    required IconData icon,
-    Color? iconColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(spacingL),
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(radiusCard),
-        boxShadow: cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: (iconColor ?? primary).withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor ?? primary,
-                  size: 24,
-                ),
-              ),
-              const Spacer(),
-            ],
-          ),
-          const SizedBox(height: spacingL),
-          Text(
-            label,
-            style: meta,
-          ),
-          const SizedBox(height: spacingS),
-          Text(
-            value,
-            style: displayKPI,
-          ),
-        ],
-      ),
-    );
-  }
-  
-  // Carte menu (selon brief)
-  static Widget buildMenuCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-    Color? iconColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(radiusCard),
-        boxShadow: cardShadow,
-        border: Border.all(color: border),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(radiusCard),
-          child: Padding(
-            padding: const EdgeInsets.all(spacingL),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: (iconColor ?? primary).withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor ?? primary,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(height: spacingL),
-                Text(
-                  title,
-                  style: h2,
-                ),
-                const SizedBox(height: spacingS),
-                Text(
-                  subtitle,
-                  style: body.copyWith(color: textMuted),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-  
-  // Badge statut
-  static Widget buildStatusBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: spacingM,
-        vertical: spacingS,
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Text(
-        text,
-        style: meta.copyWith(color: color),
       ),
     );
   }

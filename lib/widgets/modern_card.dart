@@ -29,7 +29,7 @@ class ModernCard extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         color: backgroundColor ?? AppTheme.background,
-        borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusCard),
+        borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
         boxShadow: shadow ?? AppTheme.cardShadow,
         gradient: gradient,
       ),
@@ -37,7 +37,7 @@ class ModernCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusCard),
+          borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
           child: Padding(
             padding: padding ?? const EdgeInsets.all(AppTheme.spacingM),
             child: child,
@@ -110,7 +110,7 @@ class StatCard extends StatelessWidget {
                 padding: const EdgeInsets.all(AppTheme.spacingS),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusChip),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 ),
                 child: Icon(
                   icon,
@@ -128,7 +128,7 @@ class StatCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: AppTheme.textMuted,
+                        color: AppTheme.textSecondary,
                       ),
                     ),
                     if (subtitle != null) ...[
@@ -137,7 +137,7 @@ class StatCard extends StatelessWidget {
                         subtitle!,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: AppTheme.textMuted,
+                          color: AppTheme.textLight,
                         ),
                       ),
                     ],
@@ -192,7 +192,7 @@ class MenuCard extends StatelessWidget {
               padding: const EdgeInsets.all(AppTheme.spacingM),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+                borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
               ),
               child: Icon(
                 icon,
@@ -206,7 +206,7 @@ class MenuCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textMain,
+                color: AppTheme.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -216,7 +216,7 @@ class MenuCard extends StatelessWidget {
                 subtitle!,
                 style: const TextStyle(
                   fontSize: 12,
-                  color: AppTheme.textMuted,
+                  color: AppTheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),

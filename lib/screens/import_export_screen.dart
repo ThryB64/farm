@@ -1,171 +1,631 @@
+import 'dart:convert';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
+import '../theme/app_theme.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
+import '../models/parcelle.dart';
+import '../models/cellule.dart';
+import '../models/chargement.dart';
+import '../models/semis.dart';
+import '../models/variete.dart';
 
-class ImportExportScreen extends StatelessWidget {
+class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ImportExportScreen> createState() => _ImportExportScreenState();
+}
+
+class _ImportExportScreenState extends State<ImportExportScreen> with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  bool _isExporting = false;
+  bool _isImporting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
         title: const Text('Import/Export'),
-        backgroundColor: Colors.orange,
+        backgroundColor: AppTheme.accent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'État de la base',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Consumer<FirebaseProviderV3>(
-                      builder: (context, provider, child) {
-                        return Column(
-                          children: [
-                            _buildDataSummary(
-                              'Parcelles',
-                              provider.parcelles.length,
-                              Icons.landscape,
-                              Colors.green,
-                            ),
-                            SizedBox(height: 8),
-                            _buildDataSummary(
-                              'Cellules',
-                              provider.cellules.length,
-                              Icons.grid_view,
-                              Colors.orange,
-                            ),
-                            SizedBox(height: 8),
-                            _buildDataSummary(
-                              'Chargements',
-                              provider.chargements.length,
-                              Icons.local_shipping,
-                              Colors.blue,
-                            ),
-                            SizedBox(height: 8),
-                            _buildDataSummary(
-                              'Semis',
-                              provider.semis.length,
-                              Icons.grass,
-                              Colors.brown,
-                            ),
-                            SizedBox(height: 8),
-                            _buildDataSummary(
-                              'Variétés',
-                              provider.varietes.length,
-                              Icons.eco,
-                              Colors.lightGreen,
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Actions',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        try {
-                          await context.read<FirebaseProviderV3>().updateAllChargementsPoidsNormes();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Poids aux normes mis à jour avec succès'),
-                                duration: Duration(seconds: 5),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Erreur: $e'),
-                                duration: const Duration(seconds: 5),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Mettre à jour les poids aux normes'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppTheme.spacingM),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDataOverview(),
+              const SizedBox(height: AppTheme.spacingL),
+              _buildExportSection(),
+              const SizedBox(height: AppTheme.spacingL),
+              _buildImportSection(),
+              const SizedBox(height: AppTheme.spacingL),
+              _buildActionsSection(),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDataOverview() {
+    return ModernCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.analytics,
+                  color: AppTheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'État de la base de données',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          Consumer<FirebaseProviderV3>(
+            builder: (context, provider, child) {
+              return Column(
+                children: [
+                  _buildDataSummary(
+                    'Parcelles',
+                    provider.parcelles.length,
+                    Icons.landscape,
+                    AppTheme.primary,
+                  ),
+                  const SizedBox(height: AppTheme.spacingS),
+                  _buildDataSummary(
+                    'Cellules',
+                    provider.cellules.length,
+                    Icons.grid_view,
+                    AppTheme.secondary,
+                  ),
+                  const SizedBox(height: AppTheme.spacingS),
+                  _buildDataSummary(
+                    'Chargements',
+                    provider.chargements.length,
+                    Icons.local_shipping,
+                    AppTheme.accent,
+                  ),
+                  const SizedBox(height: AppTheme.spacingS),
+                  _buildDataSummary(
+                    'Semis',
+                    provider.semis.length,
+                    Icons.grass,
+                    AppTheme.success,
+                  ),
+                  const SizedBox(height: AppTheme.spacingS),
+                  _buildDataSummary(
+                    'Variétés',
+                    provider.varietes.length,
+                    Icons.eco,
+                    AppTheme.info,
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildDataSummary(String label, int count, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppTheme.spacingM),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
           Icon(icon, color: color, size: 24),
-          SizedBox(width: 12),
+          const SizedBox(width: AppTheme.spacingM),
           Text(
             label,
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               color: color,
             ),
           ),
-          Spacer(),
-          Text(
-            count.toString(),
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spacingM,
+              vertical: AppTheme.spacingS,
+            ),
+            decoration: BoxDecoration(
               color: color,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
+            child: Text(
+              count.toString(),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildExportSection() {
+    return ModernCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.success.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.download,
+                  color: AppTheme.success,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'Export des données',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          const Text(
+            'Téléchargez toutes vos données au format JSON pour sauvegarder ou partager.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          ModernButton(
+            text: 'Exporter toutes les données',
+            icon: Icons.file_download,
+            backgroundColor: AppTheme.success,
+            onPressed: _isExporting ? null : _exportAllData,
+            isLoading: _isExporting,
+            isFullWidth: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImportSection() {
+    return ModernCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.info.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.upload,
+                  color: AppTheme.info,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'Import des données',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          const Text(
+            'Importez des données depuis un fichier JSON. Attention : cela remplacera toutes les données existantes.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          ModernOutlinedButton(
+            text: 'Importer depuis un fichier',
+            icon: Icons.file_upload,
+            borderColor: AppTheme.info,
+            textColor: AppTheme.info,
+            onPressed: _isImporting ? null : _importData,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionsSection() {
+    return ModernCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.warning.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.refresh,
+                  color: AppTheme.warning,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'Actions de maintenance',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          const Text(
+            'Mettez à jour les calculs et synchronisez les données.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          ModernButton(
+            text: 'Mettre à jour les poids aux normes',
+            icon: Icons.calculate,
+            backgroundColor: AppTheme.warning,
+            onPressed: _updatePoidsNormes,
+            isFullWidth: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _exportAllData() async {
+    setState(() {
+      _isExporting = true;
+    });
+
+    try {
+      final provider = context.read<FirebaseProviderV3>();
+      
+      // Préparer les données à exporter
+      final exportData = {
+        'exportDate': DateTime.now().toIso8601String(),
+        'version': '1.0',
+        'parcelles': provider.parcelles.map((p) => p.toMap()).toList(),
+        'cellules': provider.cellules.map((c) => c.toMap()).toList(),
+        'chargements': provider.chargements.map((c) => c.toMap()).toList(),
+        'semis': provider.semis.map((s) => s.toMap()).toList(),
+        'varietes': provider.varietes.map((v) => v.toMap()).toList(),
+      };
+
+      // Convertir en JSON
+      final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
+      
+      // Créer le nom de fichier avec la date
+      final now = DateTime.now();
+      final fileName = 'mais_tracker_export_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
+      
+      // Pour le web, on utilise la fonctionnalité de téléchargement
+      _downloadFile(jsonString, fileName);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export réussi : $fileName'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'export : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isExporting = false;
+        });
+      }
+    }
+  }
+
+  void _downloadFile(String content, String fileName) {
+      // Pour le web, on utilise la fonctionnalité de téléchargement du navigateur
+      final blob = html.Blob([content], 'application/json');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', fileName);
+      anchor.click();
+      html.Url.revokeObjectUrl(url);
+  }
+
+  Future<void> _importData() async {
+    setState(() {
+      _isImporting = true;
+    });
+
+    try {
+      // Pour le web, on utilise un input file
+      final input = html.FileUploadInputElement()
+        ..accept = '.json'
+        ..click();
+      
+      input.onChange.listen((e) async {
+        final file = input.files?.first;
+        if (file != null) {
+          final reader = html.FileReader();
+          reader.onLoadEnd.listen((e) async {
+            try {
+              final jsonString = reader.result as String;
+              final data = jsonDecode(jsonString) as Map<String, dynamic>;
+              
+              // Valider la structure des données
+              if (!data.containsKey('parcelles') || 
+                  !data.containsKey('cellules') || 
+                  !data.containsKey('chargements') || 
+                  !data.containsKey('semis') || 
+                  !data.containsKey('varietes')) {
+                throw Exception('Format de fichier invalide');
+              }
+              
+              // Afficher une confirmation avant l'import
+              final confirmed = await _showImportConfirmation();
+              if (!confirmed) return;
+              
+              // Importer les données
+              await _performImport(data);
+              
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Import réussi !'),
+                    backgroundColor: AppTheme.success,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                );
+              }
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Erreur lors de l\'import : $e'),
+                    backgroundColor: AppTheme.error,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                );
+              }
+            }
+          });
+          reader.readAsText(file);
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'import : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isImporting = false;
+        });
+      }
+    }
+  }
+
+  Future<bool> _showImportConfirmation() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmer l\'import'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        ),
+        content: const Text(
+          'Cette action va remplacer toutes les données existantes. Êtes-vous sûr de vouloir continuer ?',
+        ),
+        actions: [
+          ModernTextButton(
+            text: 'Annuler',
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ModernButton(
+            text: 'Confirmer',
+            backgroundColor: AppTheme.error,
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
+  Future<void> _performImport(Map<String, dynamic> data) async {
+    final provider = context.read<FirebaseProviderV3>();
+    
+    // Supprimer toutes les données existantes
+    await provider.deleteAllData();
+    
+    // Importer les nouvelles données
+    final parcelles = (data['parcelles'] as List)
+        .map((p) => Parcelle.fromMap(Map<String, dynamic>.from(p)))
+        .toList();
+    
+    final cellules = (data['cellules'] as List)
+        .map((c) => Cellule.fromMap(Map<String, dynamic>.from(c)))
+        .toList();
+    
+    final chargements = (data['chargements'] as List)
+        .map((c) => Chargement.fromMap(Map<String, dynamic>.from(c)))
+        .toList();
+    
+    final semis = (data['semis'] as List)
+        .map((s) => Semis.fromMap(Map<String, dynamic>.from(s)))
+        .toList();
+    
+    final varietes = (data['varietes'] as List)
+        .map((v) => Variete.fromMap(Map<String, dynamic>.from(v)))
+        .toList();
+    
+    // Ajouter les données une par une
+    for (final parcelle in parcelles) {
+      await provider.ajouterParcelle(parcelle);
+    }
+    
+    for (final cellule in cellules) {
+      await provider.ajouterCellule(cellule);
+    }
+    
+    for (final chargement in chargements) {
+      await provider.ajouterChargement(chargement);
+    }
+    
+    for (final semis in semis) {
+      await provider.ajouterSemis(semis);
+    }
+    
+    for (final variete in varietes) {
+      await provider.ajouterVariete(variete);
+    }
+  }
+
+  Future<void> _updatePoidsNormes() async {
+    try {
+      await context.read<FirebaseProviderV3>().updateAllChargementsPoidsNormes();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Poids aux normes mis à jour avec succès'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    }
   }
 }
