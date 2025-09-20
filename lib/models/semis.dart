@@ -18,9 +18,6 @@ class Semis {
 
   // Getter pour la compatibilité avec le code existant
   List<String> get varietes => varietesSurfaces.map((v) => v.nom).toList();
-  
-  // Getter pour la compatibilité avec le code existant
-  DateTime get dateSemis => date;
 
   Map<String, dynamic> toMap() {
     return {

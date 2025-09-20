@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
-import '../theme/app_theme.dart';
+import '../theme/theme.dart';
 import '../widgets/glass.dart';
+import '../widgets/gradient_button.dart';
 
 class ParcelleFormScreen extends StatefulWidget {
   final Parcelle? parcelle;
@@ -21,6 +21,8 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
   final _codeController = TextEditingController();
   final _surfaceController = TextEditingController();
   final _anneeController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
   bool _isLoading = false;
 
   @override
@@ -30,7 +32,8 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       _nomController.text = widget.parcelle!.nom;
       _codeController.text = widget.parcelle!.code;
       _surfaceController.text = widget.parcelle!.surface.toString();
-      _anneeController.text = widget.parcelle!.annee?.toString() ?? DateTime.now().year.toString();
+      _anneeController.text = widget.parcelle!.annee.toString();
+      _descriptionController.text = widget.parcelle!.description ?? '';
     } else {
       _anneeController.text = DateTime.now().year.toString();
     }
@@ -42,6 +45,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
     _codeController.dispose();
     _surfaceController.dispose();
     _anneeController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -53,156 +57,177 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       appBar: AppBar(
         title: Text(
           isEditing ? 'Modifier la parcelle' : 'Nouvelle parcelle',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
-            color: AppColors.navy,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        backgroundColor: AppColors.sand,
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          if (isEditing)
-            IconButton(
-              onPressed: _deleteParcelle,
-              icon: const Icon(Icons.delete, color: Colors.red),
-            ),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.sand, AppColors.sand],
-          ),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Glass(
-            padding: const EdgeInsets.all(24),
-            radius: AppRadius.lg,
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // En-tête
+              Glass(
+                padding: const EdgeInsets.all(20),
+                radius: 24,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.landscape, color: AppColors.coral, size: 24),
+                        const SizedBox(width: 12),
+                        Text(
+                          isEditing ? 'Modifier la parcelle' : 'Créer une nouvelle parcelle',
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.navy),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      isEditing
+                          ? 'Modifiez les informations de votre parcelle'
+                          : 'Remplissez les informations de votre nouvelle parcelle',
+                      style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Formulaire
+              Glass(
+                padding: const EdgeInsets.all(20),
+                radius: 24,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Informations de base',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.navy),
+                    ),
+                    const SizedBox(height: 20),
+                    // Nom de la parcelle
+                    _buildTextField(
+                      controller: _nomController,
+                      label: 'Nom de la parcelle',
+                      hint: 'Ex: Parcelle Nord',
+                      icon: Icons.landscape,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Le nom est obligatoire';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Code de la parcelle
+                    _buildTextField(
+                      controller: _codeController,
+                      label: 'Code de la parcelle',
+                      hint: 'Ex: PN001',
+                      icon: Icons.tag,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Le code est obligatoire';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Surface et année
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _surfaceController,
+                            label: 'Surface (ha)',
+                            hint: 'Ex: 2.5',
+                            icon: Icons.area_chart,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'La surface est obligatoire';
+                              }
+                              final surface = double.tryParse(value);
+                              if (surface == null || surface <= 0) {
+                                return 'Surface invalide';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _anneeController,
+                            label: 'Année',
+                            hint: 'Ex: 2024',
+                            icon: Icons.calendar_today,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'L\'année est obligatoire';
+                              }
+                              final annee = int.tryParse(value);
+                              if (annee == null || annee < 2000 || annee > 2030) {
+                                return 'Année invalide';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Description
+                    _buildTextField(
+                      controller: _descriptionController,
+                      label: 'Description (optionnel)',
+                      hint: 'Ajoutez des détails sur cette parcelle...',
+                      icon: Icons.description,
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Boutons d'action
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          gradient: AppGradients.primary,
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                        child: const Icon(
-                          Icons.landscape,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        isEditing ? 'Modifier la parcelle' : 'Nouvelle parcelle',
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.navy,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Glass(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        radius: 16,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.close, color: AppColors.navy, size: 18),
+                            SizedBox(width: 8),
+                            Text('Annuler', style: TextStyle(color: AppColors.navy, fontWeight: FontWeight.w600)),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                  
-                  // Nom
-                  _buildTextField(
-                    controller: _nomController,
-                    label: 'Nom de la parcelle',
-                    icon: Icons.title,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Le nom est requis';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Code
-                  _buildTextField(
-                    controller: _codeController,
-                    label: 'Code de la parcelle',
-                    icon: Icons.tag,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Le code est requis';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Surface
-                  _buildTextField(
-                    controller: _surfaceController,
-                    label: 'Surface (ha)',
-                    icon: Icons.area_chart,
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'La surface est requise';
-                      }
-                      final surface = double.tryParse(value);
-                      if (surface == null || surface <= 0) {
-                        return 'Surface invalide';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Année
-                  _buildTextField(
-                    controller: _anneeController,
-                    label: 'Année',
-                    icon: Icons.calendar_today,
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'L\'année est requise';
-                      }
-                      final annee = int.tryParse(value);
-                      if (annee == null || annee < 2000 || annee > DateTime.now().year + 1) {
-                        return 'Année invalide';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // Boutons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GlassButton(
-                          label: 'Annuler',
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: GlassButton(
-                          label: isEditing ? 'Modifier' : 'Créer',
-                          icon: isEditing ? Icons.edit : Icons.add,
-                          gradient: true,
-                          onPressed: _isLoading ? null : _saveParcelle,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GradientButton(
+                      label: isEditing ? 'Modifier' : 'Créer',
+                      icon: isEditing ? Icons.save : Icons.add,
+                      onPressed: _isLoading ? null : _saveParcelle,
+                    ),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
@@ -212,45 +237,58 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
+    required String hint,
     required IconData icon,
     TextInputType? keyboardType,
+    int maxLines = 1,
     String? Function(String?)? validator,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-          width: 1,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: AppColors.navy, fontWeight: FontWeight.w600),
         ),
-      ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        validator: validator,
-        style: GoogleFonts.inter(
-          color: AppColors.navy,
-          fontSize: 16,
-        ),
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon, color: AppColors.coral),
-          labelStyle: GoogleFonts.inter(
-            color: AppColors.textSecondary,
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          validator: validator,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: AppColors.textSecondary),
+            prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.1),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Colors.white, width: 1),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Colors.white, width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.coral, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Colors.red, width: 1),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
         ),
-      ),
+      ],
     );
   }
 
   Future<void> _saveParcelle() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -265,104 +303,52 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
         code: _codeController.text.trim(),
         surface: double.parse(_surfaceController.text),
         annee: int.parse(_anneeController.text),
+        description: _descriptionController.text.trim().isEmpty 
+            ? null 
+            : _descriptionController.text.trim(),
+        dateCreation: widget.parcelle?.dateCreation ?? DateTime.now(),
       );
 
       if (widget.parcelle != null) {
         await provider.modifierParcelle(parcelle);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Parcelle modifiée avec succès',
-              style: GoogleFonts.inter(),
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Parcelle "${parcelle.nom}" modifiée avec succès'),
+              backgroundColor: AppColors.coral,
             ),
-            backgroundColor: AppColors.coral,
-          ),
-        );
+          );
+        }
       } else {
         await provider.ajouterParcelle(parcelle);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Parcelle "${parcelle.nom}" créée avec succès'),
+              backgroundColor: AppColors.coral,
+            ),
+          );
+        }
+      }
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Parcelle créée avec succès',
-              style: GoogleFonts.inter(),
-            ),
-            backgroundColor: AppColors.coral,
+            content: Text('Erreur: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }
-
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Erreur: $e',
-            style: GoogleFonts.inter(),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
-  }
-
-  void _deleteParcelle() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.sand,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        title: Text(
-          'Supprimer la parcelle',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
-            color: AppColors.navy,
-          ),
-        ),
-        content: Text(
-          'Êtes-vous sûr de vouloir supprimer cette parcelle ?',
-          style: GoogleFonts.inter(
-            color: AppColors.navy,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Annuler',
-              style: GoogleFonts.inter(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          GlassButton(
-            label: 'Supprimer',
-            gradient: true,
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              if (widget.parcelle?.id != null) {
-                Provider.of<FirebaseProviderV3>(context, listen: false)
-                    .supprimerParcelle(widget.parcelle!.id.toString());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Parcelle supprimée',
-                      style: GoogleFonts.inter(),
-                    ),
-                    backgroundColor: AppColors.coral,
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-    );
   }
 }

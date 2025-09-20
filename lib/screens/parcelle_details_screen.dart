@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
-import '../theme/app_theme.dart';
-import '../widgets/glass.dart';
-import 'parcelle_form_screen.dart';
 
 class ParcelleDetailsScreen extends StatefulWidget {
   final Parcelle parcelle;
@@ -19,33 +15,33 @@ class ParcelleDetailsScreen extends StatefulWidget {
 }
 
 class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
+  int? _selectedYear;
+
+  Widget _buildSemisDetails(Semis s) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 8),
+        const Text('Variétés:', style: TextStyle(fontWeight: FontWeight.bold)),
+        ...s.varietesSurfaces.map((vs) => 
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Text('${vs.nom}: ${vs.pourcentage}%'),
+          ),
+        ),
+        Text('Date: ${_formatDate(s.date)}'),
+        if (s.notes?.isNotEmpty ?? false)
+          Text('Notes: ${s.notes}'),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.parcelle.nom,
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
-            color: AppColors.navy,
-          ),
-        ),
-        backgroundColor: AppColors.sand,
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ParcelleFormScreen(parcelle: widget.parcelle),
-                ),
-              );
-            },
-            icon: const Icon(Icons.edit, color: AppColors.navy),
-          ),
-        ],
+        title: Text(widget.parcelle.nom),
+        backgroundColor: Colors.green,
       ),
       body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
@@ -56,279 +52,157 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
               .where((s) => s.parcelleId == widget.parcelle.id)
               .toList();
 
-          return Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.sand, AppColors.sand],
-              ),
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Informations principales
-                  Glass(
-                    padding: const EdgeInsets.all(20),
-                    radius: AppRadius.lg,
+          // Grouper les chargements par année
+          final Map<int, List<Chargement>> chargementsParAnnee = {};
+          for (var chargement in chargements) {
+            final annee = chargement.dateChargement.year;
+            chargementsParAnnee.putIfAbsent(annee, () => []).add(chargement);
+          }
+
+          // Grouper les semis par année
+          final Map<int, List<Semis>> semisParAnnee = {};
+          for (var s in semis) {
+            final annee = s.date.year;
+            semisParAnnee.putIfAbsent(annee, () => []).add(s);
+          }
+
+          // Trier les années par ordre décroissant
+          final List<int> annees = [...chargementsParAnnee.keys, ...semisParAnnee.keys].toSet().toList()..sort((a, b) => b.compareTo(a));
+
+          // Si aucune année n'est sélectionnée, sélectionner la plus récente
+          if (_selectedYear == null && annees.isNotEmpty) {
+            _selectedYear = annees.first;
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                gradient: AppGradients.primary,
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
-                              ),
-                              child: const Icon(
-                                Icons.landscape,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                widget.parcelle.nom,
-                                style: GoogleFonts.inter(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.navy,
-                                ),
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'Informations',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildInfoCard(
-                                'Surface',
-                                '${widget.parcelle.surface.toStringAsFixed(2)} ha',
-                                Icons.area_chart,
-                                AppColors.coral,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildInfoCard(
-                                'Code',
-                                widget.parcelle.code,
-                                Icons.tag,
-                                AppColors.salmon,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (widget.parcelle.annee != null) ...[
-                          const SizedBox(height: 12),
-                          _buildInfoCard(
-                            'Année',
-                            widget.parcelle.annee.toString(),
-                            Icons.calendar_today,
-                            AppColors.navy,
-                          ),
-                        ],
+                        SizedBox(height: 8),
+                        Text('Surface: ${widget.parcelle.surface} ha'),
+                        Text('Date de création: ${_formatDate(widget.parcelle.dateCreation)}'),
+                        if (widget.parcelle.notes != null)
+                          Text('Notes: ${widget.parcelle.notes}'),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // Statistiques
-                  Glass(
-                    padding: const EdgeInsets.all(20),
-                    radius: AppRadius.lg,
+                ),
+                SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                gradient: AppGradients.primary,
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
-                              ),
-                              child: const Icon(
-                                Icons.analytics,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
+                        Text(
+                          'Statistiques par année',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        SizedBox(height: 16),
+                        DropdownButtonFormField<int>(
+                          value: _selectedYear,
+                          decoration: const InputDecoration(
+                            labelText: 'Année',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: annees.map((annee) {
+                            return DropdownMenuItem<int>(
+                              value: annee,
+                              child: Text(annee.toString()),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedYear = value;
+                            });
+                          },
+                        ),
+                        if (_selectedYear != null) ...[
+                          SizedBox(height: 16),
+                          Text(
+                            'Récolte de $_selectedYear',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8),
+                          if (chargementsParAnnee[_selectedYear]?.isNotEmpty ?? false) ...[
                             Text(
-                              'Statistiques',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.navy,
-                              ),
+                              'Poids total: ${(chargementsParAnnee[_selectedYear]!.fold<double>(0, (sum, c) => sum + c.poidsNet) / 1000).toStringAsFixed(2)} T',
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildStatCard(
-                                'Chargements',
-                                chargements.length.toString(),
-                                Icons.local_shipping,
-                                AppColors.coral,
-                              ),
+                            Text(
+                              'Poids total normé: ${(chargementsParAnnee[_selectedYear]!.fold<double>(0, (sum, c) => sum + c.poidsNormes) / 1000).toStringAsFixed(2)} T',
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildStatCard(
-                                'Semis',
-                                semis.length.toString(),
-                                Icons.grass,
-                                AppColors.salmon,
-                              ),
+                            Text(
+                              'Rendement moyen: ${(chargementsParAnnee[_selectedYear]!.fold<double>(0, (sum, c) => sum + c.poidsNormes) / (1000 * widget.parcelle.surface)).toStringAsFixed(2)} T/ha',
                             ),
-                          ],
-                        ),
-                        if (chargements.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          _buildStatCard(
-                            'Poids total',
-                            '${(chargements.fold<double>(0, (sum, c) => sum + c.poidsNormes) / 1000).toStringAsFixed(2)} T',
-                            Icons.scale,
-                            AppColors.navy,
+                            Text(
+                              'Humidité moyenne: ${(chargementsParAnnee[_selectedYear]!.fold<double>(0, (sum, c) => sum + c.humidite) / chargementsParAnnee[_selectedYear]!.length).toStringAsFixed(1)}%',
+                            ),
+                          ] else
+                            const Text('Aucune récolte cette année'),
+                          SizedBox(height: 16),
+                          Text(
+                            'Semis de $_selectedYear',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
+                          SizedBox(height: 8),
+                          if (semisParAnnee[_selectedYear]?.isNotEmpty ?? false) ...[
+                            ...semisParAnnee[_selectedYear]!.map((s) => _buildSemisDetails(s)),
+                          ] else
+                            const Text('Aucun semis cette année'),
                         ],
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // Chargements
-                  if (chargements.isNotEmpty) ...[
-                    Text(
-                      'Chargements',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.navy,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...chargements.map((chargement) => Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: GlassCard(
-                        onTap: () {
-                          // Navigation vers détails du chargement
-                        },
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.coral.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
-                              ),
-                              child: const Icon(
-                                Icons.local_shipping,
-                                color: AppColors.coral,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${chargement.poidsNormes.toStringAsFixed(0)} kg',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.navy,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${chargement.dateChargement.day}/${chargement.dateChargement.month}/${chargement.dateChargement.year}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                ),
+                SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Chargements',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                      ),
-                    )),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // Semis
-                  if (semis.isNotEmpty) ...[
-                    Text(
-                      'Semis',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.navy,
-                      ),
+                        SizedBox(height: 8),
+                        if (_selectedYear != null && (chargementsParAnnee[_selectedYear]?.isNotEmpty ?? false))
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: chargementsParAnnee[_selectedYear]!.length,
+                            itemBuilder: (context, index) {
+                              final chargement = chargementsParAnnee[_selectedYear]![index];
+                              return ListTile(
+                                title: Text(chargement.remorque),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Date: ${_formatDate(chargement.dateChargement)}'),
+                                    Text('${(chargement.poidsNormes / 1000).toStringAsFixed(2)} T - ${chargement.humidite}%'),
+                                  ],
+                                ),
+                              );
+                            },
+                          )
+                        else
+                          const Text('Aucun chargement enregistré'),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    ...semis.map((s) => Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: GlassCard(
-                        onTap: () {
-                          // Navigation vers détails du semis
-                        },
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.salmon.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
-                              ),
-                              child: const Icon(
-                                Icons.grass,
-                                color: AppColors.salmon,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${s.varietes.length} variétés',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.navy,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${s.dateSemis.day}/${s.dateSemis.month}/${s.dateSemis.year}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )),
-                  ],
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -336,87 +210,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
     );
   }
 
-  Widget _buildInfoCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 16),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: AppColors.navy,
-            ),
-          ),
-        ],
-      ),
-    );
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
-
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 16),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.navy,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+} 

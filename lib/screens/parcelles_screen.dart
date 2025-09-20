@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
-import '../theme/app_theme.dart';
-import '../widgets/glass.dart';
 import 'parcelle_details_screen.dart';
-import 'parcelle_form_screen.dart';
 
 class ParcellesScreen extends StatelessWidget {
   const ParcellesScreen({Key? key}) : super(key: key);
@@ -15,365 +11,337 @@ class ParcellesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Parcelles',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
-            color: AppColors.navy,
-          ),
-        ),
-        backgroundColor: AppColors.sand,
+        title: const Text('Parcelles'),
+        backgroundColor: Colors.green,
         elevation: 0,
         centerTitle: true,
       ),
       body: Consumer<FirebaseProviderV3>(
-        builder: (context, provider, child) {
-          final parcelles = provider.parcelles;
-          final isLoading = provider.isLoading;
+        builder: (context, db, child) {
+          final parcellesTriees = List<Parcelle>.from(db.parcelles)
+            ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
 
-          if (isLoading) {
+          if (parcellesTriees.isEmpty) {
             return Center(
-              child: Glass(
-                padding: const EdgeInsets.all(40),
-                radius: AppRadius.lg,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircularProgressIndicator(
-                      color: AppColors.coral,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.landscape,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Aucune parcelle enregistrée',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Chargement des parcelles...',
-                      style: GoogleFonts.inter(
-                        color: AppColors.navy,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           }
 
-          if (parcelles.isEmpty) {
-            return Center(
-              child: Glass(
-                padding: const EdgeInsets.all(40),
-                radius: AppRadius.lg,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.landscape,
-                      size: 64,
-                      color: AppColors.coral,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Aucune parcelle',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.navy,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Ajoutez votre première parcelle',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    GlassButton(
-                      label: 'Ajouter une parcelle',
-                      icon: Icons.add,
-                      gradient: true,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ParcelleFormScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: parcellesTriees.length,
+            itemBuilder: (context, index) {
+              final parcelle = parcellesTriees[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-              ),
-            );
-          }
-
-          return Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.sand, AppColors.sand],
-              ),
-            ),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: parcelles.length,
-              itemBuilder: (context, index) {
-                final parcelle = parcelles[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: GlassCard(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
-                        ),
-                      );
-                    },
+                child: InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
+                    ),
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                gradient: AppGradients.primary,
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
-                              ),
-                              child: const Icon(
-                                Icons.landscape,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 parcelle.nom,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.navy,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                            PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ParcelleFormScreen(parcelle: parcelle),
-                                    ),
-                                  );
-                                } else if (value == 'delete') {
-                                  _showDeleteDialog(context, provider, parcelle);
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.edit, color: AppColors.navy),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Modifier',
-                                        style: GoogleFonts.inter(
-                                          color: AppColors.navy,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit),
+                                  color: Colors.blue,
+                                  onPressed: () => _modifierParcelle(context, parcelle),
                                 ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.delete, color: Colors.red),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Supprimer',
-                                        style: GoogleFonts.inter(
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  color: Colors.red,
+                                  onPressed: () => _confirmerSuppression(context, parcelle),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 8),
                         Row(
                           children: [
-                            Expanded(
-                              child: _buildInfoCard(
-                                'Surface',
-                                '${parcelle.surface.toStringAsFixed(2)} ha',
-                                Icons.area_chart,
-                                AppColors.coral,
+                            Icon(
+                              Icons.area_chart,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              '${parcelle.surface} ha',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildInfoCard(
-                                'Code',
-                                parcelle.code,
-                                Icons.tag,
-                                AppColors.salmon,
+                            SizedBox(width: 16),
+                            Icon(
+                              Icons.calendar_today,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Créée le ${_formatDate(parcelle.dateCreation)}',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
                               ),
                             ),
                           ],
                         ),
-                        if (parcelle.annee != null) ...[
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildInfoCard(
-                                  'Année',
-                                  parcelle.annee.toString(),
-                                  Icons.calendar_today,
-                                  AppColors.navy,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
                       ],
                     ),
                   ),
-                );
-              },
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ParcelleFormScreen(),
-            ),
-          );
-        },
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        label: GlassButton(
-          label: 'Ajouter',
-          icon: Icons.add,
-          gradient: true,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ParcelleFormScreen(),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 16),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: AppColors.navy,
-            ),
-          ),
-        ],
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _ajouterParcelle(context),
+        backgroundColor: Colors.green,
+        child: Icon(Icons.add),
       ),
     );
   }
 
-  void _showDeleteDialog(BuildContext context, FirebaseProviderV3 provider, Parcelle parcelle) {
-    showDialog(
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Future<void> _ajouterParcelle(BuildContext context) async {
+    final formKey = GlobalKey<FormState>();
+    String nom = '';
+    double surface = 0;
+
+    await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.sand,
+        title: const Text('Nouvelle Parcelle'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
+          borderRadius: BorderRadius.circular(15),
         ),
-        title: Text(
-          'Supprimer la parcelle',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
-            color: AppColors.navy,
-          ),
-        ),
-        content: Text(
-          'Êtes-vous sûr de vouloir supprimer la parcelle "${parcelle.nom}" ?',
-          style: GoogleFonts.inter(
-            color: AppColors.navy,
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Nom',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer un nom';
+                  }
+                  return null;
+                },
+                onSaved: (value) => nom = value!,
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Surface (ha)',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer une surface';
+                  }
+                  final number = double.tryParse(value);
+                  if (number == null || number <= 0) {
+                    return 'Veuillez entrer un nombre valide';
+                  }
+                  return null;
+                },
+                onSaved: (value) => surface = double.parse(value!),
+              ),
+            ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Annuler',
-              style: GoogleFonts.inter(
-                color: AppColors.textSecondary,
-              ),
-            ),
+            child: const Text('Annuler'),
           ),
-          GlassButton(
-            label: 'Supprimer',
-            gradient: true,
+          ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              if (parcelle.id != null) {
-                provider.supprimerParcelle(parcelle.id.toString());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Parcelle supprimée',
-                      style: GoogleFonts.inter(),
-                    ),
-                    backgroundColor: AppColors.coral,
-                  ),
+              if (formKey.currentState!.validate()) {
+                formKey.currentState!.save();
+                final parcelle = Parcelle(
+                  nom: nom,
+                  surface: surface,
                 );
+                context.read<FirebaseProviderV3>().ajouterParcelle(parcelle);
+                Navigator.pop(context);
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Ajouter'),
           ),
         ],
       ),
     );
   }
-}
+
+  Future<void> _modifierParcelle(BuildContext context, Parcelle parcelle) async {
+    final formKey = GlobalKey<FormState>();
+    String nom = parcelle.nom;
+    double surface = parcelle.surface;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Modifier la Parcelle'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                initialValue: parcelle.nom,
+                decoration: const InputDecoration(
+                  labelText: 'Nom',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer un nom';
+                  }
+                  return null;
+                },
+                onSaved: (value) => nom = value!,
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                initialValue: parcelle.surface.toString(),
+                decoration: const InputDecoration(
+                  labelText: 'Surface (ha)',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer une surface';
+                  }
+                  final number = double.tryParse(value);
+                  if (number == null || number <= 0) {
+                    return 'Veuillez entrer un nombre valide';
+                  }
+                  return null;
+                },
+                onSaved: (value) => surface = double.parse(value!),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                formKey.currentState!.save();
+                final parcelleModifiee = Parcelle(
+                  id: parcelle.id,
+                  nom: nom,
+                  surface: surface,
+                  dateCreation: parcelle.dateCreation,
+                );
+                context.read<FirebaseProviderV3>().modifierParcelle(parcelleModifiee);
+                Navigator.pop(context);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Modifier'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmerSuppression(BuildContext context, Parcelle parcelle) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmer la suppression'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        content: Text('Voulez-vous vraiment supprimer la parcelle "${parcelle.nom}" ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && parcelle.id != null) {
+      context.read<FirebaseProviderV3>().supprimerParcelle(parcelle.id.toString());
+    }
+  }
+} 
