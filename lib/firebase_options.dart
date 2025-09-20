@@ -54,6 +54,7 @@ class DefaultFirebaseOptions {
     authDomain: 'farmgaec.firebaseapp.com',
     storageBucket: 'farmgaec.firebasestorage.app',
     measurementId: 'G-L2B24EG6TJ',
+    databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

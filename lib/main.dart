@@ -40,7 +40,7 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
     debugPrint('[BOOT] Widgets binding ready. kIsWeb=$kIsWeb');
 
-    // Initialiser Firebase avec les options générées
+    // Initialiser Firebase AVANT runApp
     try {
       debugPrint('[BOOT] Initializing Firebase...');
       await Firebase.initializeApp(
@@ -49,6 +49,7 @@ Future<void> main() async {
       debugPrint('[BOOT] Firebase initialized successfully');
     } catch (e, s) {
       debugPrint('[BOOT] Firebase init error: $e\n$s');
+      // Continuer même si Firebase échoue
     }
 
     // Trace le premier frame (si on n'y arrive pas, on saura que ça bloque avant)
