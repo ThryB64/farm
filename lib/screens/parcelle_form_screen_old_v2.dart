@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
-import '../theme/theme.dart';
-import '../widgets/glass.dart';
-import '../widgets/gradient_button.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
+import '../theme/app_spacing.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/glass_button.dart';
 
 class ParcelleFormScreen extends StatefulWidget {
   final Parcelle? parcelle;
@@ -54,10 +56,16 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
     final isEditing = widget.parcelle != null;
 
     return Scaffold(
+      backgroundColor: AppColors.sand,
       appBar: AppBar(
+        backgroundColor: AppColors.sand,
+        foregroundColor: AppColors.deepNavy,
+        elevation: 0,
         title: Text(
           isEditing ? 'Modifier la parcelle' : 'Nouvelle parcelle',
-          style: const TextStyle(fontWeight: FontWeight.w700),
+          style: AppTypography.h2Style.copyWith(
+            color: AppColors.deepNavy,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -65,52 +73,63 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // En-tête
-              Glass(
-                padding: const EdgeInsets.all(20),
-                radius: 24,
+              GlassCard(
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.landscape, color: AppColors.coral, size: 24),
-                        const SizedBox(width: 12),
+                        Icon(
+                          Icons.landscape,
+                          color: AppColors.coral,
+                          size: AppSpacing.iconSize,
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
                         Text(
                           isEditing ? 'Modifier la parcelle' : 'Créer une nouvelle parcelle',
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.navy),
+                          style: AppTypography.h2Style.copyWith(
+                            color: AppColors.deepNavy,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
                       isEditing
                           ? 'Modifiez les informations de votre parcelle'
                           : 'Remplissez les informations de votre nouvelle parcelle',
-                      style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      style: AppTypography.bodyStyle.copyWith(
+                        color: AppColors.navy70,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: AppSpacing.xl),
+
               // Formulaire
-              Glass(
-                padding: const EdgeInsets.all(20),
-                radius: 24,
+              GlassCard(
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Informations de base',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.navy),
+                      style: AppTypography.h3Style.copyWith(
+                        color: AppColors.deepNavy,
+                      ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.lg),
+
                     // Nom de la parcelle
                     _buildTextField(
                       controller: _nomController,
@@ -124,7 +143,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: AppSpacing.lg),
+
                     // Code de la parcelle
                     _buildTextField(
                       controller: _codeController,
@@ -138,7 +159,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: AppSpacing.lg),
+
                     // Surface et année
                     Row(
                       children: [
@@ -161,7 +184,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpacing.lg),
                         Expanded(
                           child: _buildTextField(
                             controller: _anneeController,
@@ -183,7 +206,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: AppSpacing.lg),
+
                     // Description
                     _buildTextField(
                       controller: _descriptionController,
@@ -195,38 +220,33 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: AppSpacing.xl),
+
               // Boutons d'action
               Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Glass(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        radius: 16,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.close, color: AppColors.navy, size: 18),
-                            SizedBox(width: 8),
-                            Text('Annuler', style: TextStyle(color: AppColors.navy, fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                      ),
+                    child: GlassButton(
+                      text: 'Annuler',
+                      isTertiary: true,
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.lg),
                   Expanded(
-                    child: GradientButton(
-                      label: isEditing ? 'Modifier' : 'Créer',
+                    child: GlassButton(
+                      text: isEditing ? 'Modifier' : 'Créer',
                       icon: isEditing ? Icons.save : Icons.add,
+                      isPrimary: true,
+                      isLoading: _isLoading,
                       onPressed: _isLoading ? null : _saveParcelle,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
+
+              const SizedBox(height: AppSpacing.xxxl),
             ],
           ),
         ),
@@ -248,9 +268,12 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, color: AppColors.navy, fontWeight: FontWeight.w600),
+          style: AppTypography.bodyStyle.copyWith(
+            color: AppColors.deepNavy,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -258,27 +281,36 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
           validator: validator,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.textSecondary),
-            prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
+            hintStyle: AppTypography.bodyStyle.copyWith(
+              color: AppColors.navy50,
+            ),
+            prefixIcon: Icon(
+              icon,
+              color: AppColors.navy70,
+              size: AppSpacing.iconSize,
+            ),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.1),
+            fillColor: AppColors.glassLight,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Colors.white, width: 1),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(color: AppColors.glassBorder),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Colors.white, width: 1),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(color: AppColors.glassBorder),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               borderSide: const BorderSide(color: AppColors.coral, width: 2),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(color: AppColors.danger),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.lg,
+            ),
           ),
         ),
       ],
@@ -315,7 +347,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Parcelle "${parcelle.nom}" modifiée avec succès'),
-              backgroundColor: AppColors.coral,
+              backgroundColor: AppColors.success,
             ),
           );
         }
@@ -325,7 +357,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Parcelle "${parcelle.nom}" créée avec succès'),
-              backgroundColor: AppColors.coral,
+              backgroundColor: AppColors.success,
             ),
           );
         }
@@ -339,7 +371,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }

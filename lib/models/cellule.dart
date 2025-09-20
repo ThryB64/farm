@@ -4,12 +4,16 @@ class Cellule {
   final double capacite;
   final DateTime dateCreation;
   final String? notes;
+  final String? localisation;
+  final String? description;
 
   Cellule({
     this.id,
     String? reference,
     DateTime? dateCreation,
     this.notes,
+    this.localisation,
+    this.description,
   }) : dateCreation = dateCreation ?? DateTime.now(),
        reference = reference ?? _generateReference(dateCreation ?? DateTime.now()),
        capacite = 320000; // 320T en kg
@@ -25,6 +29,8 @@ class Cellule {
       'capacite': capacite,
       'date_creation': dateCreation.toIso8601String(),
       'notes': notes,
+      'localisation': localisation,
+      'description': description,
     };
   }
 
@@ -34,6 +40,8 @@ class Cellule {
       reference: map['reference'],
       dateCreation: DateTime.parse(map['date_creation']),
       notes: map['notes'],
+      localisation: map['localisation'],
+      description: map['description'],
     );
   }
 

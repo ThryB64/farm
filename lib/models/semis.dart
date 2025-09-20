@@ -15,6 +15,10 @@ class Semis {
     required this.varietesSurfaces,
     this.notes,
   });
+  
+  // Propriétés pour compatibilité
+  DateTime get dateSemis => date;
+  double get quantite => varietesSurfaces.fold<double>(0, (sum, v) => sum + v.surface);
 
   // Getter pour la compatibilité avec le code existant
   List<String> get varietes => varietesSurfaces.map((v) => v.nom).toList();

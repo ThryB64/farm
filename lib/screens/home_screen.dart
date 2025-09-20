@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_typography.dart';
-import '../theme/app_spacing.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/glass_button.dart';
+import '../theme/theme.dart';
+import '../widgets/glass.dart';
+import '../widgets/gradient_button.dart';
+import '../widgets/room_tile.dart';
+import '../widgets/device_chip.dart';
 import 'parcelles_screen.dart';
 import 'cellules_screen.dart';
 import 'chargements_screen.dart';
@@ -14,23 +14,24 @@ import 'varietes_screen.dart';
 import 'import_export_screen.dart';
 import 'statistiques_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.sand,
+      appBar: AppBar(
+        title: const Text('Hi Thierry 👋', style: TextStyle(fontWeight: FontWeight.w700)),
+        actions: const [SizedBox(width: 8)],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          _showAddMenu(context);
+        },
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        label: const SizedBox.shrink(),
+      ),
       body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
           final parcelles = provider.parcelles;
@@ -39,363 +40,231 @@ class _HomeScreenState extends State<HomeScreen> {
           final semis = provider.semis;
           final varietes = provider.varietes;
 
-          // Calculer les statistiques globales
+          // Calculer les statistiques
           final surfaceTotale = parcelles.fold<double>(0, (sum, p) => sum + p.surface);
           final nombreParcelles = parcelles.length;
           final nombreChargements = chargements.length;
-          // final nombreCellules = cellules.length;
-          // final nombreSemis = semis.length;
           final nombreVarietes = varietes.length;
 
-          return CustomScrollView(
-            slivers: [
-              // App Bar personnalisé
-              SliverAppBar(
-                expandedHeight: 200,
-                floating: false,
-                pinned: true,
-                backgroundColor: AppColors.sand,
-                foregroundColor: AppColors.deepNavy,
-                elevation: 0,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppColors.sand, AppColors.sand],
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: ListView(
+              children: [
+                // Carte température "Display" (glass)
+                Glass(
+                  padding: const EdgeInsets.all(18),
+                  radius: 28,
+                  child: Row(
+                    children: [
+                      Text('${surfaceTotale.toStringAsFixed(1)} ha', 
+                        style: const TextStyle(fontSize: 38, fontWeight: FontWeight.w700, color: AppColors.navy)),
+                      const Spacer(),
+                      GradientButton(
+                        label: 'Add Parcelle', 
+                        icon: Icons.add, 
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ParcellesScreen()),
+                          );
+                        }
                       ),
-                    ),
-                    child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Bonjour ! 👋',
-                                        style: AppTypography.h1Style.copyWith(
-                                          color: AppColors.deepNavy,
-                                        ),
-                                      ),
-                                      const SizedBox(height: AppSpacing.xs),
-                                      Text(
-                                        'Bienvenue dans votre ferme',
-                                        style: AppTypography.bodyStyle.copyWith(
-                                          color: AppColors.navy70,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Avatar group
-                                Row(
-                                  children: [
-                                    _buildAvatar('👨‍🌾'),
-                                    const SizedBox(width: AppSpacing.xs),
-                                    _buildAvatar('👩‍🌾'),
-                                    const SizedBox(width: AppSpacing.xs),
-                                    _buildAvatar('+'),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ImportExportScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-
-              // Contenu principal
-              SliverPadding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    // Carte de température/statistiques principales
-                    GlassCard(
-                      padding: const EdgeInsets.all(AppSpacing.xl),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 24),
+                Text('All Sections', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.navy)),
+                const SizedBox(height: 14),
+                // Grille de tuiles "room" pour les sections
+                LayoutBuilder(builder: (c, s) {
+                  final cross = s.maxWidth > 960 ? 4 : s.maxWidth > 640 ? 3 : 2;
+                  return GridView.count(
+                    crossAxisCount: cross,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: .78,
+                    children: [
+                      RoomTile(
+                        title: 'Parcelles', 
+                        meta: '$nombreParcelles parcelles • ${surfaceTotale.toStringAsFixed(1)} ha', 
+                        photo: const AssetImage('assets/logo.png')
+                      ),
+                      RoomTile(
+                        title: 'Chargements', 
+                        meta: '$nombreChargements chargements', 
+                        photo: const AssetImage('assets/logo.png')
+                      ),
+                      RoomTile(
+                        title: 'Variétés', 
+                        meta: '$nombreVarietes variétés', 
+                        photo: const AssetImage('assets/logo.png')
+                      ),
+                    ],
+                  );
+                }),
+                const SizedBox(height: 24),
+                Text('Quick Actions', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.navy)),
+                const SizedBox(height: 12),
+                Row(children: [
+                  DeviceChip(icon: Icons.landscape, label: 'Parcelles', active: true),
+                  const SizedBox(width: 12),
+                  DeviceChip(icon: Icons.local_shipping, label: 'Chargements'),
+                  const SizedBox(width: 12),
+                  DeviceChip(icon: Icons.eco, label: 'Semis'),
+                  const SizedBox(width: 12),
+                  DeviceChip(icon: Icons.park, label: 'Variétés'),
+                ]),
+                const SizedBox(height: 24),
+                // Statistiques détaillées
+                Glass(
+                  padding: const EdgeInsets.all(20),
+                  radius: 24,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Farm Overview', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.navy)),
+                      const SizedBox(height: 16),
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.thermostat,
-                                color: AppColors.coral,
-                                size: AppSpacing.iconSize,
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Text(
-                                'Aperçu de la ferme',
-                                style: AppTypography.h3Style,
-                              ),
-                            ],
+                          Expanded(
+                            child: _buildStatItem('Parcelles', nombreParcelles.toString(), Icons.landscape),
                           ),
-                          const SizedBox(height: AppSpacing.lg),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStatItem(
-                                  'Parcelles',
-                                  nombreParcelles.toString(),
-                                  Icons.landscape,
-                                  AppColors.coral,
-                                ),
-                              ),
-                              Expanded(
-                                child: _buildStatItem(
-                                  'Surface',
-                                  '${surfaceTotale.toStringAsFixed(1)} ha',
-                                  Icons.area_chart,
-                                  AppColors.salmon,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStatItem(
-                                  'Chargements',
-                                  nombreChargements.toString(),
-                                  Icons.local_shipping,
-                                  AppColors.success,
-                                ),
-                              ),
-                              Expanded(
-                                child: _buildStatItem(
-                                  'Variétés',
-                                  nombreVarietes.toString(),
-                                  Icons.park,
-                                  AppColors.warning,
-                                ),
-                              ),
-                            ],
+                          Expanded(
+                            child: _buildStatItem('Surface', '${surfaceTotale.toStringAsFixed(1)} ha', Icons.area_chart),
                           ),
                         ],
                       ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.xl),
-
-                    // Section "Toutes les sections"
-                    Text(
-                      'Toutes les sections',
-                      style: AppTypography.h2Style,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Grille de navigation
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
-                      crossAxisSpacing: AppSpacing.lg,
-                      mainAxisSpacing: AppSpacing.lg,
-                      childAspectRatio: 1.2,
-                      children: [
-                        _buildNavigationCard(
-                          context,
-                          'Parcelles',
-                          Icons.landscape,
-                          AppColors.coral,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ParcellesScreen(),
-                            ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatItem('Chargements', nombreChargements.toString(), Icons.local_shipping),
                           ),
-                        ),
-                        _buildNavigationCard(
-                          context,
-                          'Cellules',
-                          Icons.grid_view,
-                          AppColors.salmon,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CellulesScreen(),
-                            ),
+                          Expanded(
+                            child: _buildStatItem('Variétés', nombreVarietes.toString(), Icons.park),
                           ),
-                        ),
-                        _buildNavigationCard(
-                          context,
-                          'Chargements',
-                          Icons.local_shipping,
-                          AppColors.success,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ChargementsScreen(),
-                            ),
-                          ),
-                        ),
-                        _buildNavigationCard(
-                          context,
-                          'Semis',
-                          Icons.eco,
-                          AppColors.warning,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SemisScreen(),
-                            ),
-                          ),
-                        ),
-                        _buildNavigationCard(
-                          context,
-                          'Variétés',
-                          Icons.park,
-                          AppColors.danger,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const VarietesScreen(),
-                            ),
-                          ),
-                        ),
-                        _buildNavigationCard(
-                          context,
-                          'Statistiques',
-                          Icons.analytics,
-                          AppColors.deepNavy,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const StatistiquesScreen(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: AppSpacing.xxxl),
-                  ]),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                // Navigation rapide
+                Text('Quick Navigation', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.navy)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GradientButton(
+                        label: 'Parcelles',
+                        icon: Icons.landscape,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ParcellesScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GradientButton(
+                        label: 'Chargements',
+                        icon: Icons.local_shipping,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ChargementsScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GradientButton(
+                        label: 'Semis',
+                        icon: Icons.eco,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SemisScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GradientButton(
+                        label: 'Variétés',
+                        icon: Icons.park,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const VarietesScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GradientButton(
+                        label: 'Statistiques',
+                        icon: Icons.analytics,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const StatistiquesScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GradientButton(
+                        label: 'Import/Export',
+                        icon: Icons.settings,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ImportExportScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           );
         },
       ),
-      floatingActionButton: GlassFab(
-        icon: Icons.add,
-        onPressed: () {
-          _showAddMenu(context);
-        },
-        tooltip: 'Ajouter',
-      ),
     );
   }
 
-  Widget _buildAvatar(String emoji) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: AppColors.glassLight,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-        border: Border.all(color: AppColors.glassBorder),
-      ),
-      child: Center(
-        child: Text(
-          emoji,
-          style: const TextStyle(fontSize: 16),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+  Widget _buildStatItem(String label, String value, IconData icon) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(icon, color: color, size: AppSpacing.smallIconSize),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              label,
-              style: AppTypography.captionStyle.copyWith(
-                color: AppColors.navy70,
-              ),
-            ),
+            Icon(icon, color: AppColors.coral, size: 16),
+            const SizedBox(width: 6),
+            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.navy, fontWeight: FontWeight.w500)),
           ],
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          value,
-          style: AppTypography.h3Style.copyWith(
-            color: AppColors.deepNavy,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(fontSize: 18, color: AppColors.navy, fontWeight: FontWeight.w700)),
       ],
-    );
-  }
-
-  Widget _buildNavigationCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return GlassCard(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [color, color.withOpacity(0.8)],
-              ),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: AppSpacing.iconSize,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            title,
-            style: AppTypography.h3Style.copyWith(
-              color: AppColors.deepNavy,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 
@@ -407,93 +276,85 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: const BoxDecoration(
           color: AppColors.sand,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(AppSpacing.radiusXl),
-            topRight: Radius.circular(AppSpacing.radiusXl),
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Ajouter un élément',
-                  style: AppTypography.h2Style,
+                  'Add New Item',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.navy),
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
-                      child: GlassButton(
-                        text: 'Parcelle',
+                      child: GradientButton(
+                        label: 'Parcelle',
                         icon: Icons.landscape,
                         onPressed: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => const ParcellesScreen(),
-                            ),
+                            MaterialPageRoute(builder: (context) => const ParcellesScreen()),
                           );
                         },
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.lg),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: GlassButton(
-                        text: 'Chargement',
+                      child: GradientButton(
+                        label: 'Chargement',
                         icon: Icons.local_shipping,
                         onPressed: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => const ChargementsScreen(),
-                            ),
+                            MaterialPageRoute(builder: (context) => const ChargementsScreen()),
                           );
                         },
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
-                      child: GlassButton(
-                        text: 'Semis',
+                      child: GradientButton(
+                        label: 'Semis',
                         icon: Icons.eco,
                         onPressed: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => const SemisScreen(),
-                            ),
+                            MaterialPageRoute(builder: (context) => const SemisScreen()),
                           );
                         },
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.lg),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: GlassButton(
-                        text: 'Variété',
+                      child: GradientButton(
+                        label: 'Variété',
                         icon: Icons.park,
                         onPressed: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => const VarietesScreen(),
-                            ),
+                            MaterialPageRoute(builder: (context) => const VarietesScreen()),
                           );
                         },
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: 20),
               ],
             ),
           ),
