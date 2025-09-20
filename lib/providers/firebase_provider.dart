@@ -6,11 +6,11 @@ import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
-import '../services/firebase_service.dart';
+import '../services/hybrid_database_service.dart';
 import '../utils/poids_utils.dart';
 
 class FirebaseProvider with ChangeNotifier {
-  final FirebaseService _firebaseService = FirebaseService();
+  final HybridDatabaseService _databaseService = HybridDatabaseService();
   
   List<Parcelle> _parcelles = [];
   List<Cellule> _cellules = [];
@@ -48,17 +48,25 @@ class FirebaseProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Connexion anonyme pour simplifier
-      await FirebaseAuth.instance.signInAnonymously();
-      print('Firebase Auth: Anonymous sign-in successful');
+      // Vérifier si l'utilisateur est déjà connecté
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        // Connexion anonyme seulement si pas déjà connecté
+        await FirebaseAuth.instance.signInAnonymously();
+        print('Firebase Auth: Anonymous sign-in successful');
+      } else {
+        print('Firebase Auth: User already signed in: ${currentUser.uid}');
+      }
       
-      await _firebaseService.initialize();
+      await _databaseService.initialize();
       await _setupRealtimeListeners();
       _isInitialized = true;
       print('Firebase Provider initialized successfully');
     } catch (e) {
       _error = 'Erreur d\'initialisation Firebase: $e';
       print('Firebase Provider initialization error: $e');
+      // Continuer même en cas d'erreur d'auth pour permettre l'utilisation hors ligne
+      _isInitialized = true;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -68,7 +76,7 @@ class FirebaseProvider with ChangeNotifier {
   // Configurer les listeners temps réel
   Future<void> _setupRealtimeListeners() async {
     // Parcelles
-    _parcellesSubscription = _firebaseService.getParcellesStream().listen(
+    _parcellesSubscription = _databaseService.getParcellesStream().listen(
       (parcelles) {
         _parcelles = parcelles;
         notifyListeners();
@@ -80,7 +88,7 @@ class FirebaseProvider with ChangeNotifier {
     );
 
     // Cellules
-    _cellulesSubscription = _firebaseService.getCellulesStream().listen(
+    _cellulesSubscription = _databaseService.getCellulesStream().listen(
       (cellules) {
         _cellules = cellules;
         notifyListeners();
@@ -92,7 +100,7 @@ class FirebaseProvider with ChangeNotifier {
     );
 
     // Chargements
-    _chargementsSubscription = _firebaseService.getChargementsStream().listen(
+    _chargementsSubscription = _databaseService.getChargementsStream().listen(
       (chargements) {
         _chargements = chargements;
         notifyListeners();
@@ -104,7 +112,7 @@ class FirebaseProvider with ChangeNotifier {
     );
 
     // Semis
-    _semisSubscription = _firebaseService.getSemisStream().listen(
+    _semisSubscription = _databaseService.getSemisStream().listen(
       (semis) {
         _semis = semis;
         notifyListeners();
@@ -116,7 +124,7 @@ class FirebaseProvider with ChangeNotifier {
     );
 
     // Variétés
-    _varietesSubscription = _firebaseService.getVarietesStream().listen(
+    _varietesSubscription = _databaseService.getVarietesStream().listen(
       (varietes) {
         _varietes = varietes;
         notifyListeners();
@@ -174,7 +182,7 @@ class FirebaseProvider with ChangeNotifier {
   // Méthodes pour les parcelles
   Future<void> ajouterParcelle(Parcelle parcelle) async {
     try {
-      final id = await _firebaseService.insertParcelle(parcelle);
+      final id = await _databaseService.insertParcelle(parcelle);
       parcelle.id = int.tryParse(id) ?? 0;
       print('Parcelle ajoutée avec ID: ${parcelle.id}');
     } catch (e) {
@@ -186,7 +194,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> modifierParcelle(Parcelle parcelle) async {
     try {
-      await _firebaseService.updateParcelle(parcelle);
+      await _databaseService.updateParcelle(parcelle);
     } catch (e) {
       _error = 'Erreur modification parcelle: $e';
       notifyListeners();
@@ -196,7 +204,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> supprimerParcelle(int id) async {
     try {
-      await _firebaseService.deleteParcelle(id.toString());
+      await _databaseService.deleteParcelle(id.toString());
     } catch (e) {
       _error = 'Erreur suppression parcelle: $e';
       notifyListeners();
@@ -207,7 +215,7 @@ class FirebaseProvider with ChangeNotifier {
   // Méthodes pour les cellules
   Future<void> ajouterCellule(Cellule cellule) async {
     try {
-      final id = await _firebaseService.insertCellule(cellule);
+      final id = await _databaseService.insertCellule(cellule);
       cellule.id = int.tryParse(id) ?? 0;
       print('Cellule ajoutée avec ID: ${cellule.id}');
     } catch (e) {
@@ -219,7 +227,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> modifierCellule(Cellule cellule) async {
     try {
-      await _firebaseService.updateCellule(cellule);
+      await _databaseService.updateCellule(cellule);
     } catch (e) {
       _error = 'Erreur modification cellule: $e';
       notifyListeners();
@@ -229,7 +237,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> supprimerCellule(int id) async {
     try {
-      await _firebaseService.deleteCellule(id.toString());
+      await _databaseService.deleteCellule(id.toString());
     } catch (e) {
       _error = 'Erreur suppression cellule: $e';
       notifyListeners();
@@ -263,7 +271,7 @@ class FirebaseProvider with ChangeNotifier {
         chargement.humidite,
       );
 
-      final id = await _firebaseService.insertChargement(chargement);
+      final id = await _databaseService.insertChargement(chargement);
       chargement.id = int.tryParse(id) ?? 0;
       print('Chargement ajouté avec ID: ${chargement.id}');
     } catch (e) {
@@ -299,7 +307,7 @@ class FirebaseProvider with ChangeNotifier {
           chargement.humidite,
         );
 
-        await _firebaseService.updateChargement(chargement);
+        await _databaseService.updateChargement(chargement);
       }
     } catch (e) {
       _error = 'Erreur modification chargement: $e';
@@ -310,7 +318,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> supprimerChargement(int id) async {
     try {
-      await _firebaseService.deleteChargement(id.toString());
+      await _databaseService.deleteChargement(id.toString());
     } catch (e) {
       _error = 'Erreur suppression chargement: $e';
       notifyListeners();
@@ -321,7 +329,7 @@ class FirebaseProvider with ChangeNotifier {
   // Méthodes pour les semis
   Future<void> ajouterSemis(Semis semis) async {
     try {
-      final id = await _firebaseService.insertSemis(semis);
+      final id = await _databaseService.insertSemis(semis);
       semis.id = int.tryParse(id) ?? 0;
       print('Semis ajouté avec ID: ${semis.id}');
     } catch (e) {
@@ -333,7 +341,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> modifierSemis(Semis semis) async {
     try {
-      await _firebaseService.updateSemis(semis);
+      await _databaseService.updateSemis(semis);
     } catch (e) {
       _error = 'Erreur modification semis: $e';
       notifyListeners();
@@ -343,7 +351,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> supprimerSemis(int id) async {
     try {
-      await _firebaseService.deleteSemis(id.toString());
+      await _databaseService.deleteSemis(id.toString());
     } catch (e) {
       _error = 'Erreur suppression semis: $e';
       notifyListeners();
@@ -354,7 +362,7 @@ class FirebaseProvider with ChangeNotifier {
   // Méthodes pour les variétés
   Future<void> ajouterVariete(Variete variete) async {
     try {
-      final id = await _firebaseService.insertVariete(variete);
+      final id = await _databaseService.insertVariete(variete);
       variete.id = int.tryParse(id) ?? 0;
       print('Variété ajoutée avec ID: ${variete.id}');
     } catch (e) {
@@ -366,7 +374,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> modifierVariete(Variete variete) async {
     try {
-      await _firebaseService.updateVariete(variete);
+      await _databaseService.updateVariete(variete);
     } catch (e) {
       _error = 'Erreur modification variété: $e';
       notifyListeners();
@@ -376,7 +384,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> supprimerVariete(int id) async {
     try {
-      await _firebaseService.deleteVariete(id.toString());
+      await _databaseService.deleteVariete(id.toString());
     } catch (e) {
       _error = 'Erreur suppression variété: $e';
       notifyListeners();
@@ -387,7 +395,7 @@ class FirebaseProvider with ChangeNotifier {
   // Méthodes utilitaires
   Future<void> deleteAllData() async {
     try {
-      await _firebaseService.deleteAllData();
+      await _databaseService.deleteAllData();
     } catch (e) {
       _error = 'Erreur suppression données: $e';
       notifyListeners();
@@ -397,7 +405,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> importData(Map<String, dynamic> data) async {
     try {
-      await _firebaseService.importData(data);
+      await _databaseService.importData(data);
     } catch (e) {
       _error = 'Erreur import données: $e';
       notifyListeners();
@@ -407,7 +415,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<Map<String, dynamic>> exportData() async {
     try {
-      return await _firebaseService.exportData();
+      return await _databaseService.exportData();
     } catch (e) {
       _error = 'Erreur export données: $e';
       notifyListeners();
@@ -417,7 +425,7 @@ class FirebaseProvider with ChangeNotifier {
 
   Future<void> updateAllChargementsPoidsNormes() async {
     try {
-      await _firebaseService.updateAllChargementsPoidsNormes();
+      await _databaseService.updateAllChargementsPoidsNormes();
     } catch (e) {
       _error = 'Erreur mise à jour poids normes: $e';
       notifyListeners();

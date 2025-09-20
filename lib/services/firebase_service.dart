@@ -19,22 +19,37 @@ class FirebaseService {
   // Initialiser Firebase
   Future<void> initialize() async {
     try {
-      // Authentification anonyme pour simplifier
-      await _auth.signInAnonymously();
+      // Vérifier si l'utilisateur est déjà connecté
       final user = _auth.currentUser;
       if (user != null) {
         _userRef = _database.ref('users/${user.uid}');
-        print('Firebase initialized for user: ${user.uid}');
+        print('Firebase initialized for existing user: ${user.uid}');
+      } else {
+        // Essayer l'authentification anonyme
+        try {
+          await _auth.signInAnonymously();
+          final newUser = _auth.currentUser;
+          if (newUser != null) {
+            _userRef = _database.ref('users/${newUser.uid}');
+            print('Firebase initialized for new anonymous user: ${newUser.uid}');
+          }
+        } catch (authError) {
+          print('Auth error, continuing without user: $authError');
+          // Continuer sans authentification pour permettre l'utilisation hors ligne
+        }
       }
     } catch (e) {
       print('Error initializing Firebase: $e');
-      rethrow;
+      // Ne pas rethrow pour permettre l'utilisation hors ligne
     }
   }
 
   // Méthodes pour les parcelles
   Stream<List<Parcelle>> getParcellesStream() {
-    if (_userRef == null) throw Exception('Firebase not initialized');
+    if (_userRef == null) {
+      print('Firebase not initialized, returning empty stream');
+      return Stream.value(<Parcelle>[]);
+    }
     return _userRef!.child('parcelles').onValue.map((event) {
       if (event.snapshot.value == null) return <Parcelle>[];
       final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
@@ -47,26 +62,38 @@ class FirebaseService {
   }
 
   Future<String> insertParcelle(Parcelle parcelle) async {
-    if (_userRef == null) throw Exception('Firebase not initialized');
+    if (_userRef == null) {
+      print('Firebase not initialized, generating local ID');
+      return DateTime.now().millisecondsSinceEpoch.toString();
+    }
     final ref = _userRef!.child('parcelles').push();
     await ref.set(parcelle.toMap());
     return ref.key!;
   }
 
   Future<void> updateParcelle(Parcelle parcelle) async {
-    if (_userRef == null) throw Exception('Firebase not initialized');
+    if (_userRef == null) {
+      print('Firebase not initialized, update ignored');
+      return;
+    }
     if (parcelle.id == null) throw Exception('Parcelle ID is required for update');
     await _userRef!.child('parcelles').child(parcelle.id.toString()).set(parcelle.toMap());
   }
 
   Future<void> deleteParcelle(String id) async {
-    if (_userRef == null) throw Exception('Firebase not initialized');
+    if (_userRef == null) {
+      print('Firebase not initialized, delete ignored');
+      return;
+    }
     await _userRef!.child('parcelles').child(id).remove();
   }
 
   // Méthodes pour les cellules
   Stream<List<Cellule>> getCellulesStream() {
-    if (_userRef == null) throw Exception('Firebase not initialized');
+    if (_userRef == null) {
+      print('Firebase not initialized, returning empty stream');
+      return Stream.value(<Cellule>[]);
+    }
     return _userRef!.child('cellules').onValue.map((event) {
       if (event.snapshot.value == null) return <Cellule>[];
       final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
@@ -79,7 +106,10 @@ class FirebaseService {
   }
 
   Future<String> insertCellule(Cellule cellule) async {
-    if (_userRef == null) throw Exception('Firebase not initialized');
+    if (_userRef == null) {
+      print('Firebase not initialized, generating local ID');
+      return DateTime.now().millisecondsSinceEpoch.toString();
+    }
     final ref = _userRef!.child('cellules').push();
     await ref.set(cellule.toMap());
     return ref.key!;
