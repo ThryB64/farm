@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
@@ -12,26 +13,45 @@ class FirebaseService {
   factory FirebaseService() => _instance;
   FirebaseService._internal();
 
-  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  late final FirebaseDatabase _database;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference? _userRef;
 
   // Initialiser Firebase
   Future<void> initialize() async {
     try {
+      // Forcer l'instance avec la bonne URL
+      _database = FirebaseDatabase.instanceFor(
+        app: Firebase.app(),
+        databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
+      );
+      print('Firebase Database instance created with URL: https://farmgaec-default-rtdb.firebaseio.com');
+
+      // Vérifier la connexion
+      _database.ref('.info/connected').onValue.listen((event) {
+        print('Firebase connected: ${event.snapshot.value}');
+      });
+
+      // Vérifier le décalage serveur
+      _database.ref('.info/serverTimeOffset').onValue.listen((event) {
+        print('Server time offset: ${event.snapshot.value}');
+      });
+
       // Vérifier si l'utilisateur est déjà connecté
       final user = _auth.currentUser;
       if (user != null) {
         _userRef = _database.ref('users/${user.uid}');
         print('Firebase initialized for existing user: ${user.uid}');
+        await _testWrite();
       } else {
         // Essayer l'authentification anonyme
         try {
-          await _auth.signInAnonymously();
-          final newUser = _auth.currentUser;
+          final userCred = await _auth.signInAnonymously();
+          final newUser = userCred.user;
           if (newUser != null) {
             _userRef = _database.ref('users/${newUser.uid}');
             print('Firebase initialized for new anonymous user: ${newUser.uid}');
+            await _testWrite();
           }
         } catch (authError) {
           print('Auth error, continuing without user: $authError');
@@ -41,6 +61,19 @@ class FirebaseService {
     } catch (e) {
       print('Error initializing Firebase: $e');
       // Ne pas rethrow pour permettre l'utilisation hors ligne
+    }
+  }
+
+  // Test d'écriture pour vérifier la connexion
+  Future<void> _testWrite() async {
+    try {
+      await _database.ref('ping').set({
+        'at': ServerValue.timestamp,
+        'test': 'Firebase connection test',
+      });
+      print('✅ Firebase write test successful');
+    } catch (e) {
+      print('❌ Firebase write test failed: $e');
     }
   }
 
