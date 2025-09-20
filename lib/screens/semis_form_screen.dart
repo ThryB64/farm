@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider.dart';
+import '../providers/firebase_provider_v3.dart';
 import '../models/semis.dart';
 import '../models/variete_surface.dart';
 
@@ -60,7 +60,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     }
   }
 
-  Widget _buildVarietesSection(FirebaseProvider provider) {
+  Widget _buildVarietesSection(FirebaseProviderV3 provider) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
@@ -203,7 +203,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
         title: Text(widget.semis == null ? 'Nouveau semis' : 'Modifier le semis'),
         backgroundColor: Colors.orange,
       ),
-      body: Consumer<FirebaseProvider>(
+      body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
           // Obtenir l'année en cours
           final anneeEnCours = DateTime.now().year;

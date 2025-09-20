@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider.dart';
+import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
 
 class ParcelleFormScreen extends StatefulWidget {
@@ -121,9 +121,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                       );
 
                       if (widget.parcelle == null) {
-                        await context.read<FirebaseProvider>().ajouterParcelle(parcelle);
+                        await context.read<FirebaseProviderV3>().ajouterParcelle(parcelle);
                       } else {
-                        await context.read<FirebaseProvider>().modifierParcelle(parcelle);
+                        await context.read<FirebaseProviderV3>().modifierParcelle(parcelle);
                       }
 
                       if (mounted) {

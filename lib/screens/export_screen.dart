@@ -3,15 +3,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider.dart';
-import '../models/parcelle.dart';
+import '../providers/firebase_provider_v3.dart';
 import '../models/chargement.dart';
-import '../models/cellule.dart';
-import '../models/semis.dart';
-import '../models/variete_surface.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'dart:io';
 
 class ExportScreen extends StatefulWidget {
   const ExportScreen({Key? key}) : super(key: key);
@@ -22,14 +15,12 @@ class ExportScreen extends StatefulWidget {
 
 class _ExportScreenState extends State<ExportScreen> {
   int? _selectedYear;
-  static const int ROWS_PER_PAGE = 25;
 
   Future<void> _generatePDF() async {
     try {
-      final db = Provider.of<FirebaseProvider>(context, listen: false);
+      final db = Provider.of<FirebaseProviderV3>(context, listen: false);
       final chargements = await db.chargements.toList();
       final parcelles = await db.parcelles.toList();
-      final cellules = await db.cellules.toList();
       final semis = await db.semis.toList();
       final chargementsAnnee = chargements.where((c) => c.dateChargement.year == _selectedYear).toList();
       
@@ -618,7 +609,7 @@ class _ExportScreenState extends State<ExportScreen> {
         title: const Text('Export PDF'),
         backgroundColor: Colors.orange,
       ),
-      body: Consumer<FirebaseProvider>(
+      body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
           final years = provider.chargements
               .map((c) => c.dateChargement.year)

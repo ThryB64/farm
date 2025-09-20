@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../providers/firebase_provider.dart';
+import '../providers/firebase_provider_v3.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/parcelle.dart';
@@ -52,7 +52,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           },
         ),
       ),
-      body: Consumer<FirebaseProvider>(
+      body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
           final chargements = provider.chargements;
           final semis = provider.semis;

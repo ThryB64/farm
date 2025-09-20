@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider.dart';
+import '../providers/firebase_provider_v3.dart';
 import 'variete_form_screen.dart';
 
 class VarietesScreen extends StatelessWidget {
@@ -13,7 +13,7 @@ class VarietesScreen extends StatelessWidget {
         title: const Text('Variétés'),
         backgroundColor: Colors.orange,
       ),
-      body: Consumer<FirebaseProvider>(
+      body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
           final varietes = provider.varietes;
 
@@ -63,7 +63,7 @@ class VarietesScreen extends StatelessWidget {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    provider.supprimerVariete(variete.id!);
+                                    provider.supprimerVariete(variete.id.toString());
                                     Navigator.pop(context);
                                   },
                                   child: const Text('Supprimer'),

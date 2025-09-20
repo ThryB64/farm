@@ -3,11 +3,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 
 // Services & providers
-import 'providers/firebase_provider.dart';
+import 'providers/firebase_provider_v3.dart';
 import 'screens/home_screen.dart';
 
 Future<void> main() async {
@@ -57,16 +56,16 @@ Future<void> main() async {
       debugPrint('[BOOT] First frame rendered');
     });
 
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<FirebaseProvider>(
-            create: (context) => FirebaseProvider(),
+        runApp(
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider<FirebaseProviderV3>(
+                create: (context) => FirebaseProviderV3(),
+              ),
+            ],
+            child: const MyApp(),
           ),
-        ],
-        child: const MyApp(),
-      ),
-    );
+        );
   }, (e, s) {
     debugPrint('Zoned error at boot: $e\n$s');
   });
@@ -147,9 +146,9 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    try {
-      final provider = context.read<FirebaseProvider>();
-      await provider.initialize();
+      try {
+        final provider = context.read<FirebaseProviderV3>();
+        await provider.initialize();
       
       if (mounted) {
         Navigator.of(context).pushReplacement(

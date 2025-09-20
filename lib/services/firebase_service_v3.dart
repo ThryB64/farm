@@ -9,49 +9,52 @@ import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
-import '../utils/poids_utils.dart';
 
-class HybridDatabaseService {
-  static final HybridDatabaseService _instance = HybridDatabaseService._internal();
-  factory HybridDatabaseService() => _instance;
-  HybridDatabaseService._internal();
+class FirebaseServiceV3 {
+  static final FirebaseServiceV3 _instance = FirebaseServiceV3._internal();
+  factory FirebaseServiceV3() => _instance;
+  FirebaseServiceV3._internal();
 
   late final FirebaseDatabase _database;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference? _userRef;
   
   static const String _storageKey = 'mais_tracker_data';
+  bool _isInitialized = false;
 
-  // Initialiser le service hybride
+  // Initialiser le service
   Future<void> initialize() async {
+    if (_isInitialized) return;
+    
     try {
+      print('FirebaseService V3: Initializing...');
+      
       // Forcer l'instance avec la bonne URL
       _database = FirebaseDatabase.instanceFor(
         app: Firebase.app(),
         databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
       );
-      print('Hybrid Database: Firebase instance created with URL: https://farmgaec-default-rtdb.firebaseio.com');
+      print('FirebaseService V3: Firebase instance created with URL: https://farmgaec-default-rtdb.firebaseio.com');
 
       // Persistance : seulement sur les plateformes natives
       if (!kIsWeb) {
         _database.setPersistenceEnabled(true);
         _database.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
-        print('Hybrid Database: Persistence enabled for native platforms');
+        print('FirebaseService V3: Persistence enabled for native platforms');
       } else {
-        print('Hybrid Database: Web platform - persistence handled automatically');
+        print('FirebaseService V3: Web platform - persistence handled automatically');
       }
 
       // Vérifier la connexion
       _database.ref('.info/connected').onValue.listen((event) {
-        print('Hybrid Database connected: ${event.snapshot.value}');
+        print('FirebaseService V3 connected: ${event.snapshot.value}');
       });
 
-      // Authentification et création de userRef
+      // Authentification
       final user = _auth.currentUser;
       if (user != null) {
         _userRef = _database.ref('users/${user.uid}');
-        print('Hybrid Database: Firebase initialized for existing user: ${user.uid}');
-        await _testWrite();
+        print('FirebaseService V3: Firebase initialized for existing user: ${user.uid}');
       } else {
         // Essayer l'auth anonyme
         try {
@@ -59,188 +62,55 @@ class HybridDatabaseService {
           final newUser = userCred.user;
           if (newUser != null) {
             _userRef = _database.ref('users/${newUser.uid}');
-            print('Hybrid Database: Firebase initialized for anonymous user: ${newUser.uid}');
-            await _testWrite();
+            print('FirebaseService V3: Firebase initialized for anonymous user: ${newUser.uid}');
           }
         } catch (authError) {
-          print('Hybrid Database: Auth failed, using localStorage: $authError');
+          print('FirebaseService V3: Auth failed, using localStorage: $authError');
         }
       }
       
-      // Vérifier que _userRef est défini
+      // Test de connexion
       if (_userRef != null) {
-        print('Hybrid Database: User reference created successfully');
-        print('Hybrid Database: User path: ${_userRef!.path}');
+        await _testConnection();
+        print('FirebaseService V3: User reference created successfully');
+        print('FirebaseService V3: User path: ${_userRef!.path}');
       } else {
-        print('Hybrid Database: No user reference - will use localStorage only');
+        print('FirebaseService V3: No user reference - will use localStorage only');
       }
+      
+      _isInitialized = true;
+      print('✅ FirebaseService V3: Initialized successfully');
+      
     } catch (e) {
-      print('Hybrid Database: Firebase init failed, using localStorage: $e');
+      print('❌ FirebaseService V3: Firebase init failed, using localStorage: $e');
+      _isInitialized = true; // Permettre l'utilisation hors ligne
     }
   }
 
-  // Test d'écriture pour vérifier la connexion
-  Future<void> _testWrite() async {
+  // Test de connexion
+  Future<void> _testConnection() async {
     try {
       await _database.ref('ping').set({
         'at': ServerValue.timestamp,
-        'test': 'Hybrid Database connection test',
+        'test': 'FirebaseService V3 connection test',
       });
-      print('✅ Hybrid Database write test successful');
+      print('✅ FirebaseService V3: Connection test successful');
     } catch (e) {
-      print('❌ Hybrid Database write test failed: $e');
+      print('❌ FirebaseService V3: Connection test failed: $e');
     }
   }
 
-  // Synchroniser les données entre Firebase et localStorage
-  Future<void> syncData() async {
-    if (_userRef == null) {
-      print('Hybrid Database: No user reference, trying to reconnect...');
-      // Essayer de reconnecter
-      final user = _auth.currentUser;
-      if (user != null) {
-        _userRef = _database.ref('users/${user.uid}');
-        print('Hybrid Database: Reconnected with user: ${user.uid}');
-      } else {
-        print('Hybrid Database: No user available, skipping sync');
-        return;
-      }
-    }
-
-    try {
-      print('Hybrid Database: Starting data synchronization...');
-      
-      // Synchroniser les parcelles
-      await _syncParcelles();
-      
-      // Synchroniser les cellules
-      await _syncCellules();
-      
-      // Synchroniser les chargements
-      await _syncChargements();
-      
-      // Synchroniser les semis
-      await _syncSemis();
-      
-      // Synchroniser les variétés
-      await _syncVarietes();
-      
-      print('✅ Hybrid Database: Data synchronization completed');
-    } catch (e) {
-      print('❌ Hybrid Database: Sync failed: $e');
-    }
+  // Générer une clé stable déterministe pour une parcelle
+  String generateStableKey(Parcelle parcelle) {
+    final slug = parcelle.nom.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+    final surf = (parcelle.surface * 1000).round();
+    return 'f_${slug}_$surf';
   }
 
-  // Synchroniser les parcelles
-  Future<void> _syncParcelles() async {
-    try {
-      // Charger depuis localStorage
-      final localData = await _loadDataFromStorage();
-      final localParcelles = localData['parcelles'] as List<dynamic>? ?? [];
-      
-      // Sauvegarder dans Firebase
-      for (final parcelleData in localParcelles) {
-        if (parcelleData['firebaseId'] == null) {
-          // Créer une nouvelle entrée Firebase
-          final ref = _userRef!.child('parcelles').push();
-          await ref.set(parcelleData);
-          print('Hybrid Database: Synced parcelle to Firebase: ${ref.key}');
-        }
-      }
-    } catch (e) {
-      print('Hybrid Database: Error syncing parcelles: $e');
-    }
-  }
-
-  // Synchroniser les cellules
-  Future<void> _syncCellules() async {
-    try {
-      final localData = await _loadDataFromStorage();
-      final localCellules = localData['cellules'] as List<dynamic>? ?? [];
-      
-      for (final celluleData in localCellules) {
-        if (celluleData['firebaseId'] == null) {
-          final ref = _userRef!.child('cellules').push();
-          await ref.set(celluleData);
-          print('Hybrid Database: Synced cellule to Firebase: ${ref.key}');
-        }
-      }
-    } catch (e) {
-      print('Hybrid Database: Error syncing cellules: $e');
-    }
-  }
-
-  // Synchroniser les chargements
-  Future<void> _syncChargements() async {
-    try {
-      final localData = await _loadDataFromStorage();
-      final localChargements = localData['chargements'] as List<dynamic>? ?? [];
-      
-      for (final chargementData in localChargements) {
-        if (chargementData['firebaseId'] == null) {
-          final ref = _userRef!.child('chargements').push();
-          await ref.set(chargementData);
-          print('Hybrid Database: Synced chargement to Firebase: ${ref.key}');
-        }
-      }
-    } catch (e) {
-      print('Hybrid Database: Error syncing chargements: $e');
-    }
-  }
-
-  // Synchroniser les semis
-  Future<void> _syncSemis() async {
-    try {
-      final localData = await _loadDataFromStorage();
-      final localSemis = localData['semis'] as List<dynamic>? ?? [];
-      
-      for (final semisData in localSemis) {
-        if (semisData['firebaseId'] == null) {
-          final ref = _userRef!.child('semis').push();
-          await ref.set(semisData);
-          print('Hybrid Database: Synced semis to Firebase: ${ref.key}');
-        }
-      }
-    } catch (e) {
-      print('Hybrid Database: Error syncing semis: $e');
-    }
-  }
-
-  // Synchroniser les variétés
-  Future<void> _syncVarietes() async {
-    try {
-      final localData = await _loadDataFromStorage();
-      final localVarietes = localData['varietes'] as List<dynamic>? ?? [];
-      
-      for (final varieteData in localVarietes) {
-        if (varieteData['firebaseId'] == null) {
-          final ref = _userRef!.child('varietes').push();
-          await ref.set(varieteData);
-          print('Hybrid Database: Synced variete to Firebase: ${ref.key}');
-        }
-      }
-    } catch (e) {
-      print('Hybrid Database: Error syncing varietes: $e');
-    }
-  }
-
-  // Charger les données depuis localStorage
-  Future<Map<String, dynamic>> _loadDataFromStorage() async {
-    try {
-      final stored = html.window.localStorage[_storageKey];
-      if (stored != null) {
-        return jsonDecode(stored);
-      }
-    } catch (e) {
-      print('Hybrid Database: Error loading from localStorage: $e');
-    }
-    return {
-      'parcelles': [],
-      'cellules': [],
-      'chargements': [],
-      'semis': [],
-      'varietes': [],
-    };
+  // Générer une clé stable pour les autres entités
+  String generateStableKeyForEntity(String type, Map<String, dynamic> data) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return '${type}_${timestamp}';
   }
 
   // Méthodes pour les parcelles
@@ -256,25 +126,24 @@ class HybridDatabaseService {
         }).toList();
       });
     } else {
-      // Mode localStorage
       return Stream.value(_getParcellesFromStorage());
     }
   }
 
   Future<String> insertParcelle(Parcelle parcelle) async {
     if (_userRef != null) {
-      // Utiliser une clé stable basée sur le nom et la surface pour éviter les doublons
-      final stableKey = '${parcelle.nom.replaceAll(' ', '_')}_${parcelle.surface.toString().replaceAll('.', '_')}';
-      final ref = _userRef!.child('parcelles').child(stableKey);
+      final key = generateStableKey(parcelle);
+      final ref = _userRef!.child('parcelles').child(key);
       
-      // Utiliser update() au lieu de set() pour éviter les doublons
-      await ref.update({
+      await ref.set({
         ...parcelle.toMap(),
+        'id': key,
+        'createdAt': ServerValue.timestamp,
         'updatedAt': ServerValue.timestamp,
       });
       
-      print('Hybrid Database: Parcelle upserted with stable key: $stableKey');
-      return stableKey;
+      print('FirebaseService V3: Parcelle inserted with stable key: $key');
+      return key;
     } else {
       // Mode localStorage
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -286,34 +155,24 @@ class HybridDatabaseService {
 
   Future<void> updateParcelle(Parcelle parcelle) async {
     if (_userRef != null) {
-      if (parcelle.firebaseId != null) {
-        // Utiliser l'ID Firebase si disponible
-        await _userRef!.child('parcelles').child(parcelle.firebaseId!).update({
-          ...parcelle.toMap(),
-          'updatedAt': ServerValue.timestamp,
-        });
-        print('Hybrid Database: Parcelle updated with Firebase ID: ${parcelle.firebaseId}');
-      } else {
-        // Créer une nouvelle clé stable
-        final stableKey = '${parcelle.nom.replaceAll(' ', '_')}_${parcelle.surface.toString().replaceAll('.', '_')}';
-        await _userRef!.child('parcelles').child(stableKey).update({
-          ...parcelle.toMap(),
-          'updatedAt': ServerValue.timestamp,
-        });
-        print('Hybrid Database: Parcelle updated with stable key: $stableKey');
-      }
+      final key = generateStableKey(parcelle);
+      await _userRef!.child('parcelles').child(key).update({
+        ...parcelle.toMap(),
+        'id': key,
+        'updatedAt': ServerValue.timestamp,
+      });
+      print('FirebaseService V3: Parcelle updated with key: $key');
     } else {
-      // Mode localStorage
       _saveParcelleToStorage(parcelle);
     }
   }
 
-  Future<void> deleteParcelle(String id) async {
+  Future<void> deleteParcelle(String key) async {
     if (_userRef != null) {
-      await _userRef!.child('parcelles').child(id).remove();
+      await _userRef!.child('parcelles').child(key).remove();
+      print('FirebaseService V3: Parcelle deleted: $key');
     } else {
-      // Mode localStorage
-      _deleteParcelleFromStorage(id);
+      _deleteParcelleFromStorage(key);
     }
   }
 
@@ -336,9 +195,15 @@ class HybridDatabaseService {
 
   Future<String> insertCellule(Cellule cellule) async {
     if (_userRef != null) {
-      final ref = _userRef!.child('cellules').push();
-      await ref.set(cellule.toMap());
-      return ref.key!;
+      final key = generateStableKeyForEntity('cellule', cellule.toMap());
+      final ref = _userRef!.child('cellules').child(key);
+      await ref.set({
+        ...cellule.toMap(),
+        'id': key,
+        'createdAt': ServerValue.timestamp,
+        'updatedAt': ServerValue.timestamp,
+      });
+      return key;
     } else {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       cellule.id = int.tryParse(id) ?? 0;
@@ -350,17 +215,20 @@ class HybridDatabaseService {
   Future<void> updateCellule(Cellule cellule) async {
     if (_userRef != null) {
       if (cellule.id == null) throw Exception('Cellule ID is required for update');
-      await _userRef!.child('cellules').child(cellule.id.toString()).set(cellule.toMap());
+      await _userRef!.child('cellules').child(cellule.id.toString()).update({
+        ...cellule.toMap(),
+        'updatedAt': ServerValue.timestamp,
+      });
     } else {
       _saveCelluleToStorage(cellule);
     }
   }
 
-  Future<void> deleteCellule(String id) async {
+  Future<void> deleteCellule(String key) async {
     if (_userRef != null) {
-      await _userRef!.child('cellules').child(id).remove();
+      await _userRef!.child('cellules').child(key).remove();
     } else {
-      _deleteCelluleFromStorage(id);
+      _deleteCelluleFromStorage(key);
     }
   }
 
@@ -383,9 +251,15 @@ class HybridDatabaseService {
 
   Future<String> insertChargement(Chargement chargement) async {
     if (_userRef != null) {
-      final ref = _userRef!.child('chargements').push();
-      await ref.set(chargement.toMap());
-      return ref.key!;
+      final key = generateStableKeyForEntity('chargement', chargement.toMap());
+      final ref = _userRef!.child('chargements').child(key);
+      await ref.set({
+        ...chargement.toMap(),
+        'id': key,
+        'createdAt': ServerValue.timestamp,
+        'updatedAt': ServerValue.timestamp,
+      });
+      return key;
     } else {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       chargement.id = int.tryParse(id) ?? 0;
@@ -397,17 +271,20 @@ class HybridDatabaseService {
   Future<void> updateChargement(Chargement chargement) async {
     if (_userRef != null) {
       if (chargement.id == null) throw Exception('Chargement ID is required for update');
-      await _userRef!.child('chargements').child(chargement.id.toString()).set(chargement.toMap());
+      await _userRef!.child('chargements').child(chargement.id.toString()).update({
+        ...chargement.toMap(),
+        'updatedAt': ServerValue.timestamp,
+      });
     } else {
       _saveChargementToStorage(chargement);
     }
   }
 
-  Future<void> deleteChargement(String id) async {
+  Future<void> deleteChargement(String key) async {
     if (_userRef != null) {
-      await _userRef!.child('chargements').child(id).remove();
+      await _userRef!.child('chargements').child(key).remove();
     } else {
-      _deleteChargementFromStorage(id);
+      _deleteChargementFromStorage(key);
     }
   }
 
@@ -430,9 +307,15 @@ class HybridDatabaseService {
 
   Future<String> insertSemis(Semis semis) async {
     if (_userRef != null) {
-      final ref = _userRef!.child('semis').push();
-      await ref.set(semis.toMap());
-      return ref.key!;
+      final key = generateStableKeyForEntity('semis', semis.toMap());
+      final ref = _userRef!.child('semis').child(key);
+      await ref.set({
+        ...semis.toMap(),
+        'id': key,
+        'createdAt': ServerValue.timestamp,
+        'updatedAt': ServerValue.timestamp,
+      });
+      return key;
     } else {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       semis.id = int.tryParse(id) ?? 0;
@@ -444,17 +327,20 @@ class HybridDatabaseService {
   Future<void> updateSemis(Semis semis) async {
     if (_userRef != null) {
       if (semis.id == null) throw Exception('Semis ID is required for update');
-      await _userRef!.child('semis').child(semis.id.toString()).set(semis.toMap());
+      await _userRef!.child('semis').child(semis.id.toString()).update({
+        ...semis.toMap(),
+        'updatedAt': ServerValue.timestamp,
+      });
     } else {
       _saveSemisToStorage(semis);
     }
   }
 
-  Future<void> deleteSemis(String id) async {
+  Future<void> deleteSemis(String key) async {
     if (_userRef != null) {
-      await _userRef!.child('semis').child(id).remove();
+      await _userRef!.child('semis').child(key).remove();
     } else {
-      _deleteSemisFromStorage(id);
+      _deleteSemisFromStorage(key);
     }
   }
 
@@ -477,9 +363,15 @@ class HybridDatabaseService {
 
   Future<String> insertVariete(Variete variete) async {
     if (_userRef != null) {
-      final ref = _userRef!.child('varietes').push();
-      await ref.set(variete.toMap());
-      return ref.key!;
+      final key = generateStableKeyForEntity('variete', variete.toMap());
+      final ref = _userRef!.child('varietes').child(key);
+      await ref.set({
+        ...variete.toMap(),
+        'id': key,
+        'createdAt': ServerValue.timestamp,
+        'updatedAt': ServerValue.timestamp,
+      });
+      return key;
     } else {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
       variete.id = int.tryParse(id) ?? 0;
@@ -491,17 +383,20 @@ class HybridDatabaseService {
   Future<void> updateVariete(Variete variete) async {
     if (_userRef != null) {
       if (variete.id == null) throw Exception('Variete ID is required for update');
-      await _userRef!.child('varietes').child(variete.id.toString()).set(variete.toMap());
+      await _userRef!.child('varietes').child(variete.id.toString()).update({
+        ...variete.toMap(),
+        'updatedAt': ServerValue.timestamp,
+      });
     } else {
       _saveVarieteToStorage(variete);
     }
   }
 
-  Future<void> deleteVariete(String id) async {
+  Future<void> deleteVariete(String key) async {
     if (_userRef != null) {
-      await _userRef!.child('varietes').child(id).remove();
+      await _userRef!.child('varietes').child(key).remove();
     } else {
-      _deleteVarieteFromStorage(id);
+      _deleteVarieteFromStorage(key);
     }
   }
 
@@ -530,12 +425,6 @@ class HybridDatabaseService {
       final stored = html.window.localStorage[_storageKey];
       return stored != null ? jsonDecode(stored) : {};
     }
-  }
-
-  Future<void> updateAllChargementsPoidsNormes() async {
-    // Cette méthode n'est pas nécessaire pour le service hybride
-    // car les calculs sont faits automatiquement lors de l'ajout/modification
-    print('updateAllChargementsPoidsNormes: Not needed for hybrid service');
   }
 
   // Méthodes localStorage
@@ -638,7 +527,6 @@ class HybridDatabaseService {
     }
   }
 
-  // Méthodes pour chargements, semis, variétés (similaires)
   List<Chargement> _getChargementsFromStorage() {
     try {
       final stored = html.window.localStorage[_storageKey];

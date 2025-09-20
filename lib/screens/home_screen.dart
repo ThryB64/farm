@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider.dart';
+import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      final provider = Provider.of<FirebaseProvider>(context, listen: false);
+      final provider = Provider.of<FirebaseProviderV3>(context, listen: false);
       final stats = await provider.getStats();
       
       if (mounted) {
