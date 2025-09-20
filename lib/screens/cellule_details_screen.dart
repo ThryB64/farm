@@ -244,7 +244,9 @@ class CelluleDetailsScreen extends StatelessWidget {
                       orElse: () => Parcelle(
                         id: 0,
                         nom: 'Inconnue',
+                        code: 'UNKNOWN',
                         surface: 0,
+                        annee: DateTime.now().year,
                         dateCreation: DateTime.now(),
                       ),
                     );

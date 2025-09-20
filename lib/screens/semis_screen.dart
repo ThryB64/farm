@@ -88,7 +88,9 @@ class _SemisScreenState extends State<SemisScreen> {
                             orElse: () => Parcelle(
                               id: 0,
                               nom: 'Inconnu',
+                              code: 'UNKNOWN',
                               surface: 0,
+                              annee: DateTime.now().year,
                               dateCreation: DateTime.now(),
                             ),
                           );

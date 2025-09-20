@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 // Services & providers
 import 'providers/firebase_provider_v3.dart';
 import 'screens/home_screen.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   // Si un widget crashe, on affiche une carte rouge au lieu d'un écran blanc
@@ -78,10 +79,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Maïs Tracker',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.light,
+      debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
     );
   }

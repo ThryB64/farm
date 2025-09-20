@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
+import '../theme/app_spacing.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/glass_button.dart';
 import 'parcelles_screen.dart';
 import 'cellules_screen.dart';
 import 'chargements_screen.dart';
@@ -8,7 +13,6 @@ import 'semis_screen.dart';
 import 'varietes_screen.dart';
 import 'import_export_screen.dart';
 import 'statistiques_screen.dart';
-import 'export_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -18,414 +22,478 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   @override
   void initState() {
     super.initState();
-    _loadStats();
-  }
-
-  Future<void> _loadStats() async {
-    // Les statistiques sont maintenant calculées en temps réel dans le Consumer
-    // Plus besoin de charger les stats séparément
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('GAEC de la BARADE'),
-        backgroundColor: Colors.green,
-        elevation: 0,
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.green.shade700,
-                Colors.green.shade500,
-              ],
-            ),
-          ),
-        ),
-      ),
+      backgroundColor: AppColors.sand,
       body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
           final parcelles = provider.parcelles;
           final chargements = provider.chargements;
-          // final semis = provider.semis;
+          final cellules = provider.cellules;
+          final semis = provider.semis;
+          final varietes = provider.varietes;
 
           // Calculer les statistiques globales
-          final surfaceTotale = parcelles.fold<double>(
-            0,
-            (sum, p) => sum + p.surface,
-          );
+          final surfaceTotale = parcelles.fold<double>(0, (sum, p) => sum + p.surface);
+          final nombreParcelles = parcelles.length;
+          final nombreChargements = chargements.length;
+          // final nombreCellules = cellules.length;
+          // final nombreSemis = semis.length;
+          final nombreVarietes = varietes.length;
 
-          // Obtenir l'année la plus récente avec des chargements
-          final derniereAnnee = chargements.isEmpty 
-              ? DateTime.now().year 
-              : chargements
-                  .map((c) => c.dateChargement.year)
-                  .reduce((a, b) => a > b ? a : b);
-
-          final chargementsDerniereAnnee = chargements.where(
-            (c) => c.dateChargement.year == derniereAnnee
-          ).toList();
-
-          // Calculer le poids total normé de l'année
-          final poidsTotalNormeAnnee = chargementsDerniereAnnee.fold<double>(
-            0,
-            (sum, c) => sum + c.poidsNormes,
-          );
-
-          // Calculer le rendement moyen normé (en T/ha)
-          final rendementMoyenNorme = surfaceTotale > 0
-              ? (poidsTotalNormeAnnee / 1000) / surfaceTotale
-              : 0.0;
-
-          // Calculer le nombre de variétés utilisées
-          // final varietesUtilisees = semis.expand((s) => s.varietes).toSet().length;
-
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.green.shade50,
-                  Colors.white,
+          return CustomScrollView(
+            slivers: [
+              // App Bar personnalisé
+              SliverAppBar(
+                expandedHeight: 200,
+                floating: false,
+                pinned: true,
+                backgroundColor: AppColors.sand,
+                foregroundColor: AppColors.deepNavy,
+                elevation: 0,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.sand, AppColors.sand],
+                      ),
+                    ),
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Bonjour ! 👋',
+                                        style: AppTypography.h1Style.copyWith(
+                                          color: AppColors.deepNavy,
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Text(
+                                        'Bienvenue dans votre ferme',
+                                        style: AppTypography.bodyStyle.copyWith(
+                                          color: AppColors.navy70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Avatar group
+                                Row(
+                                  children: [
+                                    _buildAvatar('👨‍🌾'),
+                                    const SizedBox(width: AppSpacing.xs),
+                                    _buildAvatar('👩‍🌾'),
+                                    const SizedBox(width: AppSpacing.xs),
+                                    _buildAvatar('+'),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ImportExportScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Carte de statistiques rapides
-                  Container(
-                    margin: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 2,
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+
+              // Contenu principal
+              SliverPadding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // Carte de température/statistiques principales
+                    GlassCard(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.analytics,
-                                  color: Colors.green,
-                                  size: 24,
+                              Icon(
+                                Icons.thermostat,
+                                color: AppColors.coral,
+                                size: AppSpacing.iconSize,
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                'Aperçu de la ferme',
+                                style: AppTypography.h3Style,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildStatItem(
+                                  'Parcelles',
+                                  nombreParcelles.toString(),
+                                  Icons.landscape,
+                                  AppColors.coral,
                                 ),
                               ),
-                              SizedBox(width: 12),
-                              const Text(
-                                'Aperçu',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                              Expanded(
+                                child: _buildStatItem(
+                                  'Surface',
+                                  '${surfaceTotale.toStringAsFixed(1)} ha',
+                                  Icons.area_chart,
+                                  AppColors.salmon,
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 16),
-                          Center(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    _buildStatCard(
-                                      'Surface totale',
-                                      '${surfaceTotale.toStringAsFixed(2)} ha',
-                                      Icons.landscape,
-                                      Colors.green,
-                                    ),
-                                    SizedBox(width: 12),
-                                    _buildStatCard(
-                                      'Rendement $derniereAnnee',
-                                      '${rendementMoyenNorme.toStringAsFixed(3)} T/ha',
-                                      Icons.trending_up,
-                                      Colors.blue,
-                                    ),
-                                    SizedBox(width: 12),
-                                    _buildStatCard(
-                                      'Poids total $derniereAnnee',
-                                      '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(2)} T',
-                                      Icons.scale,
-                                      Colors.orange,
-                                    ),
-                                  ],
+                          const SizedBox(height: AppSpacing.md),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildStatItem(
+                                  'Chargements',
+                                  nombreChargements.toString(),
+                                  Icons.local_shipping,
+                                  AppColors.success,
                                 ),
                               ),
-                            ),
+                              Expanded(
+                                child: _buildStatItem(
+                                  'Variétés',
+                                  nombreVarietes.toString(),
+                                  Icons.park,
+                                  AppColors.warning,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  // Menu principal
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Section "Toutes les sections"
+                    Text(
+                      'Toutes les sections',
+                      style: AppTypography.h2Style,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Grille de navigation
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: AppSpacing.lg,
+                      mainAxisSpacing: AppSpacing.lg,
+                      childAspectRatio: 1.2,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.menu,
-                                color: Colors.green,
-                                size: 24,
-                              ),
+                        _buildNavigationCard(
+                          context,
+                          'Parcelles',
+                          Icons.landscape,
+                          AppColors.coral,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ParcellesScreen(),
                             ),
-                            SizedBox(width: 12),
-                            const Text(
-                              'Menu principal',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        SizedBox(height: 16),
-                        GridView.count(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          childAspectRatio: 1.5,
-                          children: [
-                            _buildMenuCard(
-                              'Parcelles',
-                              Icons.landscape,
-                              Colors.green,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ParcellesScreen(),
-                                ),
-                              ),
+                        _buildNavigationCard(
+                          context,
+                          'Cellules',
+                          Icons.grid_view,
+                          AppColors.salmon,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CellulesScreen(),
                             ),
-                            _buildMenuCard(
-                              'Cellules',
-                              Icons.grid_view,
-                              Colors.orange,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const CellulesScreen(),
-                                ),
-                              ),
+                          ),
+                        ),
+                        _buildNavigationCard(
+                          context,
+                          'Chargements',
+                          Icons.local_shipping,
+                          AppColors.success,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ChargementsScreen(),
                             ),
-                            _buildMenuCard(
-                              'Chargements',
-                              Icons.local_shipping,
-                              Colors.blue,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ChargementsScreen(),
-                                ),
-                              ),
+                          ),
+                        ),
+                        _buildNavigationCard(
+                          context,
+                          'Semis',
+                          Icons.eco,
+                          AppColors.warning,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SemisScreen(),
                             ),
-                            _buildMenuCard(
-                              'Semis',
-                              Icons.grass,
-                              Colors.brown,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SemisScreen(),
-                                ),
-                              ),
+                          ),
+                        ),
+                        _buildNavigationCard(
+                          context,
+                          'Variétés',
+                          Icons.park,
+                          AppColors.danger,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const VarietesScreen(),
                             ),
-                            _buildMenuCard(
-                              'Variétés',
-                              Icons.eco,
-                              Colors.lightGreen,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const VarietesScreen(),
-                                ),
-                              ),
+                          ),
+                        ),
+                        _buildNavigationCard(
+                          context,
+                          'Statistiques',
+                          Icons.analytics,
+                          AppColors.deepNavy,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const StatistiquesScreen(),
                             ),
-                            _buildMenuCard(
-                              'Statistiques',
-                              Icons.bar_chart,
-                              Colors.purple,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const StatistiquesScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Import/Export',
-                              Icons.import_export,
-                              Colors.teal,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ImportExportScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Export PDF',
-                              Icons.picture_as_pdf,
-                              Colors.red,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ExportScreen(),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: AppSpacing.xxxl),
+                  ]),
+                ),
               ),
-            ),
+            ],
           );
         },
       ),
+      floatingActionButton: GlassFab(
+        icon: Icons.add,
+        onPressed: () {
+          _showAddMenu(context);
+        },
+        tooltip: 'Ajouter',
+      ),
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildAvatar(String emoji) {
     return Container(
-      width: 160,
-      padding: const EdgeInsets.all(12),
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
+        color: AppColors.glassLight,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+        border: Border.all(color: AppColors.glassBorder),
+      ),
+      child: Center(
+        child: Text(
+          emoji,
+          style: const TextStyle(fontSize: 16),
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildMenuCard(
+  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: color, size: AppSpacing.smallIconSize),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              label,
+              style: AppTypography.captionStyle.copyWith(
+                color: AppColors.navy70,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          value,
+          style: AppTypography.h3Style.copyWith(
+            color: AppColors.deepNavy,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavigationCard(
+    BuildContext context,
     String title,
     IconData icon,
     Color color,
     VoidCallback onTap,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return GlassCard(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [color, color.withOpacity(0.8)],
+              ),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: AppSpacing.iconSize,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            title,
+            style: AppTypography.h3Style.copyWith(
+              color: AppColors.deepNavy,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.all(12),
+    );
+  }
+
+  void _showAddMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.sand,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(AppSpacing.radiusXl),
+            topRight: Radius.circular(AppSpacing.radiusXl),
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 28,
-                    color: color,
-                  ),
-                ),
-                SizedBox(height: 8),
                 Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                  textAlign: TextAlign.center,
+                  'Ajouter un élément',
+                  style: AppTypography.h2Style,
                 ),
+                const SizedBox(height: AppSpacing.xl),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GlassButton(
+                        text: 'Parcelle',
+                        icon: Icons.landscape,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ParcellesScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: GlassButton(
+                        text: 'Chargement',
+                        icon: Icons.local_shipping,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ChargementsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GlassButton(
+                        text: 'Semis',
+                        icon: Icons.eco,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SemisScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: GlassButton(
+                        text: 'Variété',
+                        icon: Icons.park,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const VarietesScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xl),
               ],
             ),
           ),
@@ -433,4 +501,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-} 
+}

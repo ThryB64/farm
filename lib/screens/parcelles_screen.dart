@@ -2,346 +2,505 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../models/parcelle.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
+import '../theme/app_spacing.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/glass_button.dart';
+import '../widgets/glass_chip.dart';
+import 'parcelle_form_screen.dart';
 import 'parcelle_details_screen.dart';
 
-class ParcellesScreen extends StatelessWidget {
+class ParcellesScreen extends StatefulWidget {
   const ParcellesScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ParcellesScreen> createState() => _ParcellesScreenState();
+}
+
+class _ParcellesScreenState extends State<ParcellesScreen> {
+  String _searchQuery = '';
+  String _selectedFilter = 'Toutes';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Parcelles'),
-        backgroundColor: Colors.green,
-        elevation: 0,
-        centerTitle: true,
-      ),
+      backgroundColor: AppColors.sand,
       body: Consumer<FirebaseProviderV3>(
-        builder: (context, db, child) {
-          final parcellesTriees = List<Parcelle>.from(db.parcelles)
-            ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
+        builder: (context, provider, child) {
+          final parcelles = provider.parcelles;
+          final filteredParcelles = _filterParcelles(parcelles);
 
-          if (parcellesTriees.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.landscape,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Aucune parcelle enregistrée',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
+          return CustomScrollView(
+            slivers: [
+              // App Bar personnalisé
+              SliverAppBar(
+                expandedHeight: 120,
+                floating: false,
+                pinned: true,
+                backgroundColor: AppColors.sand,
+                foregroundColor: AppColors.deepNavy,
+                elevation: 0,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.sand, AppColors.sand],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: parcellesTriees.length,
-            itemBuilder: (context, index) {
-              final parcelle = parcellesTriees[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: InkWell(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
-                    ),
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Expanded(
-                              child: Text(
-                                parcelle.nom,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
                             Row(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton(
-                                  icon: Icon(Icons.edit),
-                                  color: Colors.blue,
-                                  onPressed: () => _modifierParcelle(context, parcelle),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Parcelles',
+                                        style: AppTypography.h1Style.copyWith(
+                                          color: AppColors.deepNavy,
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Text(
+                                        '${parcelles.length} parcelles • ${_calculateTotalSurface(parcelles).toStringAsFixed(1)} ha',
+                                        style: AppTypography.bodyStyle.copyWith(
+                                          color: AppColors.navy70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                IconButton(
-                                  icon: Icon(Icons.delete),
-                                  color: Colors.red,
-                                  onPressed: () => _confirmerSuppression(context, parcelle),
+                                GlassButton(
+                                  text: 'Ajouter',
+                                  icon: Icons.add,
+                                  isPrimary: true,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const ParcelleFormScreen(),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
                           ],
                         ),
-                        SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.area_chart,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              '${parcelle.surface} ha',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Icon(
-                              Icons.calendar_today,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Créée le ${_formatDate(parcelle.dateCreation)}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+
+              // Barre de recherche et filtres
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      // Barre de recherche
+                      GlassCard(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                        child: TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Rechercher une parcelle...',
+                            hintStyle: AppTypography.bodyStyle.copyWith(
+                              color: AppColors.navy50,
+                            ),
+                            border: InputBorder.none,
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: AppColors.navy50,
+                              size: AppSpacing.iconSize,
+                            ),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(
+                                      Icons.clear,
+                                      color: AppColors.navy50,
+                                      size: AppSpacing.iconSize,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _searchQuery = '';
+                                      });
+                                    },
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: AppSpacing.lg),
+
+                      // Filtres
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip('Toutes', _selectedFilter == 'Toutes'),
+                            const SizedBox(width: AppSpacing.sm),
+                            _buildFilterChip('Petites (< 2 ha)', _selectedFilter == 'Petites'),
+                            const SizedBox(width: AppSpacing.sm),
+                            _buildFilterChip('Moyennes (2-5 ha)', _selectedFilter == 'Moyennes'),
+                            const SizedBox(width: AppSpacing.sm),
+                            _buildFilterChip('Grandes (> 5 ha)', _selectedFilter == 'Grandes'),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Liste des parcelles
+              if (filteredParcelles.isEmpty)
+                SliverFillRemaining(
+                  child: _buildEmptyState(),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final parcelle = filteredParcelles[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                          child: _buildParcelleCard(context, parcelle, provider),
+                        );
+                      },
+                      childCount: filteredParcelles.length,
+                    ),
+                  ),
+                ),
+
+              // Espacement en bas
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.xxxl),
+              ),
+            ],
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _ajouterParcelle(context),
-        backgroundColor: Colors.green,
-        child: Icon(Icons.add),
-      ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+  Widget _buildFilterChip(String label, bool isSelected) {
+    return GlassChip(
+      label: label,
+      isSelected: isSelected,
+      onTap: () {
+        setState(() {
+          _selectedFilter = label;
+        });
+      },
+    );
   }
 
-  Future<void> _ajouterParcelle(BuildContext context) async {
-    final formKey = GlobalKey<FormState>();
-    String nom = '';
-    double surface = 0;
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Nouvelle Parcelle'),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+  Widget _buildParcelleCard(BuildContext context, Parcelle parcelle, FirebaseProviderV3 provider) {
+    return GlassCard(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // En-tête de la carte
+          Row(
             children: [
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Nom',
-                  border: OutlineInputBorder(),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      parcelle.nom,
+                      style: AppTypography.h3Style.copyWith(
+                        color: AppColors.deepNavy,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Code: ${parcelle.code} • Année: ${parcelle.annee}',
+                      style: AppTypography.captionStyle.copyWith(
+                        color: AppColors.navy70,
+                      ),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nom';
-                  }
-                  return null;
-                },
-                onSaved: (value) => nom = value!,
               ),
-              SizedBox(height: 16),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Surface (ha)',
-                  border: OutlineInputBorder(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
                 ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer une surface';
-                  }
-                  final number = double.tryParse(value);
-                  if (number == null || number <= 0) {
-                    return 'Veuillez entrer un nombre valide';
-                  }
-                  return null;
-                },
-                onSaved: (value) => surface = double.parse(value!),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  '${parcelle.surface.toStringAsFixed(1)} ha',
+                  style: AppTypography.captionStyle.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                formKey.currentState!.save();
-                final parcelle = Parcelle(
-                  nom: nom,
-                  surface: surface,
-                );
-                context.read<FirebaseProviderV3>().ajouterParcelle(parcelle);
-                Navigator.pop(context);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Ajouter'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Future<void> _modifierParcelle(BuildContext context, Parcelle parcelle) async {
-    final formKey = GlobalKey<FormState>();
-    String nom = parcelle.nom;
-    double surface = parcelle.surface;
+          const SizedBox(height: AppSpacing.lg),
 
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Modifier la Parcelle'),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          // Informations détaillées
+          Row(
             children: [
-              TextFormField(
-                initialValue: parcelle.nom,
-                decoration: const InputDecoration(
-                  labelText: 'Nom',
-                  border: OutlineInputBorder(),
+              Expanded(
+                child: _buildInfoItem(
+                  Icons.landscape,
+                  'Surface',
+                  '${parcelle.surface.toStringAsFixed(1)} ha',
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nom';
-                  }
-                  return null;
-                },
-                onSaved: (value) => nom = value!,
               ),
-              SizedBox(height: 16),
-              TextFormField(
-                initialValue: parcelle.surface.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Surface (ha)',
-                  border: OutlineInputBorder(),
+              Expanded(
+                child: _buildInfoItem(
+                  Icons.calendar_today,
+                  'Année',
+                  parcelle.annee.toString(),
                 ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer une surface';
-                  }
-                  final number = double.tryParse(value);
-                  if (number == null || number <= 0) {
-                    return 'Veuillez entrer un nombre valide';
-                  }
-                  return null;
-                },
-                onSaved: (value) => surface = double.parse(value!),
+              ),
+              Expanded(
+                child: _buildInfoItem(
+                  Icons.tag,
+                  'Code',
+                  parcelle.code,
+                ),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                formKey.currentState!.save();
-                final parcelleModifiee = Parcelle(
-                  id: parcelle.id,
-                  nom: nom,
-                  surface: surface,
-                  dateCreation: parcelle.dateCreation,
-                );
-                context.read<FirebaseProviderV3>().modifierParcelle(parcelleModifiee);
-                Navigator.pop(context);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Modifier'),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // Actions
+          Row(
+            children: [
+              Expanded(
+                child: GlassButton(
+                  text: 'Modifier',
+                  icon: Icons.edit,
+                  isSecondary: true,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ParcelleFormScreen(parcelle: parcelle),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: GlassButton(
+                  text: 'Supprimer',
+                  icon: Icons.delete,
+                  isTertiary: true,
+                  onPressed: () {
+                    _showDeleteDialog(context, parcelle, provider);
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Future<void> _confirmerSuppression(BuildContext context, Parcelle parcelle) async {
-    final confirmed = await showDialog<bool>(
+  Widget _buildInfoItem(IconData icon, String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: AppSpacing.smallIconSize,
+              color: AppColors.navy70,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              label,
+              style: AppTypography.captionStyle.copyWith(
+                color: AppColors.navy70,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          value,
+          style: AppTypography.bodyStyle.copyWith(
+            color: AppColors.deepNavy,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: AppColors.glassLight,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+            ),
+            child: Icon(
+              Icons.landscape,
+              size: 60,
+              color: AppColors.navy50,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            'Aucune parcelle trouvée',
+            style: AppTypography.h2Style.copyWith(
+              color: AppColors.deepNavy,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            _searchQuery.isNotEmpty
+                ? 'Aucune parcelle ne correspond à votre recherche'
+                : 'Commencez par ajouter votre première parcelle',
+            style: AppTypography.bodyStyle.copyWith(
+              color: AppColors.navy70,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          GlassButton(
+            text: 'Ajouter une parcelle',
+            icon: Icons.add,
+            isPrimary: true,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ParcelleFormScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Parcelle> _filterParcelles(List<Parcelle> parcelles) {
+    var filtered = parcelles.where((parcelle) {
+      // Filtre par recherche
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        if (!parcelle.nom.toLowerCase().contains(query) &&
+            !parcelle.code.toLowerCase().contains(query)) {
+          return false;
+        }
+      }
+
+      // Filtre par taille
+      switch (_selectedFilter) {
+        case 'Petites':
+          return parcelle.surface < 2.0;
+        case 'Moyennes':
+          return parcelle.surface >= 2.0 && parcelle.surface <= 5.0;
+        case 'Grandes':
+          return parcelle.surface > 5.0;
+        default:
+          return true;
+      }
+    }).toList();
+
+    // Trier par nom
+    filtered.sort((a, b) => a.nom.compareTo(b.nom));
+    return filtered;
+  }
+
+  double _calculateTotalSurface(List<Parcelle> parcelles) {
+    return parcelles.fold<double>(0, (sum, parcelle) => sum + parcelle.surface);
+  }
+
+  void _showDeleteDialog(BuildContext context, Parcelle parcelle, FirebaseProviderV3 provider) {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmer la suppression'),
+        backgroundColor: AppColors.sand,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
-        content: Text('Voulez-vous vraiment supprimer la parcelle "${parcelle.nom}" ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+        title: Text(
+          'Supprimer la parcelle',
+          style: AppTypography.h3Style.copyWith(
+            color: AppColors.deepNavy,
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Supprimer'),
+        ),
+        content: Text(
+          'Êtes-vous sûr de vouloir supprimer la parcelle "${parcelle.nom}" ?\n\nCette action est irréversible.',
+          style: AppTypography.bodyStyle.copyWith(
+            color: AppColors.navy70,
+          ),
+        ),
+        actions: [
+          GlassButton(
+            text: 'Annuler',
+            isTertiary: true,
+            onPressed: () => Navigator.pop(context),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          GlassButton(
+            text: 'Supprimer',
+            isPrimary: true,
+            onPressed: () {
+              provider.supprimerParcelle(parcelle.id.toString());
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Parcelle "${parcelle.nom}" supprimée'),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+            },
           ),
         ],
       ),
     );
-
-    if (confirmed == true && parcelle.id != null) {
-      context.read<FirebaseProviderV3>().supprimerParcelle(parcelle.id.toString());
-    }
   }
-} 
+}
