@@ -3,7 +3,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+
+// Services & providers
 import 'providers/firebase_provider.dart';
 import 'screens/home_screen.dart';
 
@@ -43,6 +46,7 @@ Future<void> main() async {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+      await FirebaseAuth.instance.signInAnonymously();
       debugPrint('[BOOT] Firebase initialized successfully');
     } catch (e, s) {
       debugPrint('[BOOT] Firebase init error: $e\n$s');
@@ -53,7 +57,16 @@ Future<void> main() async {
       debugPrint('[BOOT] First frame rendered');
     });
 
-    runApp(const MyApp());
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<FirebaseProvider>(
+            create: (context) => FirebaseProvider(),
+          ),
+        ],
+        child: const MyApp(),
+      ),
+    );
   }, (e, s) {
     debugPrint('Zoned error at boot: $e\n$s');
   });
@@ -64,20 +77,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<FirebaseProvider>(
-          create: (context) => FirebaseProvider(),
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Maïs Tracker',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-          useMaterial3: true,
-        ),
-        home: const SplashScreen(),
+    return MaterialApp(
+      title: 'Maïs Tracker',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        useMaterial3: true,
       ),
+      home: const SplashScreen(),
     );
   }
 }
@@ -142,7 +148,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     try {
-      final provider = Provider.of<FirebaseProvider>(context, listen: false);
+      final provider = context.read<FirebaseProvider>();
       await provider.initialize();
       
       if (mounted) {

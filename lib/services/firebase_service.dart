@@ -236,6 +236,72 @@ class FirebaseService {
   }
 
   // Méthodes utilitaires
+  Future<List<Parcelle>> getParcelles() async {
+    if (_userRef == null) throw Exception('Firebase not initialized');
+    final snapshot = await _userRef!.child('parcelles').get();
+    if (snapshot.value == null) return <Parcelle>[];
+    final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(snapshot.value as Map);
+    return data.entries.map((entry) {
+      final Map<String, dynamic> parcelleData = Map<String, dynamic>.from(entry.value as Map);
+      parcelleData['id'] = entry.key;
+      return Parcelle.fromMap(parcelleData);
+    }).toList();
+  }
+
+  Future<List<Chargement>> getChargements() async {
+    if (_userRef == null) throw Exception('Firebase not initialized');
+    final snapshot = await _userRef!.child('chargements').get();
+    if (snapshot.value == null) return <Chargement>[];
+    final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(snapshot.value as Map);
+    return data.entries.map((entry) {
+      final Map<String, dynamic> chargementData = Map<String, dynamic>.from(entry.value as Map);
+      chargementData['id'] = entry.key;
+      return Chargement.fromMap(chargementData);
+    }).toList();
+  }
+
+  Future<Map<String, dynamic>> getStats() async {
+    if (_userRef == null) throw Exception('Firebase not initialized');
+    
+    final parcelles = await getParcelles();
+    final chargements = await getChargements();
+    
+    // Calculer la surface totale
+    final surfaceTotale = parcelles.fold<double>(
+      0,
+      (sum, p) => sum + p.surface,
+    );
+
+    // Obtenir l'année la plus récente avec des chargements
+    final derniereAnnee = chargements.isEmpty
+        ? DateTime.now().year
+        : chargements
+            .map((c) => c.dateChargement.year)
+            .reduce((a, b) => a > b ? a : b);
+
+    final chargementsDerniereAnnee = chargements.where(
+      (c) => c.dateChargement.year == derniereAnnee
+    ).toList();
+
+    // Calculer le poids total normé de l'année
+    final poidsTotalNormeAnnee = chargementsDerniereAnnee.fold<double>(
+      0,
+      (sum, c) => sum + c.poidsNormes,
+    );
+
+    // Calculer le rendement moyen normé (en T/ha)
+    final rendementMoyenNorme = surfaceTotale > 0
+        ? (poidsTotalNormeAnnee / 1000) / surfaceTotale
+        : 0.0;
+
+    return {
+      'surfaceTotale': surfaceTotale,
+      'derniereAnnee': derniereAnnee,
+      'poidsTotalNormeAnnee': poidsTotalNormeAnnee,
+      'rendementMoyenNorme': rendementMoyenNorme,
+    };
+  }
+
   Future<void> deleteAllData() async {
     if (_userRef == null) throw Exception('Firebase not initialized');
     await _userRef!.remove();
