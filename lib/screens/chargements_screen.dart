@@ -87,7 +87,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        '${chargementsParAnnee[_selectedYear].length ?? 0} chargements',
+                        '${chargementsParAnnee[_selectedYear]?.length ?? 0} chargements',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

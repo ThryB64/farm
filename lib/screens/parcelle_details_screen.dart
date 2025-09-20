@@ -31,7 +31,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
           ),
         ),
         Text('Date: ${_formatDate(s.date)}'),
-        if (s.notes.isNotEmpty ?? false)
+        if (s.notes?.isNotEmpty ?? false)
           Text('Notes: ${s.notes}'),
       ],
     );
@@ -136,7 +136,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 8),
-                          if (chargementsParAnnee[_selectedYear].isNotEmpty ?? false) ...[
+                          if (chargementsParAnnee[_selectedYear]?.isNotEmpty ?? false) ...[
                             Text(
                               'Poids total: ${(chargementsParAnnee[_selectedYear]!.fold<double>(0, (sum, c) => sum + c.poidsNet) / 1000).toStringAsFixed(2)} T',
                             ),
@@ -157,7 +157,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 8),
-                          if (semisParAnnee[_selectedYear].isNotEmpty ?? false) ...[
+                          if (semisParAnnee[_selectedYear]?.isNotEmpty ?? false) ...[
                             ...semisParAnnee[_selectedYear]!.map((s) => _buildSemisDetails(s)),
                           ] else
                             const Text('Aucun semis cette année'),
@@ -178,7 +178,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         SizedBox(height: 8),
-                        if (_selectedYear != null && (chargementsParAnnee[_selectedYear].isNotEmpty ?? false))
+                        if (_selectedYear != null && (chargementsParAnnee[_selectedYear]?.isNotEmpty ?? false))
                           ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),

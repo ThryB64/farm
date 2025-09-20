@@ -102,7 +102,7 @@ class _SemisScreenState extends State<SemisScreen> {
                                 children: [
                                   Text('Date: ${_formatDate(semis.date)}'),
                                   Text('Variétés: ${semis.varietes.join(", ")}'),
-                                  if (semis.notes.isNotEmpty ?? false) Text('Notes: ${semis.notes}'),
+                                  if (semis.notes?.isNotEmpty ?? false) Text('Notes: ${semis.notes}'),
                                 ],
                               ),
                               trailing: Row(

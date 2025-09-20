@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/database_provider.dart';
-import '../models/variete.dart';
 import 'variete_form_screen.dart';
 
 class VarietesScreen extends StatelessWidget {

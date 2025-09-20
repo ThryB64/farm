@@ -195,7 +195,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                 children: [
                   Text(
                     annee.toString(),
-                    style: Theme.of(context).textTheme.titleMedium.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.blue,
                       fontWeight: FontWeight.bold,
                     ),

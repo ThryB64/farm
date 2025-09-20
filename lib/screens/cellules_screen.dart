@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/database_provider.dart';
 import '../models/cellule.dart';
-import '../models/chargement.dart';
 import 'cellule_form_screen.dart';
 import 'cellule_details_screen.dart';
 

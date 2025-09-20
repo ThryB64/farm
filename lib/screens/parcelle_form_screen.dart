@@ -21,9 +21,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
   @override
   void initState() {
     super.initState();
-    _nomController = TextEditingController(text: widget.parcelle.nom ?? '');
-    _surfaceController = TextEditingController(text: widget.parcelle.surface.toString() ?? '');
-    _notesController = TextEditingController(text: widget.parcelle.notes ?? '');
+    _nomController = TextEditingController(text: widget.parcelle?.nom ?? '');
+    _surfaceController = TextEditingController(text: widget.parcelle?.surface.toString() ?? '');
+    _notesController = TextEditingController(text: widget.parcelle?.notes ?? '');
   }
 
   @override
@@ -113,10 +113,10 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                   if (_formKey.currentState!.validate()) {
                     try {
                       final parcelle = Parcelle(
-                        id: widget.parcelle.id,
+                        id: widget.parcelle?.id,
                         nom: _nomController.text.trim(),
                         surface: double.parse(_surfaceController.text),
-                        dateCreation: widget.parcelle.dateCreation ?? DateTime.now(),
+                        dateCreation: widget.parcelle?.dateCreation ?? DateTime.now(),
                         notes: _notesController.text.isEmpty ? null : _notesController.text.trim(),
                       );
 

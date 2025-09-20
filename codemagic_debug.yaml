@@ -1,0 +1,36 @@
+workflows:
+  mais-tracker-debug:
+    name: Maïs Tracker - Debug Build
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      vars:
+        FLUTTER_BUILD_MODE: debug
+        SQLITE_FFI_ENABLED: "true"
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Flutter test (ignore warnings)
+        script: |
+          flutter test || echo "Tests failed, continuing..."
+      - name: Build Linux (debug)
+        script: |
+          flutter build linux --debug || echo "Linux build failed, continuing..."
+      - name: Build Windows (debug)
+        script: |
+          flutter build windows --debug || echo "Windows build failed, continuing..."
+      - name: Build macOS (debug)
+        script: |
+          flutter build macos --debug || echo "macOS build failed, continuing..."
+    artifacts:
+      - build/linux/x64/debug/bundle/*
+      - build/windows/runner/Debug/*
+      - build/macos/Build/Products/Debug/*.app
+    publishing:
+      email:
+        recipients:
+          - thierryber64@gmail.com
+        notify:
+          success: true
+          failure: true

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/database_provider.dart';
 import '../models/chargement.dart';
-import '../models/cellule.dart';
-import '../models/parcelle.dart';
 import '../utils/poids_utils.dart';
 
 class ChargementFormScreen extends StatefulWidget {
@@ -379,7 +377,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                           final poidsNormes = PoidsUtils.calculPoidsNormes(poidsNet, humidite);
 
                           final chargement = Chargement(
-                            id: widget.chargement.id,
+                            id: widget.chargement?.id,
                             celluleId: _selectedCelluleId!,
                             parcelleId: _selectedParcelleId!,
                             remorque: _selectedRemorque!,

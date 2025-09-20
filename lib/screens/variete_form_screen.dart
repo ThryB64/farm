@@ -20,8 +20,8 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
   @override
   void initState() {
     super.initState();
-    _nomController = TextEditingController(text: widget.variete.nom ?? '');
-    _descriptionController = TextEditingController(text: widget.variete.description ?? '');
+    _nomController = TextEditingController(text: widget.variete?.nom ?? '');
+    _descriptionController = TextEditingController(text: widget.variete?.description ?? '');
   }
 
   @override
@@ -85,10 +85,10 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                   if (_formKey.currentState!.validate()) {
                     try {
                       final variete = Variete(
-                        id: widget.variete.id,
+                        id: widget.variete?.id,
                         nom: _nomController.text.trim(),
                         description: _descriptionController.text.isEmpty ? null : _descriptionController.text.trim(),
-                        dateCreation: widget.variete.dateCreation ?? DateTime.now(),
+                        dateCreation: widget.variete?.dateCreation ?? DateTime.now(),
                       );
 
                       if (widget.variete == null) {

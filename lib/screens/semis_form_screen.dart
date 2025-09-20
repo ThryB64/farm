@@ -25,13 +25,13 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   void initState() {
     super.initState();
     _dateController = TextEditingController(
-      text: widget.semis.date != null
+      text: widget.semis?.date != null
           ? _formatDate(widget.semis!.date)
           : _formatDate(DateTime.now()),
     );
-    _notesController = TextEditingController(text: widget.semis.notes ?? '');
-    _selectedParcelleId = widget.semis.parcelleId;
-    _selectedVarietesSurfaces = widget.semis.varietesSurfaces ?? [];
+    _notesController = TextEditingController(text: widget.semis?.notes ?? '');
+    _selectedParcelleId = widget.semis?.parcelleId;
+    _selectedVarietesSurfaces = widget.semis?.varietesSurfaces ?? [];
     _showPourcentages = _selectedVarietesSurfaces.isNotEmpty;
   }
 
@@ -49,11 +49,11 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: widget.semis.date ?? DateTime.now(),
+      initialDate: widget.semis?.date ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    if (picked != null && picked != widget.semis.date) {
+    if (picked != null && picked != widget.semis?.date) {
       setState(() {
         _dateController.text = _formatDate(picked);
       });
@@ -333,7 +333,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                           );
 
                           final semis = Semis(
-                            id: widget.semis.id,
+                            id: widget.semis?.id,
                             parcelleId: _selectedParcelleId!,
                             varietesSurfaces: _selectedVarietesSurfaces,
                             date: date,
