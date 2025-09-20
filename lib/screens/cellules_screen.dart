@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
 import '../models/cellule.dart';
-import '../theme/theme.dart';
-import '../widgets/glass.dart';
-import '../widgets/gradient_button.dart';
 import 'cellule_form_screen.dart';
+import 'cellule_details_screen.dart';
 
 class CellulesScreen extends StatefulWidget {
   const CellulesScreen({Key? key}) : super(key: key);
@@ -15,360 +13,413 @@ class CellulesScreen extends StatefulWidget {
 }
 
 class _CellulesScreenState extends State<CellulesScreen> {
-  String _searchQuery = '';
+  int? _selectedYear;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cellules', style: TextStyle(fontWeight: FontWeight.w700)),
-        actions: [
-          GradientButton(
-            label: 'Add',
-            icon: Icons.add,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CelluleFormScreen()),
-              );
-            },
-          ),
-          const SizedBox(width: 16),
-        ],
+        title: const Text('Cellules'),
+        backgroundColor: Colors.blue,
+        elevation: 0,
+        centerTitle: true,
       ),
       body: Consumer<FirebaseProviderV3>(
         builder: (context, provider, child) {
           final cellules = provider.cellules;
-          final filteredCellules = _filterCellules(cellules);
+          final chargements = provider.chargements;
 
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Barre de recherche
-                Glass(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  radius: 20,
-                  child: TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Rechercher une cellule...',
-                      hintStyle: const TextStyle(color: AppColors.textSecondary),
-                      border: InputBorder.none,
-                      prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, color: AppColors.textSecondary),
-                              onPressed: () {
-                                setState(() {
-                                  _searchQuery = '';
-                                });
-                              },
-                            )
-                          : null,
+          if (cellules.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.warehouse,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Aucune cellule enregistrée',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                // Statistiques
-                Glass(
-                  padding: const EdgeInsets.all(16),
-                  radius: 20,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatItem(
-                          'Total',
-                          '${cellules.length} cellules',
-                          Icons.grid_view,
-                          AppColors.coral,
+                ],
+              ),
+            );
+          }
+
+          // Grouper les cellules par année de création
+          final Map<int, List<Cellule>> cellulesParAnnee = {};
+          for (var cellule in cellules) {
+            final annee = cellule.dateCreation.year;
+            if (!cellulesParAnnee.containsKey(annee)) {
+              cellulesParAnnee[annee] = [];
+            }
+            cellulesParAnnee[annee]!.add(cellule);
+          }
+
+          // Trier les années par ordre décroissant
+          final List<int> annees = cellulesParAnnee.keys.toList()..sort((a, b) => b.compareTo(a));
+
+          // Trier les cellules par date décroissante dans chaque année
+          cellulesParAnnee.forEach((annee, cellules) {
+            cellules.sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
+          });
+
+          // Si aucune année n'est sélectionnée, sélectionner la plus récente
+          if (_selectedYear == null && annees.isNotEmpty) {
+            _selectedYear = annees.first;
+          }
+
+          // Calculer les statistiques de l'année sélectionnée
+          final chargementsAnnee = _selectedYear != null ? chargements.where(
+            (c) => c.dateChargement.year == _selectedYear &&
+                   cellulesParAnnee[_selectedYear]!.any((cell) => cell.id == c.celluleId)
+          ).toList() : [];
+
+          final poidsTotalNormeAnnee = chargementsAnnee.fold<double>(
+            0,
+            (sum, c) => sum + c.poidsNormes,
+          );
+
+          final poidsTotalNetAnnee = chargementsAnnee.fold<double>(
+            0,
+            (sum, c) => sum + c.poidsNet,
+          );
+
+          return Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                color: Colors.blue.withOpacity(0.1),
+                child: Column(
+                  children: [
+                    DropdownButtonFormField<int>(
+                      value: _selectedYear,
+                      decoration: InputDecoration(
+                        labelText: 'Année',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
                         ),
+                        prefixIcon: Icon(Icons.calendar_today),
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
-                      Expanded(
-                        child: _buildStatItem(
-                          'Capacité totale',
-                          '${_calculateTotalCapacity(cellules).toStringAsFixed(1)} kg',
-                          Icons.storage,
-                          AppColors.salmon,
+                      items: annees.map((annee) {
+                        return DropdownMenuItem(
+                          value: annee,
+                          child: Text(annee.toString()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedYear = value;
+                        });
+                      },
+                    ),
+                    if (_selectedYear != null) ...[
+                      SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildStatCard(
+                            'Poids total normé',
+                            '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(2)} T',
+                            Icons.scale,
+                            Colors.blue,
+                          ),
+                          _buildStatCard(
+                            'Poids total net',
+                            '${(poidsTotalNetAnnee / 1000).toStringAsFixed(2)} T',
+                            Icons.monitor_weight,
+                            Colors.green,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      if (cellulesParAnnee[_selectedYear] != null) Text(
+                        '${cellulesParAnnee[_selectedYear]!.length} cellules en $_selectedYear',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Liste des cellules
-                Expanded(
-                  child: filteredCellules.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.builder(
-                          itemCount: filteredCellules.length,
-                          itemBuilder: (context, index) {
-                            final cellule = filteredCellules[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: _buildCelluleCard(context, cellule, provider),
-                            );
-                          },
-                        ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: color, size: 16),
-            const SizedBox(width: 6),
-            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.navy, fontWeight: FontWeight.w500)),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 16, color: AppColors.navy, fontWeight: FontWeight.w700)),
-      ],
-    );
-  }
-
-  Widget _buildCelluleCard(BuildContext context, Cellule cellule, FirebaseProviderV3 provider) {
-    return Glass(
-      padding: const EdgeInsets.all(20),
-      radius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // En-tête de la carte
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Cellule #${cellule.id}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.navy),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Capacité: ${cellule.capacite.toStringAsFixed(1)} kg',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                    ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  gradient: primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${cellule.capacite.toStringAsFixed(1)} kg',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12),
-                ),
+              Expanded(
+                child: _selectedYear == null
+                    ? const Center(child: Text('Sélectionnez une année'))
+                    : cellulesParAnnee[_selectedYear] == null
+                        ? const Center(child: Text('Aucune cellule pour cette année'))
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: cellulesParAnnee[_selectedYear]!.length,
+                            itemBuilder: (context, index) {
+                              final cellule = cellulesParAnnee[_selectedYear]![index];
+                              
+                              // Calculer les statistiques de la cellule pour l'année sélectionnée
+                              final chargementsCellule = chargements
+                                  .where((c) => c.celluleId == cellule.id && 
+                                               c.dateChargement.year == _selectedYear)
+                                  .toList();
+
+                              final poidsTotal = chargementsCellule.fold<double>(
+                                0,
+                                (sum, c) => sum + c.poidsNet,
+                              );
+
+                              final poidsTotalNorme = chargementsCellule.fold<double>(
+                                0,
+                                (sum, c) => sum + c.poidsNormes,
+                              );
+
+                              final tauxRemplissage = (poidsTotalNorme / cellule.capacite) * 100;
+                              final humiditeMoyenne = chargementsCellule.isEmpty ? 0.0 : 
+                                chargementsCellule.fold<double>(0, (sum, c) => sum + c.humidite) / chargementsCellule.length;
+
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CelluleDetailsScreen(
+                                          cellule: cellule,
+                                        ),
+                                      ),
+                                    ).then((_) => setState(() {}));
+                                  },
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                'Cellule ${cellule.reference}',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                IconButton(
+                                                  icon: Icon(Icons.info),
+                                                  color: Colors.blue,
+                                                  onPressed: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) => CelluleDetailsScreen(
+                                                          cellule: cellule,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                                IconButton(
+                                                  icon: Icon(Icons.delete),
+                                                  color: Colors.red,
+                                                  onPressed: () => _showDeleteConfirmation(context, cellule),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.warehouse,
+                                              size: 16,
+                                              color: Colors.grey[600],
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              '${(cellule.capacite / 1000).toStringAsFixed(2)} T',
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            SizedBox(width: 16),
+                                            Icon(
+                                              Icons.calendar_today,
+                                              size: 16,
+                                              color: Colors.grey[600],
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              'Créée le ${_formatDate(cellule.dateCreation)}',
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (chargementsCellule.isNotEmpty) ...[
+                                          SizedBox(height: 8),
+                                          LinearProgressIndicator(
+                                            value: tauxRemplissage / 100,
+                                            backgroundColor: Colors.blue.withOpacity(0.2),
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              tauxRemplissage > 90
+                                                  ? Colors.red
+                                                  : tauxRemplissage > 70
+                                                      ? Colors.orange
+                                                      : Colors.blue,
+                                            ),
+                                            minHeight: 8,
+                                          ),
+                                          SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'Taux de remplissage: ${tauxRemplissage.toStringAsFixed(1)}%',
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Net: ${(poidsTotal / 1000).toStringAsFixed(2)} T\nNormé: ${(poidsTotalNorme / 1000).toStringAsFixed(2)} T',
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                ),
+                                                textAlign: TextAlign.end,
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'Humidité moyenne: ${humiditeMoyenne.toStringAsFixed(1)}%',
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
-          // Informations détaillées
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoItem(Icons.storage, 'Capacité', '${cellule.capacite.toStringAsFixed(1)} kg'),
-              ),
-              Expanded(
-                child: _buildInfoItem(Icons.location_on, 'Localisation', cellule.localisation ?? 'Non spécifiée'),
-              ),
-              Expanded(
-                child: _buildInfoItem(Icons.calendar_today, 'Créée', _formatDate(cellule.dateCreation)),
-              ),
-            ],
-          ),
-          if (cellule.description != null && cellule.description!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              'Description: ${cellule.description}',
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CelluleFormScreen(),
             ),
-          ],
-          const SizedBox(height: 16),
-          // Actions
-          Row(
-            children: [
-              Expanded(
-                child: GradientButton(
-                  label: 'Modifier',
-                  icon: Icons.edit,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CelluleFormScreen(cellule: cellule),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    _showDeleteDialog(context, cellule, provider);
-                  },
-                  child: Glass(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    radius: 16,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.delete, color: AppColors.navy, size: 16),
-                        SizedBox(width: 8),
-                        Text('Supprimer', style: TextStyle(color: AppColors.navy, fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+          );
+        },
+        backgroundColor: Colors.blue,
+        child: Icon(Icons.add),
       ),
     );
-  }
-
-  Widget _buildInfoItem(IconData icon, String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 14, color: AppColors.textSecondary),
-            const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 14, color: AppColors.navy, fontWeight: FontWeight.w600)),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Glass(
-            padding: const EdgeInsets.all(40),
-            radius: 40,
-            child: Icon(
-              Icons.grid_view,
-              size: 60,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Aucune cellule trouvée',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.navy),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _searchQuery.isNotEmpty
-                ? 'Aucune cellule ne correspond à votre recherche'
-                : 'Commencez par ajouter votre première cellule',
-            style: const TextStyle(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          GradientButton(
-            label: 'Ajouter une cellule',
-            icon: Icons.add,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CelluleFormScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Cellule> _filterCellules(List<Cellule> cellules) {
-    var filtered = cellules.where((cellule) {
-      // Filtre par recherche
-      if (_searchQuery.isNotEmpty) {
-        final query = _searchQuery.toLowerCase();
-        if (!(cellule.localisation?.toLowerCase().contains(query) ?? false) &&
-            !(cellule.description?.toLowerCase().contains(query) ?? false)) {
-          return false;
-        }
-      }
-
-      return true;
-    }).toList();
-
-    // Trier par capacité (plus grande en premier)
-    filtered.sort((a, b) => b.capacite.compareTo(a.capacite));
-    return filtered;
-  }
-
-  double _calculateTotalCapacity(List<Cellule> cellules) {
-    return cellules.fold<double>(0, (sum, cellule) => sum + cellule.capacite);
   }
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  void _showDeleteDialog(BuildContext context, Cellule cellule, FirebaseProviderV3 provider) {
+  void _showDeleteConfirmation(BuildContext context, Cellule cellule) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.sand,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(
-          'Supprimer la cellule',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.navy),
+        title: const Text('Confirmer la suppression'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
         ),
-        content: Text(
-          'Êtes-vous sûr de vouloir supprimer cette cellule ?\n\nCette action est irréversible.',
-          style: const TextStyle(color: AppColors.textSecondary),
-        ),
+        content: const Text('Êtes-vous sûr de vouloir supprimer cette cellule ?'),
         actions: [
-          GradientButton(
-            label: 'Annuler',
+          TextButton(
             onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
           ),
-          const SizedBox(width: 8),
-          GradientButton(
-            label: 'Supprimer',
+          ElevatedButton(
             onPressed: () {
-              provider.supprimerCellule(cellule.id.toString());
+              context.read<FirebaseProviderV3>().supprimerCellule(cellule.id.toString());
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Cellule supprimée'),
-                  backgroundColor: AppColors.coral,
-                ),
-              );
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Supprimer'),
           ),
         ],
       ),
     );
   }
-}
+
+  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 16),
+              SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+} 

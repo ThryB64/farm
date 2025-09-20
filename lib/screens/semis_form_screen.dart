@@ -92,7 +92,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       _selectedVarietesSurfaces.add(VarieteSurface(
                         nom: variete.nom,
                         pourcentage: 0,
-                        surface: 0.0,
                       ));
                     } else {
                       _selectedVarietesSurfaces.removeWhere((v) => v.nom == variete.nom);
@@ -163,7 +162,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         _selectedVarietesSurfaces[index] = VarieteSurface(
                           nom: varieteSurface.nom,
                           pourcentage: pourcentage,
-                          surface: 0.0,
                         );
                       });
                     },
@@ -337,8 +335,8 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                           final semis = Semis(
                             id: widget.semis?.id,
                             parcelleId: _selectedParcelleId!,
-                            date: date,
                             varietesSurfaces: _selectedVarietesSurfaces,
+                            date: date,
                             notes: _notesController.text.isEmpty ? null : _notesController.text.trim(),
                           );
 

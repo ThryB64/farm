@@ -10,12 +10,6 @@ class Chargement {
   double _poidsNormes;
   final double humidite;
   final String variete;
-  final String? type;
-  final String? notes;
-  
-  // Propriétés calculées
-  double get poids => _poidsNet;
-  set poids(double value) => _poidsNet = value;
 
   Chargement({
     this.id,
@@ -29,8 +23,6 @@ class Chargement {
     required double poidsNormes,
     required this.humidite,
     required this.variete,
-    this.type,
-    this.notes,
   }) : _poidsNet = poidsNet,
        _poidsNormes = poidsNormes;
 
@@ -53,8 +45,6 @@ class Chargement {
       'poids_normes': _poidsNormes,
       'humidite': humidite,
       'variete': variete,
-      'type': type,
-      'notes': notes,
     };
   }
 
@@ -71,8 +61,6 @@ class Chargement {
       poidsNormes: map['poids_normes'],
       humidite: map['humidite'],
       variete: map['variete'],
-      type: map['type'],
-      notes: map['notes'],
     );
   }
 

@@ -4,10 +4,9 @@ class Parcelle {
   final String nom;
   final String code;
   final double surface;
-  final int annee;
+  final int? annee;
   final DateTime dateCreation;
   final String? notes;
-  final String? description;
 
   Parcelle({
     this.id,
@@ -15,10 +14,9 @@ class Parcelle {
     required this.nom,
     required this.code,
     required this.surface,
-    required this.annee,
+    this.annee,
     DateTime? dateCreation,
     this.notes,
-    this.description,
   }) : dateCreation = dateCreation ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
@@ -31,7 +29,6 @@ class Parcelle {
       'annee': annee,
       'date_creation': dateCreation.toIso8601String(),
       'notes': notes,
-      'description': description,
     };
   }
 
@@ -42,10 +39,9 @@ class Parcelle {
       nom: map['nom'],
       code: map['code'] ?? '',
       surface: map['surface'],
-      annee: map['annee'] ?? DateTime.now().year,
+      annee: map['annee'],
       dateCreation: DateTime.parse(map['date_creation']),
       notes: map['notes'],
-      description: map['description'],
     );
   }
 

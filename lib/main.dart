@@ -8,14 +8,15 @@ import 'firebase_options.dart';
 // Services & providers
 import 'providers/firebase_provider_v3.dart';
 import 'screens/home_screen.dart';
-import 'theme/theme.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   // Si un widget crashe, on affiche une carte rouge au lieu d'un écran blanc
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return MaterialApp(
+      theme: buildAppTheme(),
       home: Scaffold(
-        backgroundColor: const Color(0xFF101010),
+        backgroundColor: AppColors.sand,
         body: Center(
           child: Container(
             padding: const EdgeInsets.all(16),
@@ -78,9 +79,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Maïs Tracker',
+      title: 'GAEC de la BARADE',
       theme: buildAppTheme(),
-      debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
     );
   }
