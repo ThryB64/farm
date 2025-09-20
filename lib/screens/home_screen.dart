@@ -12,6 +12,7 @@ import 'varietes_screen.dart';
 import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'export_screen.dart';
+import 'debug_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -341,6 +342,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const StatistiquesScreen()),
+              ),
+            ),
+            MenuCard(
+              title: 'Debug',
+              subtitle: 'Diagnostic des données',
+              icon: Icons.bug_report,
+              color: AppTheme.error,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DebugScreen()),
               ),
             ),
           ],
