@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/database_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../models/chargement.dart';
 import '../models/cellule.dart';
 import 'chargement_form_screen.dart';
@@ -22,7 +22,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> {
         title: const Text('Chargements'),
         backgroundColor: Colors.green,
       ),
-      body: Consumer<DatabaseProvider>(
+      body: Consumer<FirebaseProvider>(
         builder: (context, provider, child) {
           final chargements = provider.chargements;
           final cellules = provider.cellules;
@@ -192,7 +192,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> {
           ),
           TextButton(
             onPressed: () {
-              context.read<DatabaseProvider>().supprimerChargement(chargement.id!);
+              context.read<FirebaseProvider>().supprimerChargement(chargement.id!);
               Navigator.pop(context);
             },
             child: const Text('Supprimer'),

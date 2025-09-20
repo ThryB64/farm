@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/database_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../models/cellule.dart';
 
 class CelluleFormScreen extends StatefulWidget {
@@ -73,9 +73,9 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                       );
 
                       if (widget.cellule == null) {
-                        await context.read<DatabaseProvider>().ajouterCellule(cellule);
+                        await context.read<FirebaseProvider>().ajouterCellule(cellule);
                       } else {
-                        await context.read<DatabaseProvider>().modifierCellule(cellule);
+                        await context.read<FirebaseProvider>().modifierCellule(cellule);
                       }
 
                       if (mounted) {

@@ -64,8 +64,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => FirebaseProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<FirebaseProvider>(
+          create: (context) => FirebaseProvider(),
+        ),
+      ],
       child: MaterialApp(
         title: 'Maïs Tracker',
         theme: ThemeData(

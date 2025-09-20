@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/database_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../models/parcelle.dart';
 import 'parcelle_details_screen.dart';
 import 'parcelle_form_screen.dart';
@@ -17,7 +17,7 @@ class ParcellesScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Consumer<DatabaseProvider>(
+      body: Consumer<FirebaseProvider>(
         builder: (context, db, child) {
           final parcellesTriees = List<Parcelle>.from(db.parcelles)
             ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
@@ -216,7 +216,7 @@ class ParcellesScreen extends StatelessWidget {
                   nom: nom,
                   surface: surface,
                 );
-                context.read<DatabaseProvider>().ajouterParcelle(parcelle);
+                context.read<FirebaseProvider>().ajouterParcelle(parcelle);
                 Navigator.pop(context);
               }
             },
@@ -300,7 +300,7 @@ class ParcellesScreen extends StatelessWidget {
                   surface: surface,
                   dateCreation: parcelle.dateCreation,
                 );
-                context.read<DatabaseProvider>().modifierParcelle(parcelleModifiee);
+                context.read<FirebaseProvider>().modifierParcelle(parcelleModifiee);
                 Navigator.pop(context);
               }
             },
@@ -342,7 +342,7 @@ class ParcellesScreen extends StatelessWidget {
     );
 
     if (confirmed == true && parcelle.id != null) {
-      context.read<DatabaseProvider>().supprimerParcelle(parcelle.id!);
+      context.read<FirebaseProvider>().supprimerParcelle(parcelle.id!);
     }
   }
 } 

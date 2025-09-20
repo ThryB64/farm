@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/database_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../models/parcelle.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
@@ -44,7 +44,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
         title: Text(widget.parcelle.nom),
         backgroundColor: Colors.green,
       ),
-      body: Consumer<DatabaseProvider>(
+      body: Consumer<FirebaseProvider>(
         builder: (context, provider, child) {
           final chargements = provider.chargements
               .where((c) => c.parcelleId == widget.parcelle.id)

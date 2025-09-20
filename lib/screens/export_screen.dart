@@ -3,7 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
-import '../providers/database_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../models/parcelle.dart';
 import '../models/chargement.dart';
 import '../models/cellule.dart';
@@ -26,7 +26,7 @@ class _ExportScreenState extends State<ExportScreen> {
 
   Future<void> _generatePDF() async {
     try {
-      final db = Provider.of<DatabaseProvider>(context, listen: false);
+      final db = Provider.of<FirebaseProvider>(context, listen: false);
       final chargements = await db.chargements.toList();
       final parcelles = await db.parcelles.toList();
       final cellules = await db.cellules.toList();
@@ -618,7 +618,7 @@ class _ExportScreenState extends State<ExportScreen> {
         title: const Text('Export PDF'),
         backgroundColor: Colors.orange,
       ),
-      body: Consumer<DatabaseProvider>(
+      body: Consumer<FirebaseProvider>(
         builder: (context, provider, child) {
           final years = provider.chargements
               .map((c) => c.dateChargement.year)

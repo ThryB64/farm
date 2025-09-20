@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/database_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../models/variete.dart';
 
 class VarieteFormScreen extends StatefulWidget {
@@ -92,9 +92,9 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                       );
 
                       if (widget.variete == null) {
-                        await context.read<DatabaseProvider>().ajouterVariete(variete);
+                        await context.read<FirebaseProvider>().ajouterVariete(variete);
                       } else {
-                        await context.read<DatabaseProvider>().modifierVariete(variete);
+                        await context.read<FirebaseProvider>().modifierVariete(variete);
                       }
 
                       if (mounted) {

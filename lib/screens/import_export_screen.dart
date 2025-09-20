@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
-import '../providers/database_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
@@ -39,7 +39,7 @@ class ImportExportScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 16),
-                    Consumer<DatabaseProvider>(
+                    Consumer<FirebaseProvider>(
                       builder: (context, provider, child) {
                         return Column(
                           children: [
@@ -206,7 +206,7 @@ class ImportExportScreen extends StatelessWidget {
 
   Future<void> _exportData(BuildContext context) async {
     try {
-      final provider = context.read<DatabaseProvider>();
+      final provider = context.read<FirebaseProvider>();
       
       // Créer un objet contenant toutes les données
       final data = {
@@ -321,7 +321,7 @@ class ImportExportScreen extends StatelessWidget {
       );
 
       if (summary != null) {
-        final provider = context.read<DatabaseProvider>();
+        final provider = context.read<FirebaseProvider>();
         
         // Supprimer les données existantes
         await provider.deleteAllData();
