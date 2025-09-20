@@ -12,6 +12,7 @@ import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
 import '../models/variete_surface.dart';
+import 'debug_screen.dart';
 
 class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({Key? key}) : super(key: key);
@@ -25,7 +26,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   late Animation<double> _fadeAnimation;
   bool _isExporting = false;
   bool _isImporting = false;
-  bool _showDebugInfo = false; // Ajout du debug dans l'écran
 
   @override
   void initState() {
@@ -62,25 +62,14 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(_showDebugInfo ? Icons.bug_report : Icons.bug_report_outlined),
-            tooltip: 'Afficher les infos de debug',
-            onPressed: () {
-              setState(() {
-                _showDebugInfo = !_showDebugInfo;
-              });
-            },
-          ),
-        ],
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppTheme.spacingM),
-          child: Column(
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          children: [
               _buildDataOverview(),
               const SizedBox(height: AppTheme.spacingL),
               _buildExportSection(),
@@ -88,10 +77,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               _buildImportSection(),
               const SizedBox(height: AppTheme.spacingL),
               _buildActionsSection(),
-              if (_showDebugInfo) ...[
-                const SizedBox(height: AppTheme.spacingL),
-                _buildDebugSection(),
-              ],
+              const SizedBox(height: AppTheme.spacingL),
+              _buildDebugSection(),
             ],
           ),
         ),
@@ -101,9 +88,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
 
   Widget _buildDataOverview() {
     return ModernCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
           Row(
             children: [
               Container(
@@ -119,61 +106,61 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                 ),
               ),
               const SizedBox(width: AppTheme.spacingM),
-              const Text(
+                    const Text(
                 'État de la base de données',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
-                ),
-              ),
+                      ),
+                    ),
             ],
           ),
           const SizedBox(height: AppTheme.spacingL),
-          Consumer<FirebaseProviderV3>(
-            builder: (context, provider, child) {
-              return Column(
-                children: [
-                  _buildDataSummary(
-                    'Parcelles',
-                    provider.parcelles.length,
-                    Icons.landscape,
+                    Consumer<FirebaseProviderV3>(
+                      builder: (context, provider, child) {
+                        return Column(
+                          children: [
+                            _buildDataSummary(
+                              'Parcelles',
+                              provider.parcelles.length,
+                              Icons.landscape,
                     AppTheme.primary,
-                  ),
+                            ),
                   const SizedBox(height: AppTheme.spacingS),
-                  _buildDataSummary(
-                    'Cellules',
-                    provider.cellules.length,
+                            _buildDataSummary(
+                              'Cellules',
+                              provider.cellules.length,
                     Icons.grid_view,
                     AppTheme.secondary,
-                  ),
+                            ),
                   const SizedBox(height: AppTheme.spacingS),
-                  _buildDataSummary(
-                    'Chargements',
-                    provider.chargements.length,
-                    Icons.local_shipping,
+                            _buildDataSummary(
+                              'Chargements',
+                              provider.chargements.length,
+                              Icons.local_shipping,
                     AppTheme.accent,
-                  ),
+                            ),
                   const SizedBox(height: AppTheme.spacingS),
-                  _buildDataSummary(
-                    'Semis',
-                    provider.semis.length,
+                            _buildDataSummary(
+                              'Semis',
+                              provider.semis.length,
                     Icons.grass,
                     AppTheme.success,
-                  ),
+                            ),
                   const SizedBox(height: AppTheme.spacingS),
-                  _buildDataSummary(
-                    'Variétés',
-                    provider.varietes.length,
-                    Icons.eco,
+                            _buildDataSummary(
+                              'Variétés',
+                              provider.varietes.length,
+                              Icons.eco,
                     AppTheme.info,
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
     );
   }
 
@@ -223,9 +210,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
 
   Widget _buildExportSection() {
     return ModernCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
           Row(
             children: [
               Container(
@@ -241,16 +228,16 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                 ),
               ),
               const SizedBox(width: AppTheme.spacingM),
-              const Text(
+                    const Text(
                 'Export des données',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
           const SizedBox(height: AppTheme.spacingM),
           const Text(
             'Téléchargez toutes vos données au format JSON pour sauvegarder ou partager.',
@@ -275,9 +262,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
 
   Widget _buildImportSection() {
     return ModernCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
           Row(
             children: [
               Container(
@@ -293,16 +280,16 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                 ),
               ),
               const SizedBox(width: AppTheme.spacingM),
-              const Text(
+                    const Text(
                 'Import des données',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
           const SizedBox(height: AppTheme.spacingM),
           const Text(
             'Importez des données depuis un fichier JSON. Attention : cela remplacera toutes les données existantes.',
@@ -330,7 +317,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [
+      children: [
               Container(
                 padding: const EdgeInsets.all(AppTheme.spacingS),
                 decoration: BoxDecoration(
@@ -378,72 +365,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             textColor: AppTheme.error,
             onPressed: _clearCacheAndReload,
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDebugSection() {
-    return ModernCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
-                decoration: BoxDecoration(
-                  color: AppTheme.error.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                ),
-                child: const Icon(
-                  Icons.bug_report,
-                  color: AppTheme.error,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: AppTheme.spacingM),
-              const Text(
-                'Informations de debug',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          Consumer<FirebaseProviderV3>(
-            builder: (context, provider, child) {
-              return Column(
-                children: [
-                  _buildDebugInfo('État du provider', provider.isInitialized ? 'Initialisé' : 'Non initialisé', AppTheme.info),
-                  _buildDebugInfo('En cours de chargement', provider.isLoading ? 'Oui' : 'Non', AppTheme.warning),
-                  _buildDebugInfo('Erreur', provider.error ?? 'Aucune', provider.error != null ? AppTheme.error : AppTheme.success),
-                  const SizedBox(height: AppTheme.spacingM),
-                  _buildDebugInfo('Parcelles en mémoire', '${provider.parcelles.length}', AppTheme.info),
-                  _buildDebugInfo('Cellules en mémoire', '${provider.cellules.length}', AppTheme.info),
-                  _buildDebugInfo('Chargements en mémoire', '${provider.chargements.length}', AppTheme.info),
-                  _buildDebugInfo('Semis en mémoire', '${provider.semis.length}', AppTheme.info),
-                  _buildDebugInfo('Variétés en mémoire', '${provider.varietes.length}', AppTheme.info),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDebugInfo(String label, String value, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingXS),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(fontSize: 14, color: AppTheme.textPrimary)),
-          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
         ],
       ),
     );
@@ -656,16 +577,16 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
 
   Future<bool> _showImportConfirmation() async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
+        context: context,
+        builder: (context) => AlertDialog(
         title: const Text('Confirmer l\'import'),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
         content: const Text(
           'Cette action va remplacer toutes les données existantes. Êtes-vous sûr de vouloir continuer ?',
-        ),
-        actions: [
+          ),
+          actions: [
           ModernTextButton(
             text: 'Annuler',
             onPressed: () => Navigator.pop(context, false),
@@ -674,14 +595,14 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             text: 'Confirmer',
             backgroundColor: AppTheme.error,
             onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
     ) ?? false;
   }
 
   Future<void> _performImport(Map<String, dynamic> data) async {
-    final provider = context.read<FirebaseProviderV3>();
+        final provider = context.read<FirebaseProviderV3>();
     
     // 1. Vider complètement le localStorage
     await _clearLocalStorage();
@@ -775,7 +696,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       } else {
         message = 'Import réussi ! $totalData éléments importés.';
         
-        ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
             backgroundColor: AppTheme.success,
@@ -1047,4 +968,58 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       }
     }
   }
-}
+
+  Widget _buildDebugSection() {
+    return ModernCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.bug_report,
+                  color: AppTheme.error,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'Diagnostic des données',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          const Text(
+            'Analysez la cohérence des données et les problèmes de jointure.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          ModernButton(
+            text: 'Ouvrir l\'écran de diagnostic',
+            icon: Icons.analytics,
+            backgroundColor: AppTheme.error,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DebugScreen()),
+            ),
+            isFullWidth: true,
+          ),
+        ],
+      ),
+    );
+  }
+} 
