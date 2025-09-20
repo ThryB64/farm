@@ -12,9 +12,6 @@ workflows:
       - name: Get Flutter packages
         script: |
           flutter packages pub get
-      - name: Flutter test (ignore warnings)
-        script: |
-          flutter test || echo "Tests failed, continuing..."
       - name: Build iOS
         script: |
           flutter build ios --release --no-codesign
@@ -40,9 +37,6 @@ workflows:
       - name: Get Flutter packages
         script: |
           flutter packages pub get
-      - name: Flutter test (ignore warnings)
-        script: |
-          flutter test || echo "Tests failed, continuing..."
       - name: Build Linux
         script: |
           flutter build linux --release
@@ -68,9 +62,6 @@ workflows:
       - name: Get Flutter packages
         script: |
           flutter packages pub get
-      - name: Flutter test (ignore warnings)
-        script: |
-          flutter test || echo "Tests failed, continuing..."
       - name: Build Windows
         script: |
           flutter build windows --release

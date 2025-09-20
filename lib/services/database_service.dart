@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:io';
 import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
@@ -27,88 +28,126 @@ class DatabaseService {
   }
 
   Future<Database> _initDatabase() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, _dbName);
+    try {
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, _dbName);
+      
+      print("Database path: $path");
+      print("Database name: $_dbName");
+      print("Database version: $_dbVersion");
 
-    // Supprimer la base de données existante si la version a changé
-    final dbExists = await databaseExists(path);
-    if (dbExists) {
-      final db = await openDatabase(path);
-      final version = await db.getVersion();
-      await db.close();
-      if (version != _dbVersion) {
-        await deleteDatabase();
+      // Vérifier que le dossier parent existe
+      final parentDir = Directory(dirname(path));
+      if (!await parentDir.exists()) {
+        print("Creating parent directory: ${parentDir.path}");
+        await parentDir.create(recursive: true);
       }
-    }
 
-    return await openDatabase(
-      path,
-      version: _dbVersion,
-      onCreate: _createDb,
-      onUpgrade: _onUpgrade,
-      singleInstance: true,
-      readOnly: false,
-    );
+      // Supprimer la base de données existante si la version a changé
+      final dbExists = await databaseExists(path);
+      print("Database exists: $dbExists");
+      
+      if (dbExists) {
+        final db = await openDatabase(path);
+        final version = await db.getVersion();
+        await db.close();
+        print("Current database version: $version");
+        if (version != _dbVersion) {
+          print("Version mismatch, deleting database");
+          await deleteDatabase();
+        }
+      }
+
+      print("Opening database at: $path");
+      final database = await openDatabase(
+        path,
+        version: _dbVersion,
+        onCreate: _createDb,
+        onUpgrade: _onUpgrade,
+        singleInstance: true,
+        readOnly: false,
+      );
+      
+      print("Database opened successfully");
+      return database;
+    } catch (e) {
+      print("Error initializing database: $e");
+      rethrow;
+    }
   }
 
   Future<void> _createDb(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE parcelles(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nom TEXT NOT NULL,
-        surface REAL NOT NULL,
-        date_creation TEXT NOT NULL,
-        notes TEXT
-      )
-    ''');
+    try {
+      print("Creating database tables...");
+      
+      await db.execute('''
+        CREATE TABLE parcelles(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nom TEXT NOT NULL,
+          surface REAL NOT NULL,
+          date_creation TEXT NOT NULL,
+          notes TEXT
+        )
+      ''');
+      print("Table 'parcelles' created");
 
-    await db.execute('''
-      CREATE TABLE cellules(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        reference TEXT NOT NULL,
-        capacite REAL NOT NULL,
-        date_creation TEXT NOT NULL,
-        notes TEXT
-      )
-    ''');
+      await db.execute('''
+        CREATE TABLE cellules(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          reference TEXT NOT NULL,
+          capacite REAL NOT NULL,
+          date_creation TEXT NOT NULL,
+          notes TEXT
+        )
+      ''');
+      print("Table 'cellules' created");
 
-    await db.execute('''
-      CREATE TABLE chargements(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        cellule_id INTEGER NOT NULL,
-        parcelle_id INTEGER NOT NULL,
-        remorque TEXT NOT NULL,
-        date_chargement TEXT NOT NULL,
-        poids_plein REAL NOT NULL,
-        poids_vide REAL NOT NULL,
-        poids_net REAL NOT NULL,
-        poids_normes REAL NOT NULL,
-        humidite REAL NOT NULL,
-        variete TEXT NOT NULL DEFAULT '',
-        FOREIGN KEY (cellule_id) REFERENCES cellules (id),
-        FOREIGN KEY (parcelle_id) REFERENCES parcelles (id)
-      )
-    ''');
+      await db.execute('''
+        CREATE TABLE chargements(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          cellule_id INTEGER NOT NULL,
+          parcelle_id INTEGER NOT NULL,
+          remorque TEXT NOT NULL,
+          date_chargement TEXT NOT NULL,
+          poids_plein REAL NOT NULL,
+          poids_vide REAL NOT NULL,
+          poids_net REAL NOT NULL,
+          poids_normes REAL NOT NULL,
+          humidite REAL NOT NULL,
+          variete TEXT NOT NULL DEFAULT '',
+          FOREIGN KEY (cellule_id) REFERENCES cellules (id),
+          FOREIGN KEY (parcelle_id) REFERENCES parcelles (id)
+        )
+      ''');
+      print("Table 'chargements' created");
 
-    await db.execute('''
-      CREATE TABLE semis(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        parcelle_id INTEGER NOT NULL,
-        date TEXT NOT NULL,
-        varietes_surfaces TEXT NOT NULL,
-        notes TEXT,
-        FOREIGN KEY (parcelle_id) REFERENCES parcelles (id)
-      )
-    ''');
+      await db.execute('''
+        CREATE TABLE semis(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          parcelle_id INTEGER NOT NULL,
+          date TEXT NOT NULL,
+          varietes_surfaces TEXT NOT NULL,
+          notes TEXT,
+          FOREIGN KEY (parcelle_id) REFERENCES parcelles (id)
+        )
+      ''');
+      print("Table 'semis' created");
 
-    await db.execute('''
-      CREATE TABLE varietes(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nom TEXT NOT NULL,
-        description TEXT,
-        date_creation TEXT NOT NULL
-      )
-    ''');
+      await db.execute('''
+        CREATE TABLE varietes(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nom TEXT NOT NULL,
+          description TEXT,
+          date_creation TEXT NOT NULL
+        )
+      ''');
+      print("Table 'varietes' created");
+      
+      print("All tables created successfully");
+    } catch (e) {
+      print("Error creating database tables: $e");
+      rethrow;
+    }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {

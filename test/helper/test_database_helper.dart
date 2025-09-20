@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 import 'dart:io';
 
@@ -9,9 +9,7 @@ class TestDatabaseHelper {
   
   /// Initialise la base de données de test
   static Future<void> initializeTestDatabase() async {
-    // Initialiser sqflite_common_ffi pour les tests
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    // Pas besoin d'initialiser sqflite_common_ffi pour les tests normaux
     
     // Créer un répertoire temporaire pour la base de données de test
     final tempDir = Directory.systemTemp;

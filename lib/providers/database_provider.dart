@@ -27,9 +27,11 @@ class DatabaseProvider with ChangeNotifier {
 
   Future<void> initialize() async {
     try {
+      print("Initializing DatabaseProvider...");
       await _loadData();
+      print("DatabaseProvider initialized successfully");
     } catch (e) {
-      // print('Erreur lors de l\'initialisation: $e');
+      print('Erreur lors de l\'initialisation: $e');
       rethrow;
     }
   }
@@ -78,11 +80,22 @@ class DatabaseProvider with ChangeNotifier {
 
   Future<void> _loadData() async {
     try {
+      print("Loading data from database...");
+      
       final parcelles = await _db.getParcelles();
+      print("Loaded ${parcelles.length} parcelles");
+      
       final cellules = await _db.getCellules();
+      print("Loaded ${cellules.length} cellules");
+      
       final chargements = await _db.getChargements();
+      print("Loaded ${chargements.length} chargements");
+      
       final semis = await _db.getSemis();
+      print("Loaded ${semis.length} semis");
+      
       final varietes = await _db.getVarietes();
+      print("Loaded ${varietes.length} varietes");
 
       _parcelles = parcelles;
       _cellules = cellules;
@@ -90,9 +103,10 @@ class DatabaseProvider with ChangeNotifier {
       _semis = semis;
       _varietes = varietes;
 
+      print("Data loaded successfully, notifying listeners");
       notifyListeners();
     } catch (e) {
-      // print('Erreur lors du chargement des données: $e');
+      print('Erreur lors du chargement des données: $e');
       rethrow;
     }
   }
