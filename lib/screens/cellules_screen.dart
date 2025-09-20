@@ -95,7 +95,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
-                color: Colors.blue.withValues(alpha: 0.1),
+                color: Colors.blue.withOpacity(0.1),
                 child: Column(
                   children: [
                     DropdownButtonFormField<int>(
@@ -280,7 +280,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                           SizedBox(height: 8),
                                           LinearProgressIndicator(
                                             value: tauxRemplissage / 100,
-                                            backgroundColor: Colors.blue.withValues(alpha: 0.2),
+                                            backgroundColor: Colors.blue.withOpacity(0.2),
                                             valueColor: AlwaysStoppedAnimation<Color>(
                                               tauxRemplissage > 90
                                                   ? Colors.red
@@ -385,10 +385,10 @@ class _CellulesScreenState extends State<CellulesScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withValues(alpha: 0.2),
+          color: color.withOpacity(0.2),
           width: 1,
         ),
       ),
