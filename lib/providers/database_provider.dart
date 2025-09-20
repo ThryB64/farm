@@ -5,10 +5,11 @@ import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
 import '../services/database_service.dart';
+import '../services/web_database_service.dart';
 import '../utils/poids_utils.dart';
 
 class DatabaseProvider with ChangeNotifier {
-  final DatabaseService _db;
+  final dynamic _db;
   List<Parcelle> _parcelles = [];
   List<Cellule> _cellules = [];
   List<Chargement> _chargements = [];
@@ -16,31 +17,17 @@ class DatabaseProvider with ChangeNotifier {
   List<Variete> _varietes = [];
   bool _enabled = false;
 
-  DatabaseProvider() : _db = DatabaseService() {
-    if (!kIsWeb) {
-      _enabled = true;
-      _loadData();
-    } else {
-      _enabled = false;
-      print('Web build: DatabaseProvider désactivé');
-    }
+  DatabaseProvider() : _db = kIsWeb ? WebDatabaseService() : DatabaseService() {
+    _enabled = true;
+    _loadData();
   }
 
   static final DatabaseProvider instance = DatabaseProvider._();
-  DatabaseProvider._() : _db = DatabaseService() {
-    if (!kIsWeb) {
-      _enabled = true;
-    } else {
-      _enabled = false;
-      print('Web build: DatabaseProvider désactivé');
-    }
+  DatabaseProvider._() : _db = kIsWeb ? WebDatabaseService() : DatabaseService() {
+    _enabled = true;
   }
 
   Future<void> init() async {
-    if (kIsWeb) {
-      _enabled = false;
-      return;
-    }
     _enabled = true;
     await _loadData();
   }

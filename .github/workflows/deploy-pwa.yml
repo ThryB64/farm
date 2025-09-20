@@ -34,7 +34,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter Web (debug)
-        run: flutter build web --release --base-href /farm/ --pwa-strategy=none
+        run: flutter build web --release --base-href /farm/
 
       - name: SPA fallback
         run: cp build/web/index.html build/web/404.html
