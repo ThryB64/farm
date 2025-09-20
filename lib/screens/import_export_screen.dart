@@ -11,6 +11,7 @@ import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
+import '../models/variete_surface.dart';
 
 class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({Key? key}) : super(key: key);
@@ -166,10 +167,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -369,18 +367,18 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     try {
       final provider = context.read<FirebaseProviderV3>();
       
-      // Préparer les données à exporter
+      // Préparer les données à exporter avec conversion explicite des types
       final exportData = {
         'exportDate': DateTime.now().toIso8601String(),
         'version': '1.0',
-        'parcelles': provider.parcelles.map((p) => p.toMap()).toList(),
-        'cellules': provider.cellules.map((c) => c.toMap()).toList(),
-        'chargements': provider.chargements.map((c) => c.toMap()).toList(),
-        'semis': provider.semis.map((s) => s.toMap()).toList(),
-        'varietes': provider.varietes.map((v) => v.toMap()).toList(),
+        'parcelles': provider.parcelles.map((p) => _convertParcelleToMap(p)).toList(),
+        'cellules': provider.cellules.map((c) => _convertCelluleToMap(c)).toList(),
+        'chargements': provider.chargements.map((c) => _convertChargementToMap(c)).toList(),
+        'semis': provider.semis.map((s) => _convertSemisToMap(s)).toList(),
+        'varietes': provider.varietes.map((v) => _convertVarieteToMap(v)).toList(),
       };
 
-      // Convertir en JSON
+      // Convertir en JSON avec indentation
       final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
       
       // Créer le nom de fichier avec la date
@@ -424,14 +422,71 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     }
   }
 
+  // Méthodes de conversion avec gestion explicite des types
+  Map<String, dynamic> _convertParcelleToMap(Parcelle parcelle) {
+    return {
+      'id': parcelle.id,
+      'firebaseId': parcelle.firebaseId,
+      'nom': parcelle.nom,
+      'surface': parcelle.surface,
+      'date_creation': parcelle.dateCreation.toIso8601String(),
+      'notes': parcelle.notes,
+    };
+  }
+
+  Map<String, dynamic> _convertCelluleToMap(Cellule cellule) {
+    return {
+      'id': cellule.id,
+      'reference': cellule.reference,
+      'capacite': cellule.capacite,
+      'date_creation': cellule.dateCreation.toIso8601String(),
+      'notes': cellule.notes,
+    };
+  }
+
+  Map<String, dynamic> _convertChargementToMap(Chargement chargement) {
+    return {
+      'id': chargement.id,
+      'cellule_id': chargement.celluleId,
+      'parcelle_id': chargement.parcelleId,
+      'remorque': chargement.remorque,
+      'date_chargement': chargement.dateChargement.toIso8601String(),
+      'poids_plein': chargement.poidsPlein,
+      'poids_vide': chargement.poidsVide,
+      'poids_net': chargement.poidsNet,
+      'poids_normes': chargement.poidsNormes,
+      'humidite': chargement.humidite,
+      'variete': chargement.variete,
+    };
+  }
+
+  Map<String, dynamic> _convertSemisToMap(Semis semis) {
+    return {
+      'id': semis.id,
+      'parcelle_id': semis.parcelleId,
+      'date': semis.date.toIso8601String(),
+      'varietes_surfaces': semis.varietesSurfaces.map((v) => v.toMap()).toList(),
+      'notes': semis.notes,
+    };
+  }
+
+  Map<String, dynamic> _convertVarieteToMap(Variete variete) {
+    return {
+      'id': variete.id,
+      'nom': variete.nom,
+      'description': variete.description,
+      'date_creation': variete.dateCreation.toIso8601String(),
+    };
+  }
+
   void _downloadFile(String content, String fileName) {
-      // Pour le web, on utilise la fonctionnalité de téléchargement du navigateur
-      final blob = html.Blob([content], 'application/json');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: url)
-        ..setAttribute('download', fileName);
-      anchor.click();
-      html.Url.revokeObjectUrl(url);
+    // Pour le web, on utilise la fonctionnalité de téléchargement du navigateur
+    final blob = html.Blob([content], 'application/json');
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', fileName);
+    anchor.click();
+    html.Url.revokeObjectUrl(url);
   }
 
   Future<void> _importData() async {
@@ -554,25 +609,25 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     // Supprimer toutes les données existantes
     await provider.deleteAllData();
     
-    // Importer les nouvelles données
+    // Importer les nouvelles données avec conversion explicite des types
     final parcelles = (data['parcelles'] as List)
-        .map((p) => Parcelle.fromMap(Map<String, dynamic>.from(p)))
+        .map((p) => _parseParcelleFromMap(Map<String, dynamic>.from(p)))
         .toList();
     
     final cellules = (data['cellules'] as List)
-        .map((c) => Cellule.fromMap(Map<String, dynamic>.from(c)))
+        .map((c) => _parseCelluleFromMap(Map<String, dynamic>.from(c)))
         .toList();
     
     final chargements = (data['chargements'] as List)
-        .map((c) => Chargement.fromMap(Map<String, dynamic>.from(c)))
+        .map((c) => _parseChargementFromMap(Map<String, dynamic>.from(c)))
         .toList();
     
     final semis = (data['semis'] as List)
-        .map((s) => Semis.fromMap(Map<String, dynamic>.from(s)))
+        .map((s) => _parseSemisFromMap(Map<String, dynamic>.from(s)))
         .toList();
     
     final varietes = (data['varietes'] as List)
-        .map((v) => Variete.fromMap(Map<String, dynamic>.from(v)))
+        .map((v) => _parseVarieteFromMap(Map<String, dynamic>.from(v)))
         .toList();
     
     // Ajouter les données une par une
@@ -595,6 +650,67 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     for (final variete in varietes) {
       await provider.ajouterVariete(variete);
     }
+  }
+
+  // Méthodes de parsing avec conversion explicite des types
+  Parcelle _parseParcelleFromMap(Map<String, dynamic> map) {
+    return Parcelle(
+      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      firebaseId: map['firebaseId']?.toString(),
+      nom: map['nom'].toString(),
+      surface: double.tryParse(map['surface'].toString()) ?? 0.0,
+      dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
+      notes: map['notes']?.toString(),
+    );
+  }
+
+  Cellule _parseCelluleFromMap(Map<String, dynamic> map) {
+    return Cellule(
+      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      reference: map['reference'].toString(),
+      dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
+      notes: map['notes']?.toString(),
+    );
+  }
+
+  Chargement _parseChargementFromMap(Map<String, dynamic> map) {
+    return Chargement(
+      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      celluleId: int.tryParse(map['cellule_id'].toString()) ?? 0,
+      parcelleId: int.tryParse(map['parcelle_id'].toString()) ?? 0,
+      remorque: map['remorque'].toString(),
+      dateChargement: DateTime.tryParse(map['date_chargement'].toString()) ?? DateTime.now(),
+      poidsPlein: double.tryParse(map['poids_plein'].toString()) ?? 0.0,
+      poidsVide: double.tryParse(map['poids_vide'].toString()) ?? 0.0,
+      poidsNet: double.tryParse(map['poids_net'].toString()) ?? 0.0,
+      poidsNormes: double.tryParse(map['poids_normes'].toString()) ?? 0.0,
+      humidite: double.tryParse(map['humidite'].toString()) ?? 0.0,
+      variete: map['variete'].toString(),
+    );
+  }
+
+  Semis _parseSemisFromMap(Map<String, dynamic> map) {
+    final varietesSurfacesData = map['varietes_surfaces'] as List? ?? [];
+    final varietesSurfaces = varietesSurfacesData
+        .map((v) => VarieteSurface.fromMap(Map<String, dynamic>.from(v)))
+        .toList();
+    
+    return Semis(
+      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      parcelleId: int.tryParse(map['parcelle_id'].toString()) ?? 0,
+      date: DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
+      varietesSurfaces: varietesSurfaces,
+      notes: map['notes']?.toString(),
+    );
+  }
+
+  Variete _parseVarieteFromMap(Map<String, dynamic> map) {
+    return Variete(
+      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      nom: map['nom'].toString(),
+      description: map['description']?.toString(),
+      dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
+    );
   }
 
   Future<void> _updatePoidsNormes() async {
