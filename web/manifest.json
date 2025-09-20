@@ -1,7 +1,8 @@
 {
     "name": "Maïs Tracker",
     "short_name": "MaïsTracker",
-    "start_url": ".",
+    "start_url": "/farm/",
+    "scope": "/farm/",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
