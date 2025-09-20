@@ -182,9 +182,12 @@ class FirebaseProvider with ChangeNotifier {
   // Méthodes pour les parcelles
   Future<void> ajouterParcelle(Parcelle parcelle) async {
     try {
-      final id = await _databaseService.insertParcelle(parcelle);
-      parcelle.id = int.tryParse(id) ?? 0;
-      print('Parcelle ajoutée avec ID: ${parcelle.id}');
+      final firebaseId = await _databaseService.insertParcelle(parcelle);
+      // Stocker l'ID Firebase comme string
+      parcelle.firebaseId = firebaseId;
+      // Générer un ID local pour la compatibilité
+      parcelle.id = DateTime.now().millisecondsSinceEpoch;
+      print('Parcelle ajoutée avec ID Firebase: $firebaseId (ID local: ${parcelle.id})');
     } catch (e) {
       _error = 'Erreur ajout parcelle: $e';
       notifyListeners();

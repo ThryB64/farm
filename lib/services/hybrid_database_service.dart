@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
@@ -14,7 +15,7 @@ class HybridDatabaseService {
   factory HybridDatabaseService() => _instance;
   HybridDatabaseService._internal();
 
-  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  late final FirebaseDatabase _database;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference? _userRef;
   
@@ -23,19 +24,33 @@ class HybridDatabaseService {
   // Initialiser le service hybride
   Future<void> initialize() async {
     try {
+      // Forcer l'instance avec la bonne URL
+      _database = FirebaseDatabase.instanceFor(
+        app: Firebase.app(),
+        databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
+      );
+      print('Hybrid Database: Firebase instance created with URL: https://farmgaec-default-rtdb.firebaseio.com');
+
+      // Vérifier la connexion
+      _database.ref('.info/connected').onValue.listen((event) {
+        print('Hybrid Database connected: ${event.snapshot.value}');
+      });
+
       // Essayer Firebase d'abord
       final user = _auth.currentUser;
       if (user != null) {
         _userRef = _database.ref('users/${user.uid}');
         print('Hybrid Database: Firebase initialized for user: ${user.uid}');
+        await _testWrite();
       } else {
         // Essayer l'auth anonyme
         try {
-          await _auth.signInAnonymously();
-          final newUser = _auth.currentUser;
+          final userCred = await _auth.signInAnonymously();
+          final newUser = userCred.user;
           if (newUser != null) {
             _userRef = _database.ref('users/${newUser.uid}');
             print('Hybrid Database: Firebase initialized for anonymous user: ${newUser.uid}');
+            await _testWrite();
           }
         } catch (authError) {
           print('Hybrid Database: Auth failed, using localStorage: $authError');
@@ -43,6 +58,19 @@ class HybridDatabaseService {
       }
     } catch (e) {
       print('Hybrid Database: Firebase init failed, using localStorage: $e');
+    }
+  }
+
+  // Test d'écriture pour vérifier la connexion
+  Future<void> _testWrite() async {
+    try {
+      await _database.ref('ping').set({
+        'at': ServerValue.timestamp,
+        'test': 'Hybrid Database connection test',
+      });
+      print('✅ Hybrid Database write test successful');
+    } catch (e) {
+      print('❌ Hybrid Database write test failed: $e');
     }
   }
 
