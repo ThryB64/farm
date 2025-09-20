@@ -6,17 +6,33 @@ workflows:
       flutter: stable
       xcode: latest
       vars:
-        FLUTTER_BUILD_MODE: release
+        FLUTTER_BUILD_MODE: debug
         SQLITE_FFI_ENABLED: "true"
     scripts:
       - name: Get Flutter packages
         script: |
           flutter packages pub get
+      - name: Configure iOS for Altstore
+        script: |
+          # Désactiver la signature de code dans le projet Xcode
+          cd ios
+          sed -i 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "";/g' Runner.xcodeproj/project.pbxproj
+          sed -i 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' Runner.xcodeproj/project.pbxproj
+          sed -i 's/PROVISIONING_PROFILE_SPECIFIER = "";/PROVISIONING_PROFILE_SPECIFIER = "";/g' Runner.xcodeproj/project.pbxproj
+          cd ..
       - name: Build iOS
         script: |
-          flutter build ios --debug --no-codesign
+          flutter build ios
+      - name: Create IPA for Altstore
+        script: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r ../../../mais-tracker.ipa Payload/
+          cd ../../..
     artifacts:
-      - build/ios/iphoneos/Debug-iphoneos/Runner.app
+      - build/ios/iphoneos/Runner.app
+      - mais-tracker.ipa
     publishing:
       email:
         recipients:
@@ -67,6 +83,54 @@ workflows:
           flutter build windows --release
     artifacts:
       - build/windows/runner/Release/*
+    publishing:
+      email:
+        recipients:
+          - thierryber64@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  mais-tracker-web:
+    name: Maïs Tracker - Web (PWA pour iOS)
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      vars:
+        FLUTTER_BUILD_MODE: release
+        SQLITE_FFI_ENABLED: "true"
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Build Web PWA
+        script: |
+          flutter build web --release
+      - name: Create PWA manifest
+        script: |
+          echo '{
+            "name": "Maïs Tracker",
+            "short_name": "MaïsTracker",
+            "description": "Application de gestion des récoltes de maïs",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#4CAF50",
+            "icons": [
+              {
+                "src": "icons/Icon-192.png",
+                "sizes": "192x192",
+                "type": "image/png"
+              },
+              {
+                "src": "icons/Icon-512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+              }
+            ]
+          }' > build/web/manifest.json
+    artifacts:
+      - build/web/*
     publishing:
       email:
         recipients:

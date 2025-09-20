@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'providers/database_provider.dart';
 import 'screens/home_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -14,10 +13,6 @@ void main() {
     debugPrint('Stack trace: $stack');
     return true;
   };
-
-  // Initialiser sqflite_common_ffi
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
 
   runApp(const MyApp());
 }
