@@ -354,6 +354,14 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             onPressed: _updatePoidsNormes,
             isFullWidth: true,
           ),
+          const SizedBox(height: AppTheme.spacingM),
+          ModernOutlinedButton(
+            text: 'Vider le cache et recharger',
+            icon: Icons.refresh,
+            borderColor: AppTheme.error,
+            textColor: AppTheme.error,
+            onPressed: _clearCacheAndReload,
+          ),
         ],
       ),
     );
@@ -606,10 +614,16 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   Future<void> _performImport(Map<String, dynamic> data) async {
     final provider = context.read<FirebaseProviderV3>();
     
-    // Supprimer toutes les données existantes
+    // 1. Vider complètement le localStorage
+    await _clearLocalStorage();
+    
+    // 2. Supprimer toutes les données existantes de Firebase
     await provider.deleteAllData();
     
-    // Importer les nouvelles données avec conversion explicite des types
+    // 3. Attendre un peu pour que la suppression soit effective
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // 4. Importer les nouvelles données avec conversion explicite des types
     final parcelles = (data['parcelles'] as List)
         .map((p) => _parseParcelleFromMap(Map<String, dynamic>.from(p)))
         .toList();
@@ -630,7 +644,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         .map((v) => _parseVarieteFromMap(Map<String, dynamic>.from(v)))
         .toList();
     
-    // Ajouter les données une par une
+    // 5. Ajouter les données une par une
     for (final parcelle in parcelles) {
       await provider.ajouterParcelle(parcelle);
     }
@@ -650,13 +664,60 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     for (final variete in varietes) {
       await provider.ajouterVariete(variete);
     }
+    
+    // 6. Forcer un refresh des données
+    await Future.delayed(const Duration(milliseconds: 1000));
+  }
+
+  // Fonction pour vider le localStorage
+  Future<void> _clearLocalStorage() async {
+    try {
+      // Vider toutes les clés liées à l'application
+      html.window.localStorage.remove('parcelles');
+      html.window.localStorage.remove('cellules');
+      html.window.localStorage.remove('chargements');
+      html.window.localStorage.remove('semis');
+      html.window.localStorage.remove('varietes');
+      html.window.localStorage.remove('firebase_data');
+      html.window.localStorage.remove('user_data');
+      
+      // Vider toutes les clés qui commencent par 'firebase_'
+      final keys = html.window.localStorage.keys.toList();
+      for (final key in keys) {
+        if (key.startsWith('firebase_') || key.startsWith('parcelle_') || 
+            key.startsWith('cellule_') || key.startsWith('chargement_') ||
+            key.startsWith('semis_') || key.startsWith('variete_')) {
+          html.window.localStorage.remove(key);
+        }
+      }
+      
+      print('✅ LocalStorage vidé avec succès');
+    } catch (e) {
+      print('⚠️ Erreur lors du vidage du localStorage: $e');
+    }
   }
 
   // Méthodes de parsing avec conversion explicite des types
   Parcelle _parseParcelleFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase (ex: "f_parcelle_1_11200")
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        // C'est une clé stable Firebase
+        firebaseId = idValue;
+        id = null; // Pas d'ID numérique pour les clés stables
+      } else {
+        // C'est un ID numérique
+        id = int.tryParse(idValue);
+      }
+    }
+    
     return Parcelle(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
-      firebaseId: map['firebaseId']?.toString(),
+      id: id,
+      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
       nom: map['nom'].toString(),
       surface: double.tryParse(map['surface'].toString()) ?? 0.0,
       dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
@@ -665,8 +726,22 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   }
 
   Cellule _parseCelluleFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
     return Cellule(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: id,
       reference: map['reference'].toString(),
       dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
       notes: map['notes']?.toString(),
@@ -674,8 +749,22 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   }
 
   Chargement _parseChargementFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
     return Chargement(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: id,
       celluleId: int.tryParse(map['cellule_id'].toString()) ?? 0,
       parcelleId: int.tryParse(map['parcelle_id'].toString()) ?? 0,
       remorque: map['remorque'].toString(),
@@ -695,8 +784,22 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         .map((v) => VarieteSurface.fromMap(Map<String, dynamic>.from(v)))
         .toList();
     
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
     return Semis(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: id,
       parcelleId: int.tryParse(map['parcelle_id'].toString()) ?? 0,
       date: DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
       varietesSurfaces: varietesSurfaces,
@@ -705,8 +808,22 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   }
 
   Variete _parseVarieteFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
     return Variete(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: id,
       nom: map['nom'].toString(),
       description: map['description']?.toString(),
       dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
@@ -734,6 +851,47 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _clearCacheAndReload() async {
+    try {
+      // Vider le localStorage
+      await _clearLocalStorage();
+      
+      // Supprimer toutes les données Firebase
+      await context.read<FirebaseProviderV3>().deleteAllData();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Cache vidé ! Rechargez la page pour voir l\'effet.'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+        
+        // Recharger la page après 2 secondes
+        Future.delayed(const Duration(seconds: 2), () {
+          html.window.location.reload();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors du vidage du cache : $e'),
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
