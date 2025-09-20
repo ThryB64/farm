@@ -1,147 +1,282 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
+import '../theme/app_theme.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
 import '../models/parcelle.dart';
 import 'parcelle_details_screen.dart';
 
-class ParcellesScreen extends StatelessWidget {
+class ParcellesScreen extends StatefulWidget {
   const ParcellesScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ParcellesScreen> createState() => _ParcellesScreenState();
+}
+
+class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
         title: const Text('Parcelles'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppTheme.primary,
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () => _showAddParcelleDialog(),
+            icon: const Icon(Icons.add),
+            tooltip: 'Ajouter une parcelle',
+          ),
+        ],
       ),
       body: Consumer<FirebaseProviderV3>(
-        builder: (context, db, child) {
-          final parcellesTriees = List<Parcelle>.from(db.parcelles)
+        builder: (context, provider, child) {
+          final parcelles = List<Parcelle>.from(provider.parcelles)
             ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
 
-          if (parcellesTriees.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.landscape,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Aucune parcelle enregistrée',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            );
+          if (parcelles.isEmpty) {
+            return _buildEmptyState();
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: parcellesTriees.length,
-            itemBuilder: (context, index) {
-              final parcelle = parcellesTriees[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: InkWell(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
-                    ),
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                parcelle.nom,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.edit),
-                                  color: Colors.blue,
-                                  onPressed: () => _modifierParcelle(context, parcelle),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.delete),
-                                  color: Colors.red,
-                                  onPressed: () => _confirmerSuppression(context, parcelle),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.area_chart,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              '${parcelle.surface} ha',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Icon(
-                              Icons.calendar_today,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Créée le ${_formatDate(parcelle.dateCreation)}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+          return FadeTransition(
+            opacity: _fadeAnimation,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(AppTheme.spacingM),
+              itemCount: parcelles.length,
+              itemBuilder: (context, index) {
+                final parcelle = parcelles[index];
+                return _buildParcelleCard(parcelle, provider);
+              },
+            ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _ajouterParcelle(context),
-        backgroundColor: Colors.green,
-        child: Icon(Icons.add),
+        onPressed: () => _showAddParcelleDialog(),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppTheme.spacingXL),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.landscape,
+              size: 64,
+              color: AppTheme.primary.withOpacity(0.6),
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          Text(
+            'Aucune parcelle enregistrée',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingS),
+          Text(
+            'Commencez par ajouter votre première parcelle',
+            style: TextStyle(
+              fontSize: 16,
+              color: AppTheme.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppTheme.spacingXL),
+          ModernButton(
+            text: 'Ajouter une parcelle',
+            icon: Icons.add,
+            onPressed: () => _showAddParcelleDialog(),
+            isFullWidth: false,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV3 provider) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
+      child: ModernCard(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(AppTheme.spacingM),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                  ),
+                  child: const Icon(
+                    Icons.landscape,
+                    color: AppTheme.primary,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(width: AppTheme.spacingM),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        parcelle.nom,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Créée le ${_formatDate(parcelle.dateCreation)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _showEditParcelleDialog(parcelle);
+                    } else if (value == 'delete') {
+                      _showDeleteConfirmation(parcelle);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, color: AppTheme.primary),
+                          SizedBox(width: AppTheme.spacingS),
+                          Text('Modifier'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: AppTheme.error),
+                          SizedBox(width: AppTheme.spacingS),
+                          Text('Supprimer'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildInfoChip(
+                    '${parcelle.surface} ha',
+                    Icons.area_chart,
+                    AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(width: AppTheme.spacingS),
+                Expanded(
+                  child: _buildInfoChip(
+                    'Surface',
+                    Icons.info_outline,
+                    AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(String text, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingM,
+        vertical: AppTheme.spacingS,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: AppTheme.spacingS),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -150,7 +285,7 @@ class ParcellesScreen extends StatelessWidget {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  Future<void> _ajouterParcelle(BuildContext context) async {
+  Future<void> _showAddParcelleDialog() async {
     final formKey = GlobalKey<FormState>();
     String nom = '';
     double surface = 0;
@@ -160,7 +295,7 @@ class ParcellesScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Nouvelle Parcelle'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
         content: Form(
           key: formKey,
@@ -169,8 +304,9 @@ class ParcellesScreen extends StatelessWidget {
             children: [
               TextFormField(
                 decoration: const InputDecoration(
-                  labelText: 'Nom',
-                  border: OutlineInputBorder(),
+                  labelText: 'Nom de la parcelle',
+                  hintText: 'Ex: Parcelle Nord',
+                  prefixIcon: Icon(Icons.landscape),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -180,11 +316,12 @@ class ParcellesScreen extends StatelessWidget {
                 },
                 onSaved: (value) => nom = value!,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: AppTheme.spacingM),
               TextFormField(
                 decoration: const InputDecoration(
-                  labelText: 'Surface (ha)',
-                  border: OutlineInputBorder(),
+                  labelText: 'Surface (hectares)',
+                  hintText: 'Ex: 2.5',
+                  prefixIcon: Icon(Icons.area_chart),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -203,11 +340,12 @@ class ParcellesScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(
+          ModernTextButton(
+            text: 'Annuler',
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
           ),
-          ElevatedButton(
+          ModernButton(
+            text: 'Ajouter',
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 formKey.currentState!.save();
@@ -217,20 +355,25 @@ class ParcellesScreen extends StatelessWidget {
                 );
                 context.read<FirebaseProviderV3>().ajouterParcelle(parcelle);
                 Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Parcelle ajoutée avec succès'),
+                    backgroundColor: AppTheme.success,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Ajouter'),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _modifierParcelle(BuildContext context, Parcelle parcelle) async {
+  Future<void> _showEditParcelleDialog(Parcelle parcelle) async {
     final formKey = GlobalKey<FormState>();
     String nom = parcelle.nom;
     double surface = parcelle.surface;
@@ -240,7 +383,7 @@ class ParcellesScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Modifier la Parcelle'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
         content: Form(
           key: formKey,
@@ -250,8 +393,8 @@ class ParcellesScreen extends StatelessWidget {
               TextFormField(
                 initialValue: parcelle.nom,
                 decoration: const InputDecoration(
-                  labelText: 'Nom',
-                  border: OutlineInputBorder(),
+                  labelText: 'Nom de la parcelle',
+                  prefixIcon: Icon(Icons.landscape),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -261,12 +404,12 @@ class ParcellesScreen extends StatelessWidget {
                 },
                 onSaved: (value) => nom = value!,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: AppTheme.spacingM),
               TextFormField(
                 initialValue: parcelle.surface.toString(),
                 decoration: const InputDecoration(
-                  labelText: 'Surface (ha)',
-                  border: OutlineInputBorder(),
+                  labelText: 'Surface (hectares)',
+                  prefixIcon: Icon(Icons.area_chart),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -285,11 +428,12 @@ class ParcellesScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(
+          ModernTextButton(
+            text: 'Annuler',
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
           ),
-          ElevatedButton(
+          ModernButton(
+            text: 'Modifier',
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 formKey.currentState!.save();
@@ -301,40 +445,42 @@ class ParcellesScreen extends StatelessWidget {
                 );
                 context.read<FirebaseProviderV3>().modifierParcelle(parcelleModifiee);
                 Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Parcelle modifiée avec succès'),
+                    backgroundColor: AppTheme.success,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Modifier'),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _confirmerSuppression(BuildContext context, Parcelle parcelle) async {
+  Future<void> _showDeleteConfirmation(Parcelle parcelle) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmer la suppression'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
         content: Text('Voulez-vous vraiment supprimer la parcelle "${parcelle.nom}" ?'),
         actions: [
-          TextButton(
+          ModernTextButton(
+            text: 'Annuler',
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
           ),
-          ElevatedButton(
+          ModernButton(
+            text: 'Supprimer',
+            backgroundColor: AppTheme.error,
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Supprimer'),
           ),
         ],
       ),
@@ -342,6 +488,16 @@ class ParcellesScreen extends StatelessWidget {
 
     if (confirmed == true && parcelle.id != null) {
       context.read<FirebaseProviderV3>().supprimerParcelle(parcelle.id.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Parcelle supprimée'),
+          backgroundColor: AppTheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          ),
+        ),
+      );
     }
   }
-} 
+}

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v3.dart';
+import '../theme/app_theme.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
 import 'parcelles_screen.dart';
 import 'cellules_screen.dart';
 import 'chargements_screen.dart';
 import 'semis_screen.dart';
 import 'varietes_screen.dart';
-import 'import_export_screen.dart';
 import 'statistiques_screen.dart';
+import 'import_export_screen.dart';
 import 'export_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,420 +20,395 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
-    _loadStats();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+    
+    _animationController.forward();
   }
 
-  Future<void> _loadStats() async {
-    // Les statistiques sont maintenant calculées en temps réel dans le Consumer
-    // Plus besoin de charger les stats séparément
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('GAEC de la BARADE'),
-        backgroundColor: Colors.green,
-        elevation: 0,
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.green.shade700,
-                Colors.green.shade500,
-              ],
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppTheme.primary,
+              AppTheme.primaryLight,
+            ],
           ),
         ),
-      ),
-      body: Consumer<FirebaseProviderV3>(
-        builder: (context, provider, child) {
-          final parcelles = provider.parcelles;
-          final chargements = provider.chargements;
-          // final semis = provider.semis;
-
-          // Calculer les statistiques globales
-          final surfaceTotale = parcelles.fold<double>(
-            0,
-            (sum, p) => sum + p.surface,
-          );
-
-          // Obtenir l'année la plus récente avec des chargements
-          final derniereAnnee = chargements.isEmpty 
-              ? DateTime.now().year 
-              : chargements
-                  .map((c) => c.dateChargement.year)
-                  .reduce((a, b) => a > b ? a : b);
-
-          final chargementsDerniereAnnee = chargements.where(
-            (c) => c.dateChargement.year == derniereAnnee
-          ).toList();
-
-          // Calculer le poids total normé de l'année
-          final poidsTotalNormeAnnee = chargementsDerniereAnnee.fold<double>(
-            0,
-            (sum, c) => sum + c.poidsNormes,
-          );
-
-          // Calculer le rendement moyen normé (en T/ha)
-          final rendementMoyenNorme = surfaceTotale > 0
-              ? (poidsTotalNormeAnnee / 1000) / surfaceTotale
-              : 0.0;
-
-          // Calculer le nombre de variétés utilisées
-          // final varietesUtilisees = semis.expand((s) => s.varietes).toSet().length;
-
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.green.shade50,
-                  Colors.white,
-                ],
-              ),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Carte de statistiques rapides
-                  Container(
-                    margin: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 2,
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.analytics,
-                                  color: Colors.green,
-                                  size: 24,
-                                ),
-                              ),
-                              SizedBox(width: 12),
-                              const Text(
-                                'Aperçu',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16),
-                          Center(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    _buildStatCard(
-                                      'Surface totale',
-                                      '${surfaceTotale.toStringAsFixed(2)} ha',
-                                      Icons.landscape,
-                                      Colors.green,
-                                    ),
-                                    SizedBox(width: 12),
-                                    _buildStatCard(
-                                      'Rendement $derniereAnnee',
-                                      '${rendementMoyenNorme.toStringAsFixed(3)} T/ha',
-                                      Icons.trending_up,
-                                      Colors.blue,
-                                    ),
-                                    SizedBox(width: 12),
-                                    _buildStatCard(
-                                      'Poids total $derniereAnnee',
-                                      '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(2)} T',
-                                      Icons.scale,
-                                      Colors.orange,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Menu principal
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SafeArea(
+          child: Consumer<FirebaseProviderV3>(
+            builder: (context, provider, child) {
+              return FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppTheme.spacingM),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.menu,
-                                color: Colors.green,
-                                size: 24,
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            const Text(
-                              'Menu principal',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 16),
-                        GridView.count(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          childAspectRatio: 1.5,
-                          children: [
-                            _buildMenuCard(
-                              'Parcelles',
-                              Icons.landscape,
-                              Colors.green,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ParcellesScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Cellules',
-                              Icons.grid_view,
-                              Colors.orange,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const CellulesScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Chargements',
-                              Icons.local_shipping,
-                              Colors.blue,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ChargementsScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Semis',
-                              Icons.grass,
-                              Colors.brown,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SemisScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Variétés',
-                              Icons.eco,
-                              Colors.lightGreen,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const VarietesScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Statistiques',
-                              Icons.bar_chart,
-                              Colors.purple,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const StatistiquesScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Import/Export',
-                              Icons.import_export,
-                              Colors.teal,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ImportExportScreen(),
-                                ),
-                              ),
-                            ),
-                            _buildMenuCard(
-                              'Export PDF',
-                              Icons.picture_as_pdf,
-                              Colors.red,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ExportScreen(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        _buildHeader(),
+                        const SizedBox(height: AppTheme.spacingL),
+                        _buildStatsSection(provider),
+                        const SizedBox(height: AppTheme.spacingL),
+                        _buildMenuSection(),
+                        const SizedBox(height: AppTheme.spacingL),
+                        _buildQuickActions(provider),
                       ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spacingM),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+              ),
+              child: const Icon(
+                Icons.agriculture,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacingM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'GAEC de la BARADE',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Gestion des récoltes de maïs',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                 ],
               ),
             ),
-          );
-        },
-      ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      width: 160,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
+  Widget _buildStatsSection(FirebaseProviderV3 provider) {
+    final parcelles = provider.parcelles;
+    final chargements = provider.chargements;
+    
+    // Calculer les statistiques
+    final surfaceTotale = parcelles.fold<double>(0, (sum, p) => sum + p.surface);
+    final derniereAnnee = DateTime.now().year;
+    final chargementsAnnee = chargements.where((c) => c.dateChargement.year == derniereAnnee).toList();
+    final poidsTotalNormeAnnee = chargementsAnnee.fold<double>(0, (sum, c) => sum + c.poidsNormes);
+    final rendementMoyenNorme = surfaceTotale > 0 ? poidsTotalNormeAnnee / (surfaceTotale * 1000) : 0.0;
+
+    return GradientCard(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Colors.white, Color(0xFFF8F9FA)],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 24),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.analytics,
+                  color: AppTheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'Aperçu général',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            textAlign: TextAlign.center,
+          const SizedBox(height: AppTheme.spacingL),
+          Row(
+            children: [
+              Expanded(
+                child: StatCard(
+                  title: 'Surface totale',
+                  value: '${surfaceTotale.toStringAsFixed(1)} ha',
+                  icon: Icons.landscape,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              Expanded(
+                child: StatCard(
+                  title: 'Rendement $derniereAnnee',
+                  value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
+                  icon: Icons.trending_up,
+                  color: AppTheme.secondary,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
-            textAlign: TextAlign.center,
+          const SizedBox(height: AppTheme.spacingM),
+          Row(
+            children: [
+              Expanded(
+                child: StatCard(
+                  title: 'Poids total $derniereAnnee',
+                  value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
+                  icon: Icons.scale,
+                  color: AppTheme.accent,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              Expanded(
+                child: StatCard(
+                  title: 'Parcelles',
+                  value: '${parcelles.length}',
+                  icon: Icons.grid_view,
+                  color: AppTheme.success,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMenuCard(
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 28,
-                    color: color,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+  Widget _buildMenuSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spacingS),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
+              child: const Icon(
+                Icons.menu,
+                color: Colors.white,
+                size: 24,
+              ),
             ),
-          ),
+            const SizedBox(width: AppTheme.spacingM),
+            const Text(
+              'Menu principal',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
-      ),
+        const SizedBox(height: AppTheme.spacingL),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          crossAxisSpacing: AppTheme.spacingM,
+          mainAxisSpacing: AppTheme.spacingM,
+          childAspectRatio: 1.2,
+          children: [
+            MenuCard(
+              title: 'Parcelles',
+              subtitle: 'Gestion des parcelles',
+              icon: Icons.landscape,
+              color: AppTheme.primary,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ParcellesScreen()),
+              ),
+            ),
+            MenuCard(
+              title: 'Cellules',
+              subtitle: 'Stockage des grains',
+              icon: Icons.grid_view,
+              color: AppTheme.secondary,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CellulesScreen()),
+              ),
+            ),
+            MenuCard(
+              title: 'Chargements',
+              subtitle: 'Récoltes et transport',
+              icon: Icons.local_shipping,
+              color: AppTheme.accent,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChargementsScreen()),
+              ),
+            ),
+            MenuCard(
+              title: 'Semis',
+              subtitle: 'Plantations',
+              icon: Icons.grass,
+              color: AppTheme.success,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SemisScreen()),
+              ),
+            ),
+            MenuCard(
+              title: 'Variétés',
+              subtitle: 'Types de maïs',
+              icon: Icons.eco,
+              color: AppTheme.info,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const VarietesScreen()),
+              ),
+            ),
+            MenuCard(
+              title: 'Statistiques',
+              subtitle: 'Analyses et graphiques',
+              icon: Icons.bar_chart,
+              color: AppTheme.warning,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const StatistiquesScreen()),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
-} 
+
+  Widget _buildQuickActions(FirebaseProviderV3 provider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spacingS),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
+              child: const Icon(
+                Icons.flash_on,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacingM),
+            const Text(
+              'Actions rapides',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppTheme.spacingL),
+        Row(
+          children: [
+            Expanded(
+              child: ModernButton(
+                text: 'Import/Export',
+                icon: Icons.import_export,
+                backgroundColor: Colors.white,
+                textColor: AppTheme.primary,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ImportExportScreen()),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacingM),
+            Expanded(
+              child: ModernOutlinedButton(
+                text: 'Export PDF',
+                icon: Icons.picture_as_pdf,
+                borderColor: Colors.white,
+                textColor: Colors.white,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ExportScreen()),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
