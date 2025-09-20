@@ -7,7 +7,7 @@ import '../utils/poids_utils.dart';
 class ChargementFormScreen extends StatefulWidget {
   final Chargement? chargement;
 
-  const ChargementFormScreen({super.key, this.chargement});
+  const ChargementFormScreen({Key? key, this.chargement}) : super(key: key);
 
   @override
   State<ChargementFormScreen> createState() => _ChargementFormScreenState();

@@ -8,7 +8,7 @@ import '../models/parcelle.dart';
 class CelluleDetailsScreen extends StatelessWidget {
   final Cellule cellule;
 
-  const CelluleDetailsScreen({super.key, required this.cellule});
+  const CelluleDetailsScreen({Key? key, required this.cellule}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

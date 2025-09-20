@@ -9,7 +9,7 @@ import 'parcelle_form_screen.dart';
 class ParcelleDetailsScreen extends StatefulWidget {
   final Parcelle parcelle;
 
-  const ParcelleDetailsScreen({super.key, required this.parcelle});
+  const ParcelleDetailsScreen({Key? key, required this.parcelle}) : super(key: key);
 
   @override
   State<ParcelleDetailsScreen> createState() => _ParcelleDetailsScreenState();

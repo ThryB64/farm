@@ -7,7 +7,7 @@ import '../models/semis.dart';
 import '../models/parcelle.dart';
 
 class StatistiquesScreen extends StatefulWidget {
-  const StatistiquesScreen({super.key});
+  const StatistiquesScreen({Key? key}) : super(key: key);
 
   @override
   State<StatistiquesScreen> createState() => _StatistiquesScreenState();

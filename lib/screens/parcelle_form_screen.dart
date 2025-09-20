@@ -6,7 +6,7 @@ import '../models/parcelle.dart';
 class ParcelleFormScreen extends StatefulWidget {
   final Parcelle? parcelle;
 
-  const ParcelleFormScreen({super.key, this.parcelle});
+  const ParcelleFormScreen({Key? key, this.parcelle}) : super(key: key);
 
   @override
   State<ParcelleFormScreen> createState() => _ParcelleFormScreenState();

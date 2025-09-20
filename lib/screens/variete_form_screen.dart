@@ -6,7 +6,7 @@ import '../models/variete.dart';
 class VarieteFormScreen extends StatefulWidget {
   final Variete? variete;
 
-  const VarieteFormScreen({super.key, this.variete});
+  const VarieteFormScreen({Key? key, this.variete}) : super(key: key);
 
   @override
   State<VarieteFormScreen> createState() => _VarieteFormScreenState();

@@ -4,7 +4,7 @@ import '../providers/database_provider.dart';
 import 'variete_form_screen.dart';
 
 class VarietesScreen extends StatelessWidget {
-  const VarietesScreen({super.key});
+  const VarietesScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -14,7 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 
 class ExportScreen extends StatefulWidget {
-  const ExportScreen({super.key});
+  const ExportScreen({Key? key}) : super(key: key);
 
   @override
   State<ExportScreen> createState() => _ExportScreenState();

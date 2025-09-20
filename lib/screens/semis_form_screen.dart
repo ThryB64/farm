@@ -7,7 +7,7 @@ import '../models/variete_surface.dart';
 class SemisFormScreen extends StatefulWidget {
   final Semis? semis;
 
-  const SemisFormScreen({super.key, this.semis});
+  const SemisFormScreen({Key? key, this.semis}) : super(key: key);
 
   @override
   State<SemisFormScreen> createState() => _SemisFormScreenState();

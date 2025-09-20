@@ -6,7 +6,7 @@ import 'cellule_form_screen.dart';
 import 'cellule_details_screen.dart';
 
 class CellulesScreen extends StatefulWidget {
-  const CellulesScreen({super.key});
+  const CellulesScreen({Key? key}) : super(key: key);
 
   @override
   State<CellulesScreen> createState() => _CellulesScreenState();

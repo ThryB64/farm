@@ -6,7 +6,7 @@ import '../models/parcelle.dart';
 import 'semis_form_screen.dart';
 
 class SemisScreen extends StatefulWidget {
-  const SemisScreen({super.key});
+  const SemisScreen({Key? key}) : super(key: key);
 
   @override
   State<SemisScreen> createState() => _SemisScreenState();

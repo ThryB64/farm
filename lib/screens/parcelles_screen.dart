@@ -6,7 +6,7 @@ import 'parcelle_details_screen.dart';
 import 'parcelle_form_screen.dart';
 
 class ParcellesScreen extends StatelessWidget {
-  const ParcellesScreen({super.key});
+  const ParcellesScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

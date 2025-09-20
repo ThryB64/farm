@@ -6,7 +6,7 @@ import '../models/cellule.dart';
 import 'chargement_form_screen.dart';
 
 class ChargementsScreen extends StatefulWidget {
-  const ChargementsScreen({super.key});
+  const ChargementsScreen({Key? key}) : super(key: key);
 
   @override
   State<ChargementsScreen> createState() => _ChargementsScreenState();
