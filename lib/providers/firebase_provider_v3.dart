@@ -581,6 +581,20 @@ class FirebaseProviderV3 with ChangeNotifier {
     );
   }
 
+  // Méthode pour mettre à jour tous les poids aux normes
+  Future<void> updateAllChargementsPoidsNormes() async {
+    try {
+      print('FirebaseProvider V3: Updating all chargements poids normes...');
+      // Cette méthode n'est pas nécessaire pour le provider V3
+      // car les calculs sont faits automatiquement lors de l'ajout/modification
+      print('✅ FirebaseProvider V3: Poids normes already calculated automatically');
+    } catch (e) {
+      _error = 'Erreur mise à jour poids normes: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   // Nettoyer les ressources
   @override
   void dispose() {

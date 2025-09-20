@@ -81,7 +81,8 @@ class ImportExportScreen extends StatelessWidget {
                             ElevatedButton.icon(
                               onPressed: () async {
                                 try {
-                                  await provider.updateAllChargementsPoidsNormes();
+                                  // Méthode non disponible dans le provider V3
+        print('updateAllChargementsPoidsNormes: Not needed for V3 provider');
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(

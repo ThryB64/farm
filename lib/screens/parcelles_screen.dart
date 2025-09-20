@@ -342,7 +342,7 @@ class ParcellesScreen extends StatelessWidget {
     );
 
     if (confirmed == true && parcelle.id != null) {
-      context.read<FirebaseProviderV3>().supprimerParcelle(parcelle.id!);
+      context.read<FirebaseProviderV3>().supprimerParcelle(parcelle.id.toString());
     }
   }
 } 
