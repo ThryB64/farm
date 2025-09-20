@@ -43,19 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildWelcomeSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Bonjour, Thierry 👋',
-          style: AppTheme.h1,
-        ),
-        const SizedBox(height: AppTheme.spacingXS),
-        Text(
-          'Bienvenue dans votre ferme',
-          style: AppTheme.bodyLarge.copyWith(color: AppTheme.textMuted),
-        ),
-      ],
+    return Text(
+      'Bonjour, Thierry 👋',
+      style: AppTheme.h1,
     );
   }
 
@@ -70,122 +60,105 @@ class _HomeScreenState extends State<HomeScreen> {
     final poidsTotalNormeAnnee = chargementsAnnee.fold<double>(0, (sum, c) => sum + c.poidsNormes);
     final rendementMoyenNorme = surfaceTotale > 0 ? poidsTotalNormeAnnee / (surfaceTotale * 1000) : 0.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Aperçu général',
-          style: AppTheme.h2,
-        ),
-        const SizedBox(height: AppTheme.spacingL),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final isTablet = constraints.maxWidth >= 768;
-            final isDesktop = constraints.maxWidth >= 1200;
-            
-            return GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: isDesktop ? 4 : (isTablet ? 2 : 1),
-              crossAxisSpacing: AppTheme.cardGutter,
-              mainAxisSpacing: AppTheme.cardGutter,
-              childAspectRatio: 1.2,
-              children: [
-                AppTheme.buildKPICard(
-                  label: 'Surface totale',
-                  value: '${surfaceTotale.toStringAsFixed(1)} ha',
-                  icon: Icons.landscape,
-                  valueColor: AppTheme.success,
-                ),
-                AppTheme.buildKPICard(
-                  label: 'Rendement moyen',
-                  value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
-                  icon: Icons.trending_up,
-                  valueColor: AppTheme.textMain,
-                  trend: '2025',
-                ),
-                AppTheme.buildKPICard(
-                  label: 'Poids total $derniereAnnee',
-                  value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
-                  icon: Icons.scale,
-                  valueColor: AppTheme.accent,
-                ),
-                AppTheme.buildKPICard(
-                  label: 'Parcelles',
-                  value: '${parcelles.length}',
-                  icon: Icons.grid_view,
-                  valueColor: AppTheme.success,
-                ),
-              ],
-            );
-          },
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= 1200;
+        final isTablet = constraints.maxWidth >= 768;
+        
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: isDesktop ? 4 : (isTablet ? 2 : 1),
+          crossAxisSpacing: AppTheme.spacingM,
+          mainAxisSpacing: AppTheme.spacingM,
+          childAspectRatio: 1.2,
+          children: [
+            AppTheme.buildKPICard(
+              label: 'Surface totale',
+              value: '${surfaceTotale.toStringAsFixed(1)} ha',
+              icon: Icons.landscape,
+              iconColor: AppTheme.success,
+            ),
+            AppTheme.buildKPICard(
+              label: 'Rendement moyen',
+              value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
+              icon: Icons.trending_up,
+              iconColor: AppTheme.textMain,
+            ),
+            AppTheme.buildKPICard(
+              label: 'Poids total $derniereAnnee',
+              value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
+              icon: Icons.scale,
+              iconColor: AppTheme.accent,
+            ),
+            AppTheme.buildKPICard(
+              label: 'Parcelles',
+              value: '${parcelles.length}',
+              icon: Icons.grid_view,
+              iconColor: AppTheme.success,
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildMenuSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Menu principal',
-          style: AppTheme.h2,
-        ),
-        const SizedBox(height: AppTheme.spacingL),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final isDesktop = constraints.maxWidth >= 1200;
-            
-            return GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: isDesktop ? 2 : 1,
-              crossAxisSpacing: AppTheme.cardGutter,
-              mainAxisSpacing: AppTheme.cardGutter,
-              childAspectRatio: 2.5,
-              children: [
-                AppTheme.buildMenuCard(
-                  title: 'Parcelles',
-                  subtitle: 'Gérer vos parcelles et cultures',
-                  icon: Icons.landscape,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ParcellesScreen()),
-                  ),
-                ),
-                AppTheme.buildMenuCard(
-                  title: 'Cellules',
-                  subtitle: 'Stockage et gestion des grains',
-                  icon: Icons.grid_view,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const CellulesScreen()),
-                  ),
-                ),
-                AppTheme.buildMenuCard(
-                  title: 'Chargements',
-                  subtitle: 'Récoltes et transport',
-                  icon: Icons.local_shipping,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ChargementsScreen()),
-                  ),
-                ),
-                AppTheme.buildMenuCard(
-                  title: 'Variétés',
-                  subtitle: 'Types de maïs et semences',
-                  icon: Icons.eco,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const VarietesScreen()),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= 1200;
+        
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: isDesktop ? 2 : 1,
+          crossAxisSpacing: AppTheme.spacingM,
+          mainAxisSpacing: AppTheme.spacingM,
+          childAspectRatio: 2.5,
+          children: [
+            AppTheme.buildMenuCard(
+              title: 'Parcelles',
+              subtitle: 'Gérer vos parcelles et cultures',
+              icon: Icons.landscape,
+              iconColor: AppTheme.success,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ParcellesScreen()),
+              ),
+            ),
+            AppTheme.buildMenuCard(
+              title: 'Cellules',
+              subtitle: 'Stockage et gestion des grains',
+              icon: Icons.grid_view,
+              iconColor: AppTheme.primary,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CellulesScreen()),
+              ),
+            ),
+            AppTheme.buildMenuCard(
+              title: 'Chargements',
+              subtitle: 'Récoltes et transport',
+              icon: Icons.local_shipping,
+              iconColor: AppTheme.accent,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChargementsScreen()),
+              ),
+            ),
+            AppTheme.buildMenuCard(
+              title: 'Variétés',
+              subtitle: 'Types de maïs et semences',
+              icon: Icons.eco,
+              iconColor: AppTheme.warning,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const VarietesScreen()),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -193,21 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Activité récente',
-              style: AppTheme.h2,
-            ),
-            TextButton(
-              onPressed: () {},
-              child: Text(
-                'Voir tout',
-                style: AppTheme.body.copyWith(color: AppTheme.primary),
-              ),
-            ),
-          ],
+        Text(
+          'Activité récente',
+          style: AppTheme.h2,
         ),
         const SizedBox(height: AppTheme.spacingL),
         _buildActivityList(provider),
@@ -226,8 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: 'Nouvelle parcelle créée',
         subtitle: parcelle.nom,
         date: parcelle.dateCreation,
-        status: 'Succès',
-        statusColor: AppTheme.success,
+        iconColor: AppTheme.success,
       ));
     }
     
@@ -239,8 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: 'Chargement enregistré',
         subtitle: '${(chargement.poidsNormes / 1000).toStringAsFixed(1)} T',
         date: chargement.dateChargement,
-        status: 'Succès',
-        statusColor: AppTheme.success,
+        iconColor: AppTheme.accent,
       ));
     }
     
@@ -259,12 +218,12 @@ class _HomeScreenState extends State<HomeScreen> {
               size: 48,
               color: AppTheme.textMuted,
             ),
-            const SizedBox(height: AppTheme.spacingM),
+            const SizedBox(height: AppTheme.spacingL),
             Text(
               'Aucune activité récente',
               style: AppTheme.h3.copyWith(color: AppTheme.textMuted),
             ),
-            const SizedBox(height: AppTheme.spacingXS),
+            const SizedBox(height: AppTheme.spacingS),
             Text(
               'Vos actions apparaîtront ici',
               style: AppTheme.body.copyWith(color: AppTheme.textMuted),
@@ -284,8 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String title,
     required String subtitle,
     required DateTime date,
-    required String status,
-    required Color statusColor,
+    required Color iconColor,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
@@ -301,10 +259,10 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppTheme.radiusChip),
+              color: iconColor.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: statusColor, size: 20),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
           const SizedBox(width: AppTheme.spacingM),
           Expanded(
@@ -312,21 +270,14 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: AppTheme.body),
-                const SizedBox(height: AppTheme.spacingXS),
+                const SizedBox(height: AppTheme.spacingS),
                 Text(subtitle, style: AppTheme.meta),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              AppTheme.buildStatusBadge(status, statusColor),
-              const SizedBox(height: AppTheme.spacingXS),
-              Text(
-                _formatDate(date),
-                style: AppTheme.meta,
-              ),
-            ],
+          Text(
+            _formatDate(date),
+            style: AppTheme.meta,
           ),
         ],
       ),

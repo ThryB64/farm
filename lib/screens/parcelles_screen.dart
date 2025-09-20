@@ -22,10 +22,10 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
     return AppLayout(
       title: 'Parcelles',
       actions: [
-        IconButton(
+        ElevatedButton.icon(
           onPressed: () => _showAddParcelleDialog(),
-          icon: const Icon(Icons.add),
-          tooltip: 'Ajouter une parcelle',
+          icon: const Icon(Icons.add, size: 20),
+          label: const Text('Ajouter'),
         ),
       ],
       floatingActionButton: FloatingActionButton(
@@ -110,13 +110,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
             onChanged: (value) => setState(() => _selectedFilter = value ?? 'Toutes'),
           ),
         ),
-        const SizedBox(width: AppTheme.spacingM),
-        // Export CSV
-        OutlinedButton.icon(
-          onPressed: () {},
-          icon: const Icon(Icons.download, size: 20),
-          label: const Text('Export'),
-        ),
       ],
     );
   }
@@ -145,7 +138,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
               'Aucune parcelle pour l\'instant',
               style: AppTheme.h2.copyWith(color: AppTheme.textMuted),
             ),
-            const SizedBox(height: AppTheme.spacingS),
+            const SizedBox(height: AppTheme.spacingM),
             Text(
               'Créez votre première parcelle pour commencer à suivre vos cultures.',
               style: AppTheme.body.copyWith(color: AppTheme.textMuted),
@@ -204,7 +197,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                   height: 48,
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusChip),
+                    shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.landscape,
@@ -222,7 +215,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                         parcelle.nom,
                         style: AppTheme.h3,
                       ),
-                      const SizedBox(height: AppTheme.spacingXS),
+                      const SizedBox(height: AppTheme.spacingS),
                       Text(
                         'Créée le ${_formatDate(parcelle.dateCreation)}',
                         style: AppTheme.meta,
@@ -230,7 +223,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                     ],
                   ),
                 ),
-                // Tags info
+                // Infos (surface, variété)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -238,7 +231,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                       '${parcelle.surface} ha',
                       AppTheme.success,
                     ),
-                    const SizedBox(height: AppTheme.spacingXS),
+                    const SizedBox(height: AppTheme.spacingS),
                     AppTheme.buildStatusBadge(
                       'Surface',
                       AppTheme.textMuted,
@@ -246,7 +239,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                   ],
                 ),
                 const SizedBox(width: AppTheme.spacingM),
-                // Actions
+                // Actions (éditer/supprimer)
                 PopupMenuButton<String>(
                   onSelected: (value) {
                     if (value == 'edit') {
@@ -262,7 +255,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                         children: [
                           Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
                           SizedBox(width: AppTheme.spacingS),
-                          Text('Modifier'),
+                          Text('Éditer'),
                         ],
                       ),
                     ),
@@ -311,7 +304,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Nouvelle Parcelle'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusModal),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         ),
         content: Form(
           key: formKey,
@@ -380,7 +373,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                 );
               }
             },
-            child: const Text('Ajouter'),
+            child: const Text('Enregistrer'),
           ),
         ],
       ),
@@ -397,7 +390,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Modifier la Parcelle'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusModal),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         ),
         content: Form(
           key: formKey,
@@ -468,7 +461,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                 );
               }
             },
-            child: const Text('Modifier'),
+            child: const Text('Enregistrer'),
           ),
         ],
       ),
@@ -481,7 +474,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Confirmer la suppression'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusModal),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         ),
         content: Text('Voulez-vous vraiment supprimer la parcelle "${parcelle.nom}" ?'),
         actions: [

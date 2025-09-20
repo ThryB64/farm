@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // === COULEURS (Palette courte) ===
+  // === COULEURS (selon brief) ===
   
-  // Primary (Green)
+  // Vert principal pour actions et accents
   static const Color primary = Color(0xFF1F8A48);
-  static const Color primaryDark = Color(0xFF156036);
   
-  // Accent (Amber)
-  static const Color accent = Color(0xFFF4A737);
-  
-  // Surface & Background
-  static const Color surface = Color(0xFFFFFFFF);
+  // Gris clair pour fond de page
   static const Color background = Color(0xFFF5F7F6);
   
-  // Text
+  // Texte bleu-gris foncé pour contenu
   static const Color textMain = Color(0xFF1B2B34);
-  static const Color textMuted = Color(0xFF6B7C87);
   
-  // Border
+  // Accent jaune/ambre pour KPI importants
+  static const Color accent = Color(0xFFF4A737);
+  
+  // Couleurs secondaires
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color textMuted = Color(0xFF6B7C87);
   static const Color border = Color(0xFFE4E8EA);
   
-  // States
+  // États
   static const Color success = Color(0xFF1F8A48);
   static const Color warning = Color(0xFFE57E25);
   static const Color danger = Color(0xFFC7423A);
@@ -32,7 +31,7 @@ class AppTheme {
   
   // Hiérarchie typographique
   static const TextStyle displayKPI = TextStyle(
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: FontWeight.bold,
     color: textMain,
     fontFamily: fontFamily,
@@ -47,14 +46,14 @@ class AppTheme {
   
   static const TextStyle h2 = TextStyle(
     fontSize: 20,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.bold,
     color: textMain,
     fontFamily: fontFamily,
   );
   
   static const TextStyle h3 = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.bold,
     color: textMain,
     fontFamily: fontFamily,
   );
@@ -75,42 +74,31 @@ class AppTheme {
   
   static const TextStyle meta = TextStyle(
     fontSize: 12,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.normal,
     color: textMuted,
     fontFamily: fontFamily,
   );
   
   // === RAYONS, OMBRES, ESPACEMENTS ===
   
-  // Rayons
-  static const double radiusChip = 12.0;
+  // Rayons (selon brief)
   static const double radiusCard = 16.0;
-  static const double radiusModal = 24.0;
   
-  // Ombres
+  // Ombres douces
   static const List<BoxShadow> cardShadow = [
     BoxShadow(
       color: Color(0x0A000000),
-      offset: Offset(0, 8),
-      blurRadius: 24,
+      offset: Offset(0, 2),
+      blurRadius: 8,
       spreadRadius: 0,
     ),
   ];
   
-  // Espacements (grille 8-pt)
-  static const double spacingXS = 4.0;   // 0.5 * 8
-  static const double spacingS = 8.0;    // 1 * 8
-  static const double spacingM = 16.0;   // 2 * 8
-  static const double spacingL = 24.0;   // 3 * 8
-  static const double spacingXL = 32.0;  // 4 * 8
-  static const double spacingXXL = 48.0;  // 6 * 8
-  
-  // Marges page
-  static const double pageMarginDesktop = 24.0;
-  static const double pageMarginMobile = 16.0;
-  
-  // Gouttières cartes
-  static const double cardGutter = 16.0;
+  // Espacements généreux (selon brief)
+  static const double spacingS = 8.0;
+  static const double spacingM = 16.0;
+  static const double spacingL = 24.0;
+  static const double spacingXL = 32.0;
   
   // === THÈME PRINCIPAL ===
   
@@ -131,7 +119,7 @@ class AppTheme {
         onError: Colors.white,
       ),
       
-      // AppBar
+      // AppBar (fond blanc, ombre subtile)
       appBarTheme: const AppBarTheme(
         backgroundColor: surface,
         foregroundColor: textMain,
@@ -142,7 +130,7 @@ class AppTheme {
         shadowColor: Color(0x0A000000),
       ),
       
-      // Cards
+      // Cards (blanches, arrondies, ombre douce)
       cardTheme: CardTheme(
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -172,7 +160,7 @@ class AppTheme {
       
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
+          foregroundColor: textMuted,
           side: const BorderSide(color: border, width: 1),
           padding: const EdgeInsets.symmetric(
             horizontal: spacingL,
@@ -193,7 +181,7 @@ class AppTheme {
             vertical: spacingS,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radiusChip),
+            borderRadius: BorderRadius.circular(8),
           ),
           textStyle: body,
         ),
@@ -236,28 +224,20 @@ class AppTheme {
         foregroundColor: Colors.white,
         elevation: 4,
       ),
-      
-      // Divider
-      dividerTheme: const DividerThemeData(
-        color: border,
-        thickness: 1,
-        space: 1,
-      ),
     );
   }
   
   // === COMPOSANTS RÉUTILISABLES ===
   
-  // Carte KPI
+  // Carte KPI (selon brief)
   static Widget buildKPICard({
     required String label,
     required String value,
     required IconData icon,
-    Color? valueColor,
-    String? trend,
+    Color? iconColor,
   }) {
     return Container(
-      padding: const EdgeInsets.all(spacingM),
+      padding: const EdgeInsets.all(spacingL),
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(radiusCard),
@@ -268,48 +248,44 @@ class AppTheme {
         children: [
           Row(
             children: [
-              Icon(icon, size: 32, color: textMuted),
-              const Spacer(),
-              if (trend != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: spacingS,
-                    vertical: spacingXS,
-                  ),
-                  decoration: BoxDecoration(
-                    color: success.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(radiusChip),
-                  ),
-                  child: Text(
-                    trend,
-                    style: meta.copyWith(color: success),
-                  ),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: (iconColor ?? primary).withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
+                child: Icon(
+                  icon,
+                  color: iconColor ?? primary,
+                  size: 24,
+                ),
+              ),
+              const Spacer(),
             ],
           ),
-          const SizedBox(height: spacingM),
+          const SizedBox(height: spacingL),
           Text(
             label,
             style: meta,
           ),
-          const SizedBox(height: spacingXS),
+          const SizedBox(height: spacingS),
           Text(
             value,
-            style: displayKPI.copyWith(
-              color: valueColor ?? textMain,
-            ),
+            style: displayKPI,
           ),
         ],
       ),
     );
   }
   
-  // Carte menu
+  // Carte menu (selon brief)
   static Widget buildMenuCard({
     required String title,
     required String subtitle,
     required IconData icon,
     required VoidCallback onTap,
+    Color? iconColor,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -328,18 +304,28 @@ class AppTheme {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, size: 48, color: primary),
-                const SizedBox(height: spacingM),
-                Text(title, style: h2),
-                const SizedBox(height: spacingXS),
-                Text(subtitle, style: body),
-                const SizedBox(height: spacingM),
-                Row(
-                  children: [
-                    Text('Ouvrir', style: body.copyWith(color: primary)),
-                    const SizedBox(width: spacingXS),
-                    Icon(Icons.arrow_forward, size: 16, color: primary),
-                  ],
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: (iconColor ?? primary).withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor ?? primary,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: spacingL),
+                Text(
+                  title,
+                  style: h2,
+                ),
+                const SizedBox(height: spacingS),
+                Text(
+                  subtitle,
+                  style: body.copyWith(color: textMuted),
                 ),
               ],
             ),
@@ -353,12 +339,12 @@ class AppTheme {
   static Widget buildStatusBadge(String text, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: spacingS,
-        vertical: spacingXS,
+        horizontal: spacingM,
+        vertical: spacingS,
       ),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(radiusChip),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
