@@ -46,7 +46,6 @@ Future<void> main() async {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      await FirebaseAuth.instance.signInAnonymously();
       debugPrint('[BOOT] Firebase initialized successfully');
     } catch (e, s) {
       debugPrint('[BOOT] Firebase init error: $e\n$s');

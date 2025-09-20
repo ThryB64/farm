@@ -176,6 +176,7 @@ class FirebaseProvider with ChangeNotifier {
     try {
       final id = await _firebaseService.insertParcelle(parcelle);
       parcelle.id = int.tryParse(id) ?? 0;
+      print('Parcelle ajoutée avec ID: ${parcelle.id}');
     } catch (e) {
       _error = 'Erreur ajout parcelle: $e';
       notifyListeners();
@@ -208,6 +209,7 @@ class FirebaseProvider with ChangeNotifier {
     try {
       final id = await _firebaseService.insertCellule(cellule);
       cellule.id = int.tryParse(id) ?? 0;
+      print('Cellule ajoutée avec ID: ${cellule.id}');
     } catch (e) {
       _error = 'Erreur ajout cellule: $e';
       notifyListeners();
@@ -263,6 +265,7 @@ class FirebaseProvider with ChangeNotifier {
 
       final id = await _firebaseService.insertChargement(chargement);
       chargement.id = int.tryParse(id) ?? 0;
+      print('Chargement ajouté avec ID: ${chargement.id}');
     } catch (e) {
       _error = 'Erreur ajout chargement: $e';
       notifyListeners();
@@ -320,6 +323,7 @@ class FirebaseProvider with ChangeNotifier {
     try {
       final id = await _firebaseService.insertSemis(semis);
       semis.id = int.tryParse(id) ?? 0;
+      print('Semis ajouté avec ID: ${semis.id}');
     } catch (e) {
       _error = 'Erreur ajout semis: $e';
       notifyListeners();
@@ -352,6 +356,7 @@ class FirebaseProvider with ChangeNotifier {
     try {
       final id = await _firebaseService.insertVariete(variete);
       variete.id = int.tryParse(id) ?? 0;
+      print('Variété ajoutée avec ID: ${variete.id}');
     } catch (e) {
       _error = 'Erreur ajout variété: $e';
       notifyListeners();
