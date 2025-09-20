@@ -532,19 +532,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               
               // Importer les données
               await _performImport(data);
-              
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Import réussi !'),
-                    backgroundColor: AppTheme.success,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    ),
-                  ),
-                );
-              }
             } catch (e) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -644,6 +631,15 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         .map((v) => _parseVarieteFromMap(Map<String, dynamic>.from(v)))
         .toList();
     
+    // Vérifier si les données sont vides
+    final totalData = parcelles.length + cellules.length + chargements.length + semis.length + varietes.length;
+    print('📊 Import: $totalData éléments à importer');
+    print('   - Parcelles: ${parcelles.length}');
+    print('   - Cellules: ${cellules.length}');
+    print('   - Chargements: ${chargements.length}');
+    print('   - Semis: ${semis.length}');
+    print('   - Variétés: ${varietes.length}');
+    
     // 5. Ajouter les données une par une
     for (final parcelle in parcelles) {
       await provider.ajouterParcelle(parcelle);
@@ -667,6 +663,45 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     
     // 6. Forcer un refresh des données
     await Future.delayed(const Duration(milliseconds: 1000));
+    
+    // 7. Forcer le rechargement des données dans le provider
+    await _forceDataRefresh(provider);
+    
+    // 8. Afficher un message approprié selon le contenu
+    if (mounted) {
+      String message;
+      if (totalData == 0) {
+        message = 'Import réussi ! Base de données vidée.';
+      } else {
+        message = 'Import réussi ! $totalData éléments importés.';
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppTheme.success,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          ),
+        ),
+      );
+    }
+  }
+
+  // Fonction pour forcer le refresh des données
+  Future<void> _forceDataRefresh(FirebaseProviderV3 provider) async {
+    try {
+      // Forcer le rechargement des données depuis Firebase
+      await provider.refreshAllData();
+      
+      // Attendre un peu pour que les listeners se mettent à jour
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      print('✅ Données rafraîchies avec succès');
+    } catch (e) {
+      print('⚠️ Erreur lors du refresh des données: $e');
+    }
   }
 
   // Fonction pour vider le localStorage

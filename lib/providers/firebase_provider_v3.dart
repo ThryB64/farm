@@ -597,6 +597,32 @@ class FirebaseProviderV3 with ChangeNotifier {
 
   // Nettoyer les ressources
   @override
+  // Forcer le refresh de toutes les données
+  Future<void> refreshAllData() async {
+    try {
+      print('🔄 FirebaseProviderV3: Forcing data refresh...');
+      
+      // Vider les maps locales
+      _parcellesMap.clear();
+      _cellulesMap.clear();
+      _chargementsMap.clear();
+      _semisMap.clear();
+      _varietesMap.clear();
+      
+      // Notifier les listeners que les données ont changé
+      notifyListeners();
+      
+      // Attendre un peu pour que les streams se mettent à jour
+      await Future.delayed(const Duration(milliseconds: 200));
+      
+      print('✅ FirebaseProviderV3: Data refresh completed');
+    } catch (e) {
+      print('❌ FirebaseProviderV3: Error during data refresh: $e');
+      _error = 'Erreur lors du refresh des données: $e';
+      notifyListeners();
+    }
+  }
+
   void dispose() {
     _parcellesSubscription?.cancel();
     _cellulesSubscription?.cancel();
