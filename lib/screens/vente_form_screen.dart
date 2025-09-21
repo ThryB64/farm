@@ -51,7 +51,15 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     _poidsPleinController.text = vente.poidsPlein.toString();
     _poidsNetController.text = vente.poidsNet?.toString() ?? '';
     _ecartPoidsNetController.text = vente.ecartPoidsNet?.toString() ?? '';
-    _prixController.text = vente.prix?.toString() ?? '';
+    
+    // Calculer le prix par tonne à partir du prix total et du poids net
+    if (vente.prix != null && vente.poidsNet != null && vente.poidsNet! > 0) {
+      final prixParTonne = (vente.prix! / (vente.poidsNet! / 1000)).toStringAsFixed(2);
+      _prixController.text = prixParTonne;
+    } else {
+      _prixController.text = '';
+    }
+    
     _selectedDate = vente.date;
     _selectedAnnee = vente.annee;
     _payer = vente.payer;
