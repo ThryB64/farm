@@ -6,6 +6,7 @@ class Cellule {
   final DateTime dateCreation;
   final String? notes;
   final String? nom; // Nom optionnel pour l'affichage
+  final bool fermee; // Indique si la cellule est fermée
 
   Cellule({
     this.id,
@@ -14,6 +15,7 @@ class Cellule {
     DateTime? dateCreation,
     this.notes,
     this.nom,
+    this.fermee = false,
   }) : dateCreation = dateCreation ?? DateTime.now(),
        reference = reference ?? _generateReference(dateCreation ?? DateTime.now()),
        capacite = 320000; // 320T en kg
@@ -31,6 +33,7 @@ class Cellule {
       'date_creation': dateCreation.toIso8601String(),
       'notes': notes,
       'nom': nom,
+      'fermee': fermee,
     };
   }
 
@@ -42,6 +45,7 @@ class Cellule {
       dateCreation: DateTime.parse(map['date_creation']),
       notes: map['notes'],
       nom: map['nom'],
+      fermee: map['fermee'] ?? false,
     );
   }
   

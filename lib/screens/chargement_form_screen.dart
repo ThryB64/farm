@@ -166,7 +166,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
           _selectedYear ??= anneeEnCours;
 
           final cellulesAnnee = provider.cellules
-              .where((c) => c.dateCreation.year == _selectedYear)
+              .where((c) => c.dateCreation.year == _selectedYear && !c.fermee)
               .toList();
 
           final varietesDisponibles = _getVarietesDisponibles(provider);

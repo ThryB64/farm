@@ -268,6 +268,56 @@ class FirebaseProviderV4 extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> fermerCellule(String key) async {
+    try {
+      final cellule = _cellulesMap[key];
+      if (cellule != null) {
+        final celluleFermee = Cellule(
+          id: cellule.id,
+          firebaseId: cellule.firebaseId,
+          reference: cellule.reference,
+          dateCreation: cellule.dateCreation,
+          notes: cellule.notes,
+          nom: cellule.nom,
+          fermee: true,
+        );
+        await _service.updateCellule(celluleFermee);
+        _cellulesMap[key] = celluleFermee;
+        notifyListeners();
+        print('FirebaseProvider V4: Cellule fermée: $key');
+      }
+    } catch (e) {
+      _error = 'Erreur lors de la fermeture de la cellule: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> ouvrirCellule(String key) async {
+    try {
+      final cellule = _cellulesMap[key];
+      if (cellule != null) {
+        final celluleOuverte = Cellule(
+          id: cellule.id,
+          firebaseId: cellule.firebaseId,
+          reference: cellule.reference,
+          dateCreation: cellule.dateCreation,
+          notes: cellule.notes,
+          nom: cellule.nom,
+          fermee: false,
+        );
+        await _service.updateCellule(celluleOuverte);
+        _cellulesMap[key] = celluleOuverte;
+        notifyListeners();
+        print('FirebaseProvider V4: Cellule ouverte: $key');
+      }
+    } catch (e) {
+      _error = 'Erreur lors de l\'ouverture de la cellule: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
   
   // ===== MÉTHODES POUR CHARGEMENTS =====
   

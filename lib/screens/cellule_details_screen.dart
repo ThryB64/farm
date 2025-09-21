@@ -16,6 +16,24 @@ class CelluleDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(cellule.reference),
         centerTitle: true,
+        actions: [
+          Consumer<FirebaseProviderV4>(
+            builder: (context, provider, child) {
+              return IconButton(
+                icon: Icon(cellule.fermee ? Icons.lock_open : Icons.lock),
+                onPressed: () {
+                  final key = cellule.firebaseId ?? cellule.id.toString();
+                  if (cellule.fermee) {
+                    provider.ouvrirCellule(key);
+                  } else {
+                    provider.fermerCellule(key);
+                  }
+                },
+                tooltip: cellule.fermee ? 'Ouvrir la cellule' : 'Fermer la cellule',
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, db, child) {
@@ -240,7 +258,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                   SizedBox(height: 8),
                   ...chargementsAnnee.map((chargement) {
                     final parcelle = parcelles.firstWhere(
-                      (p) => p.id == chargement.parcelleId,
+                      (p) => (p.firebaseId ?? p.id.toString()) == chargement.parcelleId,
                       orElse: () => Parcelle(
                         id: 0,
                         nom: 'Inconnue',
