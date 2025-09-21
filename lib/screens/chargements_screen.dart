@@ -362,6 +362,14 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
         final chargement = chargements[index];
         final cellule = cellulesById[chargement.celluleId];
         final parcelle = parcellesById[chargement.parcelleId];
+        
+        // Debug: afficher les IDs pour diagnostiquer
+        if (cellule == null) {
+          print('DEBUG: Cellule non trouvée pour chargement ${chargement.id}');
+          print('  - Chargement celluleId: ${chargement.celluleId}');
+          print('  - Cellules disponibles: ${cellulesById.keys.toList()}');
+          print('  - Cellules: ${cellulesById.values.map((c) => '${c.firebaseId ?? c.id}: ${c.reference}').toList()}');
+        }
 
         return Container(
           margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
