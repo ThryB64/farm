@@ -94,32 +94,22 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     }
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[300]!, width: 1),
-        ),
-      ),
+      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(Icons.calendar_today, color: Colors.green, size: 20),
+          Icon(Icons.calendar_today, color: Colors.green),
           SizedBox(width: 8),
           Text(
             'Année:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          SizedBox(width: 12),
+          SizedBox(width: 16),
           Expanded(
             child: DropdownButtonFormField<int>(
               value: _selectedAnnee,
               decoration: InputDecoration(
-                labelText: 'Aucune Ventes en cours',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                isDense: true,
+                labelText: 'Sélectionner une année',
+                border: OutlineInputBorder(),
               ),
               items: annees.map((year) {
                 return DropdownMenuItem<int>(
