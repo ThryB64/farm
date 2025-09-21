@@ -299,12 +299,13 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             ),
           ),
           const SizedBox(height: AppTheme.spacingL),
-          ModernOutlinedButton(
+          ModernButton(
             text: 'Importer depuis un fichier',
             icon: Icons.file_upload,
-            borderColor: AppTheme.info,
-            textColor: AppTheme.info,
+            backgroundColor: AppTheme.info,
             onPressed: _isImporting ? null : _importData,
+            isLoading: _isImporting,
+            isFullWidth: true,
           ),
         ],
       ),
@@ -356,14 +357,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             backgroundColor: AppTheme.warning,
             onPressed: _updatePoidsNormes,
             isFullWidth: true,
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          ModernOutlinedButton(
-            text: 'Vider le cache et recharger',
-            icon: Icons.refresh,
-            borderColor: AppTheme.error,
-            textColor: AppTheme.error,
-            onPressed: _clearCacheAndReload,
           ),
         ],
       ),
@@ -928,46 +921,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     }
   }
 
-  Future<void> _clearCacheAndReload() async {
-    try {
-      // Vider le localStorage
-      await _clearLocalStorage();
-      
-      // Supprimer toutes les données Firebase
-      await context.read<FirebaseProviderV3>().deleteAllData();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Cache vidé ! Rechargez la page pour voir l\'effet.'),
-            backgroundColor: AppTheme.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
-          ),
-        );
-        
-        // Recharger la page après 2 secondes
-        Future.delayed(const Duration(seconds: 2), () {
-          html.window.location.reload();
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors du vidage du cache : $e'),
-            backgroundColor: AppTheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
-          ),
-        );
-      }
-    }
-  }
 
   Widget _buildDebugSection() {
     return ModernCard(
