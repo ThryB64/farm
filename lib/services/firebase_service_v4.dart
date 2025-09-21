@@ -87,7 +87,10 @@ class FirebaseServiceV4 {
   String generateChargementKey(Chargement chargement) {
     final date = chargement.dateChargement.toIso8601String().split('T')[0];
     final remorque = chargement.remorque.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
-    return 'chargement_${date}_${remorque}';
+    final poidsPlein = chargement.poidsPlein.toString();
+    final poidsVide = chargement.poidsVide.toString();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return 'chargement_${date}_${remorque}_${poidsPlein}_${poidsVide}_$timestamp';
   }
 
   String generateSemisKey(Semis semis) {
