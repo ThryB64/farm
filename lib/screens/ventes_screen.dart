@@ -84,7 +84,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddVenteDialog(context),
+        onPressed: () => _showQuickAddVenteDialog(context),
         backgroundColor: Colors.green,
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -347,6 +347,173 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  void _showQuickAddVenteDialog(BuildContext context) {
+    final numeroTicketController = TextEditingController();
+    final clientController = TextEditingController();
+    final poidsVideController = TextEditingController();
+    final poidsPleinController = TextEditingController();
+    final prixController = TextEditingController();
+    
+    int selectedAnnee = DateTime.now().year;
+    bool payer = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Ajouter une vente rapide'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: numeroTicketController,
+                decoration: InputDecoration(
+                  labelText: 'Numéro de ticket *',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: clientController,
+                decoration: InputDecoration(
+                  labelText: 'Client *',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: poidsVideController,
+                      decoration: InputDecoration(
+                        labelText: 'Poids vide (kg) *',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: poidsPleinController,
+                      decoration: InputDecoration(
+                        labelText: 'Poids plein (kg) *',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: prixController,
+                      decoration: InputDecoration(
+                        labelText: 'Prix (€/tonne)',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: DropdownButtonFormField<int>(
+                      value: selectedAnnee,
+                      decoration: InputDecoration(
+                        labelText: 'Année *',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: List.generate(5, (index) => DateTime.now().year - index + 1)
+                          .map((year) => DropdownMenuItem<int>(
+                                value: year,
+                                child: Text(year.toString()),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        selectedAnnee = value!;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              CheckboxListTile(
+                title: Text('Payé'),
+                value: payer,
+                onChanged: (value) {
+                  payer = value ?? false;
+                },
+                contentPadding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (numeroTicketController.text.isEmpty || 
+                  clientController.text.isEmpty ||
+                  poidsVideController.text.isEmpty ||
+                  poidsPleinController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Veuillez remplir tous les champs obligatoires')),
+                );
+                return;
+              }
+
+              try {
+                final poidsVide = double.parse(poidsVideController.text);
+                final poidsPlein = double.parse(poidsPleinController.text);
+                final poidsNet = poidsPlein - poidsVide;
+                final prixParTonne = double.tryParse(prixController.text) ?? 0;
+                final prixTotal = prixParTonne * (poidsNet / 1000);
+
+                final vente = Vente(
+                  date: DateTime.now(),
+                  annee: selectedAnnee,
+                  numeroTicket: numeroTicketController.text.trim(),
+                  client: clientController.text.trim(),
+                  immatriculationRemorque: '',
+                  cmr: '',
+                  poidsVide: poidsVide,
+                  poidsPlein: poidsPlein,
+                  poidsNet: poidsNet,
+                  payer: payer,
+                  prix: prixTotal > 0 ? prixTotal : null,
+                  terminee: payer,
+                );
+
+                final provider = context.read<FirebaseProviderV4>();
+                await provider.ajouterVente(vente);
+
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Vente ajoutée avec succès')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Erreur: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Text('Ajouter'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showAddVenteDialog(BuildContext context) {
