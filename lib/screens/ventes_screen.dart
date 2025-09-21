@@ -67,18 +67,11 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
             );
           }
 
-          return Column(
+          return TabBarView(
+            controller: _tabController,
             children: [
-              _buildAnneeSelector(provider),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildVentesEnCours(provider),
-                    _buildVentesTerminees(provider),
-                  ],
-                ),
-              ),
+              _buildVentesEnCours(provider),
+              _buildVentesTerminees(provider),
             ],
           );
         },
@@ -101,22 +94,32 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     }
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: Border(
+          bottom: BorderSide(color: Colors.grey[300]!, width: 1),
+        ),
+      ),
       child: Row(
         children: [
-          Icon(Icons.calendar_today, color: Colors.green),
+          Icon(Icons.calendar_today, color: Colors.green, size: 20),
           SizedBox(width: 8),
           Text(
             'Année:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
-          SizedBox(width: 16),
+          SizedBox(width: 12),
           Expanded(
             child: DropdownButtonFormField<int>(
               value: _selectedAnnee,
               decoration: InputDecoration(
-                labelText: 'Sélectionner une année',
-                border: OutlineInputBorder(),
+                labelText: 'Aucune Ventes en cours',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
               ),
               items: annees.map((year) {
                 return DropdownMenuItem<int>(
@@ -137,11 +140,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
   }
 
   Widget _buildVentesEnCours(FirebaseProviderV4 provider) {
-    if (_selectedAnnee == null) {
-      return _buildEmptyState('Sélectionnez une année');
-    }
-    
-    final ventesEnCours = provider.getVentesEnCoursParAnnee(_selectedAnnee!);
+    final ventesEnCours = provider.ventesEnCours;
     
     if (ventesEnCours.isEmpty) {
       return _buildEmptyState(
@@ -151,24 +150,28 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       );
     }
 
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: ventesEnCours.length,
+      itemBuilder: (context, index) {
+        final vente = ventesEnCours[index];
+        return _buildVenteCard(vente, provider, isEnCours: true);
+      },
+    );
+  }
+
+  Widget _buildVentesTerminees(FirebaseProviderV4 provider) {
     return Column(
       children: [
-        _buildStockSummary(provider),
+        _buildAnneeSelector(provider),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: ventesEnCours.length,
-            itemBuilder: (context, index) {
-              final vente = ventesEnCours[index];
-              return _buildVenteCard(vente, provider, isEnCours: true);
-            },
-          ),
+          child: _buildVentesTermineesContent(provider),
         ),
       ],
     );
   }
 
-  Widget _buildVentesTerminees(FirebaseProviderV4 provider) {
+  Widget _buildVentesTermineesContent(FirebaseProviderV4 provider) {
     if (_selectedAnnee == null) {
       return Center(
         child: Text(
