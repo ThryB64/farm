@@ -86,6 +86,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                     try {
                       final variete = Variete(
                         id: widget.variete?.id,
+                        firebaseId: widget.variete?.firebaseId, // ✅ Préserver le firebaseId
                         nom: _nomController.text.trim(),
                         description: _descriptionController.text.isEmpty ? null : _descriptionController.text.trim(),
                         dateCreation: widget.variete?.dateCreation ?? DateTime.now(),

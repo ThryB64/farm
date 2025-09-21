@@ -358,6 +358,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
 
     final semis = Semis(
       id: widget.semis?.id,
+      firebaseId: widget.semis?.firebaseId, // ✅ Préserver le firebaseId
       parcelleId: _selectedParcelleId!,
       date: DateTime.parse(_dateController.text.split('/').reversed.join('-')),
       varietesSurfaces: _selectedVarietesSurfaces,

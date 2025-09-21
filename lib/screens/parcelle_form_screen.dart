@@ -299,6 +299,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       
       final parcelle = Parcelle(
         id: widget.parcelle?.id,
+        firebaseId: widget.parcelle?.firebaseId, // ✅ Préserver le firebaseId
         nom: _nomController.text.trim(),
         code: _codeController.text.trim(),
         surface: double.parse(_surfaceController.text),

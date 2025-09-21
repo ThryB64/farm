@@ -69,6 +69,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                       final dateCreation = DateTime(_selectedYear!, DateTime.now().month, DateTime.now().day);
                       final cellule = Cellule(
                         id: widget.cellule?.id,
+                        firebaseId: widget.cellule?.firebaseId, // ✅ Préserver le firebaseId
                         dateCreation: dateCreation,
                       );
 

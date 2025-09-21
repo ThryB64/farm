@@ -378,6 +378,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
 
                           final chargement = Chargement(
                             id: widget.chargement?.id,
+                            firebaseId: widget.chargement?.firebaseId, // ✅ Préserver le firebaseId
                             celluleId: _selectedCelluleId!,
                             parcelleId: _selectedParcelleId!,
                             remorque: _selectedRemorque!,

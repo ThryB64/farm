@@ -439,6 +439,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 formKey.currentState!.save();
                 final parcelleModifiee = Parcelle(
                   id: parcelle.id,
+                  firebaseId: parcelle.firebaseId, // ✅ Préserver le firebaseId
                   nom: nom,
                   surface: surface,
                   dateCreation: parcelle.dateCreation,
