@@ -5,6 +5,10 @@ import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../models/chargement.dart';
+import '../models/parcelle.dart';
+import '../models/cellule.dart';
+import '../models/semis.dart';
+import '../models/variete.dart';
 
 class ExportScreen extends StatefulWidget {
   const ExportScreen({Key? key}) : super(key: key);
@@ -19,10 +23,15 @@ class _ExportScreenState extends State<ExportScreen> {
   Future<void> _generatePDF() async {
     try {
       final db = Provider.of<FirebaseProviderV4>(context, listen: false);
-      final chargements = await db.chargements.toList();
-      final parcelles = await db.parcelles.toList();
-      final semis = await db.semis.toList();
-      final chargementsAnnee = chargements.where((c) => c.dateChargement.year == _selectedYear).toList();
+      final chargements = db.chargements;
+      final parcelles = db.parcelles;
+      final cellules = db.cellules;
+      final semis = db.semis;
+      final varietes = db.varietes;
+      
+      final chargementsAnnee = chargements
+          .where((c) => c.dateChargement.year == _selectedYear)
+          .toList();
       
       if (chargementsAnnee.isEmpty) {
         if (mounted) {
@@ -96,17 +105,21 @@ class _ExportScreenState extends State<ExportScreen> {
 
       // Calculer le nombre total de pages
       for (var parcelle in parcelles) {
-        final chargementsP = chargementsAnnee.where((c) => c.parcelleId == parcelle.id).toList();
+        final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
+        final chargementsP = chargementsAnnee
+            .where((c) => c.parcelleId == parcelleId)
+            .toList();
         if (chargementsP.isNotEmpty) {
           totalPages += (chargementsP.length / 25).ceil();
         }
       }
-      if (parcelles.isNotEmpty) totalPages += 1; // Page de résumé
+      if (parcelles.isNotEmpty) totalPages += 2; // Page de résumé + page variétés
 
       // Pour chaque parcelle
       for (var parcelle in parcelles) {
+        final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
         final chargementsP = chargementsAnnee
-            .where((c) => c.parcelleId == parcelle.id)
+            .where((c) => c.parcelleId == parcelleId)
             .toList()
           ..sort((a, b) => a.dateChargement.compareTo(b.dateChargement));
 
@@ -336,13 +349,15 @@ class _ExportScreenState extends State<ExportScreen> {
                         ],
                       ),
                       ...parcelles.where((p) {
+                        final parcelleId = p.firebaseId ?? p.id.toString();
                         final parcelleChargements = chargementsAnnee
-                            .where((c) => c.parcelleId == p.id)
+                            .where((c) => c.parcelleId == parcelleId)
                             .toList();
                         return parcelleChargements.isNotEmpty;
                       }).map((p) {
+                        final parcelleId = p.firebaseId ?? p.id.toString();
                         final parcelleChargements = chargementsAnnee
-                            .where((c) => c.parcelleId == p.id)
+                            .where((c) => c.parcelleId == parcelleId)
                             .toList();
                         double poidsNet = 0;
                         double poidsNormes = 0;
@@ -361,7 +376,7 @@ class _ExportScreenState extends State<ExportScreen> {
                           children: [
                             _buildDataCell(p.nom),
                             _buildDataCell(p.surface.toStringAsFixed(2)),
-                            _buildDataCell(db.getVarieteForParcelle(p.firebaseId ?? p.id.toString())?.nom ?? "Inconnue"),
+                            _buildDataCell(_getVarieteForParcelle(p, semis, _selectedYear!)),
                             _buildDataCell((poidsNet / 1000).toStringAsFixed(2)),
                             _buildDataCell((poidsNormes / 1000).toStringAsFixed(2)),
                             _buildDataCell((poidsNormes / 1000 / p.surface).toStringAsFixed(2)),
@@ -414,8 +429,7 @@ class _ExportScreenState extends State<ExportScreen> {
 
       // Pour chaque parcelle, prendre le dernier semis de l'année
       for (var parcelle in parcelles) {
-        final parcelleId = parcelle.id;
-        if (parcelleId == null) continue;
+        final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
 
         // Trouver le dernier semis pour cette parcelle
         final dernierSemis = semisAnnee
@@ -429,7 +443,7 @@ class _ExportScreenState extends State<ExportScreen> {
           // Pour chaque variété dans le semis
           for (var varieteSurface in semisParcelle.varietesSurfaces) {
             final variete = varieteSurface.nom;
-            final pourcentage = varieteSurface.pourcentage;
+            final surface = varieteSurface.surface; // Utiliser surface en hectares
             
             // Si la variété n'est pas encore dans le map, l'ajouter
             if (!varietesMap.containsKey(variete)) {
@@ -441,8 +455,8 @@ class _ExportScreenState extends State<ExportScreen> {
               };
             }
             
-            // Ajouter la surface proportionnelle à la variété
-            varietesMap[variete]!['surface'] += parcelle.surface * (pourcentage / 100);
+            // Ajouter la surface de la variété
+            varietesMap[variete]!['surface'] += surface;
           }
         }
       }
@@ -507,7 +521,7 @@ class _ExportScreenState extends State<ExportScreen> {
                           _buildDataCell(surface.toStringAsFixed(2)),
                           _buildDataCell((poidsNet / 1000).toStringAsFixed(2)),
                           _buildDataCell((poidsNormes / 1000).toStringAsFixed(2)),
-                          _buildDataCell((poidsNormes / 1000 / surface).toStringAsFixed(2)),
+                          _buildDataCell(surface > 0 ? (poidsNormes / 1000 / surface).toStringAsFixed(2) : '0.00'),
                           _buildDataCell(chargements.length.toString()),
                         ],
                       );
@@ -550,6 +564,25 @@ class _ExportScreenState extends State<ExportScreen> {
         );
       }
     }
+  }
+
+  String _getVarieteForParcelle(Parcelle parcelle, List<Semis> semis, int annee) {
+    final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
+    
+    // Chercher le semis le plus récent pour cette parcelle et cette année
+    final semisParcelle = semis
+        .where((s) => s.parcelleId == parcelleId && s.date.year == annee)
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+    
+    if (semisParcelle.isNotEmpty) {
+      final dernierSemis = semisParcelle.first;
+      if (dernierSemis.varietesSurfaces.isNotEmpty) {
+        return dernierSemis.varietesSurfaces.first.nom;
+      }
+    }
+    
+    return 'Inconnue';
   }
 
   pw.Widget _buildHeaderCell(String text) {
@@ -668,4 +701,4 @@ class _ExportScreenState extends State<ExportScreen> {
       ),
     );
   }
-} 
+}
