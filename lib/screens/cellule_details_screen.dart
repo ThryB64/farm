@@ -20,7 +20,7 @@ class CelluleDetailsScreen extends StatelessWidget {
       body: Consumer<FirebaseProviderV4>(
         builder: (context, db, child) {
           final chargements = db.chargements
-              .where((c) => c.celluleId == cellule.id)
+              .where((c) => c.celluleId == (cellule.firebaseId ?? cellule.id.toString()))
               .toList();
           final parcelles = db.parcelles.toList();
 

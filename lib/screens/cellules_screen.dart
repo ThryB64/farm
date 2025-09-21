@@ -177,7 +177,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
                               
                               // Calculer les statistiques de la cellule pour l'année sélectionnée
                               final chargementsCellule = chargements
-                                  .where((c) => c.celluleId == cellule.id && 
+                                  .where((c) => c.celluleId == (cellule.firebaseId ?? cellule.id.toString()) && 
                                                c.dateChargement.year == _selectedYear)
                                   .toList();
 
