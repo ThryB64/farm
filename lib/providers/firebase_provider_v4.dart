@@ -30,17 +30,23 @@ class FirebaseProviderV4 extends ChangeNotifier {
   List<Semis> get semis => _semisMap.values.toList();
   List<Variete> get varietes => _varietesMap.values.toList();
   
-  // Maps pour les relations (optimisation des jointures)
-  Map<int, Parcelle> get parcellesById => {
-    for (final p in parcelles) if (p.id != null) p.id!: p
+  // Maps pour les relations (optimisation des jointures) - String keys
+  Map<String, Parcelle> get parcellesById => {
+    for (final p in parcelles) 
+      if (p.firebaseId != null) p.firebaseId!: p
+      else if (p.id != null) p.id.toString(): p
   };
   
-  Map<int, Cellule> get cellulesById => {
-    for (final c in cellules) if (c.id != null) c.id!: c
+  Map<String, Cellule> get cellulesById => {
+    for (final c in cellules) 
+      if (c.firebaseId != null) c.firebaseId!: c
+      else if (c.id != null) c.id.toString(): c
   };
   
-  Map<int, Variete> get varietesById => {
-    for (final v in varietes) if (v.id != null) v.id!: v
+  Map<String, Variete> get varietesById => {
+    for (final v in varietes) 
+      if (v.firebaseId != null) v.firebaseId!: v
+      else if (v.id != null) v.id.toString(): v
   };
   
   String? _error;
@@ -387,21 +393,21 @@ class FirebaseProviderV4 extends ChangeNotifier {
   
   // ===== MÉTHODES UTILITAIRES POUR LES RELATIONS =====
   
-  // Obtenir une variété par ID
-  Variete? getVarieteById(int? id) {
-    if (id == null) return null;
+  // Obtenir une variété par ID (String)
+  Variete? getVarieteById(String? id) {
+    if (id == null || id.isEmpty) return null;
     return varietesById[id];
   }
   
-  // Obtenir une parcelle par ID
-  Parcelle? getParcelleById(int? id) {
-    if (id == null) return null;
+  // Obtenir une parcelle par ID (String)
+  Parcelle? getParcelleById(String? id) {
+    if (id == null || id.isEmpty) return null;
     return parcellesById[id];
   }
   
-  // Obtenir une cellule par ID
-  Cellule? getCelluleById(int? id) {
-    if (id == null) return null;
+  // Obtenir une cellule par ID (String)
+  Cellule? getCelluleById(String? id) {
+    if (id == null || id.isEmpty) return null;
     return cellulesById[id];
   }
   
@@ -425,21 +431,42 @@ class FirebaseProviderV4 extends ChangeNotifier {
     return null;
   }
   
-  // Obtenir les chargements d'une parcelle
-  List<Chargement> getChargementsForParcelle(int? parcelleId) {
-    if (parcelleId == null) return [];
+  // Obtenir les chargements d'une parcelle (String ID)
+  List<Chargement> getChargementsForParcelle(String? parcelleId) {
+    if (parcelleId == null || parcelleId.isEmpty) return [];
     return chargements.where((c) => c.parcelleId == parcelleId).toList();
   }
   
-  // Obtenir les chargements d'une cellule
-  List<Chargement> getChargementsForCellule(int? celluleId) {
-    if (celluleId == null) return [];
+  // Obtenir les chargements d'une cellule (String ID)
+  List<Chargement> getChargementsForCellule(String? celluleId) {
+    if (celluleId == null || celluleId.isEmpty) return [];
     return chargements.where((c) => c.celluleId == celluleId).toList();
   }
   
-  // Obtenir les semis d'une parcelle
-  List<Semis> getSemisForParcelle(int? parcelleId) {
-    if (parcelleId == null) return [];
-    return semis.where((s) => s.parcelleId == parcelleId).toList();
+  // Obtenir les semis d'une parcelle (String ID)
+  List<Semis> getSemisForParcelle(String? parcelleId) {
+    if (parcelleId == null || parcelleId.isEmpty) return [];
+    return semis.where((s) => s.parcelleId.toString() == parcelleId).toList();
+  }
+  
+  // Méthode de diagnostic pour vérifier les jointures
+  Map<String, int> debugJoins() {
+    int ok = 0, missCell = 0, missParc = 0;
+    
+    for (final ch in chargements) {
+      final cellule = getCelluleById(ch.celluleId);
+      final parcelle = getParcelleById(ch.parcelleId);
+      
+      if (cellule == null) missCell++;
+      if (parcelle == null) missParc++;
+      if (cellule != null && parcelle != null) ok++;
+    }
+    
+    return {
+      'ok': ok,
+      'missCell': missCell,
+      'missParc': missParc,
+      'total': chargements.length,
+    };
   }
 }

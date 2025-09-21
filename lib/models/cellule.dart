@@ -5,6 +5,7 @@ class Cellule {
   final double capacite;
   final DateTime dateCreation;
   final String? notes;
+  final String? nom; // Nom optionnel pour l'affichage
 
   Cellule({
     this.id,
@@ -12,6 +13,7 @@ class Cellule {
     String? reference,
     DateTime? dateCreation,
     this.notes,
+    this.nom,
   }) : dateCreation = dateCreation ?? DateTime.now(),
        reference = reference ?? _generateReference(dateCreation ?? DateTime.now()),
        capacite = 320000; // 320T en kg
@@ -28,6 +30,7 @@ class Cellule {
       'capacite': capacite,
       'date_creation': dateCreation.toIso8601String(),
       'notes': notes,
+      'nom': nom,
     };
   }
 
@@ -38,8 +41,12 @@ class Cellule {
       reference: map['reference'],
       dateCreation: DateTime.parse(map['date_creation']),
       notes: map['notes'],
+      nom: map['nom'],
     );
   }
+  
+  // Getter pour l'affichage (nom si présent, sinon reference)
+  String get label => nom?.isNotEmpty == true ? nom! : reference;
 
   @override
   String toString() => 'Cellule(id: $id, reference: $reference, capacite: $capacite)';

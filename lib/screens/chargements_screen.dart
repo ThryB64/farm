@@ -58,6 +58,13 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
         elevation: 0,
         centerTitle: true,
         actions: [
+          Consumer<FirebaseProviderV4>(
+            builder: (context, provider, child) => IconButton(
+              onPressed: () => _debugJoins(context, provider),
+              icon: const Icon(Icons.analytics),
+              tooltip: 'Diagnostic des jointures',
+            ),
+          ),
           IconButton(
             onPressed: () => setState(() => _showDebugInfo = !_showDebugInfo),
             icon: Icon(_showDebugInfo ? Icons.visibility_off : Icons.bug_report),
@@ -75,9 +82,9 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
             return _buildEmptyState();
           }
 
-          // Créer des maps pour les jointures
-          final cellulesById = {for (final c in cellules) c.id: c};
-          final parcellesById = {for (final p in parcelles) p.id: p};
+          // Utiliser les maps optimisées du provider
+          final cellulesById = provider.cellulesById;
+          final parcellesById = provider.parcellesById;
 
           // Grouper les chargements par année
           final Map<int, List<Chargement>> chargementsParAnnee = {};
@@ -235,8 +242,15 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
   }
 
   Widget _buildDebugInfo(List<Chargement> chargements, List<Cellule> cellules, List<Parcelle> parcelles) {
-    final cellulesById = {for (final c in cellules) c.id: c};
-    final parcellesById = {for (final p in parcelles) p.id: p};
+    // Utiliser les maps optimisées du provider
+    final cellulesById = {for (final c in cellules) 
+      if (c.firebaseId != null) c.firebaseId!: c
+      else if (c.id != null) c.id.toString(): c
+    };
+    final parcellesById = {for (final p in parcelles) 
+      if (p.firebaseId != null) p.firebaseId!: p
+      else if (p.id != null) p.id.toString(): p
+    };
     
     int chargementsAvecCellule = 0;
     int chargementsAvecParcelle = 0;
@@ -338,8 +352,8 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
 
   Widget _buildChargementsList(
     List<Chargement> chargements,
-    Map<int?, Cellule> cellulesById,
-    Map<int?, Parcelle> parcellesById,
+    Map<String, Cellule> cellulesById,
+    Map<String, Parcelle> parcellesById,
   ) {
     return ListView.builder(
       padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -375,7 +389,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            cellule?.reference ?? 'Cellule inconnue',
+                            cellule?.label ?? 'Cellule inconnue',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -551,6 +565,49 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+  
+  // Méthode de diagnostic des jointures
+  void _debugJoins(BuildContext context, FirebaseProviderV4 provider) {
+    final stats = provider.debugJoins();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Diagnostic des jointures'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Total chargements: ${stats['total']}'),
+            const SizedBox(height: 8),
+            Text('Jointures OK: ${stats['ok']}', 
+                 style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+            Text('Cellules manquantes: ${stats['missCell']}', 
+                 style: TextStyle(color: stats['missCell']! > 0 ? Colors.red : Colors.green)),
+            Text('Parcelles manquantes: ${stats['missParc']}', 
+                 style: TextStyle(color: stats['missParc']! > 0 ? Colors.red : Colors.green)),
+            const SizedBox(height: 16),
+            if (stats['missCell']! > 0 || stats['missParc']! > 0)
+              const Text(
+                '⚠️ Des jointures échouent. Vérifiez que les cellules et parcelles sont bien chargées.',
+                style: TextStyle(color: Colors.orange),
+              )
+            else
+              const Text(
+                '✅ Toutes les jointures sont correctes !',
+                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _showDeleteConfirmation(Chargement chargement) async {

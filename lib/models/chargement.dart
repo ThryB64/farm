@@ -1,8 +1,8 @@
 class Chargement {
   int? id;
   String? firebaseId; // ID Firebase (string)
-  final int celluleId;
-  final int parcelleId;
+  final String celluleId; // String pour compatibilité JSON
+  final String parcelleId; // String pour compatibilité JSON
   final String remorque;
   final DateTime dateChargement;
   final double poidsPlein;
@@ -55,8 +55,8 @@ class Chargement {
     return Chargement(
       id: map['id'],
       firebaseId: map['firebaseId'],
-      celluleId: map['cellule_id'],
-      parcelleId: map['parcelle_id'],
+      celluleId: _pick(map, ['celluleId', 'cellule_id', 'cellule', 'celluleRef'])?.toString() ?? '',
+      parcelleId: _pick(map, ['parcelleId', 'parcelle_id', 'parcelle', 'parcelleRef'])?.toString() ?? '',
       remorque: map['remorque'],
       dateChargement: DateTime.parse(map['date_chargement']),
       poidsPlein: map['poids_plein'],
@@ -70,4 +70,14 @@ class Chargement {
 
   @override
   String toString() => 'Chargement(id: $id, celluleId: $celluleId, parcelleId: $parcelleId, poidsNet: $_poidsNet, poidsNormes: $_poidsNormes, variete: $variete)';
+  
+  // Méthode utilitaire pour récupérer une valeur parmi plusieurs clés possibles
+  static T? _pick<T>(Map<String, dynamic> map, List<String> keys) {
+    for (final key in keys) {
+      if (map.containsKey(key) && map[key] != null) {
+        return map[key] as T?;
+      }
+    }
+    return null;
+  }
 } 

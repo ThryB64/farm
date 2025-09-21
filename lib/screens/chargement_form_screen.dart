@@ -19,8 +19,8 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
   late TextEditingController _poidsVideController;
   late TextEditingController _humiditeController;
   String? _selectedRemorque;
-  int? _selectedParcelleId;
-  int? _selectedCelluleId;
+  String? _selectedParcelleId;
+  String? _selectedCelluleId;
   int? _selectedYear;
   String? _selectedVariete;
 
@@ -205,7 +205,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     },
                   ),
                   SizedBox(height: 16),
-                  DropdownButtonFormField<int>(
+                  DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
                     decoration: const InputDecoration(
                       labelText: 'Parcelle',
@@ -213,7 +213,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     ),
                     items: provider.parcelles.map((parcelle) {
                       return DropdownMenuItem(
-                        value: parcelle.id,
+                        value: parcelle.firebaseId ?? parcelle.id.toString(),
                         child: Text(parcelle.nom),
                       );
                     }).toList(),
@@ -256,7 +256,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     },
                   ),
                   SizedBox(height: 16),
-                  DropdownButtonFormField<int>(
+                  DropdownButtonFormField<String>(
                     value: _selectedCelluleId,
                     decoration: const InputDecoration(
                       labelText: 'Cellule',
@@ -264,7 +264,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     ),
                     items: cellulesAnnee.map((cellule) {
                       return DropdownMenuItem(
-                        value: cellule.id,
+                        value: cellule.firebaseId ?? cellule.id.toString(),
                         child: Text(cellule.reference),
                       );
                     }).toList(),

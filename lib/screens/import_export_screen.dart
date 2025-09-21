@@ -704,6 +704,16 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   }
 
   // Fonction pour forcer le refresh des données
+  // Méthode utilitaire pour récupérer une valeur parmi plusieurs clés possibles
+  T? _pick<T>(Map<String, dynamic> map, List<String> keys) {
+    for (final key in keys) {
+      if (map.containsKey(key) && map[key] != null) {
+        return map[key] as T?;
+      }
+    }
+    return null;
+  }
+
   Future<void> _forceDataRefresh(FirebaseProviderV4 provider) async {
     try {
       print('🔄 Début du refresh forcé...');
@@ -824,8 +834,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     
     return Chargement(
       id: id,
-      celluleId: int.tryParse(map['cellule_id'].toString()) ?? 0,
-      parcelleId: int.tryParse(map['parcelle_id'].toString()) ?? 0,
+      celluleId: _pick(map, ['celluleId', 'cellule_id', 'cellule', 'celluleRef'])?.toString() ?? '',
+      parcelleId: _pick(map, ['parcelleId', 'parcelle_id', 'parcelle', 'parcelleRef'])?.toString() ?? '',
       remorque: map['remorque'].toString(),
       dateChargement: DateTime.tryParse(map['date_chargement'].toString()) ?? DateTime.now(),
       poidsPlein: double.tryParse(map['poids_plein'].toString()) ?? 0.0,
