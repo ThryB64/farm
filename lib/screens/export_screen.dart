@@ -427,9 +427,17 @@ class _ExportScreenState extends State<ExportScreen> {
           .toList()
         ..sort((a, b) => b.date.compareTo(a.date));
 
-      // Pour chaque parcelle, prendre le dernier semis de l'année
+      // Pour chaque parcelle qui a été récoltée (qui apparaît dans le PDF)
       for (var parcelle in parcelles) {
         final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
+        
+        // Vérifier si cette parcelle a des chargements (donc a été récoltée)
+        final chargementsParcelle = chargementsAnnee
+            .where((c) => c.parcelleId == parcelleId)
+            .toList();
+            
+        // Ne traiter que les parcelles qui ont été récoltées
+        if (chargementsParcelle.isEmpty) continue;
 
         // Trouver le dernier semis pour cette parcelle
         final dernierSemis = semisAnnee
@@ -455,7 +463,7 @@ class _ExportScreenState extends State<ExportScreen> {
               };
             }
             
-            // Ajouter la surface de la variété
+            // Ajouter la surface de la variété (seulement pour les parcelles récoltées)
             varietesMap[variete]!['surface'] += surface;
           }
         }
