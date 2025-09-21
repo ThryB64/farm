@@ -47,6 +47,18 @@ class _CellulesScreenState extends State<CellulesScreen> {
                       color: Colors.grey[600],
                     ),
                   ),
+                  SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CelluleFormScreen()),
+                    ),
+                    icon: Icon(Icons.add),
+                    label: Text('Ajouter une cellule'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
                 ],
               ),
             );

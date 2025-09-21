@@ -28,8 +28,37 @@ class _SemisScreenState extends State<SemisScreen> {
           final parcelles = provider.parcelles;
 
           if (semis.isEmpty) {
-            return const Center(
-              child: Text('Aucun semis enregistré'),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.grass,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Aucun semis enregistré',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SemisFormScreen()),
+                    ),
+                    icon: Icon(Icons.add),
+                    label: Text('Ajouter un semis'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
 

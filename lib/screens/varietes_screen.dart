@@ -18,8 +18,37 @@ class VarietesScreen extends StatelessWidget {
           final varietes = provider.varietes;
 
           if (varietes.isEmpty) {
-            return const Center(
-              child: Text('Aucune variété enregistrée'),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.eco,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Aucune variété enregistrée',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const VarieteFormScreen()),
+                    ),
+                    icon: Icon(Icons.add),
+                    label: Text('Ajouter une variété'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
 
