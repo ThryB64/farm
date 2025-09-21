@@ -16,7 +16,7 @@ class StatistiquesScreen extends StatefulWidget {
 class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int? _selectedYear;
-  int? _selectedParcelleId;
+  String? _selectedParcelleId;
 
   @override
   void initState() {
@@ -116,15 +116,16 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                     if (_tabController.index == 1) ...[
                       SizedBox(width: 16),
                       Expanded(
-                        child: DropdownButtonFormField<int>(
+                        child: DropdownButtonFormField<String>(
                           value: _selectedParcelleId,
                           decoration: const InputDecoration(
                             labelText: 'Parcelle',
                             border: OutlineInputBorder(),
                           ),
                           items: parcelles.map((parcelle) {
-                            return DropdownMenuItem<int>(
-                              value: parcelle.id,
+                            final key = parcelle.firebaseId ?? parcelle.id.toString();
+                            return DropdownMenuItem<String>(
+                              value: key,
                               child: Text(parcelle.nom),
                             );
                           }).toList(),
@@ -174,15 +175,16 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
                                   SizedBox(height: 16),
-                                  DropdownButtonFormField<int>(
+                                  DropdownButtonFormField<String>(
                                     value: _selectedParcelleId,
                                     decoration: const InputDecoration(
                                       labelText: 'Parcelle',
                                       border: OutlineInputBorder(),
                                     ),
                                     items: parcelles.map((parcelle) {
-                                      return DropdownMenuItem<int>(
-                                        value: parcelle.id,
+                                      final key = parcelle.firebaseId ?? parcelle.id.toString();
+                                      return DropdownMenuItem<String>(
+                                        value: key,
                                         child: Text(parcelle.nom),
                                       );
                                     }).toList(),
@@ -414,17 +416,18 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
   }
 
   Widget _buildComparaisonRendementsParcellesChart(List<Chargement> chargements, List<Parcelle> parcelles) {
-    final Map<int, double> rendements = {};
+    final Map<String, double> rendements = {};
     for (var parcelle in parcelles) {
+      final parcelleKey = parcelle.firebaseId ?? parcelle.id.toString();
       final chargementsParcelle = chargements
-          .where((c) => c.parcelleId == parcelle.id && c.dateChargement.year == _selectedYear)
+          .where((c) => c.parcelleId == parcelleKey && c.dateChargement.year == _selectedYear)
           .toList();
       if (chargementsParcelle.isNotEmpty) {
         final poidsTotal = chargementsParcelle.fold<double>(
           0,
           (sum, c) => sum + c.poidsNormes,
         );
-        rendements[parcelle.id!] = (poidsTotal / 1000) / parcelle.surface;
+        rendements[parcelleKey] = (poidsTotal / 1000) / parcelle.surface;
       }
     }
 
@@ -475,7 +478,11 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          final parcelle = parcelles.firstWhere((p) => p.id == rendements.keys.elementAt(value.toInt()));
+                          final parcelleKey = rendements.keys.elementAt(value.toInt());
+                          final parcelle = parcelles.firstWhere(
+                            (p) => (p.firebaseId ?? p.id.toString()) == parcelleKey,
+                            orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
+                          );
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
@@ -523,8 +530,11 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     );
   }
 
-  Widget _buildEvolutionRendementParcelleChart(List<Chargement> chargements, int parcelleId, List<Parcelle> parcelles) {
-    final parcelle = parcelles.firstWhere((p) => p.id == parcelleId);
+  Widget _buildEvolutionRendementParcelleChart(List<Chargement> chargements, String parcelleId, List<Parcelle> parcelles) {
+    final parcelle = parcelles.firstWhere(
+      (p) => (p.firebaseId ?? p.id.toString()) == parcelleId,
+      orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
+    );
     final chargementsParcelle = chargements.where((c) => c.parcelleId == parcelleId).toList();
 
     // Grouper les chargements par année
@@ -635,8 +645,11 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     );
   }
 
-  Widget _buildEvolutionHumiditeParcelleChart(List<Chargement> chargements, int parcelleId, List<Parcelle> parcelles) {
-    final parcelle = parcelles.firstWhere((p) => p.id == parcelleId);
+  Widget _buildEvolutionHumiditeParcelleChart(List<Chargement> chargements, String parcelleId, List<Parcelle> parcelles) {
+    final parcelle = parcelles.firstWhere(
+      (p) => (p.firebaseId ?? p.id.toString()) == parcelleId,
+      orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
+    );
     final chargementsParcelle = chargements.where((c) => c.parcelleId == parcelleId).toList();
 
     // Grouper les chargements par année
@@ -764,7 +777,10 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     
     // Calculer les surfaces par variété pour l'année sélectionnée
     for (var semis in semis.where((s) => s.date.year == anneeSelectionnee)) {
-      final parcelle = parcelles.firstWhere((p) => p.id == semis.parcelleId);
+      final parcelle = parcelles.firstWhere(
+        (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
+        orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
+      );
       final surfaceTotale = parcelle.surface;
       
       for (var varieteSurface in semis.varietesSurfaces) {
@@ -882,7 +898,10 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     final semisAnnee = semis.where((s) => s.date.year == anneeSelectionnee).toList();
     
     for (var semis in semisAnnee) {
-      final parcelle = parcelles.firstWhere((p) => p.id == semis.parcelleId);
+      final parcelle = parcelles.firstWhere(
+        (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
+        orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
+      );
       
       // Calculer la surface totale de la parcelle
       final surfaceTotale = parcelle.surface;
