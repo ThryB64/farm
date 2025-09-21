@@ -5,6 +5,7 @@ import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
+import '../models/vente.dart';
 
 class FirebaseProviderV4 extends ChangeNotifier {
   final FirebaseServiceV4 _service = FirebaseServiceV4();
@@ -15,6 +16,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
   final Map<String, Chargement> _chargementsMap = {};
   final Map<String, Semis> _semisMap = {};
   final Map<String, Variete> _varietesMap = {};
+  final Map<String, Vente> _ventesMap = {};
   
   // Streams pour les données
   Stream<List<Parcelle>>? _parcellesStream;
@@ -22,6 +24,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Stream<List<Chargement>>? _chargementsStream;
   Stream<List<Semis>>? _semisStream;
   Stream<List<Variete>>? _varietesStream;
+  Stream<List<Vente>>? _ventesStream;
   
   // Getters pour l'accès aux données
   List<Parcelle> get parcelles => _parcellesMap.values.toList();
@@ -29,6 +32,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
   List<Chargement> get chargements => _chargementsMap.values.toList();
   List<Semis> get semis => _semisMap.values.toList();
   List<Variete> get varietes => _varietesMap.values.toList();
+  List<Vente> get ventes => _ventesMap.values.toList();
   
   // Maps pour les relations (optimisation des jointures) - String keys
   Map<String, Parcelle> get parcellesById => {
@@ -70,6 +74,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
       _chargementsStream = _service.getChargementsStream();
       _semisStream = _service.getSemisStream();
       _varietesStream = _service.getVarietesStream();
+      _ventesStream = _service.getVentesStream();
       
       // Écouter les changements
       _parcellesStream?.listen(_onParcellesChanged);
@@ -77,6 +82,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
       _chargementsStream?.listen(_onChargementsChanged);
       _semisStream?.listen(_onSemisChanged);
       _varietesStream?.listen(_onVarietesChanged);
+      _ventesStream?.listen(_onVentesChanged);
       
       _isInitialized = true;
       _error = null;
@@ -143,6 +149,17 @@ class FirebaseProviderV4 extends ChangeNotifier {
       }
     }
     print('FirebaseProvider V4: Updated ${varietes.length} varietes');
+    notifyListeners();
+  }
+  
+  void _onVentesChanged(List<Vente> ventes) {
+    _ventesMap.clear();
+    for (final vente in ventes) {
+      if (vente.firebaseId != null) {
+        _ventesMap[vente.firebaseId!] = vente;
+      }
+    }
+    print('FirebaseProvider V4: Updated ${ventes.length} ventes');
     notifyListeners();
   }
   
@@ -409,6 +426,74 @@ class FirebaseProviderV4 extends ChangeNotifier {
       notifyListeners();
       rethrow;
     }
+  }
+  
+  // ===== MÉTHODES POUR LES VENTES =====
+  
+  Future<String> ajouterVente(Vente vente) async {
+    try {
+      final key = await _service.insertVente(vente);
+      
+      // Mise à jour optimiste locale
+      vente.firebaseId = key;
+      _ventesMap[key] = vente;
+      notifyListeners();
+      
+      print('FirebaseProvider V4: Vente added with key: $key');
+      return key;
+    } catch (e) {
+      _error = 'Erreur lors de l\'ajout de la vente: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+  
+  Future<void> modifierVente(Vente vente) async {
+    try {
+      await _service.updateVente(vente);
+      
+      // Mise à jour optimiste locale
+      final key = vente.firebaseId ?? _service.generateVenteKey(vente);
+      _ventesMap[key] = vente;
+      notifyListeners();
+      
+      print('FirebaseProvider V4: Vente updated');
+    } catch (e) {
+      _error = 'Erreur lors de la modification de la vente: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+  
+  Future<void> supprimerVente(String key) async {
+    try {
+      await _service.deleteVente(key);
+      
+      // Suppression optimiste locale
+      _ventesMap.remove(key);
+      notifyListeners();
+      
+      print('FirebaseProvider V4: Vente deleted: $key');
+    } catch (e) {
+      _error = 'Erreur lors de la suppression de la vente: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+  
+  // Méthodes utilitaires pour les ventes
+  List<Vente> get ventesEnCours => ventes.where((v) => !v.terminee).toList();
+  List<Vente> get ventesTerminees => ventes.where((v) => v.terminee).toList();
+  
+  // Calculer le stock restant (approximation basée sur les chargements et ventes)
+  double get stockRestant {
+    // Calculer le total des chargements (maïs entré)
+    final totalChargements = chargements.fold<double>(0, (sum, c) => sum + c.poidsNormes);
+    
+    // Calculer le total des ventes terminées (maïs sorti)
+    final totalVentes = ventesTerminees.fold<double>(0, (sum, v) => sum + (v.poidsNet ?? 0));
+    
+    return totalChargements - totalVentes;
   }
   
   // ===== MÉTHODES D'IMPORT/EXPORT =====

@@ -9,6 +9,7 @@ import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
+import '../models/vente.dart';
 
 class FirebaseServiceV4 {
   static final FirebaseServiceV4 _instance = FirebaseServiceV4._internal();
@@ -384,6 +385,69 @@ class FirebaseServiceV4 {
     }
   }
 
+  // ===== MÉTHODES POUR LES VENTES =====
+
+  String generateVenteKey(Vente vente) {
+    final date = vente.date.toIso8601String().split('T')[0];
+    final ticket = vente.numeroTicket.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+    return 'v_${date}_${ticket}';
+  }
+
+  Stream<List<Vente>> getVentesStream() {
+    if (_farmRef != null) {
+      return _farmRef!.child('ventes').onValue.map((event) {
+        if (event.snapshot.value == null) return <Vente>[];
+        final data = event.snapshot.value as Map;
+        return data.entries.map((entry) {
+          final venteData = Map<String, dynamic>.from(entry.value as Map);
+          venteData['firebaseId'] = entry.key;
+          return Vente.fromMap(venteData);
+        }).toList();
+      });
+    } else {
+      return Stream.value(_getVentesFromStorage());
+    }
+  }
+
+  Future<String> insertVente(Vente vente) async {
+    if (_farmRef != null) {
+      final key = generateVenteKey(vente);
+      await _farmRef!.child('ventes').child(key).set({
+        ...vente.toMap(),
+        'firebaseId': key,
+        'createdAt': ServerValue.timestamp,
+      });
+      print('FirebaseService V4: Vente inserted: $key');
+      return key;
+    } else {
+      final id = DateTime.now().millisecondsSinceEpoch.toString();
+      vente.id = int.tryParse(id) ?? 0;
+      _saveVenteToStorage(vente);
+      return id;
+    }
+  }
+
+  Future<void> updateVente(Vente vente) async {
+    if (_farmRef != null) {
+      final key = vente.firebaseId ?? generateVenteKey(vente);
+      await _farmRef!.child('ventes').child(key).update({
+        ...vente.toMap(),
+        'firebaseId': key,
+        'updatedAt': ServerValue.timestamp,
+      });
+    } else {
+      _saveVenteToStorage(vente);
+    }
+  }
+
+  Future<void> deleteVente(String key) async {
+    if (_farmRef != null) {
+      await _farmRef!.child('ventes').child(key).remove();
+    } else {
+      _deleteVenteFromStorage(key);
+    }
+  }
+
   // ===== MÉTHODES DE STOCKAGE LOCAL =====
   
   List<Parcelle> _getParcellesFromStorage() {
@@ -444,6 +508,10 @@ class FirebaseServiceV4 {
   List<Variete> _getVarietesFromStorage() => [];
   void _saveVarieteToStorage(Variete variete) {}
   void _deleteVarieteFromStorage(String key) {}
+  
+  List<Vente> _getVentesFromStorage() => [];
+  void _saveVenteToStorage(Vente vente) {}
+  void _deleteVenteFromStorage(String key) {}
 
   // ===== MÉTHODES D'IMPORT/EXPORT =====
   

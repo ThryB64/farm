@@ -9,6 +9,7 @@ import 'cellules_screen.dart';
 import 'chargements_screen.dart';
 import 'semis_screen.dart';
 import 'varietes_screen.dart';
+import 'ventes_screen.dart';
 import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'export_screen.dart';
@@ -331,6 +332,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const VarietesScreen()),
+              ),
+            ),
+            MenuCard(
+              title: 'Ventes',
+              subtitle: 'Suivi des ventes',
+              icon: Icons.shopping_cart,
+              color: AppTheme.success,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const VentesScreen()),
               ),
             ),
             MenuCard(
