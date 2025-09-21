@@ -4,7 +4,7 @@ import 'variete_surface.dart';
 class Semis {
   int? id;
   String? firebaseId; // ID Firebase (string)
-  final int parcelleId;
+  final String parcelleId;
   final DateTime date;
   final List<VarieteSurface> varietesSurfaces;
   final String? notes;
@@ -37,7 +37,7 @@ class Semis {
     return Semis(
       id: map['id'],
       firebaseId: map['firebaseId'],
-      parcelleId: map['parcelle_id'],
+      parcelleId: map['parcelle_id']?.toString() ?? '',
       date: DateTime.parse(map['date']),
       varietesSurfaces: varietesData.map((v) => VarieteSurface.fromMap(v)).toList(),
       notes: map['notes'],

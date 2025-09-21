@@ -361,7 +361,7 @@ class _ExportScreenState extends State<ExportScreen> {
                           children: [
                             _buildDataCell(p.nom),
                             _buildDataCell(p.surface.toStringAsFixed(2)),
-                            _buildDataCell(db.getVarieteForParcelle(p.id)?.nom ?? "Inconnue"),
+                            _buildDataCell(db.getVarieteForParcelle(p.firebaseId ?? p.id.toString())?.nom ?? "Inconnue"),
                             _buildDataCell((poidsNet / 1000).toStringAsFixed(2)),
                             _buildDataCell((poidsNormes / 1000).toStringAsFixed(2)),
                             _buildDataCell((poidsNormes / 1000 / p.surface).toStringAsFixed(2)),

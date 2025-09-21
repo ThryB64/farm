@@ -506,8 +506,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
   }
   
   // Obtenir la variété principale d'une parcelle (pour compatibilité)
-  Variete? getVarieteForParcelle(int? parcelleId) {
-    if (parcelleId == null) return null;
+  Variete? getVarieteForParcelle(String? parcelleId) {
+    if (parcelleId == null || parcelleId.isEmpty) return null;
     
     // Chercher dans les semis de cette parcelle
     final semisForParcelle = semis.where((s) => s.parcelleId == parcelleId).toList();
@@ -540,7 +540,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
   // Obtenir les semis d'une parcelle (String ID)
   List<Semis> getSemisForParcelle(String? parcelleId) {
     if (parcelleId == null || parcelleId.isEmpty) return [];
-    return semis.where((s) => s.parcelleId.toString() == parcelleId).toList();
+    return semis.where((s) => s.parcelleId == parcelleId).toList();
   }
   
   // Méthode de diagnostic pour vérifier les jointures

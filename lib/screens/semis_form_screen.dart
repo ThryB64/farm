@@ -19,7 +19,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _dateController;
   late TextEditingController _notesController;
-  int? _selectedParcelleId;
+  String? _selectedParcelleId;
   List<VarieteSurface> _selectedVarietesSurfaces = [];
   bool _showHectares = false;
 
@@ -32,7 +32,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
           : _formatDate(DateTime.now()),
     );
     _notesController = TextEditingController(text: widget.semis?.notes ?? '');
-    _selectedParcelleId = widget.semis?.parcelleId;
+    _selectedParcelleId = widget.semis?.parcelleId?.toString();
     _selectedVarietesSurfaces = widget.semis?.varietesSurfaces ?? [];
     _showHectares = _selectedVarietesSurfaces.length > 1;
   }
@@ -65,9 +65,11 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
 
 
   double _getParcelleSurface() {
+    if (_selectedParcelleId == null) return 0.0;
+    
     final provider = context.read<FirebaseProviderV4>();
     final parcelle = provider.parcelles.firstWhere(
-      (p) => p.id == _selectedParcelleId,
+      (p) => (p.firebaseId ?? p.id.toString()) == _selectedParcelleId,
       orElse: () => Parcelle(nom: '', surface: 0),
     );
     return parcelle.surface;
@@ -407,15 +409,16 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               // Sélection de la parcelle
               Consumer<FirebaseProviderV4>(
                 builder: (context, provider, child) {
-                  return DropdownButtonFormField<int>(
+                  return DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
                     decoration: const InputDecoration(
                       labelText: 'Parcelle *',
                       border: OutlineInputBorder(),
                     ),
                     items: provider.parcelles.map((parcelle) {
-                      return DropdownMenuItem<int>(
-                        value: parcelle.id,
+                      final key = parcelle.firebaseId ?? parcelle.id.toString();
+                      return DropdownMenuItem<String>(
+                        value: key,
                         child: Text('${parcelle.nom} (${parcelle.surface} ha)'),
                       );
                     }).toList(),

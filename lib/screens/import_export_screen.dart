@@ -869,7 +869,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     
     return Semis(
       id: id,
-      parcelleId: int.tryParse(map['parcelle_id'].toString()) ?? 0,
+      parcelleId: map['parcelle_id']?.toString() ?? '',
       date: DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
       varietesSurfaces: varietesSurfaces,
       notes: map['notes']?.toString(),
