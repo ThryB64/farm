@@ -116,6 +116,10 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                             .removeWhere((v) => v.nom == variete.nom);
                       }
                       _showHectares = _selectedVarietesSurfaces.length > 1;
+                      // Auto-complétion immédiate si une seule variété
+                      if (_selectedVarietesSurfaces.length == 1) {
+                        _autoCompleteRemaining();
+                      }
                     });
                   },
                 );
@@ -163,14 +167,46 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               ),
             ),
           ),
+          // Aide pour l'auto-complétion
+          if (_selectedVarietesSurfaces.length > 1)
+            Container(
+              margin: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.lightbulb_outline, color: Colors.blue.shade700, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _getAutoCompleteHint(),
+                      style: TextStyle(
+                        color: Colors.blue.shade700,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _selectedVarietesSurfaces.length,
             itemBuilder: (context, index) {
               final varieteSurface = _selectedVarietesSurfaces[index];
+              final isAutoCompleted = _isAutoCompleted(index);
+              
               return ListTile(
                 title: Text(varieteSurface.nom),
+                subtitle: isAutoCompleted 
+                    ? const Text('Auto-complété', style: TextStyle(color: Colors.green, fontSize: 10))
+                    : null,
                 trailing: SizedBox(
                   width: 100,
                   child: TextFormField(
@@ -178,9 +214,11 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         ? varieteSurface.surface.toString()
                         : '',
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      suffix: Text('ha'),
+                    decoration: InputDecoration(
+                      suffix: const Text('ha'),
                       isDense: true,
+                      filled: isAutoCompleted,
+                      fillColor: isAutoCompleted ? Colors.green.shade50 : null,
                     ),
                     onChanged: (value) {
                       final hectares = double.tryParse(value) ?? 0;
@@ -189,6 +227,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                           nom: varieteSurface.nom,
                           surface: hectares,
                         );
+                        _autoCompleteRemaining();
                       });
                     },
                     validator: (value) {
@@ -208,6 +247,71 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
         ],
       ),
     );
+  }
+
+  String _getAutoCompleteHint() {
+    final total = _getParcelleSurface();
+    final count = _selectedVarietesSurfaces.length;
+    
+    if (count == 1) {
+      return 'Une seule variété : la surface totale (${total.toStringAsFixed(2)} ha) sera automatiquement assignée.';
+    } else if (count == 2) {
+      return 'Deux variétés : remplissez la première, la seconde sera auto-complétée.';
+    } else {
+      return 'Plusieurs variétés : remplissez ${count - 1} variétés, la dernière sera auto-complétée.';
+    }
+  }
+
+  bool _isAutoCompleted(int index) {
+    final total = _getParcelleSurface();
+    final filledCount = _selectedVarietesSurfaces.where((v) => v.surface > 0).length;
+    final count = _selectedVarietesSurfaces.length;
+    
+    if (count == 1) {
+      return true; // Toujours auto-complété
+    } else if (count == 2) {
+      return index == 1; // La deuxième est auto-complétée
+    } else {
+      return index == count - 1 && filledCount == count - 1; // La dernière est auto-complétée
+    }
+  }
+
+  void _autoCompleteRemaining() {
+    final total = _getParcelleSurface();
+    final count = _selectedVarietesSurfaces.length;
+    
+    if (count == 1) {
+      // Une seule variété : assigner le total
+      setState(() {
+        _selectedVarietesSurfaces[0] = VarieteSurface(
+          nom: _selectedVarietesSurfaces[0].nom,
+          surface: total,
+        );
+      });
+    } else if (count == 2) {
+      // Deux variétés : auto-compléter la deuxième
+      final firstSurface = _selectedVarietesSurfaces[0].surface;
+      if (firstSurface > 0) {
+        setState(() {
+          _selectedVarietesSurfaces[1] = VarieteSurface(
+            nom: _selectedVarietesSurfaces[1].nom,
+            surface: total - firstSurface,
+          );
+        });
+      }
+    } else {
+      // Plusieurs variétés : auto-compléter la dernière
+      final filledCount = _selectedVarietesSurfaces.where((v) => v.surface > 0).length;
+      if (filledCount == count - 1) {
+        final filledTotal = _selectedVarietesSurfaces.take(count - 1).fold<double>(0, (sum, v) => sum + v.surface);
+        setState(() {
+          _selectedVarietesSurfaces[count - 1] = VarieteSurface(
+            nom: _selectedVarietesSurfaces[count - 1].nom,
+            surface: total - filledTotal,
+          );
+        });
+      }
+    }
   }
 
   double _getTotalHectares() {
@@ -393,10 +497,51 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 ),
                 maxLines: 3,
               ),
+
+              const SizedBox(height: 24),
+
+              // Boutons de validation
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('Annuler'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _canSave() ? _saveSemis : null,
+                      icon: const Icon(Icons.save),
+                      label: const Text('Enregistrer'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  bool _canSave() {
+    return _selectedParcelleId != null &&
+           _selectedVarietesSurfaces.isNotEmpty &&
+           _dateController.text.isNotEmpty &&
+           _isTotalValid();
   }
 }
