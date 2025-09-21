@@ -113,7 +113,7 @@ class _SemisScreenState extends State<SemisScreen> {
                         itemBuilder: (context, index) {
                           final semis = semisParAnnee[_selectedYear]![index];
                           final parcelle = parcelles.firstWhere(
-                            (p) => p.id == semis.parcelleId,
+                            (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
                             orElse: () => Parcelle(
                               id: 0,
                               nom: 'Inconnu',
