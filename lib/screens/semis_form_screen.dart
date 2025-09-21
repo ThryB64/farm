@@ -22,6 +22,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   String? _selectedParcelleId;
   List<VarieteSurface> _selectedVarietesSurfaces = [];
   bool _showHectares = false;
+  int? _selectedYear;
 
   @override
   void initState() {
@@ -35,6 +36,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     _selectedParcelleId = widget.semis?.parcelleId?.toString();
     _selectedVarietesSurfaces = widget.semis?.varietesSurfaces ?? [];
     _showHectares = _selectedVarietesSurfaces.length > 1;
+    _selectedYear = widget.semis?.date.year ?? DateTime.now().year;
   }
 
   @override
@@ -63,6 +65,24 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   }
 
 
+
+  List<Parcelle> _getParcellesDisponibles(FirebaseProviderV4 provider) {
+    if (_selectedYear == null) return provider.parcelles;
+    
+    // Obtenir les parcelles qui ont déjà des semis cette année
+    final parcellesAvecSemis = <String>{};
+    for (final semis in provider.semis) {
+      if (semis.date.year == _selectedYear) {
+        parcellesAvecSemis.add(semis.parcelleId);
+      }
+    }
+    
+    // Retourner seulement les parcelles qui n'ont pas de semis cette année
+    return provider.parcelles.where((parcelle) {
+      final parcelleKey = parcelle.firebaseId ?? parcelle.id.toString();
+      return !parcellesAvecSemis.contains(parcelleKey);
+    }).toList();
+  }
 
   double _getParcelleSurface() {
     if (_selectedParcelleId == null) return 0.0;
@@ -358,11 +378,17 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       return;
     }
 
+    // Utiliser l'année sélectionnée pour la date
+    final dateParts = _dateController.text.split('/');
+    final day = int.parse(dateParts[0]);
+    final month = int.parse(dateParts[1]);
+    final year = _selectedYear!;
+    
     final semis = Semis(
       id: widget.semis?.id,
       firebaseId: widget.semis?.firebaseId, // ✅ Préserver le firebaseId
       parcelleId: _selectedParcelleId!,
-      date: DateTime.parse(_dateController.text.split('/').reversed.join('-')),
+      date: DateTime(year, month, day),
       varietesSurfaces: _selectedVarietesSurfaces,
       notes: _notesController.text.isEmpty ? null : _notesController.text,
     );
@@ -406,16 +432,45 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Sélection de la parcelle
+              // Sélection de l'année
+              DropdownButtonFormField<int>(
+                value: _selectedYear,
+                decoration: const InputDecoration(
+                  labelText: 'Année *',
+                  border: OutlineInputBorder(),
+                ),
+                items: List.generate(10, (index) {
+                  final year = DateTime.now().year - index;
+                  return DropdownMenuItem(
+                    value: year,
+                    child: Text(year.toString()),
+                  );
+                }),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedYear = value;
+                    _selectedParcelleId = null; // Réinitialiser la parcelle
+                  });
+                },
+                validator: (value) {
+                  if (value == null) return 'Veuillez sélectionner une année';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              
+              // Sélection de la parcelle (filtrée par année)
               Consumer<FirebaseProviderV4>(
                 builder: (context, provider, child) {
+                  final parcellesDisponibles = _getParcellesDisponibles(provider);
+                  
                   return DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
                     decoration: const InputDecoration(
                       labelText: 'Parcelle *',
                       border: OutlineInputBorder(),
                     ),
-                    items: provider.parcelles.map((parcelle) {
+                    items: parcellesDisponibles.map((parcelle) {
                       final key = parcelle.firebaseId ?? parcelle.id.toString();
                       return DropdownMenuItem<String>(
                         value: key,
