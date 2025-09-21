@@ -83,11 +83,11 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
           );
         },
       ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _showQuickAddVenteDialog(context),
-          backgroundColor: Colors.green,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddVenteDialog(context),
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
@@ -138,39 +138,16 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
 
   Widget _buildVentesEnCours(FirebaseProviderV4 provider) {
     if (_selectedAnnee == null) {
-      return Center(child: Text('Sélectionnez une année'));
+      return _buildEmptyState('Sélectionnez une année');
     }
     
     final ventesEnCours = provider.getVentesEnCoursParAnnee(_selectedAnnee!);
     
     if (ventesEnCours.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'Aucune vente en cours',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Appuyez sur + pour ajouter une vente',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => _showAddVenteDialog(context),
-              icon: Icon(Icons.add),
-              label: Text('Ajouter une vente'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
+      return _buildEmptyState(
+        'Aucune vente en cours',
+        'Commencez par ajouter votre première vente',
+        Icons.shopping_cart_outlined,
       );
     }
 
@@ -193,29 +170,16 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
 
   Widget _buildVentesTerminees(FirebaseProviderV4 provider) {
     if (_selectedAnnee == null) {
-      return Center(child: Text('Sélectionnez une année'));
+      return _buildEmptyState('Sélectionnez une année');
     }
     
     final ventesTerminees = provider.getVentesTermineesParAnnee(_selectedAnnee!);
     
     if (ventesTerminees.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.check_circle_outline, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'Aucune vente terminée',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Les ventes terminées apparaîtront ici',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-          ],
-        ),
+      return _buildEmptyState(
+        'Aucune vente terminée',
+        'Les ventes terminées apparaîtront ici',
+        Icons.check_circle_outline,
       );
     }
 
@@ -349,167 +313,58 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  void _showQuickAddVenteDialog(BuildContext context) {
-    final numeroTicketController = TextEditingController();
-    final clientController = TextEditingController();
-    final poidsVideController = TextEditingController();
-    final poidsPleinController = TextEditingController();
-    final prixController = TextEditingController();
-    
-    int selectedAnnee = DateTime.now().year;
-    bool payer = false;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Ajouter une vente rapide'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: numeroTicketController,
-                decoration: InputDecoration(
-                  labelText: 'Numéro de ticket *',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: clientController,
-                decoration: InputDecoration(
-                  labelText: 'Client *',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: poidsVideController,
-                      decoration: InputDecoration(
-                        labelText: 'Poids vide (kg) *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: poidsPleinController,
-                      decoration: InputDecoration(
-                        labelText: 'Poids plein (kg) *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: prixController,
-                      decoration: InputDecoration(
-                        labelText: 'Prix (€/tonne)',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: DropdownButtonFormField<int>(
-                      value: selectedAnnee,
-                      decoration: InputDecoration(
-                        labelText: 'Année *',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: List.generate(5, (index) => DateTime.now().year - index + 1)
-                          .map((year) => DropdownMenuItem<int>(
-                                value: year,
-                                child: Text(year.toString()),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        selectedAnnee = value!;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              CheckboxListTile(
-                title: Text('Payé'),
-                value: payer,
-                onChanged: (value) {
-                  payer = value ?? false;
-                },
-                contentPadding: EdgeInsets.zero,
-              ),
-            ],
+  Widget _buildEmptyState(String title, [String? subtitle, IconData? icon]) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon ?? Icons.shopping_cart_outlined,
+              size: 40,
+              color: Colors.green,
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Annuler'),
+          SizedBox(height: 24),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              if (numeroTicketController.text.isEmpty || 
-                  clientController.text.isEmpty ||
-                  poidsVideController.text.isEmpty ||
-                  poidsPleinController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Veuillez remplir tous les champs obligatoires')),
-                );
-                return;
-              }
-
-              try {
-                final poidsVide = double.parse(poidsVideController.text);
-                final poidsPlein = double.parse(poidsPleinController.text);
-                final poidsNet = poidsPlein - poidsVide;
-                final prixParTonne = double.tryParse(prixController.text) ?? 0;
-                final prixTotal = prixParTonne * (poidsNet / 1000);
-
-                final vente = Vente(
-                  date: DateTime.now(),
-                  annee: selectedAnnee,
-                  numeroTicket: numeroTicketController.text.trim(),
-                  client: clientController.text.trim(),
-                  immatriculationRemorque: '',
-                  cmr: '',
-                  poidsVide: poidsVide,
-                  poidsPlein: poidsPlein,
-                  poidsNet: poidsNet,
-                  payer: payer,
-                  prix: prixTotal > 0 ? prixTotal : null,
-                  terminee: payer,
-                );
-
-                final provider = context.read<FirebaseProviderV4>();
-                await provider.ajouterVente(vente);
-
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Vente ajoutée avec succès')),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Erreur: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: Text('Ajouter'),
+          if (subtitle != null) ...[
+            SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+          SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => _showAddVenteDialog(context),
+            icon: Icon(Icons.add, color: Colors.white),
+            label: Text(
+              'Ajouter une vente',
+              style: TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
         ],
       ),
