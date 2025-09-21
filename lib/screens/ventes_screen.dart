@@ -83,11 +83,11 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showQuickAddVenteDialog(context),
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _showQuickAddVenteDialog(context),
+          backgroundColor: Colors.green,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
     );
   }
 
