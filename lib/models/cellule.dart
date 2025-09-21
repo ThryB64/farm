@@ -1,5 +1,6 @@
 class Cellule {
   int? id;
+  String? firebaseId; // ID Firebase (string)
   final String reference;
   final double capacite;
   final DateTime dateCreation;
@@ -7,6 +8,7 @@ class Cellule {
 
   Cellule({
     this.id,
+    this.firebaseId,
     String? reference,
     DateTime? dateCreation,
     this.notes,
@@ -21,6 +23,7 @@ class Cellule {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'firebaseId': firebaseId,
       'reference': reference,
       'capacite': capacite,
       'date_creation': dateCreation.toIso8601String(),
@@ -31,6 +34,7 @@ class Cellule {
   factory Cellule.fromMap(Map<String, dynamic> map) {
     return Cellule(
       id: map['id'],
+      firebaseId: map['firebaseId'],
       reference: map['reference'],
       dateCreation: DateTime.parse(map['date_creation']),
       notes: map['notes'],

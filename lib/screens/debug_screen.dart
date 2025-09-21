@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../models/chargement.dart';
 import '../models/cellule.dart';
 import '../models/parcelle.dart';
@@ -21,7 +21,7 @@ class DebugScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final chargements = provider.chargements;
           final cellules = provider.cellules;

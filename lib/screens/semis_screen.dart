@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../models/semis.dart';
 import '../models/parcelle.dart';
 import 'semis_form_screen.dart';
@@ -22,7 +22,7 @@ class _SemisScreenState extends State<SemisScreen> {
         title: const Text('Semis'),
         backgroundColor: Colors.purple,
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final semis = provider.semis;
           final parcelles = provider.parcelles;
@@ -199,7 +199,7 @@ class _SemisScreenState extends State<SemisScreen> {
           ),
           TextButton(
             onPressed: () {
-              context.read<FirebaseProviderV3>().supprimerSemis(semis.id.toString());
+              context.read<FirebaseProviderV4>().supprimerSemis(semis.id.toString());
               Navigator.pop(context);
             },
             child: const Text('Supprimer'),

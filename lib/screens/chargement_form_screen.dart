@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../models/chargement.dart';
 import '../utils/poids_utils.dart';
 
@@ -47,7 +47,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
     } else {
       // Pour un nouveau chargement, on récupère les données du dernier chargement
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final provider = context.read<FirebaseProviderV3>();
+        final provider = context.read<FirebaseProviderV4>();
         if (provider.chargements.isNotEmpty) {
           // Trier les chargements par date décroissante pour avoir le plus récent
           final chargements = provider.chargements.toList()
@@ -79,7 +79,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
     super.dispose();
   }
 
-  List<String> _getVarietesDisponibles(FirebaseProviderV3 provider) {
+  List<String> _getVarietesDisponibles(FirebaseProviderV4 provider) {
     if (_selectedParcelleId == null || _selectedYear == null) return [];
 
     final anneeSelectionnee = _selectedYear!;  // Non-null assertion car vérifié au-dessus
@@ -143,7 +143,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
         title: Text(widget.chargement == null ? 'Nouveau chargement' : 'Modifier le chargement'),
         backgroundColor: Colors.orange,
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           // Créer la liste des années à partir des chargements existants
           Set<int> anneesSet = provider.chargements
@@ -390,7 +390,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                             variete: _selectedVariete!,
                           );
 
-                          final provider = context.read<FirebaseProviderV3>();
+                          final provider = context.read<FirebaseProviderV4>();
                           if (widget.chargement == null) {
                             await provider.ajouterChargement(chargement);
                           } else {

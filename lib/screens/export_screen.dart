@@ -3,7 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../models/chargement.dart';
 
 class ExportScreen extends StatefulWidget {
@@ -18,7 +18,7 @@ class _ExportScreenState extends State<ExportScreen> {
 
   Future<void> _generatePDF() async {
     try {
-      final db = Provider.of<FirebaseProviderV3>(context, listen: false);
+      final db = Provider.of<FirebaseProviderV4>(context, listen: false);
       final chargements = await db.chargements.toList();
       final parcelles = await db.parcelles.toList();
       final semis = await db.semis.toList();
@@ -609,7 +609,7 @@ class _ExportScreenState extends State<ExportScreen> {
         title: const Text('Export PDF'),
         backgroundColor: Colors.orange,
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final years = provider.chargements
               .map((c) => c.dateChargement.year)

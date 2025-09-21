@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         child: SafeArea(
-          child: Consumer<FirebaseProviderV3>(
+          child: Consumer<FirebaseProviderV4>(
             builder: (context, provider, child) {
               return FadeTransition(
                 opacity: _fadeAnimation,
@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildStatsSection(FirebaseProviderV3 provider) {
+  Widget _buildStatsSection(FirebaseProviderV4 provider) {
     final parcelles = provider.parcelles;
     final chargements = provider.chargements;
     
@@ -349,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildQuickActions(FirebaseProviderV3 provider) {
+  Widget _buildQuickActions(FirebaseProviderV4 provider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

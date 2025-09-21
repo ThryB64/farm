@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../models/cellule.dart';
 import 'cellule_form_screen.dart';
 import 'cellule_details_screen.dart';
@@ -24,7 +24,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final cellules = provider.cellules;
           final chargements = provider.chargements;
@@ -379,7 +379,7 @@ class _CellulesScreenState extends State<CellulesScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<FirebaseProviderV3>().supprimerCellule(cellule.id.toString());
+              context.read<FirebaseProviderV4>().supprimerCellule(cellule.id.toString());
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(

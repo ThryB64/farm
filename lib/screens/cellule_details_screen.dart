@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/parcelle.dart';
@@ -17,7 +17,7 @@ class CelluleDetailsScreen extends StatelessWidget {
         title: Text(cellule.reference),
         centerTitle: true,
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, db, child) {
           final chargements = db.chargements
               .where((c) => c.celluleId == cellule.id)

@@ -3,6 +3,7 @@ import 'variete_surface.dart';
 
 class Semis {
   int? id;
+  String? firebaseId; // ID Firebase (string)
   final int parcelleId;
   final DateTime date;
   final List<VarieteSurface> varietesSurfaces;
@@ -10,6 +11,7 @@ class Semis {
 
   Semis({
     this.id,
+    this.firebaseId,
     required this.parcelleId,
     required this.date,
     required this.varietesSurfaces,
@@ -22,6 +24,7 @@ class Semis {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'firebaseId': firebaseId,
       'parcelle_id': parcelleId,
       'date': date.toIso8601String(),
       'varietes_surfaces': jsonEncode(varietesSurfaces.map((v) => v.toMap()).toList()),
@@ -33,6 +36,7 @@ class Semis {
     final List<dynamic> varietesData = jsonDecode(map['varietes_surfaces']);
     return Semis(
       id: map['id'],
+      firebaseId: map['firebaseId'],
       parcelleId: map['parcelle_id'],
       date: DateTime.parse(map['date']),
       varietesSurfaces: varietesData.map((v) => VarieteSurface.fromMap(v)).toList(),

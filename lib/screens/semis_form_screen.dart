@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../models/semis.dart';
 import '../models/variete_surface.dart';
 import '../models/parcelle.dart';
@@ -65,7 +65,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
 
 
   double _getParcelleSurface() {
-    final provider = context.read<FirebaseProviderV3>();
+    final provider = context.read<FirebaseProviderV4>();
     final parcelle = provider.parcelles.firstWhere(
       (p) => p.id == _selectedParcelleId,
       orElse: () => Parcelle(nom: '', surface: 0),
@@ -73,7 +73,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     return parcelle.surface;
   }
 
-  Widget _buildVarietesSection(FirebaseProviderV3 provider) {
+  Widget _buildVarietesSection(FirebaseProviderV4 provider) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
@@ -366,12 +366,12 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
 
     try {
       if (widget.semis == null) {
-        await context.read<FirebaseProviderV3>().ajouterSemis(semis);
+        await context.read<FirebaseProviderV4>().ajouterSemis(semis);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Semis ajouté avec succès')),
         );
       } else {
-        await context.read<FirebaseProviderV3>().modifierSemis(semis);
+        await context.read<FirebaseProviderV4>().modifierSemis(semis);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Semis modifié avec succès')),
         );
@@ -404,7 +404,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Sélection de la parcelle
-              Consumer<FirebaseProviderV3>(
+              Consumer<FirebaseProviderV4>(
                 builder: (context, provider, child) {
                   return DropdownButtonFormField<int>(
                     value: _selectedParcelleId,
@@ -452,7 +452,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               const SizedBox(height: 16),
 
               // Sélection des variétés
-              Consumer<FirebaseProviderV3>(
+              Consumer<FirebaseProviderV4>(
                 builder: (context, provider, child) {
                   return _buildVarietesSection(provider);
                 },

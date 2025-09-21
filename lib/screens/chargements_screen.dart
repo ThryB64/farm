@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
@@ -65,7 +65,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           ),
         ],
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final chargements = provider.chargements;
           final cellules = provider.cellules;
@@ -577,7 +577,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
     );
 
     if (confirmed == true && chargement.id != null) {
-      await context.read<FirebaseProviderV3>().supprimerChargement(chargement.id.toString());
+      await context.read<FirebaseProviderV4>().supprimerChargement(chargement.id.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Chargement supprimé'),

@@ -1,5 +1,6 @@
 class Chargement {
   int? id;
+  String? firebaseId; // ID Firebase (string)
   final int celluleId;
   final int parcelleId;
   final String remorque;
@@ -13,6 +14,7 @@ class Chargement {
 
   Chargement({
     this.id,
+    this.firebaseId,
     required this.celluleId,
     required this.parcelleId,
     required this.remorque,
@@ -35,6 +37,7 @@ class Chargement {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'firebaseId': firebaseId,
       'cellule_id': celluleId,
       'parcelle_id': parcelleId,
       'remorque': remorque,
@@ -51,6 +54,7 @@ class Chargement {
   factory Chargement.fromMap(Map<String, dynamic> map) {
     return Chargement(
       id: map['id'],
+      firebaseId: map['firebaseId'],
       celluleId: map['cellule_id'],
       parcelleId: map['parcelle_id'],
       remorque: map['remorque'],

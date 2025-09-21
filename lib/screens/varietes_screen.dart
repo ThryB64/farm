@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import 'variete_form_screen.dart';
 
 class VarietesScreen extends StatelessWidget {
@@ -13,7 +13,7 @@ class VarietesScreen extends StatelessWidget {
         title: const Text('Variétés'),
         backgroundColor: Colors.orange,
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final varietes = provider.varietes;
 

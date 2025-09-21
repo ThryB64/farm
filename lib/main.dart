@@ -6,7 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 // Services & providers
-import 'providers/firebase_provider_v3.dart';
+import 'providers/firebase_provider_v4.dart';
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -60,8 +60,8 @@ Future<void> main() async {
         runApp(
           MultiProvider(
             providers: [
-              ChangeNotifierProvider<FirebaseProviderV3>(
-                create: (context) => FirebaseProviderV3(),
+              ChangeNotifierProvider<FirebaseProviderV4>(
+                create: (context) => FirebaseProviderV4(),
               ),
             ],
             child: const MyApp(),
@@ -145,7 +145,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
       try {
-        final provider = context.read<FirebaseProviderV3>();
+        final provider = context.read<FirebaseProviderV4>();
         await provider.initialize();
       
       if (mounted) {

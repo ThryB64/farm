@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
@@ -117,7 +117,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             ],
           ),
           const SizedBox(height: AppTheme.spacingL),
-                    Consumer<FirebaseProviderV3>(
+                    Consumer<FirebaseProviderV4>(
                       builder: (context, provider, child) {
                         return Column(
                           children: [
@@ -369,7 +369,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     });
 
     try {
-      final provider = context.read<FirebaseProviderV3>();
+      final provider = context.read<FirebaseProviderV4>();
       
       // Préparer les données à exporter avec conversion explicite des types
       final exportData = {
@@ -595,7 +595,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   }
 
   Future<void> _performImport(Map<String, dynamic> data) async {
-        final provider = context.read<FirebaseProviderV3>();
+        final provider = context.read<FirebaseProviderV4>();
     
     // 1. Vider complètement le localStorage
     await _clearLocalStorage();
@@ -704,7 +704,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   }
 
   // Fonction pour forcer le refresh des données
-  Future<void> _forceDataRefresh(FirebaseProviderV3 provider) async {
+  Future<void> _forceDataRefresh(FirebaseProviderV4 provider) async {
     try {
       print('🔄 Début du refresh forcé...');
       
@@ -891,7 +891,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
 
   Future<void> _updatePoidsNormes() async {
     try {
-      await context.read<FirebaseProviderV3>().updateAllChargementsPoidsNormes();
+      await context.read<FirebaseProviderV4>().updateAllChargementsPoidsNormes();
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

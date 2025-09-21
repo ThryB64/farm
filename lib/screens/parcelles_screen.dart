@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
@@ -61,7 +61,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           ),
         ],
       ),
-      body: Consumer<FirebaseProviderV3>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final parcelles = List<Parcelle>.from(provider.parcelles)
             ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
@@ -139,7 +139,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
     );
   }
 
-  Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV3 provider) {
+  Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV4 provider) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
       child: ModernCard(
@@ -353,7 +353,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   nom: nom,
                   surface: surface,
                 );
-                context.read<FirebaseProviderV3>().ajouterParcelle(parcelle);
+                context.read<FirebaseProviderV4>().ajouterParcelle(parcelle);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -443,7 +443,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   surface: surface,
                   dateCreation: parcelle.dateCreation,
                 );
-                context.read<FirebaseProviderV3>().modifierParcelle(parcelleModifiee);
+                context.read<FirebaseProviderV4>().modifierParcelle(parcelleModifiee);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -487,7 +487,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
     );
 
     if (confirmed == true && parcelle.id != null) {
-      context.read<FirebaseProviderV3>().supprimerParcelle(parcelle.id.toString());
+      context.read<FirebaseProviderV4>().supprimerParcelle(parcelle.id.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Parcelle supprimée'),

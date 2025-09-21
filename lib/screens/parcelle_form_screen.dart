@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/firebase_provider_v3.dart';
+import '../providers/firebase_provider_v4.dart';
 import '../models/parcelle.dart';
 import '../theme/theme.dart';
 import '../widgets/glass.dart';
@@ -295,7 +295,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
     });
 
     try {
-      final provider = Provider.of<FirebaseProviderV3>(context, listen: false);
+      final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
       
       final parcelle = Parcelle(
         id: widget.parcelle?.id,
