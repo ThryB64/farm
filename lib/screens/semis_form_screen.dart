@@ -63,12 +63,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   }
 
 
-  void _removeVariete(int index) {
-    setState(() {
-      _selectedVarietesSurfaces.removeAt(index);
-      _showHectares = _selectedVarietesSurfaces.length > 1;
-    });
-  }
 
   double _getParcelleSurface() {
     final provider = context.read<FirebaseProviderV3>();
@@ -227,104 +221,83 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        value: null, // Toujours null pour permettre la sélection
-                        decoration: const InputDecoration(
-                          labelText: 'Sélectionner une variété',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: provider.varietes.map((variete) {
-                          return DropdownMenuItem<String>(
-                            value: variete.nom,
-                            child: Text(variete.nom),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedVarietesSurfaces.add(VarieteSurface(
-                                nom: value,
-                                surface: 0,
-                              ));
-                              _showHectares = _selectedVarietesSurfaces.length > 1;
-                            });
-                          }
-                        },
-                      ),
+                      ...provider.varietes.map((variete) {
+                        final isSelected = _selectedVarietesSurfaces.any((vs) => vs.nom == variete.nom);
+                        final selectedIndex = _selectedVarietesSurfaces.indexWhere((vs) => vs.nom == variete.nom);
+                        
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            leading: Checkbox(
+                              value: isSelected,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == true) {
+                                    // Ajouter la variété
+                                    _selectedVarietesSurfaces.add(VarieteSurface(
+                                      nom: variete.nom,
+                                      surface: 0,
+                                    ));
+                                  } else {
+                                    // Supprimer la variété
+                                    _selectedVarietesSurfaces.removeAt(selectedIndex);
+                                  }
+                                  _showHectares = _selectedVarietesSurfaces.length > 1;
+                                });
+                              },
+                            ),
+                            title: Text(
+                              variete.nom,
+                              style: TextStyle(
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected ? Colors.blue : null,
+                              ),
+                            ),
+                            subtitle: variete.description != null 
+                                ? Text(variete.description!)
+                                : null,
+                            trailing: isSelected && _showHectares
+                                ? SizedBox(
+                                    width: 120,
+                                    child: TextFormField(
+                                      initialValue: _selectedVarietesSurfaces[selectedIndex].surface > 0 
+                                          ? _selectedVarietesSurfaces[selectedIndex].surface.toString()
+                                          : '',
+                                      decoration: const InputDecoration(
+                                        labelText: 'Ha',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        isDense: true,
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value) {
+                                        final hectares = double.tryParse(value) ?? 0;
+                                        setState(() {
+                                          _selectedVarietesSurfaces[selectedIndex] = VarieteSurface(
+                                            nom: variete.nom,
+                                            surface: hectares,
+                                          );
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (_showHectares) {
+                                          final hectares = double.tryParse(value ?? '');
+                                          if (hectares == null || hectares < 0) {
+                                            return 'Surface invalide';
+                                          }
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        );
+                      }).toList(),
                     ],
                   );
                 },
               ),
-              const SizedBox(height: 16),
-
-              // Liste des variétés sélectionnées
-              if (_selectedVarietesSurfaces.isNotEmpty) ...[
-                const Text(
-                  'Variétés sélectionnées:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                ..._selectedVarietesSurfaces.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final varieteSurface = entry.value;
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                varieteSurface.nom,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              IconButton(
-                                onPressed: () => _removeVariete(index),
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                              ),
-                            ],
-                          ),
-                          if (_showHectares) ...[
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              initialValue: varieteSurface.surface > 0 
-                                  ? varieteSurface.surface.toString()
-                                  : '',
-                              decoration: const InputDecoration(
-                                labelText: 'Surface (hectares)',
-                                border: OutlineInputBorder(),
-                                suffixText: 'ha',
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                final hectares = double.tryParse(value) ?? 0;
-                                setState(() {
-                                  _selectedVarietesSurfaces[index] = VarieteSurface(
-                                    nom: varieteSurface.nom,
-                                    surface: hectares,
-                                  );
-                                });
-                              },
-                              validator: (value) {
-                                if (_showHectares) {
-                                  final hectares = double.tryParse(value ?? '');
-                                  if (hectares == null || hectares < 0) {
-                                    return 'Surface invalide';
-                                  }
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ],
 
               // Résumé des surfaces
               if (_showHectares && _selectedParcelleId != null) ...[
