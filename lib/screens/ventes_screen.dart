@@ -240,14 +240,17 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
           children: [
             Text('Client: ${vente.client}'),
             Text('Date: ${_formatDate(vente.date)}'),
-            Text('Poids net: ${(vente.poidsNet ?? vente.poidsNetCalcule).toStringAsFixed(1)} kg'),
+            Text('Poids net final: ${(vente.poidsNet ?? vente.poidsNetCalcule).toStringAsFixed(1)} kg'),
             if (vente.ecartPoidsNet != null)
-              Text('Écart: ${vente.ecartPoidsNet!.toStringAsFixed(1)} kg', 
-                   style: TextStyle(color: vente.ecartPoidsNet! > 0 ? Colors.red : Colors.green)),
+              Text('Écart client: ${vente.ecartPoidsNet!.toStringAsFixed(1)} kg', 
+                   style: TextStyle(
+                     color: vente.ecartPoidsNet! > 0 ? Colors.red : Colors.green,
+                     fontWeight: FontWeight.bold,
+                   )),
             if (vente.prix != null)
-              Text('Prix: ${vente.prix!.toStringAsFixed(2)} €'),
+              Text('Prix total: ${vente.prix!.toStringAsFixed(2)} €'),
             if (vente.payer) 
-              Text('✅ Payé', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+              Text('✅ Payé - Vente terminée', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
         ],
         ),
         trailing: Row(

@@ -276,14 +276,24 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                   child: TextFormField(
                     controller: _ecartPoidsNetController,
                     decoration: InputDecoration(
-                      labelText: 'Écart poids net (kg)',
+                      labelText: 'Écart client (kg)',
                       border: OutlineInputBorder(),
-                      helperText: 'Différence avec le poids calculé',
+                      helperText: 'Différence pesée par le client (+/-)',
                     ),
                     keyboardType: TextInputType.number,
+                    onChanged: _calculatePoidsNetFinal,
                   ),
                 ),
               ],
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Poids net final: ${_getPoidsNetFinal().toStringAsFixed(1)} kg',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
             ),
           ],
         ),
@@ -309,36 +319,50 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                   child: TextFormField(
                     controller: _prixController,
                     decoration: InputDecoration(
-                      labelText: 'Prix (€)',
+                      labelText: 'Prix (€/tonne)',
                       border: OutlineInputBorder(),
+                      helperText: 'Prix par tonne de maïs',
                     ),
                     keyboardType: TextInputType.number,
+                    onChanged: _calculatePrixTotal,
                   ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     children: [
+                      Text(
+                        'Prix total: ${_getPrixTotal().toStringAsFixed(2)} €',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                      SizedBox(height: 8),
                       CheckboxListTile(
                         title: Text('Payé'),
                         value: _payer,
                         onChanged: (value) {
                           setState(() {
                             _payer = value ?? false;
+                            // Si payé, la vente est automatiquement terminée
+                            if (_payer) {
+                              _terminee = true;
+                            }
                           });
                         },
                         contentPadding: EdgeInsets.zero,
                       ),
-                      CheckboxListTile(
-                        title: Text('Terminée'),
-                        value: _terminee,
-                        onChanged: (value) {
-                          setState(() {
-                            _terminee = value ?? false;
-                          });
-                        },
-                        contentPadding: EdgeInsets.zero,
-                      ),
+                      if (_payer)
+                        Text(
+                          'Vente terminée (payée)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -396,7 +420,33 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     if (poidsVide != null && poidsPlein != null) {
       final poidsNet = poidsPlein - poidsVide;
       _poidsNetController.text = poidsNet.toStringAsFixed(1);
+      _calculatePrixTotal('');
     }
+  }
+
+  void _calculatePoidsNetFinal(String value) {
+    setState(() {
+      // Recalculer l'affichage du poids net final
+    });
+  }
+
+  double _getPoidsNetFinal() {
+    final poidsNet = double.tryParse(_poidsNetController.text) ?? 0;
+    final ecart = double.tryParse(_ecartPoidsNetController.text) ?? 0;
+    return poidsNet + ecart; // L'écart peut être positif ou négatif
+  }
+
+  void _calculatePrixTotal(String value) {
+    setState(() {
+      // Recalculer l'affichage du prix total
+    });
+  }
+
+  double _getPrixTotal() {
+    final prixParTonne = double.tryParse(_prixController.text) ?? 0;
+    final poidsNetFinal = _getPoidsNetFinal();
+    final tonnes = poidsNetFinal / 1000; // Convertir kg en tonnes
+    return prixParTonne * tonnes;
   }
 
   void _saveVente() async {
@@ -407,6 +457,9 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     });
 
     try {
+      final poidsNetFinal = _getPoidsNetFinal();
+      final prixTotal = _getPrixTotal();
+      
       final vente = Vente(
         id: widget.vente?.id,
         firebaseId: widget.vente?.firebaseId,
@@ -417,10 +470,10 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
         cmr: _cmrController.text.trim(),
         poidsVide: double.parse(_poidsVideController.text),
         poidsPlein: double.parse(_poidsPleinController.text),
-        poidsNet: _poidsNetController.text.isNotEmpty ? double.parse(_poidsNetController.text) : null,
+        poidsNet: poidsNetFinal, // Utiliser le poids net final (avec écart)
         ecartPoidsNet: _ecartPoidsNetController.text.isNotEmpty ? double.parse(_ecartPoidsNetController.text) : null,
         payer: _payer,
-        prix: _prixController.text.isNotEmpty ? double.parse(_prixController.text) : null,
+        prix: _prixController.text.isNotEmpty ? prixTotal : null, // Utiliser le prix total calculé
         terminee: _terminee,
       );
 
