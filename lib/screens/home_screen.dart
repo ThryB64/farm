@@ -13,6 +13,7 @@ import 'ventes_screen.dart';
 import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'export_screen.dart';
+import 'export_ventes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -414,6 +415,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ExportScreen()),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacingM),
+            Expanded(
+              child: ModernOutlinedButton(
+                text: 'Export Ventes PDF',
+                icon: Icons.sell,
+                borderColor: Colors.white,
+                textColor: Colors.white,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ExportVentesScreen()),
                 ),
               ),
             ),
