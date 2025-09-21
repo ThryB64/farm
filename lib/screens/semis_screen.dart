@@ -124,10 +124,6 @@ class _SemisScreenState extends State<SemisScreen> {
                             ),
                           );
 
-                          // Calculer les hectares semés pour cette parcelle cette année
-                          final hectaresSemes = semis.varietesSurfaces.fold<double>(0, (sum, v) => sum + v.surface);
-                          final hectaresRestants = parcelle.surface - hectaresSemes;
-
                           return Card(
                             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             child: ListTile(
@@ -137,10 +133,7 @@ class _SemisScreenState extends State<SemisScreen> {
                                 children: [
                                   Text('Date: ${_formatDate(semis.date)}'),
                                   Text('Variétés: ${semis.varietes.join(", ")}'),
-                                  Text('Hectares semés: ${hectaresSemes.toStringAsFixed(2)} ha'),
-                                  Text('Surface parcelle: ${parcelle.surface.toStringAsFixed(2)} ha'),
-                                  Text('Reste: ${hectaresRestants.toStringAsFixed(2)} ha', 
-                                       style: TextStyle(color: hectaresRestants > 0 ? Colors.green : Colors.red)),
+                                  Text('Surface: ${parcelle.surface.toStringAsFixed(2)} ha'),
                                   if (semis.notes?.isNotEmpty ?? false) Text('Notes: ${semis.notes}'),
                                 ],
                               ),
@@ -197,26 +190,17 @@ class _SemisScreenState extends State<SemisScreen> {
   }
 
   Widget _buildHectaresSummary(List<Semis> semisAnnee, List<Parcelle> parcelles) {
-    // Calculer les hectares semés par parcelle
-    final Map<String, double> hectaresParParcelle = {};
+    // Calculer le total des hectares semés
     double totalHectaresSemes = 0;
-    double totalSurfaceParcelles = 0;
-
     for (final semis in semisAnnee) {
-      final parcelle = parcelles.firstWhere(
-        (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
-        orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
-      );
-      
       final hectaresSemes = semis.varietesSurfaces.fold<double>(0, (sum, v) => sum + v.surface);
-      hectaresParParcelle[semis.parcelleId] = (hectaresParParcelle[semis.parcelleId] ?? 0) + hectaresSemes;
       totalHectaresSemes += hectaresSemes;
-      
-      // Ajouter la surface de la parcelle si pas déjà comptée
-      if (!hectaresParParcelle.containsKey('${parcelle.firebaseId ?? parcelle.id}_surface')) {
-        totalSurfaceParcelles += parcelle.surface;
-        hectaresParParcelle['${parcelle.firebaseId ?? parcelle.id}_surface'] = parcelle.surface;
-      }
+    }
+
+    // Calculer le total des surfaces de toutes les parcelles
+    double totalSurfaceParcelles = 0;
+    for (final parcelle in parcelles) {
+      totalSurfaceParcelles += parcelle.surface;
     }
 
     final hectaresRestants = totalSurfaceParcelles - totalHectaresSemes;
@@ -241,20 +225,21 @@ class _SemisScreenState extends State<SemisScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Total hectares semés: ${totalHectaresSemes.toStringAsFixed(2)} ha'),
-              Text('Total surface parcelles: ${totalSurfaceParcelles.toStringAsFixed(2)} ha'),
-            ],
+          Text(
+            'Total hectares semés: ${totalHectaresSemes.toStringAsFixed(2)} ha',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Hectares restants: ${hectaresRestants.toStringAsFixed(2)} ha',
+            'Hectares restants à semer: ${hectaresRestants.toStringAsFixed(2)} ha',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: hectaresRestants > 0 ? Colors.green : Colors.red,
+              color: hectaresRestants > 0 ? Colors.orange : Colors.red,
             ),
           ),
         ],
