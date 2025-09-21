@@ -151,6 +151,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<String> ajouterParcelle(Parcelle parcelle) async {
     try {
       final key = await _service.insertParcelle(parcelle);
+      
+      // Mise à jour optimiste locale
+      parcelle.firebaseId = key;
+      _parcellesMap[key] = parcelle;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Parcelle added with key: $key');
       return key;
     } catch (e) {
@@ -163,6 +169,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> modifierParcelle(Parcelle parcelle) async {
     try {
       await _service.updateParcelle(parcelle);
+      
+      // Mise à jour optimiste locale
+      final key = parcelle.firebaseId ?? _service.generateParcelleKey(parcelle);
+      _parcellesMap[key] = parcelle;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Parcelle updated');
     } catch (e) {
       _error = 'Erreur lors de la modification de la parcelle: $e';
@@ -174,6 +186,11 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> supprimerParcelle(String key) async {
     try {
       await _service.deleteParcelle(key);
+      
+      // Suppression optimiste locale
+      _parcellesMap.remove(key);
+      notifyListeners();
+      
       print('FirebaseProvider V4: Parcelle deleted: $key');
     } catch (e) {
       _error = 'Erreur lors de la suppression de la parcelle: $e';
@@ -187,6 +204,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<String> ajouterCellule(Cellule cellule) async {
     try {
       final key = await _service.insertCellule(cellule);
+      
+      // Mise à jour optimiste locale
+      cellule.firebaseId = key;
+      _cellulesMap[key] = cellule;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Cellule added with key: $key');
       return key;
     } catch (e) {
@@ -199,6 +222,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> modifierCellule(Cellule cellule) async {
     try {
       await _service.updateCellule(cellule);
+      
+      // Mise à jour optimiste locale
+      final key = cellule.firebaseId ?? _service.generateCelluleKey(cellule);
+      _cellulesMap[key] = cellule;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Cellule updated');
     } catch (e) {
       _error = 'Erreur lors de la modification de la cellule: $e';
@@ -210,6 +239,11 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> supprimerCellule(String key) async {
     try {
       await _service.deleteCellule(key);
+      
+      // Suppression optimiste locale
+      _cellulesMap.remove(key);
+      notifyListeners();
+      
       print('FirebaseProvider V4: Cellule deleted: $key');
     } catch (e) {
       _error = 'Erreur lors de la suppression de la cellule: $e';
@@ -223,6 +257,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<String> ajouterChargement(Chargement chargement) async {
     try {
       final key = await _service.insertChargement(chargement);
+      
+      // Mise à jour optimiste locale
+      chargement.firebaseId = key;
+      _chargementsMap[key] = chargement;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Chargement added with key: $key');
       return key;
     } catch (e) {
@@ -235,6 +275,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> modifierChargement(Chargement chargement) async {
     try {
       await _service.updateChargement(chargement);
+      
+      // Mise à jour optimiste locale
+      final key = chargement.firebaseId ?? _service.generateChargementKey(chargement);
+      _chargementsMap[key] = chargement;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Chargement updated');
     } catch (e) {
       _error = 'Erreur lors de la modification du chargement: $e';
@@ -246,6 +292,11 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> supprimerChargement(String key) async {
     try {
       await _service.deleteChargement(key);
+      
+      // Suppression optimiste locale
+      _chargementsMap.remove(key);
+      notifyListeners();
+      
       print('FirebaseProvider V4: Chargement deleted: $key');
     } catch (e) {
       _error = 'Erreur lors de la suppression du chargement: $e';
@@ -259,6 +310,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<String> ajouterSemis(Semis semis) async {
     try {
       final key = await _service.insertSemis(semis);
+      
+      // Mise à jour optimiste locale
+      semis.firebaseId = key;
+      _semisMap[key] = semis;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Semis added with key: $key');
       return key;
     } catch (e) {
@@ -271,6 +328,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> modifierSemis(Semis semis) async {
     try {
       await _service.updateSemis(semis);
+      
+      // Mise à jour optimiste locale
+      final key = semis.firebaseId ?? _service.generateSemisKey(semis);
+      _semisMap[key] = semis;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Semis updated');
     } catch (e) {
       _error = 'Erreur lors de la modification du semis: $e';
@@ -282,6 +345,11 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> supprimerSemis(String key) async {
     try {
       await _service.deleteSemis(key);
+      
+      // Suppression optimiste locale
+      _semisMap.remove(key);
+      notifyListeners();
+      
       print('FirebaseProvider V4: Semis deleted: $key');
     } catch (e) {
       _error = 'Erreur lors de la suppression du semis: $e';
@@ -295,6 +363,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<String> ajouterVariete(Variete variete) async {
     try {
       final key = await _service.insertVariete(variete);
+      
+      // Mise à jour optimiste locale
+      variete.firebaseId = key;
+      _varietesMap[key] = variete;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Variete added with key: $key');
       return key;
     } catch (e) {
@@ -307,6 +381,12 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> modifierVariete(Variete variete) async {
     try {
       await _service.updateVariete(variete);
+      
+      // Mise à jour optimiste locale
+      final key = variete.firebaseId ?? _service.generateVarieteKey(variete);
+      _varietesMap[key] = variete;
+      notifyListeners();
+      
       print('FirebaseProvider V4: Variete updated');
     } catch (e) {
       _error = 'Erreur lors de la modification de la variété: $e';
@@ -318,6 +398,11 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> supprimerVariete(String key) async {
     try {
       await _service.deleteVariete(key);
+      
+      // Suppression optimiste locale
+      _varietesMap.remove(key);
+      notifyListeners();
+      
       print('FirebaseProvider V4: Variete deleted: $key');
     } catch (e) {
       _error = 'Erreur lors de la suppression de la variété: $e';
@@ -331,6 +416,15 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> deleteAllData() async {
     try {
       await _service.deleteAllData();
+      
+      // Nettoyage local
+      _parcellesMap.clear();
+      _cellulesMap.clear();
+      _chargementsMap.clear();
+      _semisMap.clear();
+      _varietesMap.clear();
+      notifyListeners();
+      
       print('FirebaseProvider V4: All data deleted');
     } catch (e) {
       _error = 'Erreur lors de la suppression des données: $e';

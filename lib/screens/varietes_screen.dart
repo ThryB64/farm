@@ -92,7 +92,8 @@ class VarietesScreen extends StatelessWidget {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    provider.supprimerVariete(variete.id.toString());
+                                    final key = variete.firebaseId ?? variete.id.toString();
+                                    provider.supprimerVariete(key);
                                     Navigator.pop(context);
                                   },
                                   child: const Text('Supprimer'),

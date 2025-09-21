@@ -379,7 +379,8 @@ class _CellulesScreenState extends State<CellulesScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<FirebaseProviderV4>().supprimerCellule(cellule.id.toString());
+              final key = cellule.firebaseId ?? cellule.id.toString();
+              context.read<FirebaseProviderV4>().supprimerCellule(key);
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(

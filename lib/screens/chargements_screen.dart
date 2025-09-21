@@ -633,8 +633,9 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       ),
     );
 
-    if (confirmed == true && chargement.id != null) {
-      await context.read<FirebaseProviderV4>().supprimerChargement(chargement.id.toString());
+    if (confirmed == true) {
+      final key = chargement.firebaseId ?? chargement.id.toString();
+      await context.read<FirebaseProviderV4>().supprimerChargement(key);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Chargement supprimé'),

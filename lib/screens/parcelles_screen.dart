@@ -486,8 +486,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
 
-    if (confirmed == true && parcelle.id != null) {
-      context.read<FirebaseProviderV4>().supprimerParcelle(parcelle.id.toString());
+    if (confirmed == true) {
+      final key = parcelle.firebaseId ?? parcelle.id.toString();
+      context.read<FirebaseProviderV4>().supprimerParcelle(key);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Parcelle supprimée'),

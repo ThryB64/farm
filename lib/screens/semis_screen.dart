@@ -199,7 +199,8 @@ class _SemisScreenState extends State<SemisScreen> {
           ),
           TextButton(
             onPressed: () {
-              context.read<FirebaseProviderV4>().supprimerSemis(semis.id.toString());
+              final key = semis.firebaseId ?? semis.id.toString();
+              context.read<FirebaseProviderV4>().supprimerSemis(key);
               Navigator.pop(context);
             },
             child: const Text('Supprimer'),

@@ -73,28 +73,28 @@ class FirebaseServiceV4 {
 
   // ===== GÉNÉRATION DE CLÉS STANDARDISÉES =====
   
-  String _generateParcelleKey(Parcelle parcelle) {
+  String generateParcelleKey(Parcelle parcelle) {
     final nom = parcelle.nom.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
     final surface = (parcelle.surface * 100).round();
     return 'parcelle_${nom}_${surface}';
   }
 
-  String _generateCelluleKey(Cellule cellule) {
+  String generateCelluleKey(Cellule cellule) {
     return 'cellule_${cellule.reference}';
   }
 
-  String _generateChargementKey(Chargement chargement) {
+  String generateChargementKey(Chargement chargement) {
     final date = chargement.dateChargement.toIso8601String().split('T')[0];
     final remorque = chargement.remorque.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
     return 'chargement_${date}_${remorque}';
   }
 
-  String _generateSemisKey(Semis semis) {
+  String generateSemisKey(Semis semis) {
     final date = semis.date.toIso8601String().split('T')[0];
     return 'semis_${semis.parcelleId}_${date}';
   }
 
-  String _generateVarieteKey(Variete variete) {
+  String generateVarieteKey(Variete variete) {
     final nom = variete.nom.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
     return 'variete_$nom';
   }
@@ -119,7 +119,7 @@ class FirebaseServiceV4 {
 
   Future<String> insertParcelle(Parcelle parcelle) async {
     if (_farmRef != null) {
-      final key = _generateParcelleKey(parcelle);
+      final key = generateParcelleKey(parcelle);
       await _farmRef!.child('parcelles').child(key).set({
         ...parcelle.toMap(),
         'firebaseId': key,
@@ -137,7 +137,7 @@ class FirebaseServiceV4 {
 
   Future<void> updateParcelle(Parcelle parcelle) async {
     if (_farmRef != null) {
-      final key = parcelle.firebaseId ?? _generateParcelleKey(parcelle);
+      final key = parcelle.firebaseId ?? generateParcelleKey(parcelle);
       await _farmRef!.child('parcelles').child(key).update({
         ...parcelle.toMap(),
         'firebaseId': key,
@@ -176,7 +176,7 @@ class FirebaseServiceV4 {
 
   Future<String> insertCellule(Cellule cellule) async {
     if (_farmRef != null) {
-      final key = _generateCelluleKey(cellule);
+      final key = generateCelluleKey(cellule);
       await _farmRef!.child('cellules').child(key).set({
         ...cellule.toMap(),
         'firebaseId': key,
@@ -194,7 +194,7 @@ class FirebaseServiceV4 {
 
   Future<void> updateCellule(Cellule cellule) async {
     if (_farmRef != null) {
-      final key = cellule.firebaseId ?? _generateCelluleKey(cellule);
+      final key = cellule.firebaseId ?? generateCelluleKey(cellule);
       await _farmRef!.child('cellules').child(key).update({
         ...cellule.toMap(),
         'firebaseId': key,
@@ -233,7 +233,7 @@ class FirebaseServiceV4 {
 
   Future<String> insertChargement(Chargement chargement) async {
     if (_farmRef != null) {
-      final key = _generateChargementKey(chargement);
+      final key = generateChargementKey(chargement);
       await _farmRef!.child('chargements').child(key).set({
         ...chargement.toMap(),
         'firebaseId': key,
@@ -251,7 +251,7 @@ class FirebaseServiceV4 {
 
   Future<void> updateChargement(Chargement chargement) async {
     if (_farmRef != null) {
-      final key = chargement.firebaseId ?? _generateChargementKey(chargement);
+      final key = chargement.firebaseId ?? generateChargementKey(chargement);
       await _farmRef!.child('chargements').child(key).update({
         ...chargement.toMap(),
         'firebaseId': key,
@@ -290,7 +290,7 @@ class FirebaseServiceV4 {
 
   Future<String> insertSemis(Semis semis) async {
     if (_farmRef != null) {
-      final key = _generateSemisKey(semis);
+      final key = generateSemisKey(semis);
       await _farmRef!.child('semis').child(key).set({
         ...semis.toMap(),
         'firebaseId': key,
@@ -308,7 +308,7 @@ class FirebaseServiceV4 {
 
   Future<void> updateSemis(Semis semis) async {
     if (_farmRef != null) {
-      final key = semis.firebaseId ?? _generateSemisKey(semis);
+      final key = semis.firebaseId ?? generateSemisKey(semis);
       await _farmRef!.child('semis').child(key).update({
         ...semis.toMap(),
         'firebaseId': key,
@@ -347,7 +347,7 @@ class FirebaseServiceV4 {
 
   Future<String> insertVariete(Variete variete) async {
     if (_farmRef != null) {
-      final key = _generateVarieteKey(variete);
+      final key = generateVarieteKey(variete);
       await _farmRef!.child('varietes').child(key).set({
         ...variete.toMap(),
         'firebaseId': key,
@@ -365,7 +365,7 @@ class FirebaseServiceV4 {
 
   Future<void> updateVariete(Variete variete) async {
     if (_farmRef != null) {
-      final key = variete.firebaseId ?? _generateVarieteKey(variete);
+      final key = variete.firebaseId ?? generateVarieteKey(variete);
       await _farmRef!.child('varietes').child(key).update({
         ...variete.toMap(),
         'firebaseId': key,
