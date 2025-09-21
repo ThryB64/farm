@@ -140,13 +140,20 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: ventesEnCours.length,
-      itemBuilder: (context, index) {
-        final vente = ventesEnCours[index];
-        return _buildVenteCard(vente, provider, isEnCours: true);
-      },
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: ventesEnCours.length,
+            itemBuilder: (context, index) {
+              final vente = ventesEnCours[index];
+              return _buildVenteCard(vente, provider, isEnCours: true);
+            },
+          ),
+        ),
+        _buildTotauxVentesEnCours(provider),
+      ],
     );
   }
 
@@ -201,13 +208,20 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: ventesTerminees.length,
-      itemBuilder: (context, index) {
-        final vente = ventesTerminees[index];
-        return _buildVenteCard(vente, provider, isEnCours: false);
-      },
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: ventesTerminees.length,
+            itemBuilder: (context, index) {
+              final vente = ventesTerminees[index];
+              return _buildVenteCard(vente, provider, isEnCours: false);
+            },
+          ),
+        ),
+        _buildTotauxVentesTerminees(provider),
+      ],
     );
   }
 
@@ -428,6 +442,135 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTotauxVentesEnCours(FirebaseProviderV4 provider) {
+    final ventesEnCours = provider.ventesEnCours;
+    
+    final totalPoids = ventesEnCours.fold<double>(0, (sum, v) => sum + (v.poidsNet ?? v.poidsNetCalcule));
+    final totalPrix = ventesEnCours.fold<double>(0, (sum, v) => sum + (v.prix ?? 0));
+    final totalEcart = ventesEnCours.fold<double>(0, (sum, v) => sum + (v.ecartPoidsNet ?? 0));
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange[50],
+        border: Border(
+          top: BorderSide(color: Colors.orange[200]!, width: 1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Totaux - Ventes en cours',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange[800],
+            ),
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildTotalItem('Poids total', '${totalPoids.toStringAsFixed(1)} kg', Colors.orange[700]!),
+              _buildTotalItem('Prix total', '${totalPrix.toStringAsFixed(2)} €', Colors.green[700]!),
+              _buildTotalItem('Écart total', '${totalEcart.toStringAsFixed(1)} kg', Colors.blue[700]!),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTotauxVentesTerminees(FirebaseProviderV4 provider) {
+    if (_selectedAnnee == null) return SizedBox.shrink();
+    
+    final ventesTerminees = provider.getVentesTermineesParAnnee(_selectedAnnee!);
+    final stockRestant = provider.getStockRestantParAnnee(_selectedAnnee!);
+    
+    final totalPoids = ventesTerminees.fold<double>(0, (sum, v) => sum + (v.poidsNet ?? v.poidsNetCalcule));
+    final totalPrix = ventesTerminees.fold<double>(0, (sum, v) => sum + (v.prix ?? 0));
+    final totalEcart = ventesTerminees.fold<double>(0, (sum, v) => sum + (v.ecartPoidsNet ?? 0));
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green[50],
+        border: Border(
+          top: BorderSide(color: Colors.green[200]!, width: 1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Totaux - Ventes terminées ($_selectedAnnee)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.green[800],
+            ),
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildTotalItem('Poids total', '${totalPoids.toStringAsFixed(1)} kg', Colors.green[700]!),
+              _buildTotalItem('Prix total', '${totalPrix.toStringAsFixed(2)} €', Colors.green[700]!),
+              _buildTotalItem('Écart total', '${totalEcart.toStringAsFixed(1)} kg', Colors.blue[700]!),
+            ],
+          ),
+          SizedBox(height: 8),
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inventory, color: Colors.blue[700], size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Stock restant: ${stockRestant.toStringAsFixed(1)} kg',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[700],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTotalItem(String label, String value, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
     );
   }
 }
