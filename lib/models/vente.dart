@@ -2,6 +2,7 @@ class Vente {
   int? id;
   String? firebaseId;
   final DateTime date;
+  final int annee; // Année de la récolte vendue
   final String numeroTicket;
   final String client;
   final String immatriculationRemorque;
@@ -18,6 +19,7 @@ class Vente {
     this.id,
     this.firebaseId,
     required this.date,
+    required this.annee,
     required this.numeroTicket,
     required this.client,
     required this.immatriculationRemorque,
@@ -36,6 +38,7 @@ class Vente {
       'id': id,
       'firebaseId': firebaseId,
       'date': date.millisecondsSinceEpoch,
+      'annee': annee,
       'numeroTicket': numeroTicket,
       'client': client,
       'immatriculationRemorque': immatriculationRemorque,
@@ -55,6 +58,7 @@ class Vente {
       id: map['id'],
       firebaseId: map['firebaseId'],
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
+      annee: map['annee'] ?? DateTime.fromMillisecondsSinceEpoch(map['date']).year,
       numeroTicket: map['numeroTicket'] ?? '',
       client: map['client'] ?? '',
       immatriculationRemorque: map['immatriculationRemorque'] ?? '',
@@ -73,6 +77,7 @@ class Vente {
     int? id,
     String? firebaseId,
     DateTime? date,
+    int? annee,
     String? numeroTicket,
     String? client,
     String? immatriculationRemorque,
@@ -89,6 +94,7 @@ class Vente {
       id: id ?? this.id,
       firebaseId: firebaseId ?? this.firebaseId,
       date: date ?? this.date,
+      annee: annee ?? this.annee,
       numeroTicket: numeroTicket ?? this.numeroTicket,
       client: client ?? this.client,
       immatriculationRemorque: immatriculationRemorque ?? this.immatriculationRemorque,

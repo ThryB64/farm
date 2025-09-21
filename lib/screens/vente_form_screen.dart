@@ -28,6 +28,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
   final _notesController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
+  int _selectedAnnee = DateTime.now().year;
   bool _payer = false;
   bool _terminee = false;
   bool _isLoading = false;
@@ -52,6 +53,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     _ecartPoidsNetController.text = vente.ecartPoidsNet?.toString() ?? '';
     _prixController.text = vente.prix?.toString() ?? '';
     _selectedDate = vente.date;
+    _selectedAnnee = vente.annee;
     _payer = vente.payer;
     _terminee = vente.terminee;
   }
@@ -183,15 +185,48 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
               ],
             ),
             SizedBox(height: 16),
-            InkWell(
-              onTap: _selectDate,
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'Date de la vente *',
-                  border: OutlineInputBorder(),
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: _selectDate,
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Date de la vente *',
+                        border: OutlineInputBorder(),
+                      ),
+                      child: Text(_formatDate(_selectedDate)),
+                    ),
+                  ),
                 ),
-                child: Text(_formatDate(_selectedDate)),
-              ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    value: _selectedAnnee,
+                    decoration: InputDecoration(
+                      labelText: 'Année de la récolte *',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: _getAnneeOptions().map((year) {
+                      return DropdownMenuItem<int>(
+                        value: year,
+                        child: Text(year.toString()),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedAnnee = value!;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'L\'année est requise';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -413,6 +448,16 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
+  List<int> _getAnneeOptions() {
+    final currentYear = DateTime.now().year;
+    final years = <int>[];
+    // Générer les années de 2020 à l'année actuelle + 1
+    for (int year = 2020; year <= currentYear + 1; year++) {
+      years.add(year);
+    }
+    return years.reversed.toList(); // Années récentes en premier
+  }
+
   void _calculatePoidsNet(String value) {
     final poidsVide = double.tryParse(_poidsVideController.text);
     final poidsPlein = double.tryParse(_poidsPleinController.text);
@@ -464,6 +509,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
         id: widget.vente?.id,
         firebaseId: widget.vente?.firebaseId,
         date: _selectedDate,
+        annee: _selectedAnnee,
         numeroTicket: _numeroTicketController.text.trim(),
         client: _clientController.text.trim(),
         immatriculationRemorque: _immatriculationController.text.trim(),

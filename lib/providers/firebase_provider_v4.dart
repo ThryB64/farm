@@ -485,7 +485,32 @@ class FirebaseProviderV4 extends ChangeNotifier {
   List<Vente> get ventesEnCours => ventes.where((v) => !v.terminee).toList();
   List<Vente> get ventesTerminees => ventes.where((v) => v.terminee).toList();
   
-  // Calculer le stock restant (approximation basée sur les chargements et ventes)
+  // Ventes par année
+  List<Vente> getVentesParAnnee(int annee) => ventes.where((v) => v.annee == annee).toList();
+  List<Vente> getVentesEnCoursParAnnee(int annee) => ventes.where((v) => v.annee == annee && !v.terminee).toList();
+  List<Vente> getVentesTermineesParAnnee(int annee) => ventes.where((v) => v.annee == annee && v.terminee).toList();
+  
+  // Calculer le stock restant par année
+  double getStockRestantParAnnee(int annee) {
+    // Calculer le total des chargements pour cette année (maïs entré)
+    final totalChargements = chargements
+        .where((c) => c.dateChargement.year == annee)
+        .fold<double>(0, (sum, c) => sum + c.poidsNormes);
+    
+    // Calculer le total des ventes terminées pour cette année (maïs sorti)
+    final totalVentes = getVentesTermineesParAnnee(annee)
+        .fold<double>(0, (sum, v) => sum + (v.poidsNet ?? 0));
+    
+    return totalChargements - totalVentes;
+  }
+  
+  // Calculer le chiffre d'affaires par année
+  double getChiffreAffairesParAnnee(int annee) {
+    return getVentesTermineesParAnnee(annee)
+        .fold<double>(0, (sum, v) => sum + (v.prix ?? 0));
+  }
+  
+  // Calculer le stock restant global (toutes années confondues)
   double get stockRestant {
     // Calculer le total des chargements (maïs entré)
     final totalChargements = chargements.fold<double>(0, (sum, c) => sum + c.poidsNormes);
@@ -494,6 +519,18 @@ class FirebaseProviderV4 extends ChangeNotifier {
     final totalVentes = ventesTerminees.fold<double>(0, (sum, v) => sum + (v.poidsNet ?? 0));
     
     return totalChargements - totalVentes;
+  }
+  
+  // Obtenir les années disponibles
+  List<int> get anneesDisponibles {
+    final annees = <int>{};
+    for (final vente in ventes) {
+      annees.add(vente.annee);
+    }
+    for (final chargement in chargements) {
+      annees.add(chargement.dateChargement.year);
+    }
+    return annees.toList()..sort((a, b) => b.compareTo(a)); // Années récentes en premier
   }
   
   // ===== MÉTHODES D'IMPORT/EXPORT =====

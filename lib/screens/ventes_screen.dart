@@ -15,6 +15,7 @@ class VentesScreen extends StatefulWidget {
 
 class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int? _selectedAnnee;
 
   @override
   void initState() {
@@ -66,11 +67,18 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
             );
           }
 
-          return TabBarView(
-            controller: _tabController,
+          return Column(
             children: [
-              _buildVentesEnCours(provider),
-              _buildVentesTerminees(provider),
+              _buildAnneeSelector(provider),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildVentesEnCours(provider),
+                    _buildVentesTerminees(provider),
+                  ],
+                ),
+              ),
             ],
           );
         },
@@ -83,8 +91,57 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     );
   }
 
+  Widget _buildAnneeSelector(FirebaseProviderV4 provider) {
+    final annees = provider.anneesDisponibles;
+    if (annees.isEmpty) return SizedBox.shrink();
+    
+    // Si aucune année n'est sélectionnée, prendre la plus récente
+    if (_selectedAnnee == null && annees.isNotEmpty) {
+      _selectedAnnee = annees.first;
+    }
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Icon(Icons.calendar_today, color: Colors.green),
+          SizedBox(width: 8),
+          Text(
+            'Année:',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: DropdownButtonFormField<int>(
+              value: _selectedAnnee,
+              decoration: InputDecoration(
+                labelText: 'Sélectionner une année',
+                border: OutlineInputBorder(),
+              ),
+              items: annees.map((year) {
+                return DropdownMenuItem<int>(
+                  value: year,
+                  child: Text(year.toString()),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedAnnee = value;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildVentesEnCours(FirebaseProviderV4 provider) {
-    final ventesEnCours = provider.ventesEnCours;
+    if (_selectedAnnee == null) {
+      return Center(child: Text('Sélectionnez une année'));
+    }
+    
+    final ventesEnCours = provider.getVentesEnCoursParAnnee(_selectedAnnee!);
     
     if (ventesEnCours.isEmpty) {
       return Center(
@@ -135,7 +192,11 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
   }
 
   Widget _buildVentesTerminees(FirebaseProviderV4 provider) {
-    final ventesTerminees = provider.ventesTerminees;
+    if (_selectedAnnee == null) {
+      return Center(child: Text('Sélectionnez une année'));
+    }
+    
+    final ventesTerminees = provider.getVentesTermineesParAnnee(_selectedAnnee!);
     
     if (ventesTerminees.isEmpty) {
       return Center(
@@ -169,9 +230,12 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
   }
 
   Widget _buildStockSummary(FirebaseProviderV4 provider) {
-    final stockRestant = provider.stockRestant;
-    final ventesEnCours = provider.ventesEnCours;
+    if (_selectedAnnee == null) return SizedBox.shrink();
+    
+    final stockRestant = provider.getStockRestantParAnnee(_selectedAnnee!);
+    final ventesEnCours = provider.getVentesEnCoursParAnnee(_selectedAnnee!);
     final totalVentesEnCours = ventesEnCours.fold<double>(0, (sum, v) => sum + (v.poidsNet ?? v.poidsNetCalcule));
+    final chiffreAffaires = provider.getChiffreAffairesParAnnee(_selectedAnnee!);
 
     return ModernCard(
       margin: const EdgeInsets.all(16),
@@ -181,7 +245,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Résumé du stock',
+              'Résumé du stock - $_selectedAnnee',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -209,6 +273,16 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
                     Text(
                       '${totalVentesEnCours.toStringAsFixed(1)} kg',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Chiffre d\'affaires', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                    Text(
+                      '${chiffreAffaires.toStringAsFixed(2)} €',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
                     ),
                   ],
                 ),
@@ -240,6 +314,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
           children: [
             Text('Client: ${vente.client}'),
             Text('Date: ${_formatDate(vente.date)}'),
+            Text('Année récolte: ${vente.annee}'),
             Text('Poids net final: ${(vente.poidsNet ?? vente.poidsNetCalcule).toStringAsFixed(1)} kg'),
             if (vente.ecartPoidsNet != null)
               Text('Écart client: ${vente.ecartPoidsNet!.toStringAsFixed(1)} kg', 
