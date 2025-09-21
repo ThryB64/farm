@@ -62,22 +62,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     }
   }
 
-  void _addVariete() {
-    showDialog(
-      context: context,
-      builder: (context) => _VarieteSelectionDialog(
-        onVarieteSelected: (variete) {
-          setState(() {
-            _selectedVarietesSurfaces.add(VarieteSurface(
-              nom: variete.nom,
-              surface: 0, // En hectares maintenant
-            ));
-            _showHectares = _selectedVarietesSurfaces.length > 1;
-          });
-        },
-      ),
-    );
-  }
 
   void _removeVariete(int index) {
     setState(() {
@@ -232,31 +216,54 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Variétés
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Variétés *',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: _addVariete,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Ajouter'),
-                  ),
-                ],
+              // Sélection des variétés
+              Consumer<FirebaseProviderV3>(
+                builder: (context, provider, child) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Variétés *',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: null, // Toujours null pour permettre la sélection
+                        decoration: const InputDecoration(
+                          labelText: 'Sélectionner une variété',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: provider.varietes.map((variete) {
+                          return DropdownMenuItem<String>(
+                            value: variete.nom,
+                            child: Text(variete.nom),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _selectedVarietesSurfaces.add(VarieteSurface(
+                                nom: value,
+                                surface: 0,
+                              ));
+                              _showHectares = _selectedVarietesSurfaces.length > 1;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
 
-              if (_selectedVarietesSurfaces.isEmpty)
-                const Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text('Aucune variété sélectionnée'),
-                  ),
-                )
-              else
+              // Liste des variétés sélectionnées
+              if (_selectedVarietesSurfaces.isNotEmpty) ...[
+                const Text(
+                  'Variétés sélectionnées:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
                 ..._selectedVarietesSurfaces.asMap().entries.map((entry) {
                   final index = entry.key;
                   final varieteSurface = entry.value;
@@ -317,6 +324,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                     ),
                   );
                 }).toList(),
+              ],
 
               // Résumé des surfaces
               if (_showHectares && _selectedParcelleId != null) ...[
@@ -361,49 +369,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _VarieteSelectionDialog extends StatelessWidget {
-  final Function(Variete) onVarieteSelected;
-
-  const _VarieteSelectionDialog({required this.onVarieteSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<FirebaseProviderV3>(
-      builder: (context, provider, child) {
-        return AlertDialog(
-          title: const Text('Sélectionner une variété'),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 300,
-            child: ListView.builder(
-              itemCount: provider.varietes.length,
-              itemBuilder: (context, index) {
-                final variete = provider.varietes[index];
-                return ListTile(
-                  title: Text(variete.nom),
-                  subtitle: variete.description != null 
-                      ? Text(variete.description!)
-                      : null,
-                  onTap: () {
-                    onVarieteSelected(variete);
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Annuler'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
