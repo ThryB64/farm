@@ -299,7 +299,10 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
           },
         ),
       ),
-    );
+    ).then((_) {
+      // Rafraîchir l'état après modification
+      setState(() {});
+    });
   }
 
   void _removeProduit(int index) {
@@ -393,6 +396,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
   final _quantiteController = TextEditingController();
   double _prixUnitaire = 0.0;
   DateTime _selectedDate = DateTime.now();
+  int _selectedAnnee = DateTime.now().year;
 
   @override
   void initState() {
@@ -407,6 +411,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
     _quantiteController.text = produitTraitement.quantite.toString();
     _prixUnitaire = produitTraitement.prixUnitaire;
     _selectedDate = produitTraitement.date;
+    _selectedAnnee = widget.annee;
   }
 
   @override
@@ -442,7 +447,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     setState(() {
                       _selectedProduit = value;
                       if (value != null) {
-                        _prixUnitaire = value.getPrixPourAnnee(widget.annee);
+                        _prixUnitaire = value.getPrixUnitairePourAnnee(_selectedAnnee);
                       }
                     });
                   },
@@ -480,13 +485,41 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 ),
                 const SizedBox(height: AppTheme.spacingM),
                 
-                // Prix unitaire
+                // Sélection de l'année pour le prix
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+                  child: DropdownButtonFormField<int>(
+                    value: _selectedAnnee,
+                    decoration: const InputDecoration(
+                      labelText: 'Année du prix',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: List.generate(10, (index) {
+                      final year = DateTime.now().year - 5 + index;
+                      return DropdownMenuItem(
+                        value: year,
+                        child: Text(year.toString()),
+                      );
+                    }),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedAnnee = value!;
+                        if (_selectedProduit != null) {
+                          _prixUnitaire = _selectedProduit!.getPrixUnitairePourAnnee(_selectedAnnee);
+                        }
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spacingM),
+                
+                // Prix total pour la quantité
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
                   child: TextFormField(
                     initialValue: _prixUnitaire.toString(),
                     decoration: const InputDecoration(
-                      labelText: 'Prix unitaire (€)',
+                      labelText: 'Prix total pour cette quantité (€)',
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
@@ -514,7 +547,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                         ),
                         const SizedBox(height: AppTheme.spacingS),
                         Text('Quantité: ${_quantiteController.text} ${_selectedProduit!.mesure}'),
-                        Text('Prix unitaire: ${_prixUnitaire.toStringAsFixed(2)} €'),
+                        Text('Prix total (${_selectedAnnee}): ${_prixUnitaire.toStringAsFixed(2)} €'),
                         Text(
                           'Coût total: ${_calculerCoutTotal().toStringAsFixed(2)} €',
                           style: const TextStyle(
@@ -562,8 +595,8 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
   }
 
   double _calculerCoutTotal() {
-    final quantite = double.tryParse(_quantiteController.text) ?? 0.0;
-    return quantite * _prixUnitaire;
+    // Le prix saisi est déjà le prix total pour la quantité
+    return _prixUnitaire;
   }
 
   Future<void> _selectDate() async {
