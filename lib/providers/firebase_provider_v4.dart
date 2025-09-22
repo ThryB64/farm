@@ -6,6 +6,8 @@ import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
 import '../models/vente.dart';
+import '../models/traitement.dart';
+import '../models/produit.dart';
 
 class FirebaseProviderV4 extends ChangeNotifier {
   final FirebaseServiceV4 _service = FirebaseServiceV4();
@@ -17,6 +19,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
   final Map<String, Semis> _semisMap = {};
   final Map<String, Variete> _varietesMap = {};
   final Map<String, Vente> _ventesMap = {};
+  final Map<String, Traitement> _traitementsMap = {};
+  final Map<String, Produit> _produitsMap = {};
   
   // Streams pour les données
   Stream<List<Parcelle>>? _parcellesStream;
@@ -25,6 +29,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Stream<List<Semis>>? _semisStream;
   Stream<List<Variete>>? _varietesStream;
   Stream<List<Vente>>? _ventesStream;
+  Stream<List<Traitement>>? _traitementsStream;
+  Stream<List<Produit>>? _produitsStream;
   
   // Getters pour l'accès aux données
   List<Parcelle> get parcelles => _parcellesMap.values.toList();
@@ -33,6 +39,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
   List<Semis> get semis => _semisMap.values.toList();
   List<Variete> get varietes => _varietesMap.values.toList();
   List<Vente> get ventes => _ventesMap.values.toList();
+  List<Traitement> get traitements => _traitementsMap.values.toList();
+  List<Produit> get produits => _produitsMap.values.toList();
   
   // Maps pour les relations (optimisation des jointures) - String keys
   Map<String, Parcelle> get parcellesById => {
@@ -734,5 +742,114 @@ class FirebaseProviderV4 extends ChangeNotifier {
       'missParc': missParc,
       'total': chargements.length,
     };
+  }
+
+  // ===== MÉTHODES POUR LES TRAITEMENTS =====
+  
+  // Ajouter un traitement
+  Future<void> ajouterTraitement(Traitement traitement) async {
+    try {
+      final key = await _service.ajouterTraitement(traitement);
+      final traitementAvecKey = traitement.copyWith(firebaseId: key);
+      _traitementsMap[key] = traitementAvecKey;
+      notifyListeners();
+      print('FirebaseProvider V4: Traitement ajouté: $key');
+    } catch (e) {
+      _error = 'Erreur lors de l\'ajout du traitement: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Modifier un traitement
+  Future<void> modifierTraitement(Traitement traitement) async {
+    try {
+      final key = traitement.firebaseId ?? traitement.id.toString();
+      await _service.modifierTraitement(traitement);
+      _traitementsMap[key] = traitement;
+      notifyListeners();
+      print('FirebaseProvider V4: Traitement modifié: $key');
+    } catch (e) {
+      _error = 'Erreur lors de la modification du traitement: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Supprimer un traitement
+  Future<void> supprimerTraitement(String key) async {
+    try {
+      await _service.supprimerTraitement(key);
+      _traitementsMap.remove(key);
+      notifyListeners();
+      print('FirebaseProvider V4: Traitement supprimé: $key');
+    } catch (e) {
+      _error = 'Erreur lors de la suppression du traitement: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // ===== MÉTHODES POUR LES PRODUITS =====
+  
+  // Ajouter un produit
+  Future<void> ajouterProduit(Produit produit) async {
+    try {
+      final key = await _service.ajouterProduit(produit);
+      final produitAvecKey = produit.copyWith(firebaseId: key);
+      _produitsMap[key] = produitAvecKey;
+      notifyListeners();
+      print('FirebaseProvider V4: Produit ajouté: $key');
+    } catch (e) {
+      _error = 'Erreur lors de l\'ajout du produit: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Modifier un produit
+  Future<void> modifierProduit(Produit produit) async {
+    try {
+      final key = produit.firebaseId ?? produit.id.toString();
+      await _service.modifierProduit(produit);
+      _produitsMap[key] = produit;
+      notifyListeners();
+      print('FirebaseProvider V4: Produit modifié: $key');
+    } catch (e) {
+      _error = 'Erreur lors de la modification du produit: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Supprimer un produit
+  Future<void> supprimerProduit(String key) async {
+    try {
+      await _service.supprimerProduit(key);
+      _produitsMap.remove(key);
+      notifyListeners();
+      print('FirebaseProvider V4: Produit supprimé: $key');
+    } catch (e) {
+      _error = 'Erreur lors de la suppression du produit: $e';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Obtenir un produit par ID
+  Produit? getProduitById(String? produitId) {
+    if (produitId == null || produitId.isEmpty) return null;
+    return _produitsMap[produitId];
+  }
+
+  // Obtenir les traitements d'une parcelle
+  List<Traitement> getTraitementsForParcelle(String? parcelleId) {
+    if (parcelleId == null || parcelleId.isEmpty) return [];
+    return traitements.where((t) => t.parcelleId == parcelleId).toList();
+  }
+
+  // Obtenir les traitements d'une année
+  List<Traitement> getTraitementsForAnnee(int annee) {
+    return traitements.where((t) => t.annee == annee).toList();
   }
 }

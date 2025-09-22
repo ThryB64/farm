@@ -10,6 +10,8 @@ import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
 import '../models/vente.dart';
+import '../models/traitement.dart';
+import '../models/produit.dart';
 
 class FirebaseServiceV4 {
   static final FirebaseServiceV4 _instance = FirebaseServiceV4._internal();
@@ -545,4 +547,104 @@ class FirebaseServiceV4 {
       return stored != null ? jsonDecode(stored) : {};
     }
   }
+
+  // ===== MÉTHODES POUR LES TRAITEMENTS =====
+  
+  Future<String> ajouterTraitement(Traitement traitement) async {
+    if (_farmRef != null) {
+      final ref = _farmRef!.child('traitements').push();
+      await ref.set(traitement.toMap());
+      return ref.key!;
+    } else {
+      final key = 't_${DateTime.now().millisecondsSinceEpoch}';
+      _saveTraitementToStorage(traitement.copyWith(firebaseId: key));
+      return key;
+    }
+  }
+
+  Future<void> modifierTraitement(Traitement traitement) async {
+    final key = traitement.firebaseId ?? traitement.id.toString();
+    if (_farmRef != null) {
+      await _farmRef!.child('traitements').child(key).set(traitement.toMap());
+    } else {
+      _saveTraitementToStorage(traitement);
+    }
+  }
+
+  Future<void> supprimerTraitement(String key) async {
+    if (_farmRef != null) {
+      await _farmRef!.child('traitements').child(key).remove();
+    } else {
+      _deleteTraitementFromStorage(key);
+    }
+  }
+
+  Stream<List<Traitement>> getTraitementsStream() {
+    if (_farmRef != null) {
+      return _farmRef!.child('traitements').onValue.map((event) {
+        if (event.snapshot.value == null) return <Traitement>[];
+        final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+        return data.entries.map((e) {
+          return Traitement.fromMap(Map<String, dynamic>.from(e.value));
+        }).toList();
+      });
+    } else {
+      return Stream.value(_getTraitementsFromStorage());
+    }
+  }
+
+  // ===== MÉTHODES POUR LES PRODUITS =====
+  
+  Future<String> ajouterProduit(Produit produit) async {
+    if (_farmRef != null) {
+      final ref = _farmRef!.child('produits').push();
+      await ref.set(produit.toMap());
+      return ref.key!;
+    } else {
+      final key = 'p_${DateTime.now().millisecondsSinceEpoch}';
+      _saveProduitToStorage(produit.copyWith(firebaseId: key));
+      return key;
+    }
+  }
+
+  Future<void> modifierProduit(Produit produit) async {
+    final key = produit.firebaseId ?? produit.id.toString();
+    if (_farmRef != null) {
+      await _farmRef!.child('produits').child(key).set(produit.toMap());
+    } else {
+      _saveProduitToStorage(produit);
+    }
+  }
+
+  Future<void> supprimerProduit(String key) async {
+    if (_farmRef != null) {
+      await _farmRef!.child('produits').child(key).remove();
+    } else {
+      _deleteProduitFromStorage(key);
+    }
+  }
+
+  Stream<List<Produit>> getProduitsStream() {
+    if (_farmRef != null) {
+      return _farmRef!.child('produits').onValue.map((event) {
+        if (event.snapshot.value == null) return <Produit>[];
+        final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+        return data.entries.map((e) {
+          return Produit.fromMap(Map<String, dynamic>.from(e.value));
+        }).toList();
+      });
+    } else {
+      return Stream.value(_getProduitsFromStorage());
+    }
+  }
+
+  // ===== MÉTHODES DE STOCKAGE LOCAL =====
+  
+  List<Traitement> _getTraitementsFromStorage() => [];
+  void _saveTraitementToStorage(Traitement traitement) {}
+  void _deleteTraitementFromStorage(String key) {}
+  
+  List<Produit> _getProduitsFromStorage() => [];
+  void _saveProduitToStorage(Produit produit) {}
+  void _deleteProduitFromStorage(String key) {}
 }

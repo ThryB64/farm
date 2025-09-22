@@ -10,6 +10,7 @@ import 'chargements_screen.dart';
 import 'semis_screen.dart';
 import 'varietes_screen.dart';
 import 'ventes_screen.dart';
+import 'traitements_screen.dart';
 import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'export_screen.dart';
@@ -418,6 +419,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const VentesScreen()),
+              ),
+            ),
+            MenuCard(
+              title: 'Traitements',
+              subtitle: 'Produits phytosanitaires',
+              icon: Icons.science,
+              color: AppTheme.warning,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TraitementsScreen()),
               ),
             ),
             MenuCard(
