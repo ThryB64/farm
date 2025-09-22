@@ -6,7 +6,6 @@ class Traitement {
   final String parcelleId;
   final DateTime date;
   final int annee;
-  final String type; // Herbicide, Fongicide, Insecticide, etc.
   final String? notes;
   final List<ProduitTraitement> produits;
   final double coutTotal;
@@ -17,7 +16,6 @@ class Traitement {
     required this.parcelleId,
     required this.date,
     required this.annee,
-    required this.type,
     this.notes,
     required this.produits,
     required this.coutTotal,
@@ -30,7 +28,6 @@ class Traitement {
       'parcelleId': parcelleId,
       'date': date.millisecondsSinceEpoch,
       'annee': annee,
-      'type': type,
       'notes': notes,
       'produits': produits.map((p) => p.toMap()).toList(),
       'coutTotal': coutTotal,
@@ -44,7 +41,6 @@ class Traitement {
       parcelleId: map['parcelleId'] ?? '',
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
       annee: map['annee'] ?? DateTime.fromMillisecondsSinceEpoch(map['date']).year,
-      type: map['type'] ?? '',
       notes: map['notes'],
       produits: (map['produits'] as List<dynamic>? ?? [])
           .map((p) => ProduitTraitement.fromMap(p))
@@ -59,7 +55,6 @@ class Traitement {
     String? parcelleId,
     DateTime? date,
     int? annee,
-    String? type,
     String? notes,
     List<ProduitTraitement>? produits,
     double? coutTotal,
@@ -70,7 +65,6 @@ class Traitement {
       parcelleId: parcelleId ?? this.parcelleId,
       date: date ?? this.date,
       annee: annee ?? this.annee,
-      type: type ?? this.type,
       notes: notes ?? this.notes,
       produits: produits ?? this.produits,
       coutTotal: coutTotal ?? this.coutTotal,

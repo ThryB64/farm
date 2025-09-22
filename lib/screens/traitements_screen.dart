@@ -236,14 +236,14 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
           margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: _getTypeColor(traitement.type),
-              child: Icon(
-                _getTypeIcon(traitement.type),
+              backgroundColor: AppTheme.primary,
+              child: const Icon(
+                Icons.science,
                 color: Colors.white,
               ),
             ),
             title: Text(
-              traitement.type,
+              'Traitement ${traitement.annee}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Column(
@@ -350,35 +350,6 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
     );
   }
 
-  Color _getTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'herbicide':
-        return Colors.green;
-      case 'fongicide':
-        return Colors.blue;
-      case 'insecticide':
-        return Colors.orange;
-      case 'fertilisant':
-        return Colors.brown;
-      default:
-        return AppTheme.primary;
-    }
-  }
-
-  IconData _getTypeIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'herbicide':
-        return Icons.grass;
-      case 'fongicide':
-        return Icons.water_drop;
-      case 'insecticide':
-        return Icons.bug_report;
-      case 'fertilisant':
-        return Icons.eco;
-      default:
-        return Icons.science;
-    }
-  }
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';

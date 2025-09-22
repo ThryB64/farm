@@ -24,7 +24,6 @@ class TraitementFormScreen extends StatefulWidget {
 
 class _TraitementFormScreenState extends State<TraitementFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _typeController = TextEditingController();
   final _notesController = TextEditingController();
   
   String? _selectedParcelleId;
@@ -43,7 +42,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
 
   void _loadTraitementData() {
     final traitement = widget.traitement!;
-    _typeController.text = traitement.type;
     _notesController.text = traitement.notes ?? '';
     _selectedParcelleId = traitement.parcelleId;
     _selectedDate = traitement.date;
@@ -52,7 +50,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
 
   @override
   void dispose() {
-    _typeController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -72,34 +69,33 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Type de traitement
-              TextFormField(
-                controller: _typeController,
-                decoration: const InputDecoration(
-                  labelText: 'Type de traitement *',
-                  border: OutlineInputBorder(),
-                  hintText: 'Herbicide, Fongicide, Insecticide, etc.',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Le type est obligatoire';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppTheme.spacingM),
-              
               // Parcelle
               Consumer<FirebaseProviderV4>(
                 builder: (context, provider, child) {
                   final parcelles = provider.parcelles;
+                  final traitements = provider.traitements;
+                  
+                  // Filtrer les parcelles déjà traitées pour cette année
+                  final parcellesDisponibles = parcelles.where((p) {
+                    final parcelleId = p.firebaseId ?? p.id.toString();
+                    final traitementExistant = traitements.any((t) => 
+                        t.parcelleId == parcelleId && t.annee == widget.annee);
+                    
+                    // Si on modifie un traitement existant, on garde la parcelle actuelle
+                    if (widget.traitement != null && _selectedParcelleId == parcelleId) {
+                      return true;
+                    }
+                    
+                    return !traitementExistant;
+                  }).toList();
+                  
                   return DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
                     decoration: const InputDecoration(
                       labelText: 'Parcelle *',
                       border: OutlineInputBorder(),
                     ),
-                    items: parcelles.map((p) {
+                    items: parcellesDisponibles.map((p) {
                       return DropdownMenuItem(
                         value: p.firebaseId ?? p.id.toString(),
                         child: Text(p.nom),
@@ -366,7 +362,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
         parcelleId: _selectedParcelleId!,
         date: _selectedDate,
         annee: widget.annee,
-        type: _typeController.text.trim(),
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         produits: _produits,
         coutTotal: _calculerCoutTotal(),
