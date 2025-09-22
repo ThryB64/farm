@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  int? _selectedYear;
 
   @override
   void initState() {
@@ -157,12 +158,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final parcelles = provider.parcelles;
     final chargements = provider.chargements;
     
-    // Calculer les statistiques
-    final surfaceTotale = parcelles.fold<double>(0, (sum, p) => sum + p.surface);
-    final derniereAnnee = DateTime.now().year;
-    final chargementsAnnee = chargements.where((c) => c.dateChargement.year == derniereAnnee).toList();
+    // Initialiser l'année sélectionnée si pas encore fait
+    if (_selectedYear == null) {
+      final anneesDisponibles = chargements
+          .map((c) => c.dateChargement.year)
+          .toSet()
+          .toList()
+        ..sort((a, b) => b.compareTo(a));
+      _selectedYear = anneesDisponibles.isNotEmpty ? anneesDisponibles.first : DateTime.now().year;
+    }
+    
+    // Calculer les statistiques pour l'année sélectionnée
+    final chargementsAnnee = chargements.where((c) => c.dateChargement.year == _selectedYear).toList();
+    
+    // Trouver les parcelles qui ont été récoltées cette année
+    final parcellesRecoltees = <String>{};
+    for (var chargement in chargementsAnnee) {
+      parcellesRecoltees.add(chargement.parcelleId);
+    }
+    
+    // Calculer la surface des parcelles récoltées
+    double surfaceRecoltee = 0.0;
+    for (var parcelle in parcelles) {
+      final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
+      if (parcellesRecoltees.contains(parcelleId)) {
+        surfaceRecoltee += parcelle.surface;
+      }
+    }
+    
     final poidsTotalNormeAnnee = chargementsAnnee.fold<double>(0, (sum, c) => sum + c.poidsNormes);
-    final rendementMoyenNorme = surfaceTotale > 0 ? poidsTotalNormeAnnee / (surfaceTotale * 1000) : 0.0;
+    final rendementMoyenNorme = surfaceRecoltee > 0 ? poidsTotalNormeAnnee / (surfaceRecoltee * 1000) : 0.0;
 
     return GradientCard(
       gradient: const LinearGradient(
@@ -199,12 +224,62 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
           const SizedBox(height: AppTheme.spacingL),
+          
+          // Sélecteur d'année
+          Row(
+            children: [
+              const Icon(
+                Icons.calendar_today,
+                color: AppTheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: AppTheme.spacingS),
+              const Text(
+                'Année:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              Expanded(
+                child: DropdownButtonFormField<int>(
+                  value: _selectedYear,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  items: () {
+                    final annees = chargements
+                        .map((c) => c.dateChargement.year)
+                        .toSet()
+                        .toList();
+                    annees.sort((a, b) => b.compareTo(a));
+                    return annees.map((year) {
+                      return DropdownMenuItem(
+                        value: year,
+                        child: Text(year.toString()),
+                      );
+                    }).toList();
+                  }(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedYear = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: AppTheme.spacingL),
           Row(
             children: [
               Expanded(
                 child: StatCard(
-                  title: 'Surface totale',
-                  value: '${surfaceTotale.toStringAsFixed(1)} ha',
+                  title: 'Surface récoltée',
+                  value: '${surfaceRecoltee.toStringAsFixed(1)} ha',
                   icon: Icons.landscape,
                   color: AppTheme.primary,
                 ),
@@ -212,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SizedBox(width: AppTheme.spacingM),
               Expanded(
                 child: StatCard(
-                  title: 'Rendement $derniereAnnee',
+                  title: 'Rendement $_selectedYear',
                   value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
                   icon: Icons.trending_up,
                   color: AppTheme.secondary,
@@ -225,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               Expanded(
                 child: StatCard(
-                  title: 'Poids total $derniereAnnee',
+                  title: 'Poids total $_selectedYear',
                   value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
                   icon: Icons.scale,
                   color: AppTheme.accent,
