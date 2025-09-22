@@ -53,7 +53,7 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Quantité: ${produit.quantite} ${produit.mesure}'),
+                      Text('Mesure: ${produit.mesure}'),
                       if (produit.notes != null && produit.notes!.isNotEmpty)
                         Text('Notes: ${produit.notes}'),
                       Text('Prix: ${produit.prixParAnnee.length} année(s) configurée(s)'),

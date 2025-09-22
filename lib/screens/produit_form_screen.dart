@@ -17,9 +17,8 @@ class ProduitFormScreen extends StatefulWidget {
 class _ProduitFormScreenState extends State<ProduitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
-  final _quantiteController = TextEditingController();
-  final _mesureController = TextEditingController();
   final _notesController = TextEditingController();
+  String _selectedMesure = 'kg';
   
   Map<int, double> _prixParAnnee = {};
   int _selectedAnnee = DateTime.now().year;
@@ -38,8 +37,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
   void _loadProduitData() {
     final produit = widget.produit!;
     _nomController.text = produit.nom;
-    _quantiteController.text = produit.quantite.toString();
-    _mesureController.text = produit.mesure;
+    _selectedMesure = produit.mesure;
     _notesController.text = produit.notes ?? '';
     _prixParAnnee = Map.from(produit.prixParAnnee);
   }
@@ -47,8 +45,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
   @override
   void dispose() {
     _nomController.dispose();
-    _quantiteController.dispose();
-    _mesureController.dispose();
     _notesController.dispose();
     _prixController.dispose();
     super.dispose();
@@ -85,47 +81,29 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
               ),
               const SizedBox(height: AppTheme.spacingM),
               
-              // Quantité et mesure
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      controller: _quantiteController,
-                      decoration: const InputDecoration(
-                        labelText: 'Quantité *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'La quantité est obligatoire';
-                        }
-                        if (double.tryParse(value) == null) {
-                          return 'Veuillez entrer un nombre valide';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: AppTheme.spacingM),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _mesureController,
-                      decoration: const InputDecoration(
-                        labelText: 'Mesure *',
-                        border: OutlineInputBorder(),
-                        hintText: 'L, kg, etc.',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'La mesure est obligatoire';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
+              // Mesure
+              DropdownButtonFormField<String>(
+                value: _selectedMesure,
+                decoration: const InputDecoration(
+                  labelText: 'Mesure *',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'kg', child: Text('kg')),
+                  DropdownMenuItem(value: 'L', child: Text('L')),
+                  DropdownMenuItem(value: 'T', child: Text('T')),
                 ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedMesure = value!;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'La mesure est obligatoire';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: AppTheme.spacingM),
               
@@ -293,8 +271,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
         id: widget.produit?.id,
         firebaseId: widget.produit?.firebaseId,
         nom: _nomController.text.trim(),
-        quantite: double.parse(_quantiteController.text),
-        mesure: _mesureController.text.trim(),
+        mesure: _selectedMesure,
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         prixParAnnee: _prixParAnnee,
       );

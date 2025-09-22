@@ -203,7 +203,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                   margin: const EdgeInsets.only(bottom: AppTheme.spacingS),
                   child: ListTile(
                     title: Text(produit.nomProduit),
-                    subtitle: Text('${produit.quantite} ${produit.mesure} - ${produit.prixUnitaire.toStringAsFixed(2)} €/unité - ${_formatDate(produit.date)}'),
+                    subtitle: Text('${produit.quantite} ${produit.mesure} - ${produit.prixUnitaire.toStringAsFixed(2)} €/${produit.mesure} - ${_formatDate(produit.date)}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -513,22 +513,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 ),
                 const SizedBox(height: AppTheme.spacingM),
                 
-                // Prix total pour la quantité
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
-                  child: TextFormField(
-                    initialValue: _prixUnitaire.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Prix total pour cette quantité (€)',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      _prixUnitaire = double.tryParse(value) ?? 0.0;
-                      setState(() {});
-                    },
-                  ),
-                ),
                 const SizedBox(height: AppTheme.spacingM),
                 
                 // Résumé
@@ -547,7 +531,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                         ),
                         const SizedBox(height: AppTheme.spacingS),
                         Text('Quantité: ${_quantiteController.text} ${_selectedProduit!.mesure}'),
-                        Text('Prix total (${_selectedAnnee}): ${_prixUnitaire.toStringAsFixed(2)} €'),
+                        Text('Prix unitaire (${_selectedAnnee}): ${_prixUnitaire.toStringAsFixed(2)} €/${_selectedProduit!.mesure}'),
                         Text(
                           'Coût total: ${_calculerCoutTotal().toStringAsFixed(2)} €',
                           style: const TextStyle(
@@ -595,8 +579,8 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
   }
 
   double _calculerCoutTotal() {
-    // Le prix saisi est déjà le prix total pour la quantité
-    return _prixUnitaire;
+    final quantite = double.tryParse(_quantiteController.text) ?? 0.0;
+    return quantite * _prixUnitaire;
   }
 
   Future<void> _selectDate() async {
