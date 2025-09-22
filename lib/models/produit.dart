@@ -70,4 +70,9 @@ class Produit {
   double calculerCoutTotal(int annee) {
     return quantite * getPrixPourAnnee(annee);
   }
+
+  // Calculer le prix unitaire pour une année donnée (prix par unité de mesure)
+  double getPrixUnitairePourAnnee(int annee) {
+    return getPrixPourAnnee(annee);
+  }
 }

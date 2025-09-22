@@ -5,6 +5,7 @@ class ProduitTraitement {
   final String mesure;
   final double prixUnitaire;
   final double coutTotal;
+  final DateTime date;
 
   ProduitTraitement({
     required this.produitId,
@@ -13,6 +14,7 @@ class ProduitTraitement {
     required this.mesure,
     required this.prixUnitaire,
     required this.coutTotal,
+    required this.date,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +25,7 @@ class ProduitTraitement {
       'mesure': mesure,
       'prixUnitaire': prixUnitaire,
       'coutTotal': coutTotal,
+      'date': date.millisecondsSinceEpoch,
     };
   }
 
@@ -34,6 +37,7 @@ class ProduitTraitement {
       mesure: map['mesure'] ?? '',
       prixUnitaire: (map['prixUnitaire'] ?? 0).toDouble(),
       coutTotal: (map['coutTotal'] ?? 0).toDouble(),
+      date: DateTime.fromMillisecondsSinceEpoch(map['date'] ?? DateTime.now().millisecondsSinceEpoch),
     );
   }
 
@@ -44,6 +48,7 @@ class ProduitTraitement {
     String? mesure,
     double? prixUnitaire,
     double? coutTotal,
+    DateTime? date,
   }) {
     return ProduitTraitement(
       produitId: produitId ?? this.produitId,
@@ -52,6 +57,7 @@ class ProduitTraitement {
       mesure: mesure ?? this.mesure,
       prixUnitaire: prixUnitaire ?? this.prixUnitaire,
       coutTotal: coutTotal ?? this.coutTotal,
+      date: date ?? this.date,
     );
   }
 }

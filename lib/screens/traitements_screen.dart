@@ -250,8 +250,9 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Parcelle: ${parcelle.nom}'),
-                Text('Date: ${_formatDate(traitement.date)}'),
                 Text('Produits: ${traitement.produits.length}'),
+                if (traitement.produits.isNotEmpty)
+                  Text('Dates: ${traitement.produits.map((p) => _formatDate(p.date)).join(', ')}'),
                 if (traitement.notes != null && traitement.notes!.isNotEmpty)
                   Text('Notes: ${traitement.notes}'),
               ],

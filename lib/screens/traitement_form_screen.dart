@@ -27,7 +27,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
   final _notesController = TextEditingController();
   
   String? _selectedParcelleId;
-  DateTime _selectedDate = DateTime.now();
   List<ProduitTraitement> _produits = [];
   
   bool _isLoading = false;
@@ -44,7 +43,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
     final traitement = widget.traitement!;
     _notesController.text = traitement.notes ?? '';
     _selectedParcelleId = traitement.parcelleId;
-    _selectedDate = traitement.date;
     _produits = List.from(traitement.produits);
   }
 
@@ -114,19 +112,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                     },
                   );
                 },
-              ),
-              const SizedBox(height: AppTheme.spacingM),
-              
-              // Date
-              InkWell(
-                onTap: _selectDate,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Date *',
-                    border: OutlineInputBorder(),
-                  ),
-                  child: Text(_formatDate(_selectedDate)),
-                ),
               ),
               const SizedBox(height: AppTheme.spacingM),
               
@@ -218,7 +203,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                   margin: const EdgeInsets.only(bottom: AppTheme.spacingS),
                   child: ListTile(
                     title: Text(produit.nomProduit),
-                    subtitle: Text('${produit.quantite} ${produit.mesure} - ${produit.prixUnitaire.toStringAsFixed(2)} €/unité'),
+                    subtitle: Text('${produit.quantite} ${produit.mesure} - ${produit.prixUnitaire.toStringAsFixed(2)} €/unité - ${_formatDate(produit.date)}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -278,21 +263,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _selectDate() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    
-    if (date != null) {
-      setState(() {
-        _selectedDate = date;
-      });
-    }
   }
 
   String _formatDate(DateTime date) {
@@ -360,7 +330,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
         id: widget.traitement?.id,
         firebaseId: widget.traitement?.firebaseId,
         parcelleId: _selectedParcelleId!,
-        date: _selectedDate,
+        date: _produits.isNotEmpty ? _produits.first.date : DateTime.now(),
         annee: widget.annee,
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         produits: _produits,
@@ -422,6 +392,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
   Produit? _selectedProduit;
   final _quantiteController = TextEditingController();
   double _prixUnitaire = 0.0;
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -435,6 +406,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
     final produitTraitement = widget.produit!;
     _quantiteController.text = produitTraitement.quantite.toString();
     _prixUnitaire = produitTraitement.prixUnitaire;
+    _selectedDate = produitTraitement.date;
   }
 
   @override
@@ -491,6 +463,19 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     onChanged: (value) {
                       setState(() {});
                     },
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spacingM),
+                
+                // Date
+                InkWell(
+                  onTap: _selectDate,
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Date d\'application *',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Text(_formatDate(_selectedDate)),
                   ),
                 ),
                 const SizedBox(height: AppTheme.spacingM),
@@ -581,6 +566,25 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
     return quantite * _prixUnitaire;
   }
 
+  Future<void> _selectDate() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    
+    if (date != null) {
+      setState(() {
+        _selectedDate = date;
+      });
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   void _addProduit() {
     final quantite = double.tryParse(_quantiteController.text) ?? 0.0;
     if (quantite <= 0) return;
@@ -592,6 +596,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       mesure: _selectedProduit!.mesure,
       prixUnitaire: _prixUnitaire,
       coutTotal: _calculerCoutTotal(),
+      date: _selectedDate,
     );
 
     widget.onProduitSelected(produitTraitement);
