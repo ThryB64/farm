@@ -600,7 +600,9 @@ class FirebaseServiceV4 {
           return root.entries.map((e) {
             try {
               final map = normalizeLoose(e.value);
-              return Traitement.fromMap(map);
+              final traitement = Traitement.fromMap(map);
+              // Assigner la clé Firebase comme firebaseId
+              return traitement.copyWith(firebaseId: e.key);
             } catch (error) {
               print('Error parsing traitement ${e.key}: $error');
               return null;
@@ -658,7 +660,9 @@ class FirebaseServiceV4 {
           return root.entries.map((e) {
             try {
               final map = normalizeLoose(e.value);
-              return Produit.fromMap(map);
+              final produit = Produit.fromMap(map);
+              // Assigner la clé Firebase comme firebaseId
+              return produit.copyWith(firebaseId: e.key);
             } catch (error) {
               print('Error parsing produit ${e.key}: $error');
               return null;
