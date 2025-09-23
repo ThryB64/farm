@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
 import 'export_screen.dart';
 import 'export_ventes_screen.dart';
+import 'export_traitements_screen.dart';
 
 class ExportsPdfScreen extends StatelessWidget {
   const ExportsPdfScreen({Key? key}) : super(key: key);
@@ -40,6 +41,19 @@ class ExportsPdfScreen extends StatelessWidget {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExportVentesScreen()),
+              ),
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+            
+            // Export PDF Traitements
+            MenuCard(
+              title: 'Export PDF Traitements',
+              subtitle: 'Générer un PDF des données de traitements',
+              icon: Icons.science,
+              color: AppTheme.warning,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ExportTraitementsScreen()),
               ),
             ),
           ],
