@@ -183,6 +183,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
       }
     }
     print('FirebaseProvider V4: Updated ${traitements.length} traitements');
+    // Log des clés pour debug
+    print('Traitements keys: ${_traitementsMap.keys.toList()}');
     notifyListeners();
   }
   

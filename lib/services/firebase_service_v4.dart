@@ -594,6 +594,8 @@ class FirebaseServiceV4 {
         try {
           // Normalisation robuste via JSON round-trip
           final root = normalizeLoose(event.snapshot.value);
+          print('FirebaseService V4: Received ${root.length} traitements from Firebase');
+          print('FirebaseService V4: Traitements keys: ${root.keys.toList()}');
           
           return root.entries.map((e) {
             try {
