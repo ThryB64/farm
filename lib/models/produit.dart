@@ -16,24 +16,42 @@ class Produit {
   });
 
   Map<String, dynamic> toMap() {
+    // Convertir les clés int en string pour Firebase
+    final prixParAnneeString = <String, dynamic>{};
+    for (final entry in prixParAnnee.entries) {
+      prixParAnneeString[entry.key.toString()] = entry.value;
+    }
+    
     return {
       'id': id,
       'firebaseId': firebaseId,
       'nom': nom,
       'mesure': mesure,
       'notes': notes,
-      'prixParAnnee': prixParAnnee,
+      'prixParAnnee': prixParAnneeString,
     };
   }
 
   factory Produit.fromMap(Map<String, dynamic> map) {
+    // Convertir les clés string en int pour prixParAnnee
+    final prixParAnnee = <int, double>{};
+    if (map['prixParAnnee'] != null) {
+      final prixData = map['prixParAnnee'] as Map<String, dynamic>;
+      for (final entry in prixData.entries) {
+        final annee = int.tryParse(entry.key) ?? 0;
+        if (annee > 0) {
+          prixParAnnee[annee] = (entry.value as num).toDouble();
+        }
+      }
+    }
+    
     return Produit(
       id: map['id'],
       firebaseId: map['firebaseId'],
       nom: map['nom'] ?? '',
       mesure: map['mesure'] ?? '',
       notes: map['notes'],
-      prixParAnnee: Map<int, double>.from(map['prixParAnnee'] ?? {}),
+      prixParAnnee: prixParAnnee,
     );
   }
 
