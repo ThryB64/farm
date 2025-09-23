@@ -583,10 +583,23 @@ class FirebaseServiceV4 {
     if (_farmRef != null) {
       return _farmRef!.child('traitements').onValue.map((event) {
         if (event.snapshot.value == null) return <Traitement>[];
-        final data = Map<String, dynamic>.from(event.snapshot.value as Map);
-        return data.entries.map((e) {
-          return Traitement.fromMap(Map<String, dynamic>.from(e.value));
-        }).toList();
+        try {
+          final rawData = event.snapshot.value;
+          if (rawData is! Map) return <Traitement>[];
+          final data = Map<String, dynamic>.from(rawData);
+          return data.entries.map((e) {
+            try {
+              if (e.value is! Map) return null;
+              return Traitement.fromMap(Map<String, dynamic>.from(e.value));
+            } catch (error) {
+              print('Error parsing traitement ${e.key}: $error');
+              return null;
+            }
+          }).where((t) => t != null).cast<Traitement>().toList();
+        } catch (error) {
+          print('Error parsing traitements: $error');
+          return <Traitement>[];
+        }
       });
     } else {
       return Stream.value(_getTraitementsFromStorage());
@@ -628,10 +641,23 @@ class FirebaseServiceV4 {
     if (_farmRef != null) {
       return _farmRef!.child('produits').onValue.map((event) {
         if (event.snapshot.value == null) return <Produit>[];
-        final data = Map<String, dynamic>.from(event.snapshot.value as Map);
-        return data.entries.map((e) {
-          return Produit.fromMap(Map<String, dynamic>.from(e.value));
-        }).toList();
+        try {
+          final rawData = event.snapshot.value;
+          if (rawData is! Map) return <Produit>[];
+          final data = Map<String, dynamic>.from(rawData);
+          return data.entries.map((e) {
+            try {
+              if (e.value is! Map) return null;
+              return Produit.fromMap(Map<String, dynamic>.from(e.value));
+            } catch (error) {
+              print('Error parsing produit ${e.key}: $error');
+              return null;
+            }
+          }).where((p) => p != null).cast<Produit>().toList();
+        } catch (error) {
+          print('Error parsing produits: $error');
+          return <Produit>[];
+        }
       });
     } else {
       return Stream.value(_getProduitsFromStorage());
