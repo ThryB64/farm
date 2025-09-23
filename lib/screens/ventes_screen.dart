@@ -91,6 +91,8 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     // Si aucune année n'est sélectionnée, prendre la plus récente
     if (_selectedAnnee == null && annees.isNotEmpty) {
       _selectedAnnee = annees.first;
+    } else if (_selectedAnnee == null) {
+      _selectedAnnee = DateTime.now().year;
     }
     
     return Container(

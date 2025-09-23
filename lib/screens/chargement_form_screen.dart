@@ -53,14 +53,16 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
           final chargements = provider.chargements.toList()
             ..sort((a, b) => b.dateChargement.compareTo(a.dateChargement));
           
-          final dernierChargement = chargements.first;
-          setState(() {
-            _selectedParcelleId = dernierChargement.parcelleId;
-            _selectedCelluleId = dernierChargement.celluleId;
-            _selectedYear = dernierChargement.dateChargement.year;
-            _selectedVariete = dernierChargement.variete;
-            _selectedRemorque = dernierChargement.remorque;
-          });
+          final dernierChargement = chargements.isNotEmpty ? chargements.first : null;
+          if (dernierChargement != null) {
+            setState(() {
+              _selectedParcelleId = dernierChargement.parcelleId;
+              _selectedCelluleId = dernierChargement.celluleId;
+              _selectedYear = dernierChargement.dateChargement.year;
+              _selectedVariete = dernierChargement.variete;
+              _selectedRemorque = dernierChargement.remorque;
+            });
+          }
         } else {
           // S'il n'y a pas de chargement, utiliser l'année en cours
           setState(() {

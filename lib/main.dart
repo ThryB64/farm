@@ -144,14 +144,19 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-      try {
-        final provider = context.read<FirebaseProviderV4>();
-        await provider.initialize();
+    try {
+      // Attendre que le widget soit monté avant d'accéder au contexte
+      await Future.delayed(const Duration(milliseconds: 100));
       
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        final provider = context.read<FirebaseProviderV4>();
+        await provider.initialize();
+        
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

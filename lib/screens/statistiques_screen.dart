@@ -85,6 +85,8 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           // Si aucune année n'est sélectionnée, prendre la plus récente
           if (_selectedYear == null && annees.isNotEmpty) {
             _selectedYear = annees.first;
+          } else if (_selectedYear == null) {
+            _selectedYear = DateTime.now().year;
           }
 
           return Column(

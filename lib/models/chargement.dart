@@ -57,14 +57,14 @@ class Chargement {
       firebaseId: map['firebaseId'],
       celluleId: _pick(map, ['celluleId', 'cellule_id', 'cellule', 'celluleRef'])?.toString() ?? '',
       parcelleId: _pick(map, ['parcelleId', 'parcelle_id', 'parcelle', 'parcelleRef'])?.toString() ?? '',
-      remorque: map['remorque'],
+      remorque: map['remorque'] ?? '',
       dateChargement: DateTime.parse(map['date_chargement']),
-      poidsPlein: map['poids_plein'],
-      poidsVide: map['poids_vide'],
-      poidsNet: map['poids_net'],
-      poidsNormes: map['poids_normes'],
-      humidite: map['humidite'],
-      variete: map['variete'],
+      poidsPlein: (map['poids_plein'] ?? 0).toDouble(),
+      poidsVide: (map['poids_vide'] ?? 0).toDouble(),
+      poidsNet: (map['poids_net'] ?? 0).toDouble(),
+      poidsNormes: (map['poids_normes'] ?? 0).toDouble(),
+      humidite: (map['humidite'] ?? 0).toDouble(),
+      variete: map['variete'] ?? '',
     );
   }
 

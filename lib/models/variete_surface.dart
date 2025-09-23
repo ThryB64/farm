@@ -9,7 +9,7 @@ class VarieteSurface {
   });
 
   // Getter pour la compatibilité avec l'ancien code
-  double get pourcentage => surface; // Pour la compatibilité
+  double get pourcentage => surface; // Pour la compatibilité - surface en hectares
 
   Map<String, dynamic> toMap() {
     return {

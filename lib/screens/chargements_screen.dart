@@ -104,6 +104,8 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           // Si aucune année n'est sélectionnée, sélectionner la plus récente
           if (_selectedYear == null && annees.isNotEmpty) {
             _selectedYear = annees.first;
+          } else if (_selectedYear == null) {
+            _selectedYear = DateTime.now().year;
           }
 
           return FadeTransition(

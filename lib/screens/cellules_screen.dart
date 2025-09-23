@@ -95,6 +95,8 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
           // Si aucune année n'est sélectionnée, sélectionner la plus récente
           if (_selectedYear == null && annees.isNotEmpty) {
             _selectedYear = annees.first;
+          } else if (_selectedYear == null) {
+            _selectedYear = DateTime.now().year;
           }
 
           // Calculer les statistiques de l'année sélectionnée
