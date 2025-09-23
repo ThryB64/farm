@@ -586,11 +586,19 @@ class FirebaseServiceV4 {
         try {
           final rawData = event.snapshot.value;
           if (rawData is! Map) return <Traitement>[];
-          final data = Map<String, dynamic>.from(rawData);
+          
+          // ⚠️ Normalisation indispensable sur Web
+          // Map<Object?, Object?> -> Map<String, dynamic>
+          final data = rawData.map((k, v) => MapEntry(k.toString(), v));
+          
           return data.entries.map((e) {
             try {
               if (e.value is! Map) return null;
-              return Traitement.fromMap(Map<String, dynamic>.from(e.value));
+              
+              // Normaliser aussi la valeur
+              final normalizedValue = (e.value as Map).map((k, v) => MapEntry(k.toString(), v));
+              
+              return Traitement.fromMap(Map<String, dynamic>.from(normalizedValue));
             } catch (error) {
               print('Error parsing traitement ${e.key}: $error');
               return null;
@@ -644,11 +652,19 @@ class FirebaseServiceV4 {
         try {
           final rawData = event.snapshot.value;
           if (rawData is! Map) return <Produit>[];
-          final data = Map<String, dynamic>.from(rawData);
+          
+          // ⚠️ Normalisation indispensable sur Web
+          // Map<Object?, Object?> -> Map<String, dynamic>
+          final data = rawData.map((k, v) => MapEntry(k.toString(), v));
+          
           return data.entries.map((e) {
             try {
               if (e.value is! Map) return null;
-              return Produit.fromMap(Map<String, dynamic>.from(e.value));
+              
+              // Normaliser aussi la valeur
+              final normalizedValue = (e.value as Map).map((k, v) => MapEntry(k.toString(), v));
+              
+              return Produit.fromMap(Map<String, dynamic>.from(normalizedValue));
             } catch (error) {
               print('Error parsing produit ${e.key}: $error');
               return null;
