@@ -1,4 +1,5 @@
 import 'produit_traitement.dart';
+import '../utils/firebase_normalize.dart';
 
 class Traitement {
   int? id;
@@ -35,6 +36,28 @@ class Traitement {
   }
 
   factory Traitement.fromMap(Map<String, dynamic> map) {
+    // Normaliser la liste des produits
+    final produitsList = map['produits'];
+    List<ProduitTraitement> produits = [];
+    
+    if (produitsList != null) {
+      try {
+        if (produitsList is List) {
+          produits = produitsList.map((p) {
+            try {
+              final normalizedP = normalizeLoose(p);
+              return ProduitTraitement.fromMap(normalizedP);
+            } catch (e) {
+              print('Error parsing produit in traitement: $e');
+              return null;
+            }
+          }).where((p) => p != null).cast<ProduitTraitement>().toList();
+        }
+      } catch (e) {
+        print('Error parsing produits list in traitement: $e');
+      }
+    }
+    
     return Traitement(
       id: map['id'],
       firebaseId: map['firebaseId'],
@@ -42,9 +65,7 @@ class Traitement {
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
       annee: map['annee'] ?? DateTime.fromMillisecondsSinceEpoch(map['date']).year,
       notes: map['notes'],
-      produits: (map['produits'] as List<dynamic>? ?? [])
-          .map((p) => ProduitTraitement.fromMap(p))
-          .toList(),
+      produits: produits,
       coutTotal: (map['coutTotal'] ?? 0).toDouble(),
     );
   }
