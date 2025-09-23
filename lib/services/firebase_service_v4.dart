@@ -595,10 +595,14 @@ class FirebaseServiceV4 {
             try {
               if (e.value is! Map) return null;
               
-              // Normaliser aussi la valeur
-              final normalizedValue = (e.value as Map).map((k, v) => MapEntry(k.toString(), v));
+              // Normaliser aussi la valeur - éviter le cast direct
+              final rawValue = e.value as Map;
+              final normalizedValue = <String, dynamic>{};
+              for (final entry in rawValue.entries) {
+                normalizedValue[entry.key.toString()] = entry.value;
+              }
               
-              return Traitement.fromMap(Map<String, dynamic>.from(normalizedValue));
+              return Traitement.fromMap(normalizedValue);
             } catch (error) {
               print('Error parsing traitement ${e.key}: $error');
               return null;
@@ -661,10 +665,14 @@ class FirebaseServiceV4 {
             try {
               if (e.value is! Map) return null;
               
-              // Normaliser aussi la valeur
-              final normalizedValue = (e.value as Map).map((k, v) => MapEntry(k.toString(), v));
+              // Normaliser aussi la valeur - éviter le cast direct
+              final rawValue = e.value as Map;
+              final normalizedValue = <String, dynamic>{};
+              for (final entry in rawValue.entries) {
+                normalizedValue[entry.key.toString()] = entry.value;
+              }
               
-              return Produit.fromMap(Map<String, dynamic>.from(normalizedValue));
+              return Produit.fromMap(normalizedValue);
             } catch (error) {
               print('Error parsing produit ${e.key}: $error');
               return null;
