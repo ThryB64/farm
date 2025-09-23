@@ -62,6 +62,14 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
               
           print('ParcelleDetailsScreen: Chargements trouvés: ${chargements.length}');
           print('ParcelleDetailsScreen: Semis trouvés: ${semis.length}');
+          
+          // Debug: afficher les IDs des chargements et semis trouvés
+          for (var c in chargements) {
+            print('  - Chargement: ${c.id} -> ParcelleId: ${c.parcelleId}');
+          }
+          for (var s in semis) {
+            print('  - Semis: ${s.id} -> ParcelleId: ${s.parcelleId}');
+          }
 
           // Grouper les chargements par année
           final Map<int, List<Chargement>> chargementsParAnnee = {};
