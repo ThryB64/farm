@@ -40,7 +40,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
 
       final pdf = pw.Document();
 
-      // Couleurs personnalisées (même que les autres exports)
+      // Couleurs personnalisées (même que les autres)
       final mainColor = PdfColor.fromHex('#2E7D32'); // Vert foncé
       final secondaryColor = PdfColor.fromHex('#81C784'); // Vert clair
       final headerBgColor = PdfColor.fromHex('#E8F5E9'); // Vert très clair
@@ -48,64 +48,42 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       // Page de garde
       pdf.addPage(
         pw.Page(
-          pageFormat: PdfPageFormat.a4,
-          build: (pw.Context context) {
+          pageFormat: PdfPageFormat.a4.landscape,
+          build: (context) {
             return pw.Container(
-              decoration: pw.BoxDecoration(
-                gradient: pw.LinearGradient(
-                  begin: pw.Alignment.topCenter,
-                  end: pw.Alignment.bottomCenter,
-                  colors: [headerBgColor, PdfColors.white],
-                ),
-              ),
+              alignment: pw.Alignment.center,
+              width: double.infinity,
+              height: double.infinity,
               child: pw.Column(
                 mainAxisAlignment: pw.MainAxisAlignment.center,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(20),
-                    decoration: pw.BoxDecoration(
+                  pw.Text(
+                    'GAEC de la BARADE',
+                    style: pw.TextStyle(
+                      fontSize: 45,
                       color: mainColor,
-                      borderRadius: pw.BorderRadius.circular(15),
+                      fontWeight: pw.FontWeight.bold,
                     ),
-                    child: pw.Column(
-                      children: [
-                        pw.Text(
-                          '🧪',
-                          style: pw.TextStyle(
-                            fontSize: 60,
-                            color: PdfColors.white,
-                          ),
-                        ),
-                        pw.SizedBox(height: 20),
-                        pw.Text(
-                          'RAPPORT DES TRAITEMENTS',
-                          style: pw.TextStyle(
-                            fontSize: 28,
-                            fontWeight: pw.FontWeight.bold,
-                            color: PdfColors.white,
-                          ),
-                          textAlign: pw.TextAlign.center,
-                        ),
-                        pw.SizedBox(height: 10),
-                        pw.Text(
-                          'Année $_selectedYear',
-                          style: pw.TextStyle(
-                            fontSize: 18,
-                            color: PdfColors.white,
-                          ),
-                          textAlign: pw.TextAlign.center,
-                        ),
-                        pw.SizedBox(height: 20),
-                        pw.Text(
-                          'Généré le ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                          style: pw.TextStyle(
-                            fontSize: 14,
-                            color: PdfColors.white,
-                          ),
-                          textAlign: pw.TextAlign.center,
-                        ),
-                      ],
+                    textAlign: pw.TextAlign.center,
+                  ),
+                  pw.SizedBox(height: 40),
+                  pw.Text(
+                    'Traitements',
+                    style: pw.TextStyle(
+                      fontSize: 35,
+                      color: secondaryColor,
                     ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                  pw.SizedBox(height: 60),
+                  pw.Text(
+                    'Année $_selectedYear',
+                    style: const pw.TextStyle(
+                      fontSize: 30,
+                      color: PdfColors.black,
+                    ),
+                    textAlign: pw.TextAlign.center,
                   ),
                 ],
               ),
@@ -114,221 +92,268 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         ),
       );
 
-      // Page de contenu
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(40),
-          build: (pw.Context context) {
-            return [
-              // En-tête
-              pw.Container(
-                width: double.infinity,
-                padding: const pw.EdgeInsets.all(20),
-                decoration: pw.BoxDecoration(
-                  color: headerBgColor,
-                  borderRadius: pw.BorderRadius.circular(10),
-                ),
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+      // Variables pour le résumé final
+      double coutTotalGlobal = 0;
+      int nombreTraitementsTotal = 0;
+      int nombreProduitsTotal = 0;
+      int currentPage = 1;
+      int totalPages = 1;
+
+      // Calculer le nombre total de pages
+      for (var parcelle in parcelles) {
+        final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
+        final traitementsP = traitementsAnnee
+            .where((t) => t.parcelleId == parcelleId)
+            .toList();
+        if (traitementsP.isNotEmpty) {
+          totalPages += (traitementsP.length / 25).ceil();
+        }
+      }
+      if (parcelles.isNotEmpty) totalPages += 1; // Page de résumé
+
+      // Pour chaque parcelle
+      for (var parcelle in parcelles) {
+        final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
+        final traitementsP = traitementsAnnee
+            .where((t) => t.parcelleId == parcelleId)
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+
+        if (traitementsP.isEmpty) continue;
+
+        nombreTraitementsTotal += traitementsP.length;
+        double coutTotalParcelle = 0;
+        int nombreProduitsParcelle = 0;
+
+        for (var t in traitementsP) {
+          coutTotalParcelle += t.coutTotal;
+          nombreProduitsParcelle += t.produits.length;
+        }
+
+        coutTotalGlobal += coutTotalParcelle;
+        nombreProduitsTotal += nombreProduitsParcelle;
+
+        // Diviser les traitements en pages de 25 lignes
+        for (var i = 0; i < traitementsP.length; i += 25) {
+          final pageTraitements = traitementsP.skip(i).take(25).toList();
+          
+          pdf.addPage(
+            pw.Page(
+              pageFormat: PdfPageFormat.a4.landscape,
+              build: (context) {
+                return pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                   children: [
-                    pw.Text(
-                      'RAPPORT DES TRAITEMENTS - ANNÉE $_selectedYear',
-                      style: pw.TextStyle(
-                        fontSize: 20,
-                        fontWeight: pw.FontWeight.bold,
-                        color: mainColor,
-                      ),
-                    ),
-                    pw.SizedBox(height: 10),
-                    pw.Text(
-                      'Nombre de traitements: ${traitementsAnnee.length}',
-                      style: pw.TextStyle(
-                        fontSize: 14,
-                        color: PdfColors.grey700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              pw.SizedBox(height: 20),
-
-              // Liste des traitements
-              ...traitementsAnnee.map((traitement) {
-                final parcelle = parcelles.firstWhere(
-                  (p) => p.firebaseId == traitement.parcelleId || p.id.toString() == traitement.parcelleId,
-                  orElse: () => Parcelle(
-                    id: 0,
-                    nom: 'Parcelle inconnue',
-                    surface: 0.0,
-                    notes: null,
-                  ),
-                );
-
-                return pw.Container(
-                  margin: const pw.EdgeInsets.only(bottom: 20),
-                  padding: const pw.EdgeInsets.all(15),
-                  decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: secondaryColor, width: 1),
-                    borderRadius: pw.BorderRadius.circular(8),
-                  ),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      // En-tête du traitement
-                      pw.Row(
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(10),
+                      color: headerBgColor,
+                      child: pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Expanded(
-                            child: pw.Text(
-                              'Traitement - ${parcelle.nom}',
-                              style: pw.TextStyle(
-                                fontSize: 16,
-                                fontWeight: pw.FontWeight.bold,
-                                color: mainColor,
-                              ),
+                            child: pw.Row(
+                              children: [
+                                pw.Text(
+                                  'Parcelle: ${parcelle.nom}',
+                                  style: pw.TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: mainColor,
+                                  ),
+                                ),
+                                pw.SizedBox(width: 20),
+                                pw.Text(
+                                  'Surface: ${parcelle.surface.toStringAsFixed(2)} ha',
+                                  style: pw.TextStyle(
+                                    fontSize: 16,
+                                    color: mainColor,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           pw.Text(
-                            'Coût total: ${traitement.coutTotal.toStringAsFixed(2)} €',
+                            'Coût total: ${coutTotalParcelle.toStringAsFixed(2)} €',
                             style: pw.TextStyle(
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: pw.FontWeight.bold,
                               color: mainColor,
                             ),
                           ),
                         ],
                       ),
-                      pw.SizedBox(height: 10),
-
-                      // Informations du traitement
-                      pw.Row(
+                    ),
+                    pw.SizedBox(height: 10),
+                    pw.Expanded(
+                      child: pw.Table(
+                        border: pw.TableBorder.all(color: mainColor, width: 1),
+                        columnWidths: {
+                          0: const pw.FlexColumnWidth(1.5), // Date
+                          1: const pw.FlexColumnWidth(2),   // Produits
+                          2: const pw.FlexColumnWidth(1.5),  // Quantité
+                          3: const pw.FlexColumnWidth(1.5),  // Prix unit.
+                          4: const pw.FlexColumnWidth(1.5),  // Coût total
+                          5: const pw.FlexColumnWidth(1),    // Notes
+                        },
                         children: [
-                          pw.Expanded(
-                            child: pw.Column(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
-                                pw.Text(
-                                  'Parcelle: ${parcelle.nom}',
-                                  style: pw.TextStyle(fontSize: 12),
+                          // En-tête du tableau
+                          pw.TableRow(
+                            decoration: pw.BoxDecoration(color: headerBgColor),
+                            children: [
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Text(
+                                  'Date',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: mainColor,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: pw.TextAlign.center,
                                 ),
-                                pw.Text(
-                                  'Surface: ${parcelle.surface.toStringAsFixed(2)} ha',
-                                  style: pw.TextStyle(fontSize: 12),
+                              ),
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Text(
+                                  'Produit',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: mainColor,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: pw.TextAlign.center,
                                 ),
-                                pw.Text(
-                                  'Date: ${traitement.date.day}/${traitement.date.month}/${traitement.date.year}',
-                                  style: pw.TextStyle(fontSize: 12),
+                              ),
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Text(
+                                  'Quantité',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: mainColor,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: pw.TextAlign.center,
                                 ),
-                              ],
-                            ),
+                              ),
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Text(
+                                  'Prix unit.',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: mainColor,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: pw.TextAlign.center,
+                                ),
+                              ),
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Text(
+                                  'Coût total',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: mainColor,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: pw.TextAlign.center,
+                                ),
+                              ),
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Text(
+                                  'Notes',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: mainColor,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: pw.TextAlign.center,
+                                ),
+                              ),
+                            ],
                           ),
-                          pw.Expanded(
-                            child: pw.Column(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
-                                pw.Text(
-                                  'Produits utilisés: ${traitement.produits.length}',
-                                  style: pw.TextStyle(fontSize: 12),
-                                ),
-                                if (traitement.notes != null && traitement.notes!.isNotEmpty)
-                                  pw.Text(
-                                    'Notes: ${traitement.notes}',
-                                    style: pw.TextStyle(fontSize: 12),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      pw.SizedBox(height: 15),
-
-                      // Liste des produits
-                      if (traitement.produits.isNotEmpty) ...[
-                        pw.Text(
-                          'Produits utilisés:',
-                          style: pw.TextStyle(
-                            fontSize: 14,
-                            fontWeight: pw.FontWeight.bold,
-                            color: mainColor,
-                          ),
-                        ),
-                        pw.SizedBox(height: 8),
-                        pw.Table(
-                          border: pw.TableBorder.all(color: secondaryColor),
-                          columnWidths: {
-                            0: const pw.FlexColumnWidth(2),
-                            1: const pw.FlexColumnWidth(1),
-                            2: const pw.FlexColumnWidth(1),
-                            3: const pw.FlexColumnWidth(1),
-                            4: const pw.FlexColumnWidth(1),
-                          },
-                          children: [
-                            // En-tête du tableau
-                            pw.TableRow(
-                              decoration: pw.BoxDecoration(color: headerBgColor),
-                              children: [
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text(
-                                    'Produit',
-                                    style: pw.TextStyle(
-                                      fontWeight: pw.FontWeight.bold,
-                                      color: mainColor,
+                          // Lignes des traitements
+                          ...pageTraitements.expand((traitement) {
+                            if (traitement.produits.isEmpty) {
+                              return [
+                                pw.TableRow(
+                                  children: [
+                                    pw.Padding(
+                                      padding: const pw.EdgeInsets.all(8),
+                                      child: pw.Text(
+                                        '${traitement.date.day}/${traitement.date.month}/${traitement.date.year}',
+                                        style: const pw.TextStyle(fontSize: 10),
+                                        textAlign: pw.TextAlign.center,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text(
-                                    'Quantité',
-                                    style: pw.TextStyle(
-                                      fontWeight: pw.FontWeight.bold,
-                                      color: mainColor,
+                                    pw.Padding(
+                                      padding: const pw.EdgeInsets.all(8),
+                                      child: pw.Text(
+                                        'Aucun produit',
+                                        style: const pw.TextStyle(fontSize: 10),
+                                        textAlign: pw.TextAlign.center,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text(
-                                    'Prix unit.',
-                                    style: pw.TextStyle(
-                                      fontWeight: pw.FontWeight.bold,
-                                      color: mainColor,
+                                    pw.Padding(
+                                      padding: const pw.EdgeInsets.all(8),
+                                      child: pw.Text(
+                                        '-',
+                                        style: const pw.TextStyle(fontSize: 10),
+                                        textAlign: pw.TextAlign.center,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text(
-                                    'Date',
-                                    style: pw.TextStyle(
-                                      fontWeight: pw.FontWeight.bold,
-                                      color: mainColor,
+                                    pw.Padding(
+                                      padding: const pw.EdgeInsets.all(8),
+                                      child: pw.Text(
+                                        '-',
+                                        style: const pw.TextStyle(fontSize: 10),
+                                        textAlign: pw.TextAlign.center,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text(
-                                    'Coût total',
-                                    style: pw.TextStyle(
-                                      fontWeight: pw.FontWeight.bold,
-                                      color: mainColor,
+                                    pw.Padding(
+                                      padding: const pw.EdgeInsets.all(8),
+                                      child: pw.Text(
+                                        '${traitement.coutTotal.toStringAsFixed(2)} €',
+                                        style: pw.TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: pw.FontWeight.bold,
+                                          color: mainColor,
+                                        ),
+                                        textAlign: pw.TextAlign.center,
+                                      ),
                                     ),
-                                  ),
+                                    pw.Padding(
+                                      padding: const pw.EdgeInsets.all(8),
+                                      child: pw.Text(
+                                        traitement.notes ?? '',
+                                        style: const pw.TextStyle(fontSize: 10),
+                                        textAlign: pw.TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            // Lignes des produits
-                            ...traitement.produits.map((produit) {
+                              ];
+                            }
+                            
+                            return traitement.produits.map((produit) {
                               return pw.TableRow(
                                 children: [
                                   pw.Padding(
                                     padding: const pw.EdgeInsets.all(8),
                                     child: pw.Text(
+                                      '${produit.date.day}/${produit.date.month}/${produit.date.year}',
+                                      style: const pw.TextStyle(fontSize: 10),
+                                      textAlign: pw.TextAlign.center,
+                                    ),
+                                  ),
+                                  pw.Padding(
+                                    padding: const pw.EdgeInsets.all(8),
+                                    child: pw.Text(
                                       produit.nomProduit,
                                       style: const pw.TextStyle(fontSize: 10),
+                                      textAlign: pw.TextAlign.center,
                                     ),
                                   ),
                                   pw.Padding(
@@ -336,6 +361,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                     child: pw.Text(
                                       '${produit.quantite.toStringAsFixed(2)} ${produit.mesure}',
                                       style: const pw.TextStyle(fontSize: 10),
+                                      textAlign: pw.TextAlign.center,
                                     ),
                                   ),
                                   pw.Padding(
@@ -343,13 +369,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                     child: pw.Text(
                                       '${produit.prixUnitaire.toStringAsFixed(2)} €',
                                       style: const pw.TextStyle(fontSize: 10),
-                                    ),
-                                  ),
-                                  pw.Padding(
-                                    padding: const pw.EdgeInsets.all(8),
-                                    child: pw.Text(
-                                      '${produit.date.day}/${produit.date.month}/${produit.date.year}',
-                                      style: const pw.TextStyle(fontSize: 10),
+                                      textAlign: pw.TextAlign.center,
                                     ),
                                   ),
                                   pw.Padding(
@@ -361,114 +381,210 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                         fontWeight: pw.FontWeight.bold,
                                         color: mainColor,
                                       ),
+                                      textAlign: pw.TextAlign.center,
+                                    ),
+                                  ),
+                                  pw.Padding(
+                                    padding: const pw.EdgeInsets.all(8),
+                                    child: pw.Text(
+                                      traitement.notes ?? '',
+                                      style: const pw.TextStyle(fontSize: 10),
+                                      textAlign: pw.TextAlign.center,
                                     ),
                                   ),
                                 ],
                               );
-                            }),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              }).toList(),
-
-              pw.SizedBox(height: 30),
-
-              // Résumé
-              pw.Container(
-                width: double.infinity,
-                padding: const pw.EdgeInsets.all(20),
-                decoration: pw.BoxDecoration(
-                  color: headerBgColor,
-                  borderRadius: pw.BorderRadius.circular(10),
-                ),
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      'RÉSUMÉ',
-                      style: pw.TextStyle(
-                        fontSize: 18,
-                        fontWeight: pw.FontWeight.bold,
-                        color: mainColor,
+                            });
+                          }),
+                        ],
                       ),
                     ),
-                    pw.SizedBox(height: 15),
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text(
-                          'Nombre total de traitements:',
-                          style: pw.TextStyle(
-                            fontSize: 14,
-                            fontWeight: pw.FontWeight.bold,
+                    pw.SizedBox(height: 10),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(10),
+                      color: headerBgColor,
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Page $currentPage sur $totalPages',
+                            style: pw.TextStyle(
+                              fontSize: 12,
+                              color: mainColor,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        pw.Text(
-                          '${traitementsAnnee.length}',
-                          style: pw.TextStyle(
-                            fontSize: 14,
-                            fontWeight: pw.FontWeight.bold,
-                            color: mainColor,
+                          pw.Text(
+                            'GAEC de la BARADE - Traitements $_selectedYear',
+                            style: pw.TextStyle(
+                              fontSize: 12,
+                              color: mainColor,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    pw.SizedBox(height: 8),
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text(
-                          'Coût total des traitements:',
-                          style: pw.TextStyle(
-                            fontSize: 14,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                        pw.Text(
-                          '${traitementsAnnee.fold<double>(0.0, (sum, t) => sum + t.coutTotal).toStringAsFixed(2)} €',
-                          style: pw.TextStyle(
-                            fontSize: 14,
-                            fontWeight: pw.FontWeight.bold,
-                            color: mainColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    pw.SizedBox(height: 8),
-                    pw.Row(
-                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                      children: [
-                        pw.Text(
-                          'Nombre total de produits utilisés:',
-                          style: pw.TextStyle(
-                            fontSize: 14,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                        pw.Text(
-                          '${traitementsAnnee.fold<int>(0, (sum, t) => sum + t.produits.length)}',
-                          style: pw.TextStyle(
-                            fontSize: 14,
-                            fontWeight: pw.FontWeight.bold,
-                            color: mainColor,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
+                );
+              },
+            ),
+          );
+          currentPage++;
+        }
+      }
+
+      // Page de résumé
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4.landscape,
+          build: (context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(20),
+                  color: headerBgColor,
+                  child: pw.Text(
+                    'RÉSUMÉ GÉNÉRAL - TRAITEMENTS $_selectedYear',
+                    style: pw.TextStyle(
+                      fontSize: 24,
+                      fontWeight: pw.FontWeight.bold,
+                      color: mainColor,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
                 ),
-              ),
-            ];
+                pw.SizedBox(height: 30),
+                pw.Expanded(
+                  child: pw.Table(
+                    border: pw.TableBorder.all(color: mainColor, width: 2),
+                    columnWidths: {
+                      0: const pw.FlexColumnWidth(2),
+                      1: const pw.FlexColumnWidth(1),
+                    },
+                    children: [
+                      pw.TableRow(
+                        decoration: pw.BoxDecoration(color: headerBgColor),
+                        children: [
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(15),
+                            child: pw.Text(
+                              'NOMBRE TOTAL DE TRAITEMENTS',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold,
+                                color: mainColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(15),
+                            child: pw.Text(
+                              '$nombreTraitementsTotal',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold,
+                                color: mainColor,
+                                fontSize: 16,
+                              ),
+                              textAlign: pw.TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.TableRow(
+                        children: [
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(15),
+                            child: pw.Text(
+                              'COÛT TOTAL DES TRAITEMENTS',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold,
+                                color: PdfColors.black,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(15),
+                            child: pw.Text(
+                              '${coutTotalGlobal.toStringAsFixed(2)} €',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold,
+                                color: mainColor,
+                                fontSize: 16,
+                              ),
+                              textAlign: pw.TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.TableRow(
+                        decoration: pw.BoxDecoration(color: headerBgColor),
+                        children: [
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(15),
+                            child: pw.Text(
+                              'NOMBRE TOTAL DE PRODUITS UTILISÉS',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold,
+                                color: mainColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(15),
+                            child: pw.Text(
+                              '$nombreProduitsTotal',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold,
+                                color: mainColor,
+                                fontSize: 16,
+                              ),
+                              textAlign: pw.TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                pw.SizedBox(height: 30),
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(10),
+                  color: headerBgColor,
+                  child: pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        'Page $currentPage sur $totalPages',
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                          color: mainColor,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.Text(
+                        'GAEC de la BARADE - Traitements $_selectedYear',
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                          color: mainColor,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
           },
         ),
       );
 
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
-        name: 'Rapport_Traitements_$_selectedYear.pdf',
+        name: 'Traitements_$_selectedYear.pdf',
       );
 
     } catch (e) {
