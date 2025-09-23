@@ -45,12 +45,23 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
+          // Utiliser firebaseId pour les liens
+          final parcelleId = widget.parcelle.firebaseId ?? widget.parcelle.id.toString();
+          
+          // Debug logs
+          print('ParcelleDetailsScreen: Parcelle ID: $parcelleId');
+          print('ParcelleDetailsScreen: Total chargements: ${provider.chargements.length}');
+          print('ParcelleDetailsScreen: Total semis: ${provider.semis.length}');
+          
           final chargements = provider.chargements
-              .where((c) => c.parcelleId == widget.parcelle.id)
+              .where((c) => c.parcelleId == parcelleId)
               .toList();
           final semis = provider.semis
-              .where((s) => s.parcelleId == widget.parcelle.id)
+              .where((s) => s.parcelleId == parcelleId)
               .toList();
+              
+          print('ParcelleDetailsScreen: Chargements trouvés: ${chargements.length}');
+          print('ParcelleDetailsScreen: Semis trouvés: ${semis.length}');
 
           // Grouper les chargements par année
           final Map<int, List<Chargement>> chargementsParAnnee = {};
