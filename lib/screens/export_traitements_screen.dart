@@ -40,7 +40,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
 
       final pdf = pw.Document();
 
-      // Couleurs personnalisées (même que les autres)
+      // Couleurs personnalisées (même que récolte)
       final mainColor = PdfColor.fromHex('#2E7D32'); // Vert foncé
       final secondaryColor = PdfColor.fromHex('#81C784'); // Vert clair
       final headerBgColor = PdfColor.fromHex('#E8F5E9'); // Vert très clair
@@ -188,150 +188,41 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                       child: pw.Table(
                         border: pw.TableBorder.all(color: mainColor, width: 1),
                         columnWidths: {
-                          0: const pw.FlexColumnWidth(1.5), // Date
-                          1: const pw.FlexColumnWidth(2),   // Produits
-                          2: const pw.FlexColumnWidth(1.5),  // Quantité
-                          3: const pw.FlexColumnWidth(1.5),  // Prix unit.
-                          4: const pw.FlexColumnWidth(1.5),  // Coût total
-                          5: const pw.FlexColumnWidth(1),    // Notes
+                          0: const pw.FlexColumnWidth(1.5), // DATE
+                          1: const pw.FlexColumnWidth(2),   // PRODUIT
+                          2: const pw.FlexColumnWidth(1.5),  // QUANTITE
+                          3: const pw.FlexColumnWidth(1.5),  // PRIX UNIT
+                          4: const pw.FlexColumnWidth(1.5),  // COUT TOTAL
+                          5: const pw.FlexColumnWidth(1),    // MESURE
                         },
                         children: [
-                          // En-tête du tableau
                           pw.TableRow(
-                            decoration: pw.BoxDecoration(color: headerBgColor),
+                            decoration: pw.BoxDecoration(
+                              color: mainColor,
+                            ),
                             children: [
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Date',
-                                  style: pw.TextStyle(
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: mainColor,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: pw.TextAlign.center,
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Produit',
-                                  style: pw.TextStyle(
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: mainColor,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: pw.TextAlign.center,
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Quantité',
-                                  style: pw.TextStyle(
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: mainColor,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: pw.TextAlign.center,
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Prix unit.',
-                                  style: pw.TextStyle(
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: mainColor,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: pw.TextAlign.center,
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Coût total',
-                                  style: pw.TextStyle(
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: mainColor,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: pw.TextAlign.center,
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Notes',
-                                  style: pw.TextStyle(
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: mainColor,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: pw.TextAlign.center,
-                                ),
-                              ),
+                              _buildHeaderCell('DATE'),
+                              _buildHeaderCell('PRODUIT'),
+                              _buildHeaderCell('QUANTITÉ'),
+                              _buildHeaderCell('PRIX UNIT'),
+                              _buildHeaderCell('COÛT TOTAL'),
+                              _buildHeaderCell('MESURE'),
                             ],
                           ),
-                          // Lignes des traitements
                           ...pageTraitements.expand((traitement) {
                             if (traitement.produits.isEmpty) {
                               return [
                                 pw.TableRow(
+                                  decoration: pw.BoxDecoration(
+                                    color: PdfColors.white,
+                                  ),
                                   children: [
-                                    pw.Padding(
-                                      padding: const pw.EdgeInsets.all(8),
-                                      child: pw.Text(
-                                        '${traitement.date.day}/${traitement.date.month}/${traitement.date.year}',
-                                        style: const pw.TextStyle(fontSize: 10),
-                                        textAlign: pw.TextAlign.center,
-                                      ),
-                                    ),
-                                    pw.Padding(
-                                      padding: const pw.EdgeInsets.all(8),
-                                      child: pw.Text(
-                                        'Aucun produit',
-                                        style: const pw.TextStyle(fontSize: 10),
-                                        textAlign: pw.TextAlign.center,
-                                      ),
-                                    ),
-                                    pw.Padding(
-                                      padding: const pw.EdgeInsets.all(8),
-                                      child: pw.Text(
-                                        '-',
-                                        style: const pw.TextStyle(fontSize: 10),
-                                        textAlign: pw.TextAlign.center,
-                                      ),
-                                    ),
-                                    pw.Padding(
-                                      padding: const pw.EdgeInsets.all(8),
-                                      child: pw.Text(
-                                        '-',
-                                        style: const pw.TextStyle(fontSize: 10),
-                                        textAlign: pw.TextAlign.center,
-                                      ),
-                                    ),
-                                    pw.Padding(
-                                      padding: const pw.EdgeInsets.all(8),
-                                      child: pw.Text(
-                                        '${traitement.coutTotal.toStringAsFixed(2)} €',
-                                        style: pw.TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: pw.FontWeight.bold,
-                                          color: mainColor,
-                                        ),
-                                        textAlign: pw.TextAlign.center,
-                                      ),
-                                    ),
-                                    pw.Padding(
-                                      padding: const pw.EdgeInsets.all(8),
-                                      child: pw.Text(
-                                        traitement.notes ?? '',
-                                        style: const pw.TextStyle(fontSize: 10),
-                                        textAlign: pw.TextAlign.center,
-                                      ),
-                                    ),
+                                    _buildDataCell('${traitement.date.day}/${traitement.date.month}'),
+                                    _buildDataCell('Aucun produit'),
+                                    _buildDataCell('-'),
+                                    _buildDataCell('-'),
+                                    _buildDataCell('${traitement.coutTotal.toStringAsFixed(2)} €'),
+                                    _buildDataCell('-'),
                                   ],
                                 ),
                               ];
@@ -339,59 +230,16 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                             
                             return traitement.produits.map((produit) {
                               return pw.TableRow(
+                                decoration: pw.BoxDecoration(
+                                  color: PdfColors.white,
+                                ),
                                 children: [
-                                  pw.Padding(
-                                    padding: const pw.EdgeInsets.all(8),
-                                    child: pw.Text(
-                                      '${produit.date.day}/${produit.date.month}/${produit.date.year}',
-                                      style: const pw.TextStyle(fontSize: 10),
-                                      textAlign: pw.TextAlign.center,
-                                    ),
-                                  ),
-                                  pw.Padding(
-                                    padding: const pw.EdgeInsets.all(8),
-                                    child: pw.Text(
-                                      produit.nomProduit,
-                                      style: const pw.TextStyle(fontSize: 10),
-                                      textAlign: pw.TextAlign.center,
-                                    ),
-                                  ),
-                                  pw.Padding(
-                                    padding: const pw.EdgeInsets.all(8),
-                                    child: pw.Text(
-                                      '${produit.quantite.toStringAsFixed(2)} ${produit.mesure}',
-                                      style: const pw.TextStyle(fontSize: 10),
-                                      textAlign: pw.TextAlign.center,
-                                    ),
-                                  ),
-                                  pw.Padding(
-                                    padding: const pw.EdgeInsets.all(8),
-                                    child: pw.Text(
-                                      '${produit.prixUnitaire.toStringAsFixed(2)} €',
-                                      style: const pw.TextStyle(fontSize: 10),
-                                      textAlign: pw.TextAlign.center,
-                                    ),
-                                  ),
-                                  pw.Padding(
-                                    padding: const pw.EdgeInsets.all(8),
-                                    child: pw.Text(
-                                      '${produit.coutTotal.toStringAsFixed(2)} €',
-                                      style: pw.TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: pw.FontWeight.bold,
-                                        color: mainColor,
-                                      ),
-                                      textAlign: pw.TextAlign.center,
-                                    ),
-                                  ),
-                                  pw.Padding(
-                                    padding: const pw.EdgeInsets.all(8),
-                                    child: pw.Text(
-                                      traitement.notes ?? '',
-                                      style: const pw.TextStyle(fontSize: 10),
-                                      textAlign: pw.TextAlign.center,
-                                    ),
-                                  ),
+                                  _buildDataCell('${produit.date.day}/${produit.date.month}'),
+                                  _buildDataCell(produit.nomProduit),
+                                  _buildDataCell('${produit.quantite.toStringAsFixed(2)}'),
+                                  _buildDataCell('${produit.prixUnitaire.toStringAsFixed(2)} €'),
+                                  _buildDataCell('${produit.coutTotal.toStringAsFixed(2)} €'),
+                                  _buildDataCell(produit.mesure),
                                 ],
                               );
                             });
@@ -399,30 +247,49 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                         ],
                       ),
                     ),
-                    pw.SizedBox(height: 10),
+                    
+                    pw.Spacer(),
+                    
+                    // Totaux de la parcelle
                     pw.Container(
                       padding: const pw.EdgeInsets.all(10),
-                      color: headerBgColor,
                       child: pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text(
-                            'Page $currentPage sur $totalPages',
+                            'Total Traitements: ${traitementsP.length}',
                             style: pw.TextStyle(
-                              fontSize: 12,
-                              color: mainColor,
+                              fontSize: 14,
                               fontWeight: pw.FontWeight.bold,
+                              color: mainColor,
                             ),
                           ),
                           pw.Text(
-                            'GAEC de la BARADE - Traitements $_selectedYear',
+                            'Total Coût: ${coutTotalParcelle.toStringAsFixed(2)} €',
                             style: pw.TextStyle(
-                              fontSize: 12,
-                              color: mainColor,
+                              fontSize: 14,
                               fontWeight: pw.FontWeight.bold,
+                              color: mainColor,
+                            ),
+                          ),
+                          pw.Text(
+                            'Produits utilisés: $nombreProduitsParcelle',
+                            style: pw.TextStyle(
+                              fontSize: 14,
+                              fontWeight: pw.FontWeight.bold,
+                              color: mainColor,
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    
+                    pw.Text(
+                      'Page ${currentPage++}/$totalPages',
+                      textAlign: pw.TextAlign.right,
+                      style: pw.TextStyle(
+                        color: PdfColors.grey700,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -430,11 +297,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               },
             ),
           );
-          currentPage++;
         }
       }
 
-      // Page de résumé
+      // Page de résumé global
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a4.landscape,
@@ -467,84 +333,21 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                       pw.TableRow(
                         decoration: pw.BoxDecoration(color: headerBgColor),
                         children: [
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(15),
-                            child: pw.Text(
-                              'NOMBRE TOTAL DE TRAITEMENTS',
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                color: mainColor,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(15),
-                            child: pw.Text(
-                              '$nombreTraitementsTotal',
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                color: mainColor,
-                                fontSize: 16,
-                              ),
-                              textAlign: pw.TextAlign.center,
-                            ),
-                          ),
+                          _buildHeaderCell('NOMBRE TOTAL DE TRAITEMENTS'),
+                          _buildHeaderCell('$nombreTraitementsTotal'),
                         ],
                       ),
                       pw.TableRow(
                         children: [
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(15),
-                            child: pw.Text(
-                              'COÛT TOTAL DES TRAITEMENTS',
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                color: PdfColors.black,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(15),
-                            child: pw.Text(
-                              '${coutTotalGlobal.toStringAsFixed(2)} €',
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                color: mainColor,
-                                fontSize: 16,
-                              ),
-                              textAlign: pw.TextAlign.center,
-                            ),
-                          ),
+                          _buildDataCell('COÛT TOTAL DES TRAITEMENTS'),
+                          _buildDataCell('${coutTotalGlobal.toStringAsFixed(2)} €'),
                         ],
                       ),
                       pw.TableRow(
                         decoration: pw.BoxDecoration(color: headerBgColor),
                         children: [
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(15),
-                            child: pw.Text(
-                              'NOMBRE TOTAL DE PRODUITS UTILISÉS',
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                color: mainColor,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(15),
-                            child: pw.Text(
-                              '$nombreProduitsTotal',
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                color: mainColor,
-                                fontSize: 16,
-                              ),
-                              textAlign: pw.TextAlign.center,
-                            ),
-                          ),
+                          _buildHeaderCell('NOMBRE TOTAL DE PRODUITS UTILISÉS'),
+                          _buildHeaderCell('$nombreProduitsTotal'),
                         ],
                       ),
                     ],
@@ -558,7 +361,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.Text(
-                        'Page $currentPage sur $totalPages',
+                        'GAEC de la BARADE - Traitements $_selectedYear',
                         style: pw.TextStyle(
                           fontSize: 12,
                           color: mainColor,
@@ -566,7 +369,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                         ),
                       ),
                       pw.Text(
-                        'GAEC de la BARADE - Traitements $_selectedYear',
+                        'Page $currentPage/$totalPages',
                         style: pw.TextStyle(
                           fontSize: 12,
                           color: mainColor,
@@ -594,6 +397,32 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         );
       }
     }
+  }
+
+  pw.Widget _buildHeaderCell(String text) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(8),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontWeight: pw.FontWeight.bold,
+          color: PdfColors.white,
+          fontSize: 12,
+        ),
+        textAlign: pw.TextAlign.center,
+      ),
+    );
+  }
+
+  pw.Widget _buildDataCell(String text) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(8),
+      child: pw.Text(
+        text,
+        style: const pw.TextStyle(fontSize: 10),
+        textAlign: pw.TextAlign.center,
+      ),
+    );
   }
 
   @override
