@@ -4,6 +4,7 @@ import '../providers/firebase_provider_v4.dart';
 import '../models/semis.dart';
 import '../models/parcelle.dart';
 import 'semis_form_screen.dart';
+import 'varietes_screen.dart';
 
 class SemisScreen extends StatefulWidget {
   const SemisScreen({Key? key}) : super(key: key);
@@ -21,6 +22,16 @@ class _SemisScreenState extends State<SemisScreen> {
       appBar: AppBar(
         title: const Text('Semis'),
         backgroundColor: Colors.purple,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.eco),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const VarietesScreen()),
+            ),
+            tooltip: 'Gérer les variétés',
+          ),
+        ],
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
