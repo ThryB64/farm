@@ -243,7 +243,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               ),
             ),
             title: Text(
-              'Traitement ${traitement.annee}',
+              parcelle.nom,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Column(

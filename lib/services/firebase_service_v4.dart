@@ -554,8 +554,11 @@ class FirebaseServiceV4 {
   Future<String> ajouterTraitement(Traitement traitement) async {
     if (_farmRef != null) {
       final ref = _farmRef!.child('traitements').push();
+      final key = ref.key!;
       await ref.set(traitement.toMap());
-      return ref.key!;
+      // Sauvegarder aussi en local pour la persistance
+      _saveTraitementToStorage(traitement.copyWith(firebaseId: key));
+      return key;
     } else {
       final key = 't_${DateTime.now().millisecondsSinceEpoch}';
       _saveTraitementToStorage(traitement.copyWith(firebaseId: key));
@@ -567,6 +570,8 @@ class FirebaseServiceV4 {
     final key = traitement.firebaseId ?? traitement.id.toString();
     if (_farmRef != null) {
       await _farmRef!.child('traitements').child(key).set(traitement.toMap());
+      // Sauvegarder aussi en local pour la persistance
+      _saveTraitementToStorage(traitement);
     } else {
       _saveTraitementToStorage(traitement);
     }
@@ -575,6 +580,8 @@ class FirebaseServiceV4 {
   Future<void> supprimerTraitement(String key) async {
     if (_farmRef != null) {
       await _farmRef!.child('traitements').child(key).remove();
+      // Supprimer aussi du stockage local
+      _deleteTraitementFromStorage(key);
     } else {
       _deleteTraitementFromStorage(key);
     }
