@@ -8,13 +8,11 @@ import 'parcelles_screen.dart';
 import 'cellules_screen.dart';
 import 'chargements_screen.dart';
 import 'semis_screen.dart';
-import 'varietes_screen.dart';
 import 'ventes_screen.dart';
 import 'traitements_screen.dart';
 import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
-import 'export_screen.dart';
-import 'export_ventes_screen.dart';
+import 'exports_pdf_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -402,16 +400,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
             MenuCard(
-              title: 'Variétés',
-              subtitle: 'Types de maïs',
-              icon: Icons.eco,
-              color: AppTheme.info,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const VarietesScreen()),
-              ),
-            ),
-            MenuCard(
               title: 'Ventes',
               subtitle: 'Suivi des ventes',
               icon: Icons.shopping_cart,
@@ -494,26 +482,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const SizedBox(width: AppTheme.spacingM),
             Expanded(
               child: ModernOutlinedButton(
-                text: 'Export PDF',
+                text: 'Exports PDF',
                 icon: Icons.picture_as_pdf,
                 borderColor: Colors.white,
                 textColor: Colors.white,
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ExportScreen()),
-                ),
-              ),
-            ),
-            const SizedBox(width: AppTheme.spacingM),
-            Expanded(
-              child: ModernOutlinedButton(
-                text: 'Export Ventes PDF',
-                icon: Icons.sell,
-                borderColor: Colors.white,
-                textColor: Colors.white,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ExportVentesScreen()),
+                  MaterialPageRoute(builder: (context) => const ExportsPdfScreen()),
                 ),
               ),
             ),
