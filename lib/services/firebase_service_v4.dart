@@ -12,6 +12,7 @@ import '../models/variete.dart';
 import '../models/vente.dart';
 import '../models/traitement.dart';
 import '../models/produit.dart';
+import '../utils/firebase_normalize.dart';
 
 class FirebaseServiceV4 {
   static final FirebaseServiceV4 _instance = FirebaseServiceV4._internal();
@@ -584,25 +585,13 @@ class FirebaseServiceV4 {
       return _farmRef!.child('traitements').onValue.map((event) {
         if (event.snapshot.value == null) return <Traitement>[];
         try {
-          final rawData = event.snapshot.value;
-          if (rawData is! Map) return <Traitement>[];
+          // Normalisation robuste via JSON round-trip
+          final root = normalizeLoose(event.snapshot.value);
           
-          // ⚠️ Normalisation indispensable sur Web
-          // Map<Object?, Object?> -> Map<String, dynamic>
-          final data = rawData.map((k, v) => MapEntry(k.toString(), v));
-          
-          return data.entries.map((e) {
+          return root.entries.map((e) {
             try {
-              if (e.value is! Map) return null;
-              
-              // Normaliser aussi la valeur - éviter le cast direct
-              final rawValue = e.value as Map;
-              final normalizedValue = <String, dynamic>{};
-              for (final entry in rawValue.entries) {
-                normalizedValue[entry.key.toString()] = entry.value;
-              }
-              
-              return Traitement.fromMap(normalizedValue);
+              final map = normalizeLoose(e.value);
+              return Traitement.fromMap(map);
             } catch (error) {
               print('Error parsing traitement ${e.key}: $error');
               return null;
@@ -654,25 +643,13 @@ class FirebaseServiceV4 {
       return _farmRef!.child('produits').onValue.map((event) {
         if (event.snapshot.value == null) return <Produit>[];
         try {
-          final rawData = event.snapshot.value;
-          if (rawData is! Map) return <Produit>[];
+          // Normalisation robuste via JSON round-trip
+          final root = normalizeLoose(event.snapshot.value);
           
-          // ⚠️ Normalisation indispensable sur Web
-          // Map<Object?, Object?> -> Map<String, dynamic>
-          final data = rawData.map((k, v) => MapEntry(k.toString(), v));
-          
-          return data.entries.map((e) {
+          return root.entries.map((e) {
             try {
-              if (e.value is! Map) return null;
-              
-              // Normaliser aussi la valeur - éviter le cast direct
-              final rawValue = e.value as Map;
-              final normalizedValue = <String, dynamic>{};
-              for (final entry in rawValue.entries) {
-                normalizedValue[entry.key.toString()] = entry.value;
-              }
-              
-              return Produit.fromMap(normalizedValue);
+              final map = normalizeLoose(e.value);
+              return Produit.fromMap(map);
             } catch (error) {
               print('Error parsing produit ${e.key}: $error');
               return null;
