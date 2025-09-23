@@ -157,16 +157,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Positioned(
           top: 0,
           right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(AppTheme.spacingM),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          child: GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const StatistiquesScreen()),
             ),
-            child: const Icon(
-              Icons.analytics,
-              color: Colors.white,
-              size: 32,
+            child: Container(
+              padding: const EdgeInsets.all(AppTheme.spacingM),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+              ),
+              child: const Icon(
+                Icons.analytics,
+                color: Colors.white,
+                size: 32,
+              ),
             ),
           ),
         ),
@@ -438,16 +444,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const TraitementsScreen()),
-              ),
-            ),
-            MenuCard(
-              title: 'Statistiques',
-              subtitle: 'Analyses et graphiques',
-              icon: Icons.bar_chart,
-              color: AppTheme.warning,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const StatistiquesScreen()),
               ),
             ),
           ],
