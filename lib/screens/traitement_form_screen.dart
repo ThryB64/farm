@@ -494,13 +494,16 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                       labelText: 'Année du prix',
                       border: OutlineInputBorder(),
                     ),
-                    items: List.generate(10, (index) {
-                      final year = DateTime.now().year - 5 + index;
-                      return DropdownMenuItem(
-                        value: year,
-                        child: Text(year.toString()),
-                      );
-                    }),
+                    items: () {
+                      final years = _selectedProduit!.prixParAnnee.keys.toList()
+                        ..sort((a, b) => b.compareTo(a));
+                      return years.map((year) {
+                        return DropdownMenuItem(
+                          value: year,
+                          child: Text('$year (${_selectedProduit!.getPrixPourAnnee(year).toStringAsFixed(2)} €/${_selectedProduit!.mesure})'),
+                        );
+                      }).toList();
+                    }(),
                     onChanged: (value) {
                       setState(() {
                         _selectedAnnee = value!;

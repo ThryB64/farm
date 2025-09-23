@@ -102,7 +102,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
           // Calculer les statistiques de l'année sélectionnée
           final chargementsAnnee = _selectedYear != null ? chargements.where(
             (c) => c.dateChargement.year == _selectedYear &&
-                   cellulesParAnnee[_selectedYear]!.any((cell) => cell.id == c.celluleId)
+                   cellulesParAnnee[_selectedYear]!.any((cell) => (cell.firebaseId ?? cell.id.toString()) == c.celluleId)
           ).toList() : [];
 
           final poidsTotalNormeAnnee = chargementsAnnee.fold<double>(
