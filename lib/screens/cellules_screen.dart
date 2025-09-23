@@ -12,8 +12,18 @@ class CellulesScreen extends StatefulWidget {
   State<CellulesScreen> createState() => _CellulesScreenState();
 }
 
-class _CellulesScreenState extends State<CellulesScreen> {
+class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStateMixin {
   int? _selectedYear;
+  final Map<String, AnimationController> _animationControllers = {};
+
+  @override
+  void dispose() {
+    // Nettoyer les contrôleurs d'animation
+    for (var controller in _animationControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -233,6 +243,8 @@ class _CellulesScreenState extends State<CellulesScreen> {
                                             Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
+                                                _buildAnimatedLock(cellule),
+                                                SizedBox(width: 8),
                                                 IconButton(
                                                   icon: Icon(Icons.info),
                                                   color: Colors.blue,
@@ -434,5 +446,84 @@ class _CellulesScreenState extends State<CellulesScreen> {
         ],
       ),
     );
+  }
+
+  // Widget animé pour le cadenas
+  Widget _buildAnimatedLock(Cellule cellule) {
+    final celluleId = cellule.firebaseId ?? cellule.id.toString();
+    
+    // Créer le contrôleur d'animation s'il n'existe pas
+    if (!_animationControllers.containsKey(celluleId)) {
+      _animationControllers[celluleId] = AnimationController(
+        duration: const Duration(milliseconds: 300),
+        vsync: this,
+      );
+      
+      // Définir l'état initial basé sur l'état de la cellule
+      if (cellule.fermee) {
+        _animationControllers[celluleId]!.value = 1.0;
+      }
+    }
+
+    final animation = _animationControllers[celluleId]!;
+
+    return GestureDetector(
+      onTap: () => _toggleCelluleState(cellule),
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) {
+          return Transform.rotate(
+            angle: animation.value * 0.1, // Légère rotation pour l'effet
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: cellule.fermee ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: cellule.fermee ? Colors.red : Colors.green,
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                cellule.fermee ? Icons.lock : Icons.lock_open,
+                color: cellule.fermee ? Colors.red : Colors.green,
+                size: 20,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // Méthode pour basculer l'état de la cellule
+  void _toggleCelluleState(Cellule cellule) async {
+    final celluleId = cellule.firebaseId ?? cellule.id.toString();
+    final controller = _animationControllers[celluleId];
+    
+    if (controller == null) return;
+
+    // Animer le changement
+    if (cellule.fermee) {
+      // Ouvrir la cellule
+      await controller.reverse();
+    } else {
+      // Fermer la cellule
+      await controller.forward();
+    }
+
+    // Mettre à jour l'état dans Firebase
+    final updatedCellule = Cellule(
+      id: cellule.id,
+      firebaseId: cellule.firebaseId,
+      reference: cellule.reference,
+      dateCreation: cellule.dateCreation,
+      notes: cellule.notes,
+      nom: cellule.nom,
+      fermee: !cellule.fermee,
+    );
+
+    // Mettre à jour via le provider
+    context.read<FirebaseProviderV4>().modifierCellule(updatedCellule);
   }
 } 
