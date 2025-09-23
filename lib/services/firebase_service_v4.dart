@@ -640,11 +640,81 @@ class FirebaseServiceV4 {
 
   // ===== MÉTHODES DE STOCKAGE LOCAL =====
   
-  List<Traitement> _getTraitementsFromStorage() => [];
-  void _saveTraitementToStorage(Traitement traitement) {}
-  void _deleteTraitementFromStorage(String key) {}
+  List<Traitement> _getTraitementsFromStorage() {
+    try {
+      final stored = html.window.localStorage[_storageKey];
+      if (stored != null) {
+        final data = jsonDecode(stored);
+        final traitementsData = data['traitements'] as Map<String, dynamic>? ?? {};
+        return traitementsData.values.map((t) => Traitement.fromMap(t)).toList();
+      }
+    } catch (e) {
+      print('Error loading traitements from storage: $e');
+    }
+    return [];
+  }
   
-  List<Produit> _getProduitsFromStorage() => [];
-  void _saveProduitToStorage(Produit produit) {}
-  void _deleteProduitFromStorage(String key) {}
+  void _saveTraitementToStorage(Traitement traitement) {
+    try {
+      final stored = html.window.localStorage[_storageKey];
+      final data = stored != null ? jsonDecode(stored) : <String, dynamic>{};
+      data['traitements'] ??= <String, dynamic>{};
+      data['traitements'][traitement.firebaseId!] = traitement.toMap();
+      html.window.localStorage[_storageKey] = jsonEncode(data);
+    } catch (e) {
+      print('Error saving traitement to storage: $e');
+    }
+  }
+  
+  void _deleteTraitementFromStorage(String key) {
+    try {
+      final stored = html.window.localStorage[_storageKey];
+      if (stored != null) {
+        final data = jsonDecode(stored);
+        data['traitements']?.remove(key);
+        html.window.localStorage[_storageKey] = jsonEncode(data);
+      }
+    } catch (e) {
+      print('Error deleting traitement from storage: $e');
+    }
+  }
+  
+  List<Produit> _getProduitsFromStorage() {
+    try {
+      final stored = html.window.localStorage[_storageKey];
+      if (stored != null) {
+        final data = jsonDecode(stored);
+        final produitsData = data['produits'] as Map<String, dynamic>? ?? {};
+        return produitsData.values.map((p) => Produit.fromMap(p)).toList();
+      }
+    } catch (e) {
+      print('Error loading produits from storage: $e');
+    }
+    return [];
+  }
+  
+  void _saveProduitToStorage(Produit produit) {
+    try {
+      final stored = html.window.localStorage[_storageKey];
+      final data = stored != null ? jsonDecode(stored) : <String, dynamic>{};
+      data['produits'] ??= <String, dynamic>{};
+      data['produits'][produit.firebaseId!] = produit.toMap();
+      html.window.localStorage[_storageKey] = jsonEncode(data);
+    } catch (e) {
+      print('Error saving produit to storage: $e');
+    }
+  }
+  
+  void _deleteProduitFromStorage(String key) {
+    try {
+      final stored = html.window.localStorage[_storageKey];
+      if (stored != null) {
+        final data = jsonDecode(stored);
+        data['produits']?.remove(key);
+        html.window.localStorage[_storageKey] = jsonEncode(data);
+      }
+    } catch (e) {
+      print('Error deleting produit from storage: $e');
+    }
+  }
 }

@@ -83,6 +83,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
       _semisStream = _service.getSemisStream();
       _varietesStream = _service.getVarietesStream();
       _ventesStream = _service.getVentesStream();
+      _traitementsStream = _service.getTraitementsStream();
+      _produitsStream = _service.getProduitsStream();
       
       // Écouter les changements
       _parcellesStream?.listen(_onParcellesChanged);
@@ -91,6 +93,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
       _semisStream?.listen(_onSemisChanged);
       _varietesStream?.listen(_onVarietesChanged);
       _ventesStream?.listen(_onVentesChanged);
+      _traitementsStream?.listen(_onTraitementsChanged);
+      _produitsStream?.listen(_onProduitsChanged);
       
       _isInitialized = true;
       _error = null;
@@ -168,6 +172,28 @@ class FirebaseProviderV4 extends ChangeNotifier {
       }
     }
     print('FirebaseProvider V4: Updated ${ventes.length} ventes');
+    notifyListeners();
+  }
+  
+  void _onTraitementsChanged(List<Traitement> traitements) {
+    _traitementsMap.clear();
+    for (final traitement in traitements) {
+      if (traitement.firebaseId != null) {
+        _traitementsMap[traitement.firebaseId!] = traitement;
+      }
+    }
+    print('FirebaseProvider V4: Updated ${traitements.length} traitements');
+    notifyListeners();
+  }
+  
+  void _onProduitsChanged(List<Produit> produits) {
+    _produitsMap.clear();
+    for (final produit in produits) {
+      if (produit.firebaseId != null) {
+        _produitsMap[produit.firebaseId!] = produit;
+      }
+    }
+    print('FirebaseProvider V4: Updated ${produits.length} produits');
     notifyListeners();
   }
   
