@@ -279,8 +279,8 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
     _securityService.setupAuthListener(() {
       print('SecurityWrapper: Auth state changed, checking status');
       if (mounted) {
-        // Attendre un peu pour que l'état se stabilise
-        Future.delayed(const Duration(milliseconds: 200), () {
+        // Attendre plus longtemps pour que la navigation se termine
+        Future.delayed(const Duration(milliseconds: 2000), () {
           if (mounted) {
             _checkSecurityStatus();
             _refreshDataAfterAuth();

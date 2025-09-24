@@ -89,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         
         // Redémarrer l'application pour revenir à l'écran de connexion
         if (mounted) {
-          // Attendre un peu pour que la déconnexion se stabilise
-          await Future.delayed(const Duration(milliseconds: 1500));
+          // Attendre moins longtemps pour que la navigation se termine avant le refresh
+          await Future.delayed(const Duration(milliseconds: 500));
           
           // Forcer le redémarrage de l'application
           if (mounted) {
