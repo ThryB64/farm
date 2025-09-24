@@ -28,7 +28,8 @@ class SecurityService {
   /// Vérifie si l'utilisateur est dans la whitelist
   Future<bool> isUserAllowed(String uid) async {
     try {
-      final database = FirebaseDatabaseSingleton.instance;
+      // Initialiser la base de données si nécessaire
+      final database = await FirebaseDatabaseSingleton.initialize();
       final snapshot = await database.ref('allowedUsers/$uid').get();
       return snapshot.exists && snapshot.value == true;
     } catch (e) {
@@ -66,7 +67,7 @@ class SecurityService {
 
   /// Gère la liaison d'appareil unique
   Future<void> _handleDeviceBinding(String uid, String deviceId) async {
-    final database = FirebaseDatabaseSingleton.instance;
+    final database = await FirebaseDatabaseSingleton.initialize();
     final db = database.ref();
     final deviceRef = db.child('userDevices/$uid/primaryDeviceId');
     final snapshot = await deviceRef.get();
@@ -127,7 +128,7 @@ class SecurityService {
     if (user == null) return null;
 
     try {
-      final database = FirebaseDatabaseSingleton.instance;
+      final database = await FirebaseDatabaseSingleton.initialize();
       final snapshot = await database.ref('userDevices/${user.uid}').get();
       if (snapshot.exists) {
         return Map<String, dynamic>.from(snapshot.value as Map);

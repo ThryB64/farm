@@ -104,7 +104,7 @@ class FirebaseServiceV4 {
   // Ajouter l'utilisateur comme membre de la ferme
   Future<void> _addUserToFarm(String uid) async {
     try {
-      final database = FirebaseDatabaseSingleton.instance;
+      final database = await FirebaseDatabaseSingleton.initialize();
       await database.ref('farmMembers/$_farmId/$uid').set(true);
       print('FirebaseService V4: User $uid added to farm $_farmId');
     } catch (e) {
