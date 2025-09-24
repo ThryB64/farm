@@ -889,6 +889,9 @@ class FirebaseProviderV4 extends ChangeNotifier {
       // Réinitialiser le service pour prendre en compte la nouvelle authentification
       await _service.initialize();
       
+      // Attendre un peu pour que les données se chargent
+      await Future.delayed(const Duration(milliseconds: 500));
+      
       // Notifier les listeners
       notifyListeners();
       

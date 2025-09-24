@@ -47,12 +47,15 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
       print('SecureLoginScreen: Sign in successful, navigating to HomeScreen');
       if (mounted) {
         // Attendre un peu pour que l'authentification se stabilise
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 1000));
         
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (route) => false,
-        );
+        // Forcer la mise à jour de l'état d'authentification
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (route) => false,
+          );
+        }
       }
     } on FirebaseAuthException catch (e) {
       print('SecureLoginScreen: Firebase auth error: ${e.code} - ${e.message}');

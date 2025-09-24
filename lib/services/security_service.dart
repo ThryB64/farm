@@ -199,6 +199,7 @@ class SecurityService {
   /// Configure un listener pour les changements d'authentification
   void setupAuthListener(VoidCallback onAuthChange) {
     _auth.authStateChanges().listen((user) {
+      print('SecurityService: Auth state changed - user: ${user?.uid ?? 'null'}');
       onAuthChange();
     });
   }

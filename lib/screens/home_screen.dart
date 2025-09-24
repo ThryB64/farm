@@ -90,13 +90,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // Redémarrer l'application pour revenir à l'écran de connexion
         if (mounted) {
           // Attendre un peu pour que la déconnexion se stabilise
-          await Future.delayed(const Duration(milliseconds: 500));
+          await Future.delayed(const Duration(milliseconds: 1000));
           
           // Forcer le redémarrage de l'application
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const SplashScreen()),
-            (route) => false,
-          );
+          if (mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const SplashScreen()),
+              (route) => false,
+            );
+          }
         }
       } catch (e) {
         print('HomeScreen: Sign out error: $e');

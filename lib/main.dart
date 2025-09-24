@@ -279,8 +279,13 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
     _securityService.setupAuthListener(() {
       print('SecurityWrapper: Auth state changed, checking status');
       if (mounted) {
-        _checkSecurityStatus();
-        _refreshDataAfterAuth();
+        // Attendre un peu pour que l'état se stabilise
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            _checkSecurityStatus();
+            _refreshDataAfterAuth();
+          }
+        });
       }
     });
   }
@@ -303,6 +308,12 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
           _securityStatus = status;
           _isLoading = false;
         });
+        
+        // Si l'utilisateur est authentifié, forcer le refresh des données
+        if (status == SecurityStatus.authenticated) {
+          print('SecurityWrapper: User authenticated, forcing data refresh');
+          _refreshDataAfterAuth();
+        }
       }
     } catch (e) {
       print('SecurityWrapper: Error checking security status: $e');
