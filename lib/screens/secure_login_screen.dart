@@ -21,12 +21,6 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Comptes autorisés (pour l'interface)
-  final List<Map<String, String>> _authorizedAccounts = [
-    {'email': 'admin@gaec-berard.fr', 'name': 'Administrateur'},
-    {'email': 'pere@gaec-berard.fr', 'name': 'Père'},
-    {'email': 'frere@gaec-berard.fr', 'name': 'Frère'},
-  ];
 
   @override
   void dispose() {
@@ -267,54 +261,6 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                             backgroundColor: AppTheme.primary,
                           ),
                           
-                          const SizedBox(height: 24),
-                          
-                          // Comptes autorisés
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppTheme.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppTheme.textSecondary.withOpacity(0.3)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.people, color: AppTheme.primary, size: 20),
-                                    const SizedBox(width: 8),
-                                    const Text(
-                                      'Comptes autorisés',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.textPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                ..._authorizedAccounts.map((account) => 
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 4),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.person, size: 16, color: AppTheme.textSecondary),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          '${account['name']} (${account['email']})',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppTheme.textSecondary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
                       ),
                     ),
