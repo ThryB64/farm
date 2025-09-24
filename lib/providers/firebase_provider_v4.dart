@@ -1,5 +1,3 @@
-import 'dart:html' as html;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../services/firebase_service_v4.dart';
 import '../models/parcelle.dart';
@@ -885,7 +883,6 @@ class FirebaseProviderV4 extends ChangeNotifier {
   
   String? _initedUid;
   bool _ready = false;
-  bool _isClearing = false;
   
   // Getter pour vérifier si le provider est prêt
   bool get ready => _ready;
@@ -915,14 +912,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
 
   // Vider toutes les données
   void clearAll() {
-    if (_isClearing) {
-      print('FirebaseProvider V4: Already clearing data, skipping...');
-      return;
-    }
-    
-    _isClearing = true;
     print('FirebaseProvider V4: Clearing all data');
-    
     parcelles.clear();
     cellules.clear();
     chargements.clear();
@@ -931,14 +921,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
     ventes.clear();
     traitements.clear();
     produits.clear();
-    
-    _ready = false;
-    _initedUid = null;
-    
     notifyListeners();
     print('FirebaseProvider V4: All data cleared');
-    
-    _isClearing = false;
   }
 
   // Forcer la mise à jour après la connexion (legacy)
@@ -958,34 +942,6 @@ class FirebaseProviderV4 extends ChangeNotifier {
       print('FirebaseProvider V4: Refresh completed');
     } catch (e) {
       print('FirebaseProvider V4: Refresh failed: $e');
-    }
-  }
-
-  // Nettoyer toutes les données
-  Future<void> clearAllData() async {
-    try {
-      print('FirebaseProvider V4: Clearing all data...');
-      
-      // Nettoyer le localStorage
-      if (kIsWeb) {
-        html.window.localStorage.remove('parcelles');
-        html.window.localStorage.remove('cellules');
-        html.window.localStorage.remove('chargements');
-        html.window.localStorage.remove('semis');
-        html.window.localStorage.remove('varietes');
-        html.window.localStorage.remove('ventes');
-        html.window.localStorage.remove('traitements');
-        html.window.localStorage.remove('produits');
-        print('FirebaseProvider V4: Local storage cleared');
-      }
-      
-      // Nettoyer les données en mémoire
-      clearAll();
-      
-      print('✅ FirebaseProvider V4: All data cleared successfully');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error clearing data: $e');
-      rethrow;
     }
   }
 }

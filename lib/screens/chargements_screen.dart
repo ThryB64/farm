@@ -146,7 +146,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+            children: [
           Container(
             padding: const EdgeInsets.all(AppTheme.spacingXL),
             decoration: BoxDecoration(
@@ -197,49 +197,49 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
   Widget _buildHeader(Map<int, List<Chargement>> chargementsParAnnee) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingM),
-      child: Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<int>(
-              value: _selectedYear,
-              decoration: const InputDecoration(
-                labelText: 'Année',
-                border: OutlineInputBorder(),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        value: _selectedYear,
+                        decoration: const InputDecoration(
+                          labelText: 'Année',
+                          border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.calendar_today),
-              ),
+                        ),
               items: chargementsParAnnee.keys.map((year) {
-                return DropdownMenuItem<int>(
-                  value: year,
-                  child: Text(year.toString()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedYear = value;
-                });
-              },
-            ),
-          ),
+                          return DropdownMenuItem<int>(
+                            value: year,
+                            child: Text(year.toString()),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedYear = value;
+                          });
+                        },
+                      ),
+                    ),
           const SizedBox(width: AppTheme.spacingM),
-          Container(
+                    Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppTheme.spacingM,
               vertical: AppTheme.spacingS,
             ),
-            decoration: BoxDecoration(
+                      decoration: BoxDecoration(
               color: AppTheme.primary,
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
-            child: Text(
-              '${chargementsParAnnee[_selectedYear]?.length ?? 0} chargements',
+                      ),
+                      child: Text(
+                        '${chargementsParAnnee[_selectedYear]?.length ?? 0} chargements',
               style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
     );
   }
 
@@ -377,8 +377,8 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
           child: ModernCard(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                 Row(
                   children: [
                     Container(
@@ -397,7 +397,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                                children: [
                           Text(
                             cellule?.label ?? 'Cellule inconnue',
                             style: const TextStyle(
@@ -413,9 +413,9 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                               fontSize: 14,
                               color: AppTheme.textSecondary,
                             ),
-                          ),
-                        ],
-                      ),
+                                  ),
+                                ],
+                              ),
                     ),
                     PopupMenuButton<String>(
                       onSelected: (value) {
@@ -492,8 +492,8 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                         Icons.landscape,
                         AppTheme.success,
                       ),
-                    ),
-                  ],
+              ),
+            ],
                 ),
                 if (_showDebugInfo) ...[
                   const SizedBox(height: AppTheme.spacingM),
@@ -576,7 +576,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-  
+
   // Méthode de diagnostic des jointures
   void _debugJoins(BuildContext context, FirebaseProviderV4 provider) {
     final stats = provider.debugJoins();
@@ -658,4 +658,4 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       );
     }
   }
-}
+} 

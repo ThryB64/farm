@@ -256,15 +256,8 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 // AuthGate : source de vérité unique pour l'authentification
-class AuthGate extends StatefulWidget {
+class AuthGate extends StatelessWidget {
   const AuthGate({Key? key}) : super(key: key);
-
-  @override
-  State<AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends State<AuthGate> {
-  bool _hasClearedData = false;
 
   @override
   Widget build(BuildContext context) {
@@ -275,20 +268,14 @@ class _AuthGateState extends State<AuthGate> {
         print('AuthGate: Auth state changed - user: ${user?.uid ?? 'null'}');
         
         if (user == null) {
-          // Utilisateur non connecté - nettoyer les données UNE SEULE FOIS
-          if (!_hasClearedData) {
-            print('AuthGate: User not authenticated, clearing data');
-            _hasClearedData = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-              provider.clearAll();
-            });
-          }
+          // Utilisateur non connecté - nettoyer les données
+          print('AuthGate: User not authenticated, clearing data');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+            provider.clearAll();
+          });
           return const SecureLoginScreen();
         }
-        
-        // Reset le flag quand l'utilisateur se reconnecte
-        _hasClearedData = false;
         
         // Utilisateur connecté - s'assurer que le provider est prêt
         print('AuthGate: User authenticated, initializing data');
