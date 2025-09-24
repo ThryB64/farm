@@ -3,6 +3,7 @@ import 'dart:html' as html;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/parcelle.dart';
 import '../models/cellule.dart';
@@ -35,6 +36,9 @@ class FirebaseServiceV4 {
     try {
       print('FirebaseService V4: Initializing...');
       
+      // Initialiser App Check
+      await _initializeAppCheck();
+      
       _database = FirebaseDatabase.instanceFor(
         app: Firebase.app(),
         databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
@@ -47,14 +51,12 @@ class FirebaseServiceV4 {
         _database.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
       }
 
-      // Authentification
+      // Vérifier l'authentification (ne pas forcer la connexion anonyme)
       final user = _auth.currentUser;
-      if (user == null) {
-        await _auth.signInAnonymously();
+      if (user != null) {
+        _farmRef = _database.ref('farms/$_farmId');
+        await _addUserToFarm(user.uid);
       }
-      
-      _farmRef = _database.ref('farms/$_farmId');
-      await _addUserToFarm(_auth.currentUser!.uid);
       
       print('✅ FirebaseService V4: Initialized successfully');
       _isInitialized = true;
@@ -62,6 +64,29 @@ class FirebaseServiceV4 {
     } catch (e) {
       print('❌ FirebaseService V4: Init failed: $e');
       _isInitialized = true;
+    }
+  }
+
+  // Initialiser App Check
+  Future<void> _initializeAppCheck() async {
+    try {
+      if (kIsWeb) {
+        // App Check pour Web avec reCAPTCHA v3 (désactivé temporairement)
+        // await FirebaseAppCheck.instance.activate(
+        //   webRecaptchaSiteKey: '6LfXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+        // );
+        print('FirebaseService V4: App Check skipped for Web (to be configured)');
+      } else {
+        // App Check pour mobile (optionnel)
+        await FirebaseAppCheck.instance.activate(
+          androidProvider: AndroidProvider.debug, // En production, utiliser playIntegrity
+          appleProvider: AppleProvider.debug, // En production, utiliser appAttest
+        );
+        print('FirebaseService V4: App Check activated for Mobile');
+      }
+    } catch (e) {
+      print('FirebaseService V4: App Check activation failed: $e');
+      // Continuer même si App Check échoue
     }
   }
 

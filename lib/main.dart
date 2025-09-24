@@ -7,7 +7,9 @@ import 'firebase_options.dart';
 
 // Services & providers
 import 'providers/firebase_provider_v4.dart';
+import 'services/security_service.dart';
 import 'screens/home_screen.dart';
+import 'screens/secure_login_screen.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -80,7 +82,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Maïs Tracker',
       theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
+      home: const SecurityWrapper(),
     );
   }
 }
@@ -249,5 +251,55 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ),
     );
+  }
+}
+
+// Wrapper de sécurité qui vérifie l'authentification
+class SecurityWrapper extends StatefulWidget {
+  const SecurityWrapper({Key? key}) : super(key: key);
+
+  @override
+  State<SecurityWrapper> createState() => _SecurityWrapperState();
+}
+
+class _SecurityWrapperState extends State<SecurityWrapper> {
+  final SecurityService _securityService = SecurityService();
+  bool _isLoading = true;
+  SecurityStatus _securityStatus = SecurityStatus.notAuthenticated;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSecurityStatus();
+  }
+
+  Future<void> _checkSecurityStatus() async {
+    try {
+      final status = await _securityService.checkSecurityStatus();
+      setState(() {
+        _securityStatus = status;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _securityStatus = SecurityStatus.notAuthenticated;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const SplashScreen();
+    }
+
+    switch (_securityStatus) {
+      case SecurityStatus.authenticated:
+        return const HomeScreen();
+      case SecurityStatus.notAuthenticated:
+      case SecurityStatus.notAllowed:
+        return const SecureLoginScreen();
+    }
   }
 } 
