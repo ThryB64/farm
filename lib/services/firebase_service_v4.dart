@@ -19,6 +19,8 @@ class FirebaseServiceV4 {
   static final FirebaseServiceV4 _instance = FirebaseServiceV4._internal();
   factory FirebaseServiceV4() => _instance;
   FirebaseServiceV4._internal();
+  
+  static bool _isGloballyInitialized = false;
 
   FirebaseDatabase? _database;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -36,32 +38,53 @@ class FirebaseServiceV4 {
     try {
       print('FirebaseService V4: Initializing...');
       
+      // Vérifier l'initialisation globale pour éviter les doublons
+      if (_isGloballyInitialized) {
+        print('FirebaseService V4: Already globally initialized, skipping...');
+        _isInitialized = true;
+        return;
+      }
+      
       // Initialiser App Check
       await _initializeAppCheck();
       
       // Vérifier si la base de données est déjà initialisée
       if (_database == null) {
-        _database = FirebaseDatabase.instanceFor(
-          app: Firebase.app(),
-          databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
-        );
-        print('FirebaseService V4: Firebase instance created');
+        try {
+          _database = FirebaseDatabase.instanceFor(
+            app: Firebase.app(),
+            databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
+          );
+          print('FirebaseService V4: Firebase instance created');
+        } catch (e) {
+          print('FirebaseService V4: Database already initialized, using existing instance');
+          _database = FirebaseDatabase.instance;
+        }
       } else {
         print('FirebaseService V4: Firebase instance already exists');
       }
 
       // Persistance pour les plateformes natives
       if (!kIsWeb && _database != null) {
-        _database!.setPersistenceEnabled(true);
-        _database!.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
+        try {
+          _database!.setPersistenceEnabled(true);
+          _database!.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
+        } catch (e) {
+          print('FirebaseService V4: Persistence already configured');
+        }
       }
 
       // Vérifier l'authentification
       final user = _auth.currentUser;
       if (user != null && _database != null) {
-        _farmRef = _database!.ref('farms/$_farmId');
-        await _addUserToFarm(user.uid);
-        print('FirebaseService V4: User authenticated: ${user.uid}');
+        try {
+          _farmRef = _database!.ref('farms/$_farmId');
+          await _addUserToFarm(user.uid);
+          print('FirebaseService V4: User authenticated: ${user.uid}');
+        } catch (e) {
+          print('FirebaseService V4: Auth setup failed: $e');
+          // Continuer en mode hors ligne
+        }
       } else {
         print('FirebaseService V4: No authenticated user - using local storage only');
         // En mode hors ligne, on utilise seulement le localStorage
@@ -69,6 +92,7 @@ class FirebaseServiceV4 {
       
       print('✅ FirebaseService V4: Initialized successfully');
       _isInitialized = true;
+      _isGloballyInitialized = true;
       
     } catch (e) {
       print('❌ FirebaseService V4: Init failed: $e');
