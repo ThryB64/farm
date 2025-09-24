@@ -1,0 +1,934 @@
+{
+  "exportDate": "2025-09-24T11:16:35.851",
+  "version": "1.0",
+  "parcelles": [
+    {
+      "id": null,
+      "firebaseId": "parcelle_baoucou__260",
+      "nom": "Baoucoué",
+      "surface": 2.6,
+      "date_creation": "2025-09-21T13:03:44.384",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_baylaire_410",
+      "nom": "Baylaire",
+      "surface": 4.1,
+      "date_creation": "2025-09-21T12:59:14.084",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_benoit_hours_330",
+      "nom": "Benoit Hours",
+      "surface": 3.3,
+      "date_creation": "2025-09-21T13:04:08.449",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_benoit_livron_260",
+      "nom": "Benoit Livron",
+      "surface": 2.6,
+      "date_creation": "2025-09-21T13:04:23.678",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_borderole_870",
+      "nom": "Borderole",
+      "surface": 8.7,
+      "date_creation": "2025-09-21T12:35:08.637",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_boudrere_420",
+      "nom": "Boudrere",
+      "surface": 4.2,
+      "date_creation": "2025-09-21T13:01:14.923",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_cabanne_bedat_250",
+      "nom": "Cabanne Bedat",
+      "surface": 2.5,
+      "date_creation": "2025-09-21T13:03:06.944",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_cabanne_garuet_120",
+      "nom": "Cabanne Garuet",
+      "surface": 1.2,
+      "date_creation": "2025-09-21T13:03:26.315",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_cabanne_haut_220",
+      "nom": "Cabanne Haut",
+      "surface": 2.2,
+      "date_creation": "2025-09-21T13:03:15.407",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_castaing_124",
+      "nom": "Castaing",
+      "surface": 1.24,
+      "date_creation": "2025-09-21T13:00:31.194",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_claverie_90",
+      "nom": "Claverie",
+      "surface": 0.9,
+      "date_creation": "2025-09-21T12:59:50.522",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_en_face__110",
+      "nom": "En face ",
+      "surface": 1.1,
+      "date_creation": "2025-09-21T13:03:51.582",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_gauze_cimetiere_300",
+      "nom": "Gauze Cimetiere",
+      "surface": 3,
+      "date_creation": "2025-09-21T12:58:31.756",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_gauze_hours_90",
+      "nom": "Gauze Hours",
+      "surface": 0.9,
+      "date_creation": "2025-09-21T13:01:03.009",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_haynard_480",
+      "nom": "Haynard",
+      "surface": 4.8,
+      "date_creation": "2025-09-21T12:36:09.047",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_hourmayou_1750",
+      "nom": "Hourmayou",
+      "surface": 17.5,
+      "date_creation": "2025-09-21T12:59:30.995",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_hournac_1770",
+      "nom": "Hournac",
+      "surface": 17.7,
+      "date_creation": "2025-09-21T12:58:17.257",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_hours_cassou_480",
+      "nom": "Hours Cassou",
+      "surface": 4.8,
+      "date_creation": "2025-09-21T13:01:40.925",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_hours_caubere_600",
+      "nom": "Hours Caubere",
+      "surface": 6,
+      "date_creation": "2025-09-21T13:01:30.260",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_joncs_600",
+      "nom": "Joncs",
+      "surface": 6,
+      "date_creation": "2025-09-21T12:59:39.888",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_lacaze_180",
+      "nom": "Lacaze",
+      "surface": 1.8,
+      "date_creation": "2025-09-21T14:53:25.531",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_lagau_160",
+      "nom": "Lagau",
+      "surface": 1.6,
+      "date_creation": "2025-09-21T13:00:46.632",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_martine_260",
+      "nom": "Martine",
+      "surface": 2.6,
+      "date_creation": "2025-09-21T12:58:43.523",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_mericq_105",
+      "nom": "Mericq",
+      "surface": 1.05,
+      "date_creation": "2025-09-21T13:00:01.336",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_montalibet_460",
+      "nom": "Montalibet",
+      "surface": 4.6,
+      "date_creation": "2025-09-21T12:58:59.579",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_pey_220",
+      "nom": "Pey",
+      "surface": 2.2,
+      "date_creation": "2025-09-21T12:35:41.758",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_poucourou_1250",
+      "nom": "Poucourou",
+      "surface": 12.5,
+      "date_creation": "2025-09-21T13:00:17.836",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_rossoni_140",
+      "nom": "Rossoni",
+      "surface": 1.4,
+      "date_creation": "2025-09-21T12:59:20.287",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_trey_70",
+      "nom": "Trey",
+      "surface": 0.7,
+      "date_creation": "2025-09-21T13:03:59.511",
+      "notes": null
+    },
+    {
+      "id": null,
+      "firebaseId": "parcelle_yannot_770",
+      "nom": "Yannot",
+      "surface": 7.7,
+      "date_creation": "2025-09-21T12:34:53.259",
+      "notes": null
+    }
+  ],
+  "cellules": [
+    {
+      "id": null,
+      "reference": "CELLULE_20250921",
+      "capacite": 320000,
+      "date_creation": "2025-09-21T00:00:00.000",
+      "notes": null
+    }
+  ],
+  "chargements": [
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_borderole_870",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:16:30.037",
+      "poids_plein": 29880,
+      "poids_vide": 14200,
+      "poids_net": 15680,
+      "poids_normes": 13986.56,
+      "humidite": 23.7,
+      "variete": "5432"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_trey_70",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:33:02.392",
+      "poids_plein": 18920,
+      "poids_vide": 13740,
+      "poids_net": 5180,
+      "poids_normes": 4931.36,
+      "humidite": 18.7,
+      "variete": "5159"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_borderole_870",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:24:18.418",
+      "poids_plein": 20540,
+      "poids_vide": 14120,
+      "poids_net": 6420,
+      "poids_normes": 5842.2,
+      "humidite": 22.4,
+      "variete": "5432"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_boudrere_420",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:29:19.866",
+      "poids_plein": 24820,
+      "poids_vide": 14360,
+      "poids_net": 10460,
+      "poids_normes": 8089.241,
+      "humidite": 33.4,
+      "variete": "Autre"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_yannot_770",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:26:56.673",
+      "poids_plein": 27000,
+      "poids_vide": 14280,
+      "poids_net": 12720,
+      "poids_normes": 10646.003999999999,
+      "humidite": 28.2,
+      "variete": "5812"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_boudrere_420",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:28:08.452",
+      "poids_plein": 27540,
+      "poids_vide": 14200,
+      "poids_net": 13340,
+      "poids_normes": 10402.532000000001,
+      "humidite": 32.8,
+      "variete": "Autre"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_yannot_770",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:26:21.068",
+      "poids_plein": 28640,
+      "poids_vide": 14340,
+      "poids_net": 14300,
+      "poids_normes": 11792.495,
+      "humidite": 29.2,
+      "variete": "5812"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_gauze_cimetiere_300",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:30:57.782",
+      "poids_plein": 28720,
+      "poids_vide": 14460,
+      "poids_net": 14260,
+      "poids_normes": 12805.48,
+      "humidite": 23.1,
+      "variete": "5159"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_borderole_870",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:23:20.500",
+      "poids_plein": 28780,
+      "poids_vide": 14120,
+      "poids_net": 14660,
+      "poids_normes": 13340.6,
+      "humidite": 22.3,
+      "variete": "5432"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_yannot_770",
+      "remorque": "Leboulch",
+      "date_chargement": "2025-09-21T18:25:33.461",
+      "poids_plein": 29800,
+      "poids_vide": 14160,
+      "poids_net": 15640,
+      "poids_normes": 12599.583999999999,
+      "humidite": 30.6,
+      "variete": "5812"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_rossoni_140",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:31:48.692",
+      "poids_plein": 33100,
+      "poids_vide": 17540,
+      "poids_net": 15560,
+      "poids_normes": 12735.86,
+      "humidite": 30,
+      "variete": "5159"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_borderole_870",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:16:56.869",
+      "poids_plein": 40340,
+      "poids_vide": 18000,
+      "poids_net": 22340,
+      "poids_normes": 19793.24,
+      "humidite": 24.1,
+      "variete": "5432"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_boudrere_420",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:29:40.859",
+      "poids_plein": 23920,
+      "poids_vide": 18200,
+      "poids_net": 5720,
+      "poids_normes": 5102.24,
+      "humidite": 23.8,
+      "variete": "Autre"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_boudrere_420",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:28:39.851",
+      "poids_plein": 31800,
+      "poids_vide": 18160,
+      "poids_net": 13640,
+      "poids_normes": 10548.494,
+      "humidite": 33.4,
+      "variete": "Autre"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_borderole_870",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:23:47.233",
+      "poids_plein": 34640,
+      "poids_vide": 18020,
+      "poids_net": 16620,
+      "poids_normes": 15024.48,
+      "humidite": 22.9,
+      "variete": "5432"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_borderole_870",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:22:31.324",
+      "poids_plein": 35300,
+      "poids_vide": 17360,
+      "poids_net": 17940,
+      "poids_normes": 16002.48,
+      "humidite": 24,
+      "variete": "5432"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_gauze_cimetiere_300",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:30:28.433",
+      "poids_plein": 35380,
+      "poids_vide": 18100,
+      "poids_net": 17280,
+      "poids_normes": 13920.768,
+      "humidite": 30.7,
+      "variete": "5159"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_yannot_770",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:25:04.745",
+      "poids_plein": 37580,
+      "poids_vide": 17920,
+      "poids_net": 19660,
+      "poids_normes": 16333.528,
+      "humidite": 28.6,
+      "variete": "5812"
+    },
+    {
+      "id": null,
+      "cellule_id": "cellule_CELLULE_20250921",
+      "parcelle_id": "parcelle_yannot_770",
+      "remorque": "Maupu",
+      "date_chargement": "2025-09-21T18:58:40.568",
+      "poids_plein": 39200,
+      "poids_vide": 18060,
+      "poids_net": 21140,
+      "poids_normes": 18083.156000000003,
+      "humidite": 27,
+      "variete": "5812"
+    }
+  ],
+  "semis": [
+    {
+      "id": null,
+      "parcelle_id": "parcelle_baoucou__260",
+      "date": "2025-05-17T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "Autre",
+          "surface": 2.6,
+          "pourcentage": 2.6
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_baylaire_410",
+      "date": "2025-05-01T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "Autre",
+          "surface": 4.1,
+          "pourcentage": 4.1
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_benoit_hours_330",
+      "date": "2025-04-09T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5812",
+          "surface": 3.3,
+          "pourcentage": 3.3
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_benoit_livron_260",
+      "date": "2025-04-30T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5159",
+          "surface": 2.6,
+          "pourcentage": 2.6
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_borderole_870",
+      "date": "2025-04-09T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5432",
+          "surface": 8.7,
+          "pourcentage": 8.7
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_boudrere_420",
+      "date": "2025-04-30T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "Autre",
+          "surface": 4.2,
+          "pourcentage": 4.2
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_cabanne_bedat_250",
+      "date": "2025-05-01T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5159",
+          "surface": 2.5,
+          "pourcentage": 2.5
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_cabanne_garuet_120",
+      "date": "2025-05-01T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5159",
+          "surface": 1.2,
+          "pourcentage": 1.2
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_cabanne_haut_220",
+      "date": "2025-05-17T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "Autre",
+          "surface": 2.2,
+          "pourcentage": 2.2
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_castaing_124",
+      "date": "2025-05-26T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5049",
+          "surface": 1.24,
+          "pourcentage": 1.24
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_claverie_90",
+      "date": "2025-04-08T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5812",
+          "surface": 0.9,
+          "pourcentage": 0.9
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_en_face__110",
+      "date": "2025-05-01T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5159",
+          "surface": 1.1,
+          "pourcentage": 1.1
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_gauze_cimetiere_300",
+      "date": "2025-05-01T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5159",
+          "surface": 3,
+          "pourcentage": 3
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_gauze_hours_90",
+      "date": "2025-04-09T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5812",
+          "surface": 0.9,
+          "pourcentage": 0.9
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_haynard_480",
+      "date": "2025-04-30T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5432",
+          "surface": 4.8,
+          "pourcentage": 4.8
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_hourmayou_1750",
+      "date": "2025-04-08T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5812",
+          "surface": 17.5,
+          "pourcentage": 17.5
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_hournac_1770",
+      "date": "2025-04-07T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5812",
+          "surface": 17.7,
+          "pourcentage": 17.7
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_hours_cassou_480",
+      "date": "2025-05-02T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "Waxy 5685",
+          "surface": 4.8,
+          "pourcentage": 4.8
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_hours_caubere_600",
+      "date": "2025-05-16T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "Waxy 5685",
+          "surface": 6,
+          "pourcentage": 6
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_joncs_600",
+      "date": "2025-04-08T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5812",
+          "surface": 6,
+          "pourcentage": 6
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_lacaze_180",
+      "date": "2025-05-26T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "Autre",
+          "surface": 1.8,
+          "pourcentage": 1.8
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_lagau_160",
+      "date": "2025-05-02T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5432",
+          "surface": 1.6,
+          "pourcentage": 1.6
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_martine_260",
+      "date": "2025-04-30T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5432",
+          "surface": 2.6,
+          "pourcentage": 2.6
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_mericq_105",
+      "date": "2025-04-10T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5432",
+          "surface": 1.05,
+          "pourcentage": 1.05
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_montalibet_460",
+      "date": "2025-05-02T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5432",
+          "surface": 4.6,
+          "pourcentage": 4.6
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_pey_220",
+      "date": "2025-05-02T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5049",
+          "surface": 2.2,
+          "pourcentage": 2.2
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_poucourou_1250",
+      "date": "2025-05-26T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5049",
+          "surface": 12.5,
+          "pourcentage": 12.5
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_rossoni_140",
+      "date": "2025-05-01T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5159",
+          "surface": 1.4,
+          "pourcentage": 1.4
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_trey_70",
+      "date": "2025-05-01T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5159",
+          "surface": 0.7,
+          "pourcentage": 0.7
+        }
+      ],
+      "notes": null
+    },
+    {
+      "id": null,
+      "parcelle_id": "parcelle_yannot_770",
+      "date": "2025-04-08T00:00:00.000",
+      "varietes_surfaces": [
+        {
+          "nom": "5812",
+          "surface": 7.7,
+          "pourcentage": 7.7
+        }
+      ],
+      "notes": null
+    }
+  ],
+  "varietes": [
+    {
+      "id": null,
+      "nom": "5049",
+      "description": null,
+      "date_creation": "2025-09-21T13:11:50.500"
+    },
+    {
+      "id": null,
+      "nom": "5159",
+      "description": null,
+      "date_creation": "2025-09-21T14:41:44.749"
+    },
+    {
+      "id": null,
+      "nom": "5432",
+      "description": null,
+      "date_creation": "2025-09-21T13:11:44.917"
+    },
+    {
+      "id": null,
+      "nom": "5812",
+      "description": null,
+      "date_creation": "2025-09-21T13:11:36.349"
+    },
+    {
+      "id": null,
+      "nom": "Autre",
+      "description": null,
+      "date_creation": "2025-09-21T13:22:10.551"
+    },
+    {
+      "id": null,
+      "nom": "Waxy 5685",
+      "description": null,
+      "date_creation": "2025-09-21T14:48:38.112"
+    }
+  ]
+}
