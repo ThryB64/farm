@@ -1,3 +1,5 @@
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../services/firebase_service_v4.dart';
 import '../models/parcelle.dart';
@@ -942,6 +944,34 @@ class FirebaseProviderV4 extends ChangeNotifier {
       print('FirebaseProvider V4: Refresh completed');
     } catch (e) {
       print('FirebaseProvider V4: Refresh failed: $e');
+    }
+  }
+
+  // Nettoyer toutes les données
+  Future<void> clearAllData() async {
+    try {
+      print('FirebaseProvider V4: Clearing all data...');
+      
+      // Nettoyer le localStorage
+      if (kIsWeb) {
+        html.window.localStorage.remove('parcelles');
+        html.window.localStorage.remove('cellules');
+        html.window.localStorage.remove('chargements');
+        html.window.localStorage.remove('semis');
+        html.window.localStorage.remove('varietes');
+        html.window.localStorage.remove('ventes');
+        html.window.localStorage.remove('traitements');
+        html.window.localStorage.remove('produits');
+        print('FirebaseProvider V4: Local storage cleared');
+      }
+      
+      // Nettoyer les données en mémoire
+      clearAll();
+      
+      print('✅ FirebaseProvider V4: All data cleared successfully');
+    } catch (e) {
+      print('❌ FirebaseProvider V4: Error clearing data: $e');
+      rethrow;
     }
   }
 }

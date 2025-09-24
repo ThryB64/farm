@@ -12,6 +12,10 @@ import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
 import '../models/variete_surface.dart';
+import '../models/vente.dart';
+import '../models/traitement.dart';
+import '../models/produit.dart';
+import '../models/produit_traitement.dart';
 import 'debug_screen.dart';
 
 class ImportExportScreen extends StatefulWidget {
@@ -154,6 +158,27 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                               provider.varietes.length,
                               Icons.eco,
                     AppTheme.info,
+                            ),
+                  const SizedBox(height: AppTheme.spacingS),
+                            _buildDataSummary(
+                              'Ventes',
+                              provider.ventes.length,
+                              Icons.shopping_cart,
+                    AppTheme.warning,
+                            ),
+                  const SizedBox(height: AppTheme.spacingS),
+                            _buildDataSummary(
+                              'Traitements',
+                              provider.traitements.length,
+                              Icons.medical_services,
+                    AppTheme.error,
+                            ),
+                  const SizedBox(height: AppTheme.spacingS),
+                            _buildDataSummary(
+                              'Produits',
+                              provider.produits.length,
+                              Icons.inventory,
+                    AppTheme.secondary,
                             ),
                           ],
                         );
@@ -374,12 +399,15 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       // Préparer les données à exporter avec conversion explicite des types
       final exportData = {
         'exportDate': DateTime.now().toIso8601String(),
-        'version': '1.0',
+        'version': '2.0',
         'parcelles': provider.parcelles.map((p) => _convertParcelleToMap(p)).toList(),
         'cellules': provider.cellules.map((c) => _convertCelluleToMap(c)).toList(),
         'chargements': provider.chargements.map((c) => _convertChargementToMap(c)).toList(),
         'semis': provider.semis.map((s) => _convertSemisToMap(s)).toList(),
         'varietes': provider.varietes.map((v) => _convertVarieteToMap(v)).toList(),
+        'ventes': provider.ventes.map((v) => _convertVenteToMap(v)).toList(),
+        'traitements': provider.traitements.map((t) => _convertTraitementToMap(t)).toList(),
+        'produits': provider.produits.map((p) => _convertProduitToMap(p)).toList(),
       };
 
       // Convertir en JSON avec indentation
@@ -477,9 +505,53 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   Map<String, dynamic> _convertVarieteToMap(Variete variete) {
     return {
       'id': variete.id,
+      'firebaseId': variete.firebaseId,
       'nom': variete.nom,
       'description': variete.description,
       'date_creation': variete.dateCreation.toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> _convertVenteToMap(Vente vente) {
+    return {
+      'id': vente.id,
+      'firebaseId': vente.firebaseId,
+      'date': vente.date.toIso8601String(),
+      'numeroTicket': vente.numeroTicket,
+      'client': vente.client,
+      'immatriculation': vente.immatriculationRemorque,
+      'cmr': vente.cmr,
+      'poidsVide': vente.poidsVide,
+      'poidsPlein': vente.poidsPlein,
+      'poidsNet': vente.poidsNet,
+      'ecartPoidsNet': vente.ecartPoidsNet,
+      'payer': vente.payer,
+      'prix': vente.prix,
+      'annee': vente.annee,
+    };
+  }
+
+  Map<String, dynamic> _convertTraitementToMap(Traitement traitement) {
+    return {
+      'id': traitement.id,
+      'firebaseId': traitement.firebaseId,
+      'parcelleId': traitement.parcelleId,
+      'date': traitement.date.toIso8601String(),
+      'annee': traitement.annee,
+      'notes': traitement.notes,
+      'produits': traitement.produits.map((p) => p.toMap()).toList(),
+      'coutTotal': traitement.coutTotal,
+    };
+  }
+
+  Map<String, dynamic> _convertProduitToMap(Produit produit) {
+    return {
+      'id': produit.id,
+      'firebaseId': produit.firebaseId,
+      'nom': produit.nom,
+      'mesure': produit.mesure,
+      'notes': produit.notes,
+      'prixParAnnee': produit.prixParAnnee,
     };
   }
 
@@ -519,8 +591,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                   !data.containsKey('chargements') || 
                   !data.containsKey('semis') || 
                   !data.containsKey('varietes')) {
-                throw Exception('Format de fichier invalide');
+                throw Exception('Format de fichier invalide - données de base manquantes');
               }
+              
+              // Vérifier la version du fichier
+              final version = data['version']?.toString() ?? '1.0';
+              print('📄 Version du fichier: $version');
               
               // Afficher une confirmation avant l'import
               final confirmed = await _showImportConfirmation();
@@ -601,7 +677,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     await _clearLocalStorage();
     
     // 2. Supprimer toutes les données existantes de Firebase
-    await provider.deleteAllData();
+    await provider.clearAllData();
     
     // 3. Attendre un peu pour que la suppression soit effective
     await Future.delayed(const Duration(milliseconds: 500));
@@ -627,14 +703,30 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         .map((v) => _parseVarieteFromMap(Map<String, dynamic>.from(v)))
         .toList();
     
+    // Importer les nouvelles données si disponibles
+    final ventes = (data['ventes'] as List? ?? [])
+        .map((v) => _parseVenteFromMap(Map<String, dynamic>.from(v)))
+        .toList();
+    
+    final traitements = (data['traitements'] as List? ?? [])
+        .map((t) => _parseTraitementFromMap(Map<String, dynamic>.from(t)))
+        .toList();
+    
+    final produits = (data['produits'] as List? ?? [])
+        .map((p) => _parseProduitFromMap(Map<String, dynamic>.from(p)))
+        .toList();
+    
     // Vérifier si les données sont vides
-    final totalData = parcelles.length + cellules.length + chargements.length + semis.length + varietes.length;
+    final totalData = parcelles.length + cellules.length + chargements.length + semis.length + varietes.length + ventes.length + traitements.length + produits.length;
     print('📊 Import: $totalData éléments à importer');
     print('   - Parcelles: ${parcelles.length}');
     print('   - Cellules: ${cellules.length}');
     print('   - Chargements: ${chargements.length}');
     print('   - Semis: ${semis.length}');
     print('   - Variétés: ${varietes.length}');
+    print('   - Ventes: ${ventes.length}');
+    print('   - Traitements: ${traitements.length}');
+    print('   - Produits: ${produits.length}');
     
     // 5. Ajouter les données une par une
     for (final parcelle in parcelles) {
@@ -655,6 +747,18 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     
     for (final variete in varietes) {
       await provider.ajouterVariete(variete);
+    }
+    
+    for (final vente in ventes) {
+      await provider.ajouterVente(vente);
+    }
+    
+    for (final traitement in traitements) {
+      await provider.ajouterTraitement(traitement);
+    }
+    
+    for (final produit in produits) {
+      await provider.ajouterProduit(produit);
     }
     
     // 6. Forcer un refresh des données
@@ -719,7 +823,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       print('🔄 Début du refresh forcé...');
       
       // Forcer le rechargement des données depuis Firebase
-      await provider.initialize();
+      await provider.refreshAfterAuth();
       
       // Attendre un peu pour que les listeners se mettent à jour
       await Future.delayed(const Duration(milliseconds: 1000));
@@ -893,9 +997,111 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     
     return Variete(
       id: id,
+      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
       nom: map['nom'].toString(),
       description: map['description']?.toString(),
       dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
+    );
+  }
+
+  Vente _parseVenteFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
+    return Vente(
+      id: id,
+      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
+      date: DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
+      numeroTicket: map['numeroTicket']?.toString() ?? '',
+      client: map['client']?.toString() ?? '',
+      immatriculationRemorque: map['immatriculation']?.toString() ?? '',
+      cmr: map['cmr']?.toString() ?? '',
+      poidsVide: double.tryParse(map['poidsVide'].toString()) ?? 0.0,
+      poidsPlein: double.tryParse(map['poidsPlein'].toString()) ?? 0.0,
+      poidsNet: double.tryParse(map['poidsNet'].toString()) ?? 0.0,
+      ecartPoidsNet: double.tryParse(map['ecartPoidsNet'].toString()) ?? 0.0,
+      payer: map['payer'] == true || map['payer'] == 'true',
+      prix: double.tryParse(map['prix'].toString()) ?? 0.0,
+      annee: int.tryParse(map['annee'].toString()) ?? DateTime.now().year,
+    );
+  }
+
+  Traitement _parseTraitementFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
+    final produitsData = map['produits'] as List? ?? [];
+    final produits = produitsData
+        .map((p) => ProduitTraitement.fromMap(Map<String, dynamic>.from(p)))
+        .toList();
+    
+    return Traitement(
+      id: id,
+      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
+      parcelleId: map['parcelleId']?.toString() ?? '',
+      date: DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
+      annee: int.tryParse(map['annee'].toString()) ?? DateTime.now().year,
+      notes: map['notes']?.toString(),
+      produits: produits.cast<ProduitTraitement>(),
+      coutTotal: double.tryParse(map['coutTotal'].toString()) ?? 0.0,
+    );
+  }
+
+  Produit _parseProduitFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
+    // Parser prixParAnnee
+    final prixParAnneeData = map['prixParAnnee'] as Map<String, dynamic>? ?? {};
+    final prixParAnnee = <int, double>{};
+    for (final entry in prixParAnneeData.entries) {
+      final year = int.tryParse(entry.key);
+      final price = double.tryParse(entry.value.toString());
+      if (year != null && price != null) {
+        prixParAnnee[year] = price;
+      }
+    }
+    
+    return Produit(
+      id: id,
+      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
+      nom: map['nom'].toString(),
+      mesure: map['mesure']?.toString() ?? 'kg',
+      notes: map['notes']?.toString(),
+      prixParAnnee: prixParAnnee,
     );
   }
 
