@@ -286,16 +286,14 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
     // Écouter les changements d'authentification via le SecurityService
     _authSubscription = _securityService.setupAuthListener(() {
       print('SecurityWrapper: Auth state changed, checking status');
-      if (mounted && !_isSigningOut) {
-        // Attendre très longtemps pour que la navigation se termine
-        Future.delayed(const Duration(milliseconds: 10000), () {
-          if (mounted && !_isSigningOut) {
+      if (mounted) {
+        // Attendre un peu pour que l'état se stabilise
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (mounted) {
             _checkSecurityStatus();
             _refreshDataAfterAuth();
           }
         });
-      } else if (_isSigningOut) {
-        print('SecurityWrapper: Ignoring auth state change during sign out');
       }
     });
   }

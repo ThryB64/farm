@@ -84,17 +84,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (confirmed == true) {
       try {
         print('HomeScreen: Starting sign out process');
-        
-        // Signaler que la déconnexion est en cours
-        final context = this.context;
-        
         await SecurityService().signOut();
         print('HomeScreen: Sign out successful, navigating to login');
         
         // Redémarrer l'application pour revenir à l'écran de connexion
         if (mounted) {
-          // Attendre moins longtemps pour que la navigation se termine avant le refresh
-          await Future.delayed(const Duration(milliseconds: 500));
+          // Attendre un peu pour que la déconnexion se stabilise
+          await Future.delayed(const Duration(milliseconds: 200));
           
           // Forcer le redémarrage de l'application
           if (mounted) {

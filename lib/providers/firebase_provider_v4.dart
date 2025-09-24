@@ -890,7 +890,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
       await _service.initialize();
       
       // Attendre un peu pour que les données se chargent
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 1000));
       
       // Notifier les listeners
       notifyListeners();

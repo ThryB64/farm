@@ -46,8 +46,8 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
 
       print('SecureLoginScreen: Sign in successful, navigating to HomeScreen');
       if (mounted) {
-        // Attendre moins longtemps pour que la navigation se termine avant le refresh
-        await Future.delayed(const Duration(milliseconds: 500));
+        // Attendre un peu pour que l'authentification se stabilise
+        await Future.delayed(const Duration(milliseconds: 200));
         
         // Forcer la mise à jour de l'état d'authentification
         if (mounted) {
