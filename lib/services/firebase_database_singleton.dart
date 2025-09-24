@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'app_firebase.dart';
 
 /// Singleton global pour Firebase Database
 /// Évite l'initialisation multiple de Firebase Database
@@ -31,11 +32,8 @@ class FirebaseDatabaseSingleton {
         throw Exception('Firebase not initialized. Call Firebase.initializeApp() first.');
       }
       
-      // Créer l'instance Firebase Database
-      _instance = FirebaseDatabase.instanceFor(
-        app: Firebase.app(),
-        databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
-      );
+      // Utiliser l'instance centralisée
+      _instance = AppFirebase.db;
       
       // Configurer la persistance pour les plateformes natives
       if (!kIsWeb) {

@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         await SecurityService().signOut();
         print('HomeScreen: Sign out successful, AuthGate will handle cleanup');
         
-        // Si jamais une route est coincée, revenir à la première
+        // Garde-fou : si jamais une route est coincée, revenir à la première
         if (mounted) {
           Navigator.of(context).popUntil((r) => r.isFirst);
         }

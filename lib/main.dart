@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+import 'services/app_firebase.dart';
 
 // Services & providers
 import 'providers/firebase_provider_v4.dart';
@@ -276,7 +277,11 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    final auth$ = FirebaseAuth.instance.authStateChanges();
+    final auth$ = AppFirebase.auth.authStateChanges();
+    
+    // Debug info
+    print('AuthGate: listening on app=${AppFirebase.app.name}');
+    print('AuthGate: user=${AppFirebase.auth.currentUser?.uid}');
     
     return StreamBuilder<User?>(
       stream: auth$,
