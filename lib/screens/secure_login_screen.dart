@@ -47,10 +47,11 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
       print('SecureLoginScreen: Sign in successful, navigating to HomeScreen');
       if (mounted) {
         // Attendre un peu pour que l'authentification se stabilise
-        await Future.delayed(const Duration(milliseconds: 1000));
+        await Future.delayed(const Duration(milliseconds: 1500));
         
         // Forcer la mise à jour de l'état d'authentification
         if (mounted) {
+          print('SecureLoginScreen: Navigating to HomeScreen');
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
             (route) => false,

@@ -280,7 +280,7 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
       print('SecurityWrapper: Auth state changed, checking status');
       if (mounted) {
         // Attendre un peu pour que l'état se stabilise
-        Future.delayed(const Duration(milliseconds: 100), () {
+        Future.delayed(const Duration(milliseconds: 200), () {
           if (mounted) {
             _checkSecurityStatus();
             _refreshDataAfterAuth();
@@ -332,6 +332,8 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
       return const SplashScreen();
     }
 
+    print('SecurityWrapper: Building with status: $_securityStatus');
+    
     switch (_securityStatus) {
       case SecurityStatus.authenticated:
         return const HomeScreen();

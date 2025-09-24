@@ -90,10 +90,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // Redémarrer l'application pour revenir à l'écran de connexion
         if (mounted) {
           // Attendre un peu pour que la déconnexion se stabilise
-          await Future.delayed(const Duration(milliseconds: 1000));
+          await Future.delayed(const Duration(milliseconds: 1500));
           
           // Forcer le redémarrage de l'application
           if (mounted) {
+            print('HomeScreen: Navigating to SplashScreen');
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const SplashScreen()),
               (route) => false,
