@@ -105,11 +105,24 @@ class SecurityService {
         final boundDeviceId = snapshot.value as String?;
         if (boundDeviceId != null && boundDeviceId != deviceId) {
           print('SecurityService: Device mismatch for user $uid');
-          await _auth.signOut();
-          throw FirebaseAuthException(
-            code: 'device-mismatch',
-            message: 'Ce compte est déjà lié à un autre appareil. Contactez l\'administrateur pour réinitialiser.',
-          );
+          print('SecurityService: Bound device: $boundDeviceId, Current device: $deviceId');
+          
+          // Option 1: Permettre la réinitialisation automatique (activé temporairement)
+          print('SecurityService: Auto-resetting device binding for $uid');
+          await db.child('userDevices/$uid').update({
+            'primaryDeviceId': deviceId,
+            'boundAt': ServerValue.timestamp,
+            'email': _auth.currentUser?.email,
+            'previousDeviceId': boundDeviceId,
+          });
+          print('SecurityService: Device binding reset for user $uid');
+          
+          // Option 2: Bloquer la connexion (désactivé temporairement)
+          // await _auth.signOut();
+          // throw FirebaseAuthException(
+          //   code: 'device-mismatch',
+          //   message: 'Ce compte est déjà lié à un autre appareil. Contactez l\'administrateur pour réinitialiser.',
+          // );
         }
         print('SecurityService: Device verified for user $uid: $deviceId');
       }
@@ -188,6 +201,37 @@ class SecurityService {
     _auth.authStateChanges().listen((user) {
       onAuthChange();
     });
+  }
+  
+  /// Réinitialise la liaison d'appareil pour l'utilisateur actuel
+  Future<void> resetDeviceBinding() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('Aucun utilisateur connecté');
+      }
+      
+      print('SecurityService: Resetting device binding for ${user.uid}');
+      final database = await FirebaseDatabaseSingleton.initialize();
+      final db = database.ref();
+      
+      // Supprimer l'ancienne liaison
+      await db.child('userDevices/${user.uid}').remove();
+      
+      // Créer une nouvelle liaison avec le nouvel appareil
+      final deviceId = ensureDeviceId();
+      await db.child('userDevices/${user.uid}').update({
+        'primaryDeviceId': deviceId,
+        'boundAt': ServerValue.timestamp,
+        'email': user.email,
+        'resetAt': ServerValue.timestamp,
+      });
+      
+      print('SecurityService: Device binding reset successful for ${user.uid}');
+    } catch (e) {
+      print('SecurityService: Device binding reset error: $e');
+      rethrow;
+    }
   }
 }
 
