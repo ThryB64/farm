@@ -20,7 +20,7 @@ class FirebaseServiceV4 {
   factory FirebaseServiceV4() => _instance;
   FirebaseServiceV4._internal();
 
-  late final FirebaseDatabase _database;
+  FirebaseDatabase? _database;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference? _farmRef;
   
@@ -39,23 +39,32 @@ class FirebaseServiceV4 {
       // Initialiser App Check
       await _initializeAppCheck();
       
-      _database = FirebaseDatabase.instanceFor(
-        app: Firebase.app(),
-        databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
-      );
-      print('FirebaseService V4: Firebase instance created');
-
-      // Persistance pour les plateformes natives
-      if (!kIsWeb) {
-        _database.setPersistenceEnabled(true);
-        _database.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
+      // Vérifier si la base de données est déjà initialisée
+      if (_database == null) {
+        _database = FirebaseDatabase.instanceFor(
+          app: Firebase.app(),
+          databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
+        );
+        print('FirebaseService V4: Firebase instance created');
+      } else {
+        print('FirebaseService V4: Firebase instance already exists');
       }
 
-      // Vérifier l'authentification (ne pas forcer la connexion anonyme)
+      // Persistance pour les plateformes natives
+      if (!kIsWeb && _database != null) {
+        _database!.setPersistenceEnabled(true);
+        _database!.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
+      }
+
+      // Vérifier l'authentification
       final user = _auth.currentUser;
-      if (user != null) {
-        _farmRef = _database.ref('farms/$_farmId');
+      if (user != null && _database != null) {
+        _farmRef = _database!.ref('farms/$_farmId');
         await _addUserToFarm(user.uid);
+        print('FirebaseService V4: User authenticated: ${user.uid}');
+      } else {
+        print('FirebaseService V4: No authenticated user - using local storage only');
+        // En mode hors ligne, on utilise seulement le localStorage
       }
       
       print('✅ FirebaseService V4: Initialized successfully');
@@ -93,8 +102,10 @@ class FirebaseServiceV4 {
   // Ajouter l'utilisateur comme membre de la ferme
   Future<void> _addUserToFarm(String uid) async {
     try {
-      await _database.ref('farmMembers/$_farmId/$uid').set(true);
-      print('FirebaseService V4: User $uid added to farm $_farmId');
+      if (_database != null) {
+        await _database!.ref('farmMembers/$_farmId/$uid').set(true);
+        print('FirebaseService V4: User $uid added to farm $_farmId');
+      }
     } catch (e) {
       print('FirebaseService V4: Failed to add user to farm: $e');
     }

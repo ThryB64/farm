@@ -719,10 +719,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       print('🔄 Début du refresh forcé...');
       
       // Forcer le rechargement des données depuis Firebase
-      await provider.refreshAllData();
+      await provider.initialize();
       
       // Attendre un peu pour que les listeners se mettent à jour
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 1000));
       
       // Vérifier l'état des données après refresh
       print('📊 État après refresh:');
