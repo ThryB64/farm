@@ -881,7 +881,48 @@ class FirebaseProviderV4 extends ChangeNotifier {
     return traitements.where((t) => t.annee == annee).toList();
   }
   
-  // Forcer la mise à jour après la connexion
+  String? _initedUid;
+  bool _ready = false;
+
+  // Initialiser pour un utilisateur spécifique
+  Future<void> ensureInitializedFor(String uid) async {
+    if (_ready && _initedUid == uid) return;
+    
+    print('FirebaseProvider V4: Initializing for user: $uid');
+    await _service.initialize();
+    _initedUid = uid;
+    _ready = true;
+    notifyListeners();
+    print('FirebaseProvider V4: Initialization completed for user: $uid');
+  }
+
+  // Nettoyer les ressources liées à l'authentification
+  Future<void> disposeAuthBoundResources() async {
+    print('FirebaseProvider V4: Disposing auth bound resources');
+    await _service.disposeListeners();
+    _initedUid = null;
+    _ready = false;
+    clearAll();
+    notifyListeners();
+    print('FirebaseProvider V4: Auth bound resources disposed');
+  }
+
+  // Vider toutes les données
+  void clearAll() {
+    print('FirebaseProvider V4: Clearing all data');
+    parcelles.clear();
+    cellules.clear();
+    chargements.clear();
+    semis.clear();
+    varietes.clear();
+    ventes.clear();
+    traitements.clear();
+    produits.clear();
+    notifyListeners();
+    print('FirebaseProvider V4: All data cleared');
+  }
+
+  // Forcer la mise à jour après la connexion (legacy)
   Future<void> refreshAfterAuth() async {
     try {
       print('FirebaseProvider V4: Refreshing after authentication...');

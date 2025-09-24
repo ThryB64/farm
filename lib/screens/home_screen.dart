@@ -84,23 +84,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (confirmed == true) {
       try {
         print('HomeScreen: Starting sign out process');
-        await SecurityService().signOut();
-        print('HomeScreen: Sign out successful, navigating to login');
         
-        // Redémarrer l'application pour revenir à l'écran de connexion
-        if (mounted) {
-          // Attendre plus longtemps pour que la déconnexion se stabilise
-          await Future.delayed(const Duration(milliseconds: 1000));
-          
-          // Forcer le redémarrage de l'application
-          if (mounted) {
-            print('HomeScreen: Navigating to SplashScreen');
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const SplashScreen()),
-              (route) => false,
-            );
-          }
-        }
+        // Nettoyer les ressources liées à l'authentification
+        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+        await provider.disposeAuthBoundResources();
+        
+        await SecurityService().signOut();
+        print('HomeScreen: Sign out successful, letting SecurityWrapper handle navigation');
+        // Laisser SecurityWrapper gérer la navigation automatiquement
+        // Pas de navigation manuelle
       } catch (e) {
         print('HomeScreen: Sign out error: $e');
         if (mounted) {

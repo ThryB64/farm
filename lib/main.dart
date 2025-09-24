@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 
 // Services & providers
@@ -255,99 +256,39 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 // Wrapper de sécurité qui vérifie l'authentification
-class SecurityWrapper extends StatefulWidget {
+class SecurityWrapper extends StatelessWidget {
   const SecurityWrapper({Key? key}) : super(key: key);
 
   @override
-  State<SecurityWrapper> createState() => _SecurityWrapperState();
-}
-
-class _SecurityWrapperState extends State<SecurityWrapper> {
-  final SecurityService _securityService = SecurityService();
-  bool _isLoading = true;
-  SecurityStatus _securityStatus = SecurityStatus.notAuthenticated;
-  bool _isSigningOut = false;
-  StreamSubscription? _authSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkSecurityStatus();
-    _setupAuthListener();
-  }
-
-  @override
-  void dispose() {
-    _authSubscription?.cancel();
-    super.dispose();
-  }
-
-  void _setupAuthListener() {
-    // Écouter les changements d'authentification via le SecurityService
-    _authSubscription = _securityService.setupAuthListener(() {
-      print('SecurityWrapper: Auth state changed, checking status');
-      if (mounted) {
-        // Attendre plus longtemps pour que la navigation se termine
-        Future.delayed(const Duration(milliseconds: 3000), () {
-          if (mounted) {
-            _checkSecurityStatus();
-            _refreshDataAfterAuth();
-          }
-        });
-      }
-    });
-  }
-  
-  void _refreshDataAfterAuth() {
-    // Rafraîchir les données du provider après la connexion
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-      provider.refreshAfterAuth();
-    });
-  }
-
-  Future<void> _checkSecurityStatus() async {
-    try {
-      print('SecurityWrapper: Checking security status');
-      final status = await _securityService.checkSecurityStatus();
-      print('SecurityWrapper: Security status: $status');
-      if (mounted) {
-        setState(() {
-          _securityStatus = status;
-          _isLoading = false;
-        });
-        
-        // Si l'utilisateur est authentifié, forcer le refresh des données
-        if (status == SecurityStatus.authenticated) {
-          print('SecurityWrapper: User authenticated, forcing data refresh');
-          _refreshDataAfterAuth();
-        }
-      }
-    } catch (e) {
-      print('SecurityWrapper: Error checking security status: $e');
-      if (mounted) {
-        setState(() {
-          _securityStatus = SecurityStatus.notAuthenticated;
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const SplashScreen();
-    }
-
-    print('SecurityWrapper: Building with status: $_securityStatus');
-    
-    switch (_securityStatus) {
-      case SecurityStatus.authenticated:
-        return const HomeScreen();
-      case SecurityStatus.notAuthenticated:
-      case SecurityStatus.notAllowed:
-        return const SecureLoginScreen();
-    }
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        print('SecurityWrapper: Auth state changed - user: ${user?.uid ?? 'null'}');
+        
+        if (user == null) {
+          // Utilisateur non connecté - nettoyer les données
+          print('SecurityWrapper: User not authenticated, clearing data');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+            provider.clearAll();
+          });
+          return const SecureLoginScreen();
+        }
+        
+        // Utilisateur connecté - initialiser les données
+        print('SecurityWrapper: User authenticated, initializing data');
+        return FutureBuilder<void>(
+          future: Provider.of<FirebaseProviderV4>(context, listen: false).ensureInitializedFor(user.uid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return const HomeScreen();
+            }
+            return const SplashScreen();
+          },
+        );
+      },
+    );
   }
 } 

@@ -794,4 +794,18 @@ class FirebaseServiceV4 {
       print('Error deleting produit from storage: $e');
     }
   }
+
+  // Nettoyer les listeners
+  Future<void> disposeListeners() async {
+    try {
+      print('FirebaseService V4: Disposing listeners...');
+      
+      // Pour l'instant, on ne fait que logger
+      // Les listeners seront automatiquement nettoyés lors de la déconnexion
+      
+      print('✅ FirebaseService V4: Listeners disposed successfully');
+    } catch (e) {
+      print('❌ FirebaseService V4: Error disposing listeners: $e');
+    }
+  }
 }

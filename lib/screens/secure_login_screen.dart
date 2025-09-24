@@ -44,20 +44,9 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
         _passwordController.text,
       );
 
-      print('SecureLoginScreen: Sign in successful, navigating to HomeScreen');
-      if (mounted) {
-        // Attendre plus longtemps pour que l'authentification se stabilise
-        await Future.delayed(const Duration(milliseconds: 1000));
-        
-        // Forcer la mise à jour de l'état d'authentification
-        if (mounted) {
-          print('SecureLoginScreen: Navigating to HomeScreen');
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (route) => false,
-          );
-        }
-      }
+      print('SecureLoginScreen: Sign in successful, letting SecurityWrapper handle navigation');
+      // Laisser SecurityWrapper gérer la navigation automatiquement
+      // Pas de navigation manuelle
     } on FirebaseAuthException catch (e) {
       print('SecureLoginScreen: Firebase auth error: ${e.code} - ${e.message}');
       if (mounted) {
