@@ -2,6 +2,7 @@ import 'dart:html' as html;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart';
 import 'firebase_database_singleton.dart';
 
 class SecurityService {
@@ -137,6 +138,13 @@ class SecurityService {
       print('Error getting device info: $e');
     }
     return null;
+  }
+  
+  /// Configure un listener pour les changements d'authentification
+  void setupAuthListener(VoidCallback onAuthChange) {
+    _auth.authStateChanges().listen((user) {
+      onAuthChange();
+    });
   }
 }
 

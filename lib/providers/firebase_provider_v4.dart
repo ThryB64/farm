@@ -880,4 +880,21 @@ class FirebaseProviderV4 extends ChangeNotifier {
   List<Traitement> getTraitementsForAnnee(int annee) {
     return traitements.where((t) => t.annee == annee).toList();
   }
+  
+  // Forcer la mise à jour après la connexion
+  Future<void> refreshAfterAuth() async {
+    try {
+      print('FirebaseProvider V4: Refreshing after authentication...');
+      
+      // Réinitialiser le service pour prendre en compte la nouvelle authentification
+      await _service.initialize();
+      
+      // Notifier les listeners
+      notifyListeners();
+      
+      print('FirebaseProvider V4: Refresh completed');
+    } catch (e) {
+      print('FirebaseProvider V4: Refresh failed: $e');
+    }
+  }
 }

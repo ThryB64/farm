@@ -271,20 +271,43 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
   void initState() {
     super.initState();
     _checkSecurityStatus();
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    // Écouter les changements d'authentification via le SecurityService
+    _securityService.setupAuthListener(() {
+      if (mounted) {
+        _checkSecurityStatus();
+        _refreshDataAfterAuth();
+      }
+    });
+  }
+  
+  void _refreshDataAfterAuth() {
+    // Rafraîchir les données du provider après la connexion
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+      provider.refreshAfterAuth();
+    });
   }
 
   Future<void> _checkSecurityStatus() async {
     try {
       final status = await _securityService.checkSecurityStatus();
-      setState(() {
-        _securityStatus = status;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _securityStatus = status;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _securityStatus = SecurityStatus.notAuthenticated;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _securityStatus = SecurityStatus.notAuthenticated;
+          _isLoading = false;
+        });
+      }
     }
   }
 
