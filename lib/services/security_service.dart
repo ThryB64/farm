@@ -41,57 +41,81 @@ class SecurityService {
 
   /// Connexion avec vérification d'appareil unique
   Future<UserCredential> signInOncePerDevice(String email, String password) async {
-    final deviceId = ensureDeviceId();
+    try {
+      print('SecurityService: Starting sign in for $email');
+      final deviceId = ensureDeviceId();
 
-    // Connexion Firebase Auth
-    final credential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    final uid = credential.user!.uid;
-
-    // Vérifier si l'utilisateur est dans la whitelist
-    if (!await isUserAllowed(uid)) {
-      await _auth.signOut();
-      throw FirebaseAuthException(
-        code: 'user-not-allowed',
-        message: 'Votre compte n\'est pas autorisé à accéder à cette application.',
+      // Connexion Firebase Auth
+      final credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
+
+      if (credential.user == null) {
+        throw FirebaseAuthException(
+          code: 'user-not-found',
+          message: 'Erreur lors de la connexion.',
+        );
+      }
+
+      final uid = credential.user!.uid;
+      print('SecurityService: User authenticated with UID: $uid');
+
+      // Vérifier si l'utilisateur est dans la whitelist
+      final isAllowed = await isUserAllowed(uid);
+      if (!isAllowed) {
+        print('SecurityService: User $uid not in whitelist');
+        await _auth.signOut();
+        throw FirebaseAuthException(
+          code: 'user-not-allowed',
+          message: 'Votre compte n\'est pas autorisé à accéder à cette application.',
+        );
+      }
+
+      // Vérifier/gérer la liaison d'appareil
+      await _handleDeviceBinding(uid, deviceId);
+
+      print('SecurityService: Sign in successful for $email');
+      return credential;
+    } catch (e) {
+      print('SecurityService: Sign in error: $e');
+      rethrow;
     }
-
-    // Vérifier/gérer la liaison d'appareil
-    await _handleDeviceBinding(uid, deviceId);
-
-    return credential;
   }
 
   /// Gère la liaison d'appareil unique
   Future<void> _handleDeviceBinding(String uid, String deviceId) async {
-    final database = await FirebaseDatabaseSingleton.initialize();
-    final db = database.ref();
-    final deviceRef = db.child('userDevices/$uid/primaryDeviceId');
-    final snapshot = await deviceRef.get();
+    try {
+      print('SecurityService: Handling device binding for $uid');
+      final database = await FirebaseDatabaseSingleton.initialize();
+      final db = database.ref();
+      final deviceRef = db.child('userDevices/$uid/primaryDeviceId');
+      final snapshot = await deviceRef.get();
 
-    if (!snapshot.exists) {
-      // Premier appareil - autoriser et enregistrer
-      await db.child('userDevices/$uid').update({
-        'primaryDeviceId': deviceId,
-        'boundAt': ServerValue.timestamp,
-        'email': _auth.currentUser?.email,
-      });
-      print('Device bound for user $uid: $deviceId');
-    } else {
-      // Vérifier si c'est le même appareil
-      final boundDeviceId = snapshot.value as String;
-      if (boundDeviceId != deviceId) {
-        await _auth.signOut();
-        throw FirebaseAuthException(
-          code: 'device-mismatch',
-          message: 'Ce compte est déjà lié à un autre appareil. Contactez l\'administrateur pour réinitialiser.',
-        );
+      if (!snapshot.exists) {
+        // Premier appareil - autoriser et enregistrer
+        await db.child('userDevices/$uid').update({
+          'primaryDeviceId': deviceId,
+          'boundAt': ServerValue.timestamp,
+          'email': _auth.currentUser?.email,
+        });
+        print('SecurityService: Device bound for user $uid: $deviceId');
+      } else {
+        // Vérifier si c'est le même appareil
+        final boundDeviceId = snapshot.value as String?;
+        if (boundDeviceId != null && boundDeviceId != deviceId) {
+          print('SecurityService: Device mismatch for user $uid');
+          await _auth.signOut();
+          throw FirebaseAuthException(
+            code: 'device-mismatch',
+            message: 'Ce compte est déjà lié à un autre appareil. Contactez l\'administrateur pour réinitialiser.',
+          );
+        }
+        print('SecurityService: Device verified for user $uid: $deviceId');
       }
-      print('Device verified for user $uid: $deviceId');
+    } catch (e) {
+      print('SecurityService: Device binding error: $e');
+      rethrow;
     }
   }
 

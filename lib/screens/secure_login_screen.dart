@@ -38,24 +38,36 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
     });
 
     try {
+      print('SecureLoginScreen: Starting sign in process');
       await _securityService.signInOncePerDevice(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
+      print('SecureLoginScreen: Sign in successful, navigating to HomeScreen');
       if (mounted) {
-        Navigator.of(context).pushReplacement(
+        // Attendre un peu pour que l'authentification se stabilise
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
         );
       }
     } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage = _getErrorMessage(e.code);
-      });
+      print('SecureLoginScreen: Firebase auth error: ${e.code} - ${e.message}');
+      if (mounted) {
+        setState(() {
+          _errorMessage = _getErrorMessage(e.code);
+        });
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Erreur de connexion: $e';
-      });
+      print('SecureLoginScreen: General error: $e');
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Erreur de connexion: $e';
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {

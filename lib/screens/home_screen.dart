@@ -83,9 +83,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     if (confirmed == true) {
       try {
+        print('HomeScreen: Starting sign out process');
         await SecurityService().signOut();
+        print('HomeScreen: Sign out successful, navigating to login');
+        
         // Redémarrer l'application pour revenir à l'écran de connexion
         if (mounted) {
+          // Attendre un peu pour que la déconnexion se stabilise
+          await Future.delayed(const Duration(milliseconds: 500));
+          
           // Forcer le redémarrage de l'application
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const SplashScreen()),
@@ -93,6 +99,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           );
         }
       } catch (e) {
+        print('HomeScreen: Sign out error: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Erreur de déconnexion: $e')),

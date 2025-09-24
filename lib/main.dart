@@ -277,6 +277,7 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
   void _setupAuthListener() {
     // Écouter les changements d'authentification via le SecurityService
     _securityService.setupAuthListener(() {
+      print('SecurityWrapper: Auth state changed, checking status');
       if (mounted) {
         _checkSecurityStatus();
         _refreshDataAfterAuth();
@@ -294,7 +295,9 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
 
   Future<void> _checkSecurityStatus() async {
     try {
+      print('SecurityWrapper: Checking security status');
       final status = await _securityService.checkSecurityStatus();
+      print('SecurityWrapper: Security status: $status');
       if (mounted) {
         setState(() {
           _securityStatus = status;
@@ -302,6 +305,7 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
         });
       }
     } catch (e) {
+      print('SecurityWrapper: Error checking security status: $e');
       if (mounted) {
         setState(() {
           _securityStatus = SecurityStatus.notAuthenticated;
