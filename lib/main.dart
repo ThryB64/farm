@@ -266,6 +266,7 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
   final SecurityService _securityService = SecurityService();
   bool _isLoading = true;
   SecurityStatus _securityStatus = SecurityStatus.notAuthenticated;
+  bool _isSigningOut = false;
 
   @override
   void initState() {
@@ -279,8 +280,8 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
     _securityService.setupAuthListener(() {
       print('SecurityWrapper: Auth state changed, checking status');
       if (mounted) {
-        // Attendre plus longtemps pour que la navigation se termine
-        Future.delayed(const Duration(milliseconds: 2000), () {
+        // Attendre très longtemps pour que la navigation se termine
+        Future.delayed(const Duration(milliseconds: 10000), () {
           if (mounted) {
             _checkSecurityStatus();
             _refreshDataAfterAuth();
