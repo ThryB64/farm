@@ -891,34 +891,28 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Future<void> ensureInitializedFor(String uid) async {
     if (_ready && _initedUid == uid) return;
     
-    print('FirebaseProvider V4: ensureInitializedFor($uid) ready=$_ready');
+    print('FirebaseProvider V4: Initializing for user: $uid');
     await _service.initialize();
     _initedUid = uid;
     _ready = true;
     notifyListeners();
-    print('FirebaseProvider V4: Initialization completed for user: $uid, ready: $_ready');
+    print('FirebaseProvider V4: Initialization completed for user: $uid');
   }
 
   // Nettoyer les ressources liées à l'authentification
   Future<void> disposeAuthBoundResources() async {
-    if (!_ready && _initedUid == null) {
-      // déjà propre -> rien à faire
-      print('FirebaseProvider V4: Already disposed, skipping');
-      return;
-    }
-    
     print('FirebaseProvider V4: Disposing auth bound resources');
     await _service.disposeListeners();
     _initedUid = null;
     _ready = false;
-    _clearAllSilently();
+    clearAll();
     notifyListeners();
-    print('FirebaseProvider V4: Auth bound resources disposed, ready: $_ready, uid: $_initedUid');
+    print('FirebaseProvider V4: Auth bound resources disposed');
   }
 
-  // Vider toutes les données (sans notifier pour éviter les boucles)
-  void _clearAllSilently() {
-    print('FirebaseProvider V4: Clearing all data silently');
+  // Vider toutes les données
+  void clearAll() {
+    print('FirebaseProvider V4: Clearing all data');
     parcelles.clear();
     cellules.clear();
     chargements.clear();
@@ -927,13 +921,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
     ventes.clear();
     traitements.clear();
     produits.clear();
-    print('FirebaseProvider V4: All data cleared silently');
-  }
-
-  // Méthode publique pour clearAll (avec notification)
-  void clearAll() {
-    _clearAllSilently();
     notifyListeners();
+    print('FirebaseProvider V4: All data cleared');
   }
 
   // Forcer la mise à jour après la connexion (legacy)

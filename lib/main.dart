@@ -255,67 +255,39 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// AuthGate : source de vérité unique pour l'authentification (sans boucles)
-class AuthGate extends StatefulWidget {
+// AuthGate : source de vérité unique pour l'authentification
+class AuthGate extends StatelessWidget {
   const AuthGate({Key? key}) : super(key: key);
 
   @override
-  State<AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends State<AuthGate> {
-  String? _lastUid;
-  bool _transitionInProgress = false;
-
-  @override
   Widget build(BuildContext context) {
-    final auth$ = FirebaseAuth.instance.authStateChanges();
-    
     return StreamBuilder<User?>(
-      stream: auth$,
-      builder: (ctx, snap) {
-        final uid = snap.data?.uid;
-        print('AuthGate: Auth state changed - uid: ${uid ?? 'null'}, lastUid: $_lastUid');
-
-        // Déclenche la transition une seule fois par changement d'uid
-        if (!_transitionInProgress && uid != _lastUid) {
-          _transitionInProgress = true;
-          print('AuthGate: uid changed $_lastUid -> $uid');
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            try {
-              final fp = context.read<FirebaseProviderV4>();
-              if (uid == null) {
-                // On nettoie (annule listeners + vide caches)
-                print('AuthGate: Disposing auth bound resources');
-                await fp.disposeAuthBoundResources();
-              } else {
-                print('AuthGate: Initializing for user $uid');
-                await fp.ensureInitializedFor(uid);
-              }
-              _lastUid = uid;
-              print('AuthGate: Transition completed for uid: $uid');
-            } catch (e) {
-              print('AuthGate: Error during transition: $e');
-            } finally {
-              if (mounted) {
-                setState(() {
-                  _transitionInProgress = false;
-                });
-              }
-            }
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        print('AuthGate: Auth state changed - user: ${user?.uid ?? 'null'}');
+        
+        if (user == null) {
+          // Utilisateur non connecté - nettoyer les données
+          print('AuthGate: User not authenticated, clearing data');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+            provider.clearAll();
           });
-        }
-
-        // Rendu UI
-        if (uid == null) {
-          // pas connecté -> page de login (pas de loader)
           return const SecureLoginScreen();
         }
-
-        // connecté -> affiche le loader tant que le provider n'est pas prêt
-        final ready = context.select<FirebaseProviderV4, bool>((fp) => fp.ready);
-        print('AuthGate: User $uid, ready: $ready');
-        return ready ? const HomeScreen() : const SplashScreen();
+        
+        // Utilisateur connecté - s'assurer que le provider est prêt
+        print('AuthGate: User authenticated, initializing data');
+        return FutureBuilder<void>(
+          future: Provider.of<FirebaseProviderV4>(context, listen: false).ensureInitializedFor(user.uid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return const HomeScreen();
+            }
+            return const SplashScreen();
+          },
+        );
       },
     );
   }

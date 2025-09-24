@@ -12,10 +12,6 @@ import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
 import '../models/variete_surface.dart';
-import '../models/vente.dart';
-import '../models/traitement.dart';
-import '../models/produit.dart';
-import '../models/produit_traitement.dart';
 import 'debug_screen.dart';
 
 class ImportExportScreen extends StatefulWidget {
@@ -157,28 +153,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                               'Variétés',
                               provider.varietes.length,
                               Icons.eco,
-                              AppTheme.info,
-                            ),
-                            const SizedBox(height: AppTheme.spacingS),
-                            _buildDataSummary(
-                              'Ventes',
-                              provider.ventes.length,
-                              Icons.sell,
-                              AppTheme.warning,
-                            ),
-                            const SizedBox(height: AppTheme.spacingS),
-                            _buildDataSummary(
-                              'Traitements',
-                              provider.traitements.length,
-                              Icons.medical_services,
-                              AppTheme.error,
-                            ),
-                            const SizedBox(height: AppTheme.spacingS),
-                            _buildDataSummary(
-                              'Produits',
-                              provider.produits.length,
-                              Icons.inventory,
-                              AppTheme.secondary,
+                    AppTheme.info,
                             ),
                           ],
                         );
@@ -399,15 +374,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       // Préparer les données à exporter avec conversion explicite des types
       final exportData = {
         'exportDate': DateTime.now().toIso8601String(),
-        'version': '2.0',
+        'version': '1.0',
         'parcelles': provider.parcelles.map((p) => _convertParcelleToMap(p)).toList(),
         'cellules': provider.cellules.map((c) => _convertCelluleToMap(c)).toList(),
         'chargements': provider.chargements.map((c) => _convertChargementToMap(c)).toList(),
         'semis': provider.semis.map((s) => _convertSemisToMap(s)).toList(),
         'varietes': provider.varietes.map((v) => _convertVarieteToMap(v)).toList(),
-        'ventes': provider.ventes.map((v) => _convertVenteToMap(v)).toList(),
-        'traitements': provider.traitements.map((t) => _convertTraitementToMap(t)).toList(),
-        'produits': provider.produits.map((p) => _convertProduitToMap(p)).toList(),
       };
 
       // Convertir en JSON avec indentation
@@ -505,65 +477,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   Map<String, dynamic> _convertVarieteToMap(Variete variete) {
     return {
       'id': variete.id,
-      'firebaseId': variete.firebaseId,
       'nom': variete.nom,
       'description': variete.description,
       'date_creation': variete.dateCreation.toIso8601String(),
-    };
-  }
-
-  Map<String, dynamic> _convertVenteToMap(Vente vente) {
-    return {
-      'id': vente.id,
-      'firebaseId': vente.firebaseId,
-      'date': vente.date.toIso8601String(),
-      'numero_ticket': vente.numeroTicket,
-      'client': vente.client,
-      'immatriculation_remorque': vente.immatriculationRemorque,
-      'cmr': vente.cmr,
-      'poids_vide': vente.poidsVide,
-      'poids_plein': vente.poidsPlein,
-      'poids_net': vente.poidsNet,
-      'ecart_poids_net': vente.ecartPoidsNet,
-      'payer': vente.payer,
-      'prix': vente.prix,
-      'annee': vente.annee,
-    };
-  }
-
-  Map<String, dynamic> _convertTraitementToMap(Traitement traitement) {
-    return {
-      'id': traitement.id,
-      'firebaseId': traitement.firebaseId,
-      'parcelle_id': traitement.parcelleId,
-      'date': traitement.date.toIso8601String(),
-      'annee': traitement.annee,
-      'notes': traitement.notes,
-      'produits': traitement.produits.map((p) => _convertProduitTraitementToMap(p)).toList(),
-      'cout_total': traitement.coutTotal,
-    };
-  }
-
-  Map<String, dynamic> _convertProduitTraitementToMap(ProduitTraitement produitTraitement) {
-    return {
-      'produit_id': produitTraitement.produitId,
-      'nom_produit': produitTraitement.nomProduit,
-      'quantite': produitTraitement.quantite,
-      'mesure': produitTraitement.mesure,
-      'prix_unitaire': produitTraitement.prixUnitaire,
-      'cout_total': produitTraitement.coutTotal,
-      'date': produitTraitement.date.toIso8601String(),
-    };
-  }
-
-  Map<String, dynamic> _convertProduitToMap(Produit produit) {
-    return {
-      'id': produit.id,
-      'firebaseId': produit.firebaseId,
-      'nom': produit.nom,
-      'mesure': produit.mesure,
-      'notes': produit.notes,
-      'prix_par_annee': produit.prixParAnnee,
     };
   }
 
@@ -597,18 +513,14 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               final jsonString = reader.result as String;
               final data = jsonDecode(jsonString) as Map<String, dynamic>;
               
-              // Valider la structure des données (version 2.0 avec tous les modèles)
+              // Valider la structure des données
               if (!data.containsKey('parcelles') || 
                   !data.containsKey('cellules') || 
                   !data.containsKey('chargements') || 
                   !data.containsKey('semis') || 
                   !data.containsKey('varietes')) {
-                throw Exception('Format de fichier invalide - version 1.0 détectée');
+                throw Exception('Format de fichier invalide');
               }
-              
-              // Vérifier la version pour les nouveaux modèles
-              final version = data['version']?.toString() ?? '1.0';
-              print('📄 Version du fichier: $version');
               
               // Afficher une confirmation avant l'import
               final confirmed = await _showImportConfirmation();
@@ -715,30 +627,14 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         .map((v) => _parseVarieteFromMap(Map<String, dynamic>.from(v)))
         .toList();
     
-    // Nouveaux modèles (version 2.0)
-    final ventes = (data['ventes'] as List? ?? [])
-        .map((v) => _parseVenteFromMap(Map<String, dynamic>.from(v)))
-        .toList();
-    
-    final traitements = (data['traitements'] as List? ?? [])
-        .map((t) => _parseTraitementFromMap(Map<String, dynamic>.from(t)))
-        .toList();
-    
-    final produits = (data['produits'] as List? ?? [])
-        .map((p) => _parseProduitFromMap(Map<String, dynamic>.from(p)))
-        .toList();
-    
     // Vérifier si les données sont vides
-    final totalData = parcelles.length + cellules.length + chargements.length + semis.length + varietes.length + ventes.length + traitements.length + produits.length;
+    final totalData = parcelles.length + cellules.length + chargements.length + semis.length + varietes.length;
     print('📊 Import: $totalData éléments à importer');
     print('   - Parcelles: ${parcelles.length}');
     print('   - Cellules: ${cellules.length}');
     print('   - Chargements: ${chargements.length}');
     print('   - Semis: ${semis.length}');
     print('   - Variétés: ${varietes.length}');
-    print('   - Ventes: ${ventes.length}');
-    print('   - Traitements: ${traitements.length}');
-    print('   - Produits: ${produits.length}');
     
     // 5. Ajouter les données une par une
     for (final parcelle in parcelles) {
@@ -759,18 +655,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     
     for (final variete in varietes) {
       await provider.ajouterVariete(variete);
-    }
-    
-    for (final vente in ventes) {
-      await provider.ajouterVente(vente);
-    }
-    
-    for (final traitement in traitements) {
-      await provider.ajouterTraitement(traitement);
-    }
-    
-    for (final produit in produits) {
-      await provider.ajouterProduit(produit);
     }
     
     // 6. Forcer un refresh des données
@@ -1009,113 +893,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     
     return Variete(
       id: id,
-      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
       nom: map['nom'].toString(),
       description: map['description']?.toString(),
       dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
-    );
-  }
-
-  Vente _parseVenteFromMap(Map<String, dynamic> map) {
-    // Gérer les clés stables Firebase
-    String? firebaseId;
-    int? id;
-    
-    if (map['id'] != null) {
-      final idValue = map['id'].toString();
-      if (idValue.startsWith('f_')) {
-        firebaseId = idValue;
-        id = null;
-      } else {
-        id = int.tryParse(idValue);
-      }
-    }
-    
-    return Vente(
-      id: id,
-      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
-      date: DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
-      numeroTicket: map['numero_ticket']?.toString() ?? '',
-      client: map['client']?.toString() ?? '',
-      immatriculationRemorque: map['immatriculation_remorque']?.toString() ?? '',
-      cmr: map['cmr']?.toString() ?? '',
-      poidsVide: double.tryParse(map['poids_vide'].toString()) ?? 0.0,
-      poidsPlein: double.tryParse(map['poids_plein'].toString()) ?? 0.0,
-      poidsNet: double.tryParse(map['poids_net'].toString()) ?? 0.0,
-      ecartPoidsNet: double.tryParse(map['ecart_poids_net'].toString()) ?? 0.0,
-      payer: map['payer'] == true || map['payer'] == 'true',
-      prix: double.tryParse(map['prix'].toString()) ?? 0.0,
-      annee: int.tryParse(map['annee'].toString()) ?? DateTime.now().year,
-    );
-  }
-
-  Traitement _parseTraitementFromMap(Map<String, dynamic> map) {
-    // Gérer les clés stables Firebase
-    String? firebaseId;
-    int? id;
-    
-    if (map['id'] != null) {
-      final idValue = map['id'].toString();
-      if (idValue.startsWith('f_')) {
-        firebaseId = idValue;
-        id = null;
-      } else {
-        id = int.tryParse(idValue);
-      }
-    }
-    
-    final produitsData = map['produits'] as List? ?? [];
-    final produits = produitsData
-        .map((p) => ProduitTraitement.fromMap(Map<String, dynamic>.from(p)))
-        .toList();
-    
-    return Traitement(
-      id: id,
-      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
-      parcelleId: map['parcelle_id']?.toString() ?? '',
-      date: DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
-      annee: int.tryParse(map['annee'].toString()) ?? DateTime.now().year,
-      notes: map['notes']?.toString(),
-      produits: produits,
-      coutTotal: double.tryParse(map['cout_total'].toString()) ?? 0.0,
-    );
-  }
-
-  Produit _parseProduitFromMap(Map<String, dynamic> map) {
-    // Gérer les clés stables Firebase
-    String? firebaseId;
-    int? id;
-    
-    if (map['id'] != null) {
-      final idValue = map['id'].toString();
-      if (idValue.startsWith('f_')) {
-        firebaseId = idValue;
-        id = null;
-      } else {
-        id = int.tryParse(idValue);
-      }
-    }
-    
-    // Gérer prixParAnnee qui peut être un Map<String, double> ou Map<int, double>
-    Map<int, double> prixParAnnee = {};
-    if (map['prix_par_annee'] != null) {
-      final prixData = map['prix_par_annee'] as Map;
-      prixData.forEach((key, value) {
-        final annee = int.tryParse(key.toString());
-        final prix = double.tryParse(value.toString());
-        if (annee != null && prix != null) {
-          prixParAnnee[annee] = prix;
-        }
-      });
-    }
-    
-    return Produit(
-      id: id,
-      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
-      nom: map['nom'].toString(),
-      mesure: map['mesure']?.toString() ?? 'kg',
-      notes: map['notes']?.toString(),
-      prixParAnnee: prixParAnnee,
     );
   }
 

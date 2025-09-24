@@ -89,14 +89,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       try {
         print('HomeScreen: Starting sign out process');
         
-        // Seulement signOut - AuthGate gère le nettoyage
-        await SecurityService().signOut();
-        print('HomeScreen: Sign out successful, AuthGate will handle cleanup');
+        // Nettoyer les ressources liées à l'authentification
+        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+        await provider.disposeAuthBoundResources();
         
-        // Si jamais une route est coincée, revenir à la première
-        if (mounted) {
-          Navigator.of(context).popUntil((r) => r.isFirst);
-        }
+        await SecurityService().signOut();
+        print('HomeScreen: Sign out successful, AuthGate will switch to login');
+        // AuthGate s'occupe de la navigation automatiquement
       } catch (e) {
         print('HomeScreen: Sign out error: $e');
         if (mounted) {
@@ -134,10 +133,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       body: Container(
         decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
               AppTheme.primary,
               AppTheme.primaryLight,
             ],
@@ -184,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spacingM),
-            decoration: BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                   ),
@@ -290,39 +289,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         end: Alignment.bottomRight,
         colors: [Colors.white, Color(0xFFF8F9FA)],
       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
                 padding: const EdgeInsets.all(AppTheme.spacingS),
-                                decoration: BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppTheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                                ),
+                ),
                 child: const Icon(
-                                  Icons.analytics,
+                  Icons.analytics,
                   color: AppTheme.primary,
-                                  size: 24,
-                                ),
-                              ),
+                  size: 24,
+                ),
+              ),
               const SizedBox(width: AppTheme.spacingM),
-                              const Text(
+              const Text(
                 'Aperçu général',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: AppTheme.spacingL),
           
           // Sélecteur d'année
           Row(
-                                  children: [
+            children: [
               const Icon(
                 Icons.calendar_today,
                 color: AppTheme.primary,
@@ -364,9 +363,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     });
                   },
                 ),
-                                    ),
-                                  ],
-                                ),
+              ),
+            ],
+          ),
           
           const SizedBox(height: AppTheme.spacingL),
           Row(
@@ -386,10 +385,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
                   icon: Icons.trending_up,
                   color: AppTheme.secondary,
-                            ),
-                          ),
-                        ],
-                      ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: AppTheme.spacingM),
           Row(
             children: [
@@ -419,49 +418,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildMenuSection() {
     return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
               padding: const EdgeInsets.all(AppTheme.spacingS),
-                              decoration: BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                              ),
+              ),
               child: const Icon(
-                                Icons.menu,
+                Icons.menu,
                 color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
+                size: 24,
+              ),
+            ),
             const SizedBox(width: AppTheme.spacingM),
-                            const Text(
-                              'Menu principal',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+            const Text(
+              'Menu principal',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
                 color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: AppTheme.spacingL),
-                        GridView.count(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: 2,
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
           crossAxisSpacing: AppTheme.spacingM,
           mainAxisSpacing: AppTheme.spacingM,
           childAspectRatio: 1.2,
-                          children: [
+          children: [
             MenuCard(
               title: 'Parcelles',
               subtitle: 'Gestion des parcelles',
               icon: Icons.landscape,
               color: AppTheme.primary,
               onTap: () => Navigator.push(
-                                context,
+                context,
                 MaterialPageRoute(builder: (context) => const ParcellesScreen()),
               ),
             ),
@@ -471,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               icon: Icons.grid_view,
               color: AppTheme.secondary,
               onTap: () => Navigator.push(
-                                context,
+                context,
                 MaterialPageRoute(builder: (context) => const CellulesScreen()),
               ),
             ),
@@ -481,7 +480,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               icon: Icons.local_shipping,
               color: AppTheme.accent,
               onTap: () => Navigator.push(
-                                context,
+                context,
                 MaterialPageRoute(builder: (context) => const ChargementsScreen()),
               ),
             ),
@@ -491,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               icon: Icons.grass,
               color: AppTheme.success,
               onTap: () => Navigator.push(
-                                context,
+                context,
                 MaterialPageRoute(builder: (context) => const SemisScreen()),
               ),
             ),
@@ -501,7 +500,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               icon: Icons.shopping_cart,
               color: AppTheme.success,
               onTap: () => Navigator.push(
-                                context,
+                context,
                 MaterialPageRoute(builder: (context) => const VentesScreen()),
               ),
             ),
@@ -511,13 +510,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               icon: Icons.science,
               color: AppTheme.warning,
               onTap: () => Navigator.push(
-                                context,
+                context,
                 MaterialPageRoute(builder: (context) => const TraitementsScreen()),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -526,10 +525,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-        children: [
-          Container(
+          children: [
+            Container(
               padding: const EdgeInsets.all(AppTheme.spacingS),
-            decoration: BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               ),
@@ -542,17 +541,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const SizedBox(width: AppTheme.spacingM),
             const Text(
               'Actions rapides',
-            style: TextStyle(
+              style: TextStyle(
                 fontSize: 20,
-              fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
         const SizedBox(height: AppTheme.spacingL),
         Row(
-              children: [
+          children: [
             Expanded(
               child: ModernButton(
                 text: 'Import/Export',
@@ -583,4 +582,4 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ],
     );
   }
-} 
+}
