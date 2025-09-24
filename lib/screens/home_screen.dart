@@ -14,6 +14,7 @@ import 'traitements_screen.dart';
 import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'exports_pdf_screen.dart';
+import '../main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -83,8 +84,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (confirmed == true) {
       try {
         await SecurityService().signOut();
+        // Redémarrer l'application pour revenir à l'écran de connexion
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/login');
+          // Forcer le redémarrage de l'application
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const SplashScreen()),
+            (route) => false,
+          );
         }
       } catch (e) {
         if (mounted) {

@@ -104,9 +104,28 @@ class SecurityService {
 
   /// Déconnexion sécurisée
   Future<void> signOut() async {
-    await _auth.signOut();
-    // Optionnel : nettoyer le device ID local
-    // html.window.localStorage.remove(_deviceIdKey);
+    try {
+      print('SecurityService: Signing out...');
+      await _auth.signOut();
+      
+      // Nettoyer le device ID local
+      html.window.localStorage.remove(_deviceIdKey);
+      
+      // Nettoyer les données de l'application
+      html.window.localStorage.remove('parcelles');
+      html.window.localStorage.remove('cellules');
+      html.window.localStorage.remove('chargements');
+      html.window.localStorage.remove('semis');
+      html.window.localStorage.remove('varietes');
+      html.window.localStorage.remove('ventes');
+      html.window.localStorage.remove('traitements');
+      html.window.localStorage.remove('produits');
+      
+      print('SecurityService: Sign out completed');
+    } catch (e) {
+      print('SecurityService: Sign out error: $e');
+      rethrow;
+    }
   }
 
   /// Vérifie l'état de sécurité complet
