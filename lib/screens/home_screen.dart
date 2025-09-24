@@ -88,6 +88,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (confirmed == true) {
       try {
         print('HomeScreen: user pressed logout');
+        
+        // Seulement signOut - AuthGate gère le nettoyage
         await SecurityService().signOut();
         print('HomeScreen: Sign out successful, AuthGate will handle cleanup');
         

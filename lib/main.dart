@@ -266,6 +266,13 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   String? _lastUid;
   bool _transitionInProgress = false;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    print('AuthGate: Initializing');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -275,12 +282,13 @@ class _AuthGateState extends State<AuthGate> {
       stream: auth$,
       builder: (ctx, snap) {
         final uid = snap.data?.uid;
-        print('AuthGate: Auth state changed - uid: ${uid ?? 'null'}, lastUid: $_lastUid');
+        print('AuthGate: Auth state changed - uid: ${uid ?? 'null'}, lastUid: $_lastUid, transition: $_transitionInProgress');
 
         // Déclenche la transition une seule fois par changement d'uid
         if (!_transitionInProgress && uid != _lastUid) {
           _transitionInProgress = true;
           print('AuthGate: uid changed $_lastUid -> $uid');
+          
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             try {
               final fp = context.read<FirebaseProviderV4>();
@@ -293,6 +301,7 @@ class _AuthGateState extends State<AuthGate> {
                 await fp.ensureInitializedFor(uid);
               }
               _lastUid = uid;
+              _isInitialized = true;
               print('AuthGate: Transition completed for uid: $uid');
             } catch (e) {
               print('AuthGate: Error during transition: $e');
@@ -309,13 +318,33 @@ class _AuthGateState extends State<AuthGate> {
         // Rendu UI
         if (uid == null) {
           // pas connecté -> page de login (pas de loader)
+          print('AuthGate: Showing login screen');
           return const SecureLoginScreen();
         }
 
-        // connecté -> affiche le loader tant que le provider n'est pas prêt
-        final ready = context.select<FirebaseProviderV4, bool>((fp) => fp.ready);
-        print('AuthGate: User $uid, ready: $ready');
-        return ready ? const HomeScreen() : const SplashScreen();
+        // connecté -> vérifier si le provider est prêt
+        if (!_isInitialized || _transitionInProgress) {
+          print('AuthGate: Showing splash screen (initializing)');
+          return const SplashScreen();
+        }
+
+        // Vérifier l'état du provider
+        try {
+          final fp = context.read<FirebaseProviderV4>();
+          final ready = fp.ready;
+          print('AuthGate: User $uid, ready: $ready');
+          
+          if (ready) {
+            print('AuthGate: Showing home screen');
+            return const HomeScreen();
+          } else {
+            print('AuthGate: Showing splash screen (provider not ready)');
+            return const SplashScreen();
+          }
+        } catch (e) {
+          print('AuthGate: Error checking provider state: $e');
+          return const SplashScreen();
+        }
       },
     );
   }

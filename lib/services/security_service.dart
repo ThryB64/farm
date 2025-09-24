@@ -144,7 +144,10 @@ class SecurityService {
   Future<void> signOut() async {
     try {
       print('SecurityService: Signing out...');
+      
+      // Déconnexion Firebase Auth (déclenche authStateChanges)
       await _auth.signOut();
+      print('SecurityService: Firebase auth signOut completed');
       
       // Nettoyer le device ID local
       html.window.localStorage.remove(_deviceIdKey);
@@ -159,7 +162,7 @@ class SecurityService {
       html.window.localStorage.remove('traitements');
       html.window.localStorage.remove('produits');
       
-      print('SecurityService: Sign out completed');
+      print('SecurityService: Sign out completed - authStateChanges should trigger');
     } catch (e) {
       print('SecurityService: Sign out error: $e');
       rethrow;
