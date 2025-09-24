@@ -64,7 +64,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _signOut() async {
-    if (_signingOut) return;
+    if (_signingOut) {
+      print('HomeScreen: Already signing out, skipping...');
+      return;
+    }
+    
     _signingOut = true;
     
     final confirmed = await showDialog<bool>(
