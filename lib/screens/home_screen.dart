@@ -28,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   int? _selectedYear;
+  bool _signingOut = false;
 
   @override
   void initState() {
@@ -63,6 +64,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _signOut() async {
+    if (_signingOut) return;
+    _signingOut = true;
+    
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -90,9 +94,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         await provider.disposeAuthBoundResources();
         
         await SecurityService().signOut();
-        print('HomeScreen: Sign out successful, letting SecurityWrapper handle navigation');
-        // Laisser SecurityWrapper gérer la navigation automatiquement
-        // Pas de navigation manuelle
+        print('HomeScreen: Sign out successful, AuthGate will switch to login');
+        // AuthGate s'occupe de la navigation automatiquement
       } catch (e) {
         print('HomeScreen: Sign out error: $e');
         if (mounted) {
@@ -102,10 +105,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
       }
     }
+    
+    _signingOut = false;
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<FirebaseProviderV4>(context);
+    
+    // Éviter l'affichage "fantôme" si le provider n'est pas prêt
+    if (!provider.ready) {
+      return const SplashScreen();
+    }
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('GAEC de la BARADE'),

@@ -883,6 +883,9 @@ class FirebaseProviderV4 extends ChangeNotifier {
   
   String? _initedUid;
   bool _ready = false;
+  
+  // Getter pour vérifier si le provider est prêt
+  bool get ready => _ready;
 
   // Initialiser pour un utilisateur spécifique
   Future<void> ensureInitializedFor(String uid) async {

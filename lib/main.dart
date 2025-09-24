@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Maïs Tracker',
       theme: AppTheme.lightTheme,
-      home: const SecurityWrapper(),
+      home: const AuthGate(),
     );
   }
 }
@@ -255,9 +255,9 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// Wrapper de sécurité qui vérifie l'authentification
-class SecurityWrapper extends StatelessWidget {
-  const SecurityWrapper({Key? key}) : super(key: key);
+// AuthGate : source de vérité unique pour l'authentification
+class AuthGate extends StatelessWidget {
+  const AuthGate({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -265,11 +265,11 @@ class SecurityWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         final user = snapshot.data;
-        print('SecurityWrapper: Auth state changed - user: ${user?.uid ?? 'null'}');
+        print('AuthGate: Auth state changed - user: ${user?.uid ?? 'null'}');
         
         if (user == null) {
           // Utilisateur non connecté - nettoyer les données
-          print('SecurityWrapper: User not authenticated, clearing data');
+          print('AuthGate: User not authenticated, clearing data');
           WidgetsBinding.instance.addPostFrameCallback((_) {
             final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
             provider.clearAll();
@@ -277,8 +277,8 @@ class SecurityWrapper extends StatelessWidget {
           return const SecureLoginScreen();
         }
         
-        // Utilisateur connecté - initialiser les données
-        print('SecurityWrapper: User authenticated, initializing data');
+        // Utilisateur connecté - s'assurer que le provider est prêt
+        print('AuthGate: User authenticated, initializing data');
         return FutureBuilder<void>(
           future: Provider.of<FirebaseProviderV4>(context, listen: false).ensureInitializedFor(user.uid),
           builder: (context, snapshot) {
