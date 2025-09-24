@@ -85,6 +85,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       try {
         print('HomeScreen: Starting sign out process');
         
+        // Signaler que la déconnexion est en cours
+        final context = this.context;
         
         await SecurityService().signOut();
         print('HomeScreen: Sign out successful, navigating to login');

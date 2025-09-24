@@ -267,6 +267,7 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
   bool _isLoading = true;
   SecurityStatus _securityStatus = SecurityStatus.notAuthenticated;
   bool _isSigningOut = false;
+  StreamSubscription? _authSubscription;
 
   @override
   void initState() {
@@ -275,18 +276,26 @@ class _SecurityWrapperState extends State<SecurityWrapper> {
     _setupAuthListener();
   }
 
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
+
   void _setupAuthListener() {
     // Écouter les changements d'authentification via le SecurityService
-    _securityService.setupAuthListener(() {
+    _authSubscription = _securityService.setupAuthListener(() {
       print('SecurityWrapper: Auth state changed, checking status');
-      if (mounted) {
+      if (mounted && !_isSigningOut) {
         // Attendre très longtemps pour que la navigation se termine
         Future.delayed(const Duration(milliseconds: 10000), () {
-          if (mounted) {
+          if (mounted && !_isSigningOut) {
             _checkSecurityStatus();
             _refreshDataAfterAuth();
           }
         });
+      } else if (_isSigningOut) {
+        print('SecurityWrapper: Ignoring auth state change during sign out');
       }
     });
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:html' as html;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -197,8 +198,8 @@ class SecurityService {
   }
   
   /// Configure un listener pour les changements d'authentification
-  void setupAuthListener(VoidCallback onAuthChange) {
-    _auth.authStateChanges().listen((user) {
+  StreamSubscription<void> setupAuthListener(VoidCallback onAuthChange) {
+    return _auth.authStateChanges().listen((user) {
       print('SecurityService: Auth state changed - user: ${user?.uid ?? 'null'}');
       // Déclencher immédiatement le callback
       onAuthChange();
