@@ -2,6 +2,7 @@ import 'dart:html' as html;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:uuid/uuid.dart';
+import 'firebase_database_singleton.dart';
 
 class SecurityService {
   static final SecurityService _instance = SecurityService._internal();
@@ -9,7 +10,6 @@ class SecurityService {
   SecurityService._internal();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseDatabase _database = FirebaseDatabase.instance;
   final Uuid _uuid = const Uuid();
 
   // Clé pour le device ID dans localStorage
@@ -28,7 +28,8 @@ class SecurityService {
   /// Vérifie si l'utilisateur est dans la whitelist
   Future<bool> isUserAllowed(String uid) async {
     try {
-      final snapshot = await _database.ref('allowedUsers/$uid').get();
+      final database = FirebaseDatabaseSingleton.instance;
+      final snapshot = await database.ref('allowedUsers/$uid').get();
       return snapshot.exists && snapshot.value == true;
     } catch (e) {
       print('Error checking user whitelist: $e');
@@ -65,7 +66,8 @@ class SecurityService {
 
   /// Gère la liaison d'appareil unique
   Future<void> _handleDeviceBinding(String uid, String deviceId) async {
-    final db = _database.ref();
+    final database = FirebaseDatabaseSingleton.instance;
+    final db = database.ref();
     final deviceRef = db.child('userDevices/$uid/primaryDeviceId');
     final snapshot = await deviceRef.get();
 
@@ -125,7 +127,8 @@ class SecurityService {
     if (user == null) return null;
 
     try {
-      final snapshot = await _database.ref('userDevices/${user.uid}').get();
+      final database = FirebaseDatabaseSingleton.instance;
+      final snapshot = await database.ref('userDevices/${user.uid}').get();
       if (snapshot.exists) {
         return Map<String, dynamic>.from(snapshot.value as Map);
       }

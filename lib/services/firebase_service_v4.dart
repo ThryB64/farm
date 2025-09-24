@@ -14,6 +14,7 @@ import '../models/vente.dart';
 import '../models/traitement.dart';
 import '../models/produit.dart';
 import '../utils/firebase_normalize.dart';
+import 'firebase_database_singleton.dart';
 
 class FirebaseServiceV4 {
   static final FirebaseServiceV4 _instance = FirebaseServiceV4._internal();
@@ -22,7 +23,6 @@ class FirebaseServiceV4 {
   
   static bool _isGloballyInitialized = false;
 
-  FirebaseDatabase? _database;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference? _farmRef;
   
@@ -48,37 +48,15 @@ class FirebaseServiceV4 {
       // Initialiser App Check
       await _initializeAppCheck();
       
-      // Vérifier si la base de données est déjà initialisée
-      if (_database == null) {
-        try {
-          _database = FirebaseDatabase.instanceFor(
-            app: Firebase.app(),
-            databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
-          );
-          print('FirebaseService V4: Firebase instance created');
-        } catch (e) {
-          print('FirebaseService V4: Database already initialized, using existing instance');
-          _database = FirebaseDatabase.instance;
-        }
-      } else {
-        print('FirebaseService V4: Firebase instance already exists');
-      }
-
-      // Persistance pour les plateformes natives
-      if (!kIsWeb && _database != null) {
-        try {
-          _database!.setPersistenceEnabled(true);
-          _database!.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
-        } catch (e) {
-          print('FirebaseService V4: Persistence already configured');
-        }
-      }
+      // Utiliser le singleton Firebase Database
+      final database = await FirebaseDatabaseSingleton.initialize();
+      print('FirebaseService V4: Using singleton database instance');
 
       // Vérifier l'authentification
       final user = _auth.currentUser;
-      if (user != null && _database != null) {
+      if (user != null) {
         try {
-          _farmRef = _database!.ref('farms/$_farmId');
+          _farmRef = database.ref('farms/$_farmId');
           await _addUserToFarm(user.uid);
           print('FirebaseService V4: User authenticated: ${user.uid}');
         } catch (e) {
@@ -126,10 +104,9 @@ class FirebaseServiceV4 {
   // Ajouter l'utilisateur comme membre de la ferme
   Future<void> _addUserToFarm(String uid) async {
     try {
-      if (_database != null) {
-        await _database!.ref('farmMembers/$_farmId/$uid').set(true);
-        print('FirebaseService V4: User $uid added to farm $_farmId');
-      }
+      final database = FirebaseDatabaseSingleton.instance;
+      await database.ref('farmMembers/$_farmId/$uid').set(true);
+      print('FirebaseService V4: User $uid added to farm $_farmId');
     } catch (e) {
       print('FirebaseService V4: Failed to add user to farm: $e');
     }
