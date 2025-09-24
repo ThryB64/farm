@@ -89,14 +89,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       try {
         print('HomeScreen: user pressed logout');
         
-        // Seulement signOut - AuthGate gère le nettoyage
+        // 1) Déconnexion Firebase
         await SecurityService().signOut();
-        print('HomeScreen: Sign out successful, AuthGate will handle cleanup');
         
-        // Garde-fou : si jamais une route est coincée, revenir à la première
+        // 2) Nettoyage des listeners / caches (au cas où l'AuthGate ne le fait pas)
+        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+        await provider.disposeAuthBoundResources();
+        
+        // 3) Revenir à la route racine (celle où se trouve AuthGate) => écran Login direct
         if (mounted) {
           Navigator.of(context).popUntil((r) => r.isFirst);
         }
+        
+        print('HomeScreen: Sign out completed with manual cleanup');
       } catch (e) {
         print('HomeScreen: Sign out error: $e');
         if (mounted) {

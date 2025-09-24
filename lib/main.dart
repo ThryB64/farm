@@ -266,18 +266,12 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   String? _lastUid;
-  bool _transitionInProgress = false;
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    print('AuthGate: Initializing');
-  }
+  bool _transitioning = false;
 
   @override
   Widget build(BuildContext context) {
-    final auth$ = AppFirebase.auth.authStateChanges();
+    // Utiliser userChanges() plus "verbeux" que authStateChanges sur Web
+    final auth$ = AppFirebase.auth.userChanges();
     
     // Debug info
     print('AuthGate: listening on app=${AppFirebase.app.name}');
@@ -287,18 +281,17 @@ class _AuthGateState extends State<AuthGate> {
       stream: auth$,
       builder: (ctx, snap) {
         final uid = snap.data?.uid;
-        print('AuthGate: Auth state changed - uid: ${uid ?? 'null'}, lastUid: $_lastUid, transition: $_transitionInProgress');
+        print('AuthGate: User changed - uid: ${uid ?? 'null'}, lastUid: $_lastUid, transitioning: $_transitioning');
 
         // Déclenche la transition une seule fois par changement d'uid
-        if (!_transitionInProgress && uid != _lastUid) {
-          _transitionInProgress = true;
+        if (!_transitioning && uid != _lastUid) {
+          _transitioning = true;
           print('AuthGate: uid changed $_lastUid -> $uid');
           
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             try {
               final fp = context.read<FirebaseProviderV4>();
               if (uid == null) {
-                // On nettoie (annule listeners + vide caches)
                 print('AuthGate: Disposing auth bound resources');
                 await fp.disposeAuthBoundResources();
               } else {
@@ -306,14 +299,13 @@ class _AuthGateState extends State<AuthGate> {
                 await fp.ensureInitializedFor(uid);
               }
               _lastUid = uid;
-              _isInitialized = true;
               print('AuthGate: Transition completed for uid: $uid');
             } catch (e) {
               print('AuthGate: Error during transition: $e');
             } finally {
               if (mounted) {
                 setState(() {
-                  _transitionInProgress = false;
+                  _transitioning = false;
                 });
               }
             }
@@ -322,15 +314,8 @@ class _AuthGateState extends State<AuthGate> {
 
         // Rendu UI
         if (uid == null) {
-          // pas connecté -> page de login (pas de loader)
           print('AuthGate: Showing login screen');
           return const SecureLoginScreen();
-        }
-
-        // connecté -> vérifier si le provider est prêt
-        if (!_isInitialized || _transitionInProgress) {
-          print('AuthGate: Showing splash screen (initializing)');
-          return const SplashScreen();
         }
 
         // Vérifier l'état du provider
