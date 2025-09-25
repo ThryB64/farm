@@ -231,20 +231,21 @@ class _AuthGateState extends State<AuthGate> {
           return const SecureLoginScreen();
         }
 
-        // Utiliser Consumer pour écouter les changements du provider
-        return Consumer<FirebaseProviderV4>(
-          builder: (context, provider, child) {
-            print('AuthGate: Provider ready: ${provider.ready}');
-            
-            if (!provider.ready) {
-              print('AuthGate: Showing splash screen (provider not ready)');
-              return const SplashScreen();
-            }
-            
-            print('AuthGate: Showing home screen');
-            return const HomeScreen();
-          },
-        );
+               // Utiliser Consumer pour écouter les changements du provider
+               return Consumer<FirebaseProviderV4>(
+                 builder: (context, provider, child) {
+                   print('AuthGate: Provider ready: ${provider.ready}');
+                   print('AuthGate: provider#${identityHashCode(provider)} ready=${provider.ready}');
+                   
+                   if (!provider.ready) {
+                     print('AuthGate: Showing splash screen (provider not ready)');
+                     return const SplashScreen();
+                   }
+                   
+                   print('AuthGate: Showing home screen');
+                   return const HomeScreen();
+                 },
+               );
       },
     );
   }
