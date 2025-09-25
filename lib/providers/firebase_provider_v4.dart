@@ -944,4 +944,18 @@ class FirebaseProviderV4 extends ChangeNotifier {
       print('FirebaseProvider V4: Refresh failed: $e');
     }
   }
+
+  @override
+  void dispose() {
+    // Annuler tous les streams pour éviter les doubles écoutes
+    _parcellesStream = null;
+    _cellulesStream = null;
+    _chargementsStream = null;
+    _semisStream = null;
+    _varietesStream = null;
+    _ventesStream = null;
+    _traitementsStream = null;
+    _produitsStream = null;
+    super.dispose();
+  }
 }

@@ -197,14 +197,7 @@ class SecurityService {
     return null;
   }
   
-  /// Configure un listener pour les changements d'authentification
-  StreamSubscription<void> setupAuthListener(VoidCallback onAuthChange) {
-    return _auth.authStateChanges().listen((user) {
-      print('SecurityService: Auth state changed - user: ${user?.uid ?? 'null'}');
-      // Déclencher immédiatement le callback
-      onAuthChange();
-    });
-  }
+  // Note: AuthGate gère directement authStateChanges() - pas besoin de listener ici
   
   /// Réinitialise la liaison d'appareil pour l'utilisateur actuel
   Future<void> resetDeviceBinding() async {
