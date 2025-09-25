@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../services/security_service.dart';
 import '../services/app_firebase.dart';
@@ -16,6 +18,7 @@ import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'exports_pdf_screen.dart';
 import '../main.dart';
+import 'secure_login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -30,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<Offset> _slideAnimation;
   int? _selectedYear;
   bool _signingOut = false;
+  late final StreamSubscription<User?> _authSubscription;
 
   @override
   void initState() {
@@ -56,11 +60,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ));
     
     _animationController.forward();
+    
+    // Abonnement de secours : écouter userChanges() et rerouter vers AuthGate si l'utilisateur devient null
+    _authSubscription = AppFirebase.auth.userChanges().listen((u) {
+      if (u == null && mounted) {
+        print('HomeScreen: Auth subscription detected user=null, navigating to AuthGate');
+        Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AuthGate()),
+          (_) => false,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _authSubscription.cancel();
     super.dispose();
   }
 
@@ -90,27 +106,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       try {
         print('HomeScreen: user pressed logout');
         
-        // 1) Déconnexion Firebase (même instance que l'AuthGate)
+        // 1) Déconnexion
         await SecurityService().signOut();
         
-        // 2) Nettoyage côté data (annule listeners + vide caches)
+        // 2) Nettoyage data (au cas où)
         final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
         await provider.disposeAuthBoundResources();
         
-        // 3) Attendre (très) brièvement l'event user=null ; sinon fallback navigation
-        try {
-          await AppFirebase.auth
-              .userChanges()
-              .firstWhere((u) => u == null)
-              .timeout(const Duration(milliseconds: 400));
-          print('HomeScreen: Auth event received, AuthGate will handle navigation');
-        } catch (_) {
-          // Fallback: on force le retour sous l'AuthGate / vers login
-          print('HomeScreen: Auth event timeout, using fallback navigation');
-          if (mounted) {
-            // Revenir à la racine si l'AuthGate est la home de ton MaterialApp
-            Navigator.of(context).popUntil((r) => r.isFirst);
-          }
+        // 3) Fallback navigation : on revient à la racine (root navigator),
+        //    là où se trouve l'AuthGate, et on purge la pile.
+        if (mounted) {
+          Navigator.of(context, rootNavigator: true)
+              .pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const AuthGate()),
+                (_) => false,
+              );
         }
         
         print('HomeScreen: logout flow done');
