@@ -887,6 +887,13 @@ class FirebaseProviderV4 extends ChangeNotifier {
   // Getter pour vérifier si le provider est prêt
   bool get ready => _ready;
 
+  // Initialiser le service Firebase
+  Future<void> initializeService() async {
+    print('FirebaseProvider V4: Initializing service...');
+    await _service.initialize();
+    print('FirebaseProvider V4: Service initialized');
+  }
+
   // Initialiser pour un utilisateur spécifique
   Future<void> ensureInitializedFor(String uid) async {
     if (_ready && _initedUid == uid) return;
