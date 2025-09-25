@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
@@ -369,25 +372,13 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     });
 
     try {
-      final provider = context.read<FirebaseProviderV4>();
-      
-      // Exporter directement depuis Firebase via les API
-      final exportData = await _exportFromFirebase();
-      
-      // Créer le nom de fichier avec la date
-      final now = DateTime.now();
-      final fileName = 'mais_tracker_export_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
-      
-      // Convertir en JSON avec indentation
-      final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
-      
-      // Pour le web, on utilise la fonctionnalité de téléchargement
-      _downloadFile(jsonString, fileName);
+      // Export exact via API REST Firebase (identique console)
+      await _exportExactJsonAndDownload();
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export réussi : $fileName'),
+            content: const Text('Export réussi - JSON identique à la console Firebase'),
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -418,196 +409,106 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     }
   }
 
-  // Exporter directement depuis Firebase via les API
-  Future<Map<String, dynamic>> _exportFromFirebase() async {
+  // ===== API REST FIREBASE (IDENTIQUE CONSOLE) =====
+
+  // 1) Récupérer farmId (selon le schéma)
+  Future<String> _resolveFarmId() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('Utilisateur non connecté');
+    final snap = await FirebaseDatabase.instance.ref('userFarms/$uid').get();
+    if (!snap.exists || snap.value == null) {
+      throw Exception('FarmId introuvable pour $uid');
+    }
+    return snap.value.toString();
+  }
+
+  // 2) URL REST "exact console"
+  Future<Uri> _buildRestUrl(String farmId, {bool export = true}) async {
+    final dbUrl = FirebaseDatabase.instance.databaseURL;
+    final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    final base = '$dbUrl/farms/$farmId.json';
+    final params = {
+      'auth': idToken,
+      if (export) 'format': 'export',
+      if (export) 'print': 'pretty',
+    };
+    return Uri.parse(base).replace(queryParameters: params);
+  }
+
+  // 3) EXPORT — identique console
+  Future<void> _exportExactJsonAndDownload() async {
     try {
-      print('🔄 Export depuis Firebase...');
+      print('🔄 Export REST Firebase (identique console)...');
       
-      // Récupérer toutes les données directement depuis Firebase
-      final parcelles = await _getAllParcellesFromFirebase();
-      final cellules = await _getAllCellulesFromFirebase();
-      final chargements = await _getAllChargementsFromFirebase();
-      final semis = await _getAllSemisFromFirebase();
-      final varietes = await _getAllVarietesFromFirebase();
-      final ventes = await _getAllVentesFromFirebase();
-      final traitements = await _getAllTraitementsFromFirebase();
-      final produits = await _getAllProduitsFromFirebase();
+      final farmId = await _resolveFarmId();
+      final url = await _buildRestUrl(farmId, export: true);
       
-      print('📊 Export: ${parcelles.length} parcelles, ${cellules.length} cellules, ${chargements.length} chargements, ${semis.length} semis, ${varietes.length} variétés');
+      print('📡 URL REST: $url');
       
-      return {
-        'exportDate': DateTime.now().toIso8601String(),
-        'version': '1.0',
-        'source': 'firebase_api',
-        'parcelles': parcelles,
-        'cellules': cellules,
-        'chargements': chargements,
-        'semis': semis,
-        'varietes': varietes,
-        'ventes': ventes,
-        'traitements': traitements,
-        'produits': produits,
-      };
+      final res = await http.get(url);
+      if (res.statusCode != 200) {
+        throw Exception('Export REST échoué: ${res.statusCode} ${res.body}');
+      }
+
+      // Web: télécharger tel quel (exact JSON console)
+      final now = DateTime.now();
+      final fileName = 'firebase_export_${farmId}_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
+      
+      final blob = html.Blob([res.body], 'application/json');
+      final href = html.Url.createObjectUrlFromBlob(blob);
+      final a = html.AnchorElement(href: href)
+        ..download = fileName
+        ..click();
+      html.Url.revokeObjectUrl(href);
+      
+      print('✅ Export REST terminé: $fileName');
     } catch (e) {
-      print('❌ Erreur export Firebase: $e');
+      print('❌ Erreur export REST: $e');
       rethrow;
     }
   }
 
-  // Méthodes de récupération directe depuis Firebase
-  Future<List<Map<String, dynamic>>> _getAllParcellesFromFirebase() async {
-    // Utiliser le service Firebase pour récupérer directement
-    final provider = context.read<FirebaseProviderV4>();
-    return provider.parcelles.map((p) => _convertParcelleToMap(p)).toList();
+  // 4) IMPORT — identique console (REMPLACE le nœud)
+  Future<void> _importExactJsonReplace(String jsonString) async {
+    try {
+      print('🔄 Import REST Firebase (identique console)...');
+      
+      final farmId = await _resolveFarmId();
+      final url = await _buildRestUrl(farmId, export: false); // pas de format=export ici
+      
+      print('📡 URL REST: $url');
+      
+      final res = await http.put(
+        url,
+        headers: {'content-type': 'application/json'},
+        body: jsonString, // on envoie le fichier tel quel
+      );
+      
+      if (res.statusCode >= 400) {
+        throw Exception('Import REST échoué: ${res.statusCode} ${res.body}');
+      }
+      
+      print('✅ Import REST terminé');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Import réussi - JSON remplacé via API REST Firebase'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Erreur import REST: $e');
+      rethrow;
+    }
   }
 
-  Future<List<Map<String, dynamic>>> _getAllCellulesFromFirebase() async {
-    final provider = context.read<FirebaseProviderV4>();
-    return provider.cellules.map((c) => _convertCelluleToMap(c)).toList();
-  }
-
-  Future<List<Map<String, dynamic>>> _getAllChargementsFromFirebase() async {
-    final provider = context.read<FirebaseProviderV4>();
-    return provider.chargements.map((c) => _convertChargementToMap(c)).toList();
-  }
-
-  Future<List<Map<String, dynamic>>> _getAllSemisFromFirebase() async {
-    final provider = context.read<FirebaseProviderV4>();
-    return provider.semis.map((s) => _convertSemisToMap(s)).toList();
-  }
-
-  Future<List<Map<String, dynamic>>> _getAllVarietesFromFirebase() async {
-    final provider = context.read<FirebaseProviderV4>();
-    return provider.varietes.map((v) => _convertVarieteToMap(v)).toList();
-  }
-
-  Future<List<Map<String, dynamic>>> _getAllVentesFromFirebase() async {
-    final provider = context.read<FirebaseProviderV4>();
-    return provider.ventes.map((v) => _convertVenteToMap(v)).toList();
-  }
-
-  Future<List<Map<String, dynamic>>> _getAllTraitementsFromFirebase() async {
-    final provider = context.read<FirebaseProviderV4>();
-    return provider.traitements.map((t) => _convertTraitementToMap(t)).toList();
-  }
-
-  Future<List<Map<String, dynamic>>> _getAllProduitsFromFirebase() async {
-    final provider = context.read<FirebaseProviderV4>();
-    return provider.produits.map((p) => _convertProduitToMap(p)).toList();
-  }
-
-  // Méthodes de conversion avec gestion explicite des types
-  Map<String, dynamic> _convertParcelleToMap(Parcelle parcelle) {
-    return {
-      'id': parcelle.id,
-      'firebaseId': parcelle.firebaseId,
-      'nom': parcelle.nom,
-      'surface': parcelle.surface,
-      'date_creation': parcelle.dateCreation.toIso8601String(),
-      'notes': parcelle.notes,
-    };
-  }
-
-  Map<String, dynamic> _convertCelluleToMap(Cellule cellule) {
-    return {
-      'id': cellule.id,
-      'reference': cellule.reference,
-      'capacite': cellule.capacite,
-      'date_creation': cellule.dateCreation.toIso8601String(),
-      'notes': cellule.notes,
-    };
-  }
-
-  Map<String, dynamic> _convertChargementToMap(Chargement chargement) {
-    return {
-      'id': chargement.id,
-      'cellule_id': chargement.celluleId,
-      'parcelle_id': chargement.parcelleId,
-      'remorque': chargement.remorque,
-      'date_chargement': chargement.dateChargement.toIso8601String(),
-      'poids_plein': chargement.poidsPlein,
-      'poids_vide': chargement.poidsVide,
-      'poids_net': chargement.poidsNet,
-      'poids_normes': chargement.poidsNormes,
-      'humidite': chargement.humidite,
-      'variete': chargement.variete,
-    };
-  }
-
-  Map<String, dynamic> _convertSemisToMap(Semis semis) {
-    return {
-      'id': semis.id,
-      'parcelle_id': semis.parcelleId,
-      'date': semis.date.toIso8601String(),
-      'varietes_surfaces': semis.varietesSurfaces.map((v) => v.toMap()).toList(),
-      'notes': semis.notes,
-    };
-  }
-
-  Map<String, dynamic> _convertVarieteToMap(Variete variete) {
-    return {
-      'id': variete.id,
-      'nom': variete.nom,
-      'description': variete.description,
-      'date_creation': variete.dateCreation.toIso8601String(),
-    };
-  }
-
-  Map<String, dynamic> _convertVenteToMap(dynamic vente) {
-    return {
-      'id': vente.id,
-      'firebaseId': vente.firebaseId,
-      'date': vente.date.toIso8601String(),
-      'numeroTicket': vente.numeroTicket,
-      'client': vente.client,
-      'immatriculationRemorque': vente.immatriculationRemorque,
-      'cmr': vente.cmr,
-      'poidsVide': vente.poidsVide,
-      'poidsPlein': vente.poidsPlein,
-      'poidsNet': vente.poidsNet,
-      'ecartPoidsNet': vente.ecartPoidsNet,
-      'payer': vente.payer,
-      'prix': vente.prix,
-      'annee': vente.annee,
-      'terminee': vente.terminee,
-    };
-  }
-
-  Map<String, dynamic> _convertTraitementToMap(dynamic traitement) {
-    return {
-      'id': traitement.id,
-      'firebaseId': traitement.firebaseId,
-      'parcelleId': traitement.parcelleId,
-      'date': traitement.date.millisecondsSinceEpoch,
-      'annee': traitement.annee,
-      'notes': traitement.notes,
-      'produits': traitement.produits.map((p) => _convertProduitTraitementToMap(p)).toList(),
-      'coutTotal': traitement.coutTotal,
-    };
-  }
-
-  Map<String, dynamic> _convertProduitTraitementToMap(dynamic produitTraitement) {
-    return {
-      'produitId': produitTraitement.produitId,
-      'nomProduit': produitTraitement.nomProduit,
-      'quantite': produitTraitement.quantite,
-      'mesure': produitTraitement.mesure,
-      'prixUnitaire': produitTraitement.prixUnitaire,
-      'coutTotal': produitTraitement.coutTotal,
-      'date': produitTraitement.date.millisecondsSinceEpoch,
-    };
-  }
-
-  Map<String, dynamic> _convertProduitToMap(dynamic produit) {
-    return {
-      'id': produit.id,
-      'firebaseId': produit.firebaseId,
-      'nom': produit.nom,
-      'mesure': produit.mesure,
-      'notes': produit.notes,
-      'prixParAnnee': produit.prixParAnnee,
-    };
-  }
+  // ===== ANCIENNES MÉTHODES (SUPPRIMÉES - REMPLACÉES PAR API REST) =====
 
   void _downloadFile(String content, String fileName) {
     // Pour le web, on utilise la fonctionnalité de téléchargement du navigateur
@@ -652,8 +553,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               final confirmed = await _showImportConfirmation();
               if (!confirmed) return;
               
-              // Importer les données directement dans Firebase
-              await _importToFirebase(data);
+              // Import exact via API REST Firebase (identique console)
+              await _importExactJsonReplace(jsonString);
             } catch (e) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
