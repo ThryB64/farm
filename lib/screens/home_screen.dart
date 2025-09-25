@@ -64,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _signOut() async {
+    print('HomeScreen: _signOut() called - signingOut: $_signingOut');
     if (_signingOut) return;
     _signingOut = true;
     

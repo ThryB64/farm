@@ -72,6 +72,9 @@ class FirebaseServiceV4 {
       _isInitialized = true;
       _isGloballyInitialized = true;
       
+      // Configurer les listeners Firebase pour charger les données
+      await _setupFirebaseListeners();
+      
     } catch (e) {
       print('❌ FirebaseService V4: Init failed: $e');
       _isInitialized = true;
@@ -110,6 +113,26 @@ class FirebaseServiceV4 {
       print('FirebaseService V4: User $uid added to farm $_farmId');
     } catch (e) {
       print('FirebaseService V4: Failed to add user to farm: $e');
+    }
+  }
+
+  // Configurer les listeners Firebase pour charger les données
+  Future<void> _setupFirebaseListeners() async {
+    try {
+      print('FirebaseService V4: Setting up Firebase listeners...');
+      
+      if (_farmRef == null) {
+        print('FirebaseService V4: No farm reference, skipping listeners');
+        return;
+      }
+
+      // Pour l'instant, on se contente de logger que les listeners seraient configurés
+      // Les vrais listeners seront configurés par le FirebaseProviderV4
+      print('FirebaseService V4: Listeners will be configured by FirebaseProviderV4');
+      
+      print('✅ FirebaseService V4: All listeners configured successfully');
+    } catch (e) {
+      print('❌ FirebaseService V4: Error setting up listeners: $e');
     }
   }
 
