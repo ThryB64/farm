@@ -411,46 +411,50 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
 
   // ===== API REST FIREBASE (IDENTIQUE CONSOLE) =====
 
-  // 1) Récupérer farmId (selon le schéma)
+  // 1) Récupérer farmId (selon le schéma) - SANS initialiser Firebase
   Future<String> _resolveFarmId() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw Exception('Utilisateur non connecté');
-    final snap = await FirebaseDatabase.instance.ref('userFarms/$uid').get();
-    if (!snap.exists || snap.value == null) {
-      throw Exception('FarmId introuvable pour $uid');
-    }
-    return snap.value.toString();
-  }
-
-  // 2) URL REST "exact console"
-  Future<Uri> _buildRestUrl(String farmId, {bool export = true}) async {
+    
+    // Utiliser l'API REST pour récupérer le farmId sans initialiser Firebase
     final dbUrl = FirebaseDatabase.instance.databaseURL;
     final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    final base = '$dbUrl/farms/$farmId.json';
-    final params = {
-      'auth': idToken,
-      if (export) 'format': 'export',
-      if (export) 'print': 'pretty',
-    };
-    return Uri.parse(base).replace(queryParameters: params);
+    final url = '$dbUrl/userFarms/$uid.json?auth=$idToken';
+    
+    final res = await http.get(Uri.parse(url));
+    if (res.statusCode != 200) {
+      throw Exception('FarmId introuvable pour $uid: ${res.statusCode}');
+    }
+    
+    final data = jsonDecode(res.body);
+    if (data == null) {
+      throw Exception('FarmId introuvable pour $uid');
+    }
+    
+    return data.toString();
   }
 
-  // 3) EXPORT — identique console
+
+  // 3) EXPORT — téléchargement direct depuis Firebase (sans reconstruction)
   Future<void> _exportExactJsonAndDownload() async {
     try {
-      print('🔄 Export REST Firebase (identique console)...');
+      print('🔄 Téléchargement direct depuis Firebase...');
       
       final farmId = await _resolveFarmId();
-      final url = await _buildRestUrl(farmId, export: true);
+      final dbUrl = FirebaseDatabase.instance.databaseURL;
+      final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
+      
+      // URL REST exacte comme la console Firebase
+      final url = '$dbUrl/farms/$farmId.json?auth=$idToken&format=export&print=pretty';
       
       print('📡 URL REST: $url');
       
-      final res = await http.get(url);
+      final res = await http.get(Uri.parse(url));
       if (res.statusCode != 200) {
-        throw Exception('Export REST échoué: ${res.statusCode} ${res.body}');
+        throw Exception('Téléchargement échoué: ${res.statusCode} ${res.body}');
       }
 
-      // Web: télécharger tel quel (exact JSON console)
+      // Télécharger le JSON brut (identique console)
       final now = DateTime.now();
       final fileName = 'firebase_export_${farmId}_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
       
@@ -461,39 +465,43 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         ..click();
       html.Url.revokeObjectUrl(href);
       
-      print('✅ Export REST terminé: $fileName');
+      print('✅ Téléchargement terminé: $fileName');
     } catch (e) {
-      print('❌ Erreur export REST: $e');
+      print('❌ Erreur téléchargement: $e');
       rethrow;
     }
   }
 
-  // 4) IMPORT — identique console (REMPLACE le nœud)
+  // 4) IMPORT — remplacement direct dans Firebase (sans reconstruction)
   Future<void> _importExactJsonReplace(String jsonString) async {
     try {
-      print('🔄 Import REST Firebase (identique console)...');
+      print('🔄 Remplacement direct dans Firebase...');
       
       final farmId = await _resolveFarmId();
-      final url = await _buildRestUrl(farmId, export: false); // pas de format=export ici
+      final dbUrl = FirebaseDatabase.instance.databaseURL;
+      final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
+      
+      // URL REST pour remplacement (comme la console)
+      final url = '$dbUrl/farms/$farmId.json?auth=$idToken';
       
       print('📡 URL REST: $url');
       
       final res = await http.put(
-        url,
+        Uri.parse(url),
         headers: {'content-type': 'application/json'},
-        body: jsonString, // on envoie le fichier tel quel
+        body: jsonString, // JSON brut tel quel
       );
       
       if (res.statusCode >= 400) {
-        throw Exception('Import REST échoué: ${res.statusCode} ${res.body}');
+        throw Exception('Remplacement échoué: ${res.statusCode} ${res.body}');
       }
       
-      print('✅ Import REST terminé');
+      print('✅ Remplacement terminé');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Import réussi - JSON remplacé via API REST Firebase'),
+            content: const Text('Import réussi - Base de données remplacée directement'),
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -503,7 +511,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         );
       }
     } catch (e) {
-      print('❌ Erreur import REST: $e');
+      print('❌ Erreur remplacement: $e');
       rethrow;
     }
   }
