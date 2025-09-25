@@ -265,9 +265,11 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   String? _lastUid;
+  bool _booting = false;
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<FirebaseProviderV4>();
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
@@ -275,21 +277,30 @@ class _AuthGateState extends State<AuthGate> {
         print('AuthGate: Auth state changed - user: ${user?.uid ?? 'null'}');
         
         if (user == null) {
-          // Utilisateur non connecté - nettoyer les données
-          print('AuthGate: User not authenticated, clearing data');
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-            provider.disposeAuthBoundResources();
-          });
+          // Utilisateur non connecté - nettoyer les données SEULEMENT si on était connecté
+          if (_lastUid != null) {
+            print('AuthGate: User not authenticated, clearing data');
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+              provider.disposeAuthBoundResources();
+            });
+            _lastUid = null;
+          }
           return const SecureLoginScreen();
         }
         
         // Utilisateur connecté - s'assurer que le provider est prêt
-        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-        if (_lastUid != user.uid || !provider.ready) {
+        if (_lastUid != user.uid || !provider.isInitialized) {
           print('AuthGate: User authenticated, initializing data for ${user.uid}');
           _lastUid = user.uid;
-          provider.ensureInitializedFor(user.uid);
+          if (!_booting) {
+            _booting = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              await provider.ensureInitializedFor(user.uid);
+              if (mounted) setState(() => _booting = false);
+            });
+          }
+          return const SplashScreen();
         }
         
         return provider.ready ? const HomeScreen() : const SplashScreen();

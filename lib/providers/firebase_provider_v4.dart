@@ -900,11 +900,13 @@ class FirebaseProviderV4 extends ChangeNotifier {
 
   // Initialiser pour un utilisateur spécifique
   Future<void> ensureInitializedFor(String uid) async {
-    if (_ready && _initedUid == uid) return;
+    if (_ready && _initedUid == uid && _isInitialized) return;
     
     print('FirebaseProvider V4: Initializing for user: $uid');
-    await _service.initialize();
     _initedUid = uid;
+    _ready = false;
+    _isInitialized = false;
+    await initialize();     // Branche les streams
     _ready = true;
     notifyListeners();
     print('FirebaseProvider V4: Initialization completed for user: $uid');
@@ -930,6 +932,7 @@ class FirebaseProviderV4 extends ChangeNotifier {
     await _service.disposeListeners();
     _initedUid = null;
     _ready = false;
+    _isInitialized = false;   // IMPORTANT : remettre à false
     clearAll();
     notifyListeners();
     print('FirebaseProvider V4: Auth bound resources disposed');
