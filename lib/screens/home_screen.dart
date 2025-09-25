@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../services/security_service.dart';
+import '../services/app_firebase.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
@@ -89,19 +90,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       try {
         print('HomeScreen: user pressed logout');
         
-        // 1) Déconnexion Firebase
+        // 1) Déconnexion Firebase (même instance que l'AuthGate)
         await SecurityService().signOut();
         
-        // 2) Nettoyage des listeners / caches (au cas où l'AuthGate ne le fait pas)
+        // 2) Nettoyage côté data (annule listeners + vide caches)
         final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
         await provider.disposeAuthBoundResources();
         
-        // 3) Revenir à la route racine (celle où se trouve AuthGate) => écran Login direct
-        if (mounted) {
-          Navigator.of(context).popUntil((r) => r.isFirst);
+        // 3) Attendre (très) brièvement l'event user=null ; sinon fallback navigation
+        try {
+          await AppFirebase.auth
+              .userChanges()
+              .firstWhere((u) => u == null)
+              .timeout(const Duration(milliseconds: 400));
+          print('HomeScreen: Auth event received, AuthGate will handle navigation');
+        } catch (_) {
+          // Fallback: on force le retour sous l'AuthGate / vers login
+          print('HomeScreen: Auth event timeout, using fallback navigation');
+          if (mounted) {
+            // Revenir à la racine si l'AuthGate est la home de ton MaterialApp
+            Navigator.of(context).popUntil((r) => r.isFirst);
+          }
         }
         
-        print('HomeScreen: Sign out completed with manual cleanup');
+        print('HomeScreen: logout flow done');
       } catch (e) {
         print('HomeScreen: Sign out error: $e');
         if (mounted) {
