@@ -256,8 +256,15 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 // AuthGate : source de vérité unique pour l'authentification
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({Key? key}) : super(key: key);
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  String? _lastUid;
 
   @override
   Widget build(BuildContext context) {
@@ -272,22 +279,20 @@ class AuthGate extends StatelessWidget {
           print('AuthGate: User not authenticated, clearing data');
           WidgetsBinding.instance.addPostFrameCallback((_) {
             final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-            provider.clearAll();
+            provider.disposeAuthBoundResources();
           });
           return const SecureLoginScreen();
         }
         
         // Utilisateur connecté - s'assurer que le provider est prêt
-        print('AuthGate: User authenticated, initializing data');
-        return FutureBuilder<void>(
-          future: Provider.of<FirebaseProviderV4>(context, listen: false).ensureInitializedFor(user.uid),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              return const HomeScreen();
-            }
-            return const SplashScreen();
-          },
-        );
+        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+        if (_lastUid != user.uid || !provider.ready) {
+          print('AuthGate: User authenticated, initializing data for ${user.uid}');
+          _lastUid = user.uid;
+          provider.ensureInitializedFor(user.uid);
+        }
+        
+        return provider.ready ? const HomeScreen() : const SplashScreen();
       },
     );
   }

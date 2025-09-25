@@ -146,8 +146,8 @@ class SecurityService {
       print('SecurityService: Signing out...');
       await _auth.signOut();
       
-      // Nettoyer le device ID local
-      html.window.localStorage.remove(_deviceIdKey);
+      // Ne PAS supprimer le device ID pour éviter les "device-mismatch" à la reconnexion
+      // html.window.localStorage.remove(_deviceIdKey);
       
       // Nettoyer les données de l'application
       html.window.localStorage.remove('parcelles');

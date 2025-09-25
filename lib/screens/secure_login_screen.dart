@@ -19,6 +19,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   final _securityService = SecurityService();
   
   bool _isLoading = false;
+  bool _authInProgress = false;
   String? _errorMessage;
 
 
@@ -30,8 +31,10 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   }
 
   Future<void> _signIn() async {
+    if (_authInProgress) return;
     if (!_formKey.currentState!.validate()) return;
 
+    _authInProgress = true;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -65,6 +68,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
           _isLoading = false;
         });
       }
+      _authInProgress = false;
     }
   }
 

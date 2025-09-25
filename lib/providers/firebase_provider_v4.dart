@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/firebase_service_v4.dart';
 import '../models/parcelle.dart';
@@ -31,6 +32,16 @@ class FirebaseProviderV4 extends ChangeNotifier {
   Stream<List<Vente>>? _ventesStream;
   Stream<List<Traitement>>? _traitementsStream;
   Stream<List<Produit>>? _produitsStream;
+  
+  // StreamSubscriptions pour les annuler
+  StreamSubscription<List<Parcelle>>? _parcellesSub;
+  StreamSubscription<List<Cellule>>? _cellulesSub;
+  StreamSubscription<List<Chargement>>? _chargementsSub;
+  StreamSubscription<List<Semis>>? _semisSub;
+  StreamSubscription<List<Variete>>? _varietesSub;
+  StreamSubscription<List<Vente>>? _ventesSub;
+  StreamSubscription<List<Traitement>>? _traitementsSub;
+  StreamSubscription<List<Produit>>? _produitsSub;
   
   // Getters pour l'accès aux données
   List<Parcelle> get parcelles => _parcellesMap.values.toList();
@@ -87,14 +98,14 @@ class FirebaseProviderV4 extends ChangeNotifier {
       _produitsStream = _service.getProduitsStream();
       
       // Écouter les changements
-      _parcellesStream?.listen(_onParcellesChanged);
-      _cellulesStream?.listen(_onCellulesChanged);
-      _chargementsStream?.listen(_onChargementsChanged);
-      _semisStream?.listen(_onSemisChanged);
-      _varietesStream?.listen(_onVarietesChanged);
-      _ventesStream?.listen(_onVentesChanged);
-      _traitementsStream?.listen(_onTraitementsChanged);
-      _produitsStream?.listen(_onProduitsChanged);
+      _parcellesSub = _parcellesStream?.listen(_onParcellesChanged);
+      _cellulesSub = _cellulesStream?.listen(_onCellulesChanged);
+      _chargementsSub = _chargementsStream?.listen(_onChargementsChanged);
+      _semisSub = _semisStream?.listen(_onSemisChanged);
+      _varietesSub = _varietesStream?.listen(_onVarietesChanged);
+      _ventesSub = _ventesStream?.listen(_onVentesChanged);
+      _traitementsSub = _traitementsStream?.listen(_onTraitementsChanged);
+      _produitsSub = _produitsStream?.listen(_onProduitsChanged);
       
       _isInitialized = true;
       _error = null;
@@ -902,6 +913,20 @@ class FirebaseProviderV4 extends ChangeNotifier {
   // Nettoyer les ressources liées à l'authentification
   Future<void> disposeAuthBoundResources() async {
     print('FirebaseProvider V4: Disposing auth bound resources');
+    
+    // Annuler tous les StreamSubscriptions
+    await _parcellesSub?.cancel();
+    await _cellulesSub?.cancel();
+    await _chargementsSub?.cancel();
+    await _semisSub?.cancel();
+    await _varietesSub?.cancel();
+    await _ventesSub?.cancel();
+    await _traitementsSub?.cancel();
+    await _produitsSub?.cancel();
+    
+    _parcellesSub = _cellulesSub = _chargementsSub = _semisSub =
+    _varietesSub = _ventesSub = _traitementsSub = _produitsSub = null;
+    
     await _service.disposeListeners();
     _initedUid = null;
     _ready = false;
@@ -913,14 +938,14 @@ class FirebaseProviderV4 extends ChangeNotifier {
   // Vider toutes les données
   void clearAll() {
     print('FirebaseProvider V4: Clearing all data');
-    parcelles.clear();
-    cellules.clear();
-    chargements.clear();
-    semis.clear();
-    varietes.clear();
-    ventes.clear();
-    traitements.clear();
-    produits.clear();
+    _parcellesMap.clear();
+    _cellulesMap.clear();
+    _chargementsMap.clear();
+    _semisMap.clear();
+    _varietesMap.clear();
+    _ventesMap.clear();
+    _traitementsMap.clear();
+    _produitsMap.clear();
     notifyListeners();
     print('FirebaseProvider V4: All data cleared');
   }
@@ -947,7 +972,17 @@ class FirebaseProviderV4 extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Annuler tous les streams pour éviter les doubles écoutes
+    // Annuler tous les StreamSubscriptions
+    _parcellesSub?.cancel();
+    _cellulesSub?.cancel();
+    _chargementsSub?.cancel();
+    _semisSub?.cancel();
+    _varietesSub?.cancel();
+    _ventesSub?.cancel();
+    _traitementsSub?.cancel();
+    _produitsSub?.cancel();
+    
+    // Nettoyer les streams
     _parcellesStream = null;
     _cellulesStream = null;
     _chargementsStream = null;
