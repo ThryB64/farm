@@ -130,47 +130,8 @@ class PlaceholderHome extends StatelessWidget {
   }
 }
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  bool _isError = false;
-  String _errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    try {
-      // Attendre que le widget soit monté avant d'accéder au contexte
-      await Future.delayed(const Duration(milliseconds: 100));
-      
-      if (mounted) {
-        final provider = context.read<FirebaseProviderV4>();
-        await provider.initialize();
-        
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isError = true;
-          _errorMessage = e.toString();
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,75 +142,30 @@ class _SplashScreenState extends State<SplashScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.green.shade700,
-              Colors.green.shade500,
+              const Color(0xFF2E7D32),
+              const Color(0xFF1B5E20),
             ],
           ),
         ),
-        child: Center(
-          child: _isError
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: Colors.white,
-                      size: 64,
-                    ),
-                    SizedBox(height: 16),
-                    const Text(
-                      'Erreur lors de l\'initialisation',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      _errorMessage,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _initializeApp,
-                      child: const Text('Réessayer'),
-                    ),
-                  ],
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/logo.png',
-                      width: 120,
-                      height: 120,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.agriculture,
-                          color: Colors.white,
-                          size: 64,
-                        );
-                      },
-                    ),
-                    SizedBox(height: 24),
-                    const CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                    SizedBox(height: 16),
-                    const Text(
-                      'Chargement...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 3,
+              ),
+              SizedBox(height: 30),
+              Text(
+                'Chargement...',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -265,32 +181,65 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
+  String? _lastUid;
+  bool _transitioning = false;
+
   @override
   Widget build(BuildContext context) {
-    final auth$ = AppFirebase.auth.userChanges()
-        .distinct((a,b) => a?.uid == b?.uid);
+    final auth$ = AppFirebase.auth
+        .userChanges()
+        .distinct((a, b) => a?.uid == b?.uid);
 
     return StreamBuilder<User?>(
       stream: auth$,
       builder: (_, snap) {
         final uid = snap.data?.uid;
-        print('AuthGate: User changed - uid: ${uid ?? 'null'}');
+        print('AuthGate: User changed - uid: ${uid ?? 'null'}, lastUid: $_lastUid, transitioning: $_transitioning');
         
+        // 🔁 Lance l'init seulement quand l'UID change
+        if (!_transitioning && uid != _lastUid) {
+          _transitioning = true;
+          print('AuthGate: uid changed $_lastUid -> $uid');
+          
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              final fp = context.read<FirebaseProviderV4>();
+              if (uid == null) {
+                print('AuthGate: Disposing auth bound resources');
+                await fp.disposeAuthBoundResources();
+              } else {
+                print('AuthGate: Initializing for user $uid');
+                await fp.ensureInitializedFor(uid);
+              }
+              _lastUid = uid;
+              print('AuthGate: Transition completed for uid: $uid');
+            } catch (e) {
+              print('AuthGate: Error during transition: $e');
+            } finally {
+              if (mounted) {
+                setState(() {
+                  _transitioning = false;
+                });
+              }
+            }
+          });
+        }
+
         if (uid == null) {
           print('AuthGate: Showing login screen');
-          return const SecureLoginScreen();       // jamais de Splash ici
+          return const SecureLoginScreen();            // ❌ jamais Splash ici
         }
 
         final ready = context.select<FirebaseProviderV4, bool>((fp) => fp.ready);
         print('AuthGate: User $uid, ready: $ready');
         
-        if (ready) {
-          print('AuthGate: Showing home screen');
-          return const HomeScreen();
-        } else {
+        if (!ready) {
           print('AuthGate: Showing splash screen (provider not ready)');
           return const SplashScreen();
         }
+
+        print('AuthGate: Showing home screen');
+        return const HomeScreen();
       },
     );
   }
