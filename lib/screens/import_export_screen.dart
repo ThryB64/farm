@@ -34,162 +34,276 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Import / Export'),
+        title: const Text('Import/Export'),
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.primary,
-              AppTheme.primary.withOpacity(0.8),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Section Export
-                ModernCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.upload, color: AppTheme.primary),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Export des données',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // État de la base de données
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'État de la base',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Consumer<FirebaseProviderV4>(
+                      builder: (context, provider, child) {
+                        return Column(
+                          children: [
+                            _buildDataSummary(
+                              'Parcelles',
+                              provider.parcelles.length,
+                              Icons.landscape,
+                              Colors.green,
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Exporter toutes les données de la ferme depuis Firebase',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ModernButton(
-                        text: 'Exporter vers fichier',
-                        onPressed: _isExporting ? null : _exportAllData,
-                        isLoading: _isExporting,
-                        icon: Icons.download,
-                      ),
-                    ],
-                  ),
+                            const SizedBox(height: 8),
+                            _buildDataSummary(
+                              'Cellules',
+                              provider.cellules.length,
+                              Icons.warehouse,
+                              Colors.blue,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDataSummary(
+                              'Chargements',
+                              provider.chargements.length,
+                              Icons.local_shipping,
+                              Colors.orange,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDataSummary(
+                              'Semis',
+                              provider.semis.length,
+                              Icons.agriculture,
+                              Colors.brown,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDataSummary(
+                              'Variétés',
+                              provider.varietes.length,
+                              Icons.eco,
+                              Colors.purple,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDataSummary(
+                              'Ventes',
+                              provider.ventes.length,
+                              Icons.shopping_cart,
+                              Colors.red,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDataSummary(
+                              'Traitements',
+                              provider.traitements.length,
+                              Icons.medical_services,
+                              Colors.teal,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildDataSummary(
+                              'Produits',
+                              provider.produits.length,
+                              Icons.inventory,
+                              Colors.indigo,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                try {
+                                  await provider.updateAllChargementsPoidsNormes();
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Poids aux normes mis à jour avec succès'),
+                                        duration: Duration(seconds: 5),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                    // Forcer le rafraîchissement de l'interface
+                                    provider.notifyListeners();
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erreur lors de la mise à jour: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Mettre à jour les poids aux normes'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Section Import
-                ModernCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.download, color: AppTheme.primary),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Import des données',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Importer des données depuis un fichier JSON',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ModernButton(
-                        text: 'Importer depuis un fichier',
-                        onPressed: _isImporting ? null : _importData,
-                        isLoading: _isImporting,
-                        icon: Icons.upload,
-                        backgroundColor: AppTheme.warning,
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Section Debug
-                ModernCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.bug_report, color: AppTheme.primary),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Outils de débogage',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Accéder aux outils de débogage et diagnostic',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ModernButton(
-                        text: 'Ouvrir Debug',
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const DebugScreen(),
-                            ),
-                          );
-                        },
-                        icon: Icons.settings,
-                        backgroundColor: AppTheme.secondary,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(height: 16),
+            
+            // Export complet
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Export complet',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Exporte toutes les données de la base dans un fichier JSON',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: _isExporting ? null : _exportData,
+                      icon: _isExporting 
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.download),
+                      label: Text(_isExporting ? 'Export en cours...' : 'Exporter la base'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Import complet
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Import complet',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Importe toutes les données depuis un fichier JSON',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: _isImporting ? null : _importData,
+                      icon: _isImporting 
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.upload),
+                      label: Text(_isImporting ? 'Import en cours...' : 'Importer la base'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Outils de débogage
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Outils de débogage',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Accéder aux outils de débogage et diagnostic',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DebugScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.bug_report),
+                      label: const Text('Ouvrir Debug'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.secondary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Future<void> _exportAllData() async {
+  Widget _buildDataSummary(String title, int count, IconData icon, Color color) {
+    return Row(
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(width: 8),
+        Text(
+          '$title : $count',
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _exportData() async {
     setState(() {
       _isExporting = true;
     });
@@ -203,7 +317,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       
       // Créer le nom de fichier avec la date
       final now = DateTime.now();
-      final fileName = 'farmgaec-backup_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
+      final fileName = 'mais_tracker_db_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
       
       // Télécharger le fichier
       _downloadFile(jsonString, fileName);
@@ -211,12 +325,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export Firebase réussi : $fileName'),
-            backgroundColor: AppTheme.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
+            content: Text('Base de données exportée : $fileName'),
+            duration: const Duration(seconds: 5),
+            backgroundColor: Colors.green,
           ),
         );
       }
@@ -224,12 +335,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'export Firebase : $e'),
-            backgroundColor: AppTheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
+            content: Text('Erreur lors de l\'export: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -262,27 +369,22 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
               final jsonString = reader.result as String;
               final data = jsonDecode(jsonString) as Map<String, dynamic>;
               
-              // Valider la structure des données
-              if (!data.containsKey('_meta') || !data.containsKey('data')) {
-                throw Exception('Format de fichier invalide - structure Firebase requise');
+              // Vérifier la structure des données
+              if (!_validateDataStructure(data)) {
+                throw Exception('Format de fichier invalide. Veuillez utiliser un fichier exporté depuis l\'application.');
               }
               
-              // Afficher une confirmation avant l'import
-              final confirmed = await _showImportConfirmation();
-              if (!confirmed) return;
-              
-              // Importer les données
-              await _performImport(data);
+              // Afficher un résumé des données à importer
+              final summary = await _showImportSummary(data);
+              if (summary != null) {
+                await _performImport(summary);
+              }
             } catch (e) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Erreur lors de l\'import : $e'),
-                    backgroundColor: AppTheme.error,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    ),
+                    content: Text('Erreur lors de l\'import: $e'),
+                    backgroundColor: Colors.red,
                   ),
                 );
               }
@@ -295,12 +397,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'import : $e'),
-            backgroundColor: AppTheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
+            content: Text('Erreur lors de l\'import: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -313,30 +411,85 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     }
   }
 
-  Future<bool> _showImportConfirmation() async {
-    return await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-        title: const Text('Confirmer l\'import'),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-        ),
-        content: const Text(
-          'Cette action va remplacer toutes les données existantes. Êtes-vous sûr de vouloir continuer ?',
-          ),
-          actions: [
-          ModernTextButton(
-            text: 'Annuler',
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          ModernButton(
-            text: 'Confirmer',
-            backgroundColor: AppTheme.error,
-            onPressed: () => Navigator.pop(context, true),
+  Future<Map<String, dynamic>?> _showImportSummary(Map<String, dynamic> data) async {
+    return await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Résumé des données à importer'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Version du fichier: ${data['version'] ?? '1.0'}'),
+            const SizedBox(height: 8),
+            Text('Parcelles : ${data['parcelles']?.length ?? 0}'),
+            Text('Cellules : ${data['cellules']?.length ?? 0}'),
+            Text('Chargements : ${data['chargements']?.length ?? 0}'),
+            Text('Semis : ${data['semis']?.length ?? 0}'),
+            Text('Variétés : ${data['varietes']?.length ?? 0}'),
+            Text('Ventes : ${data['ventes']?.length ?? 0}'),
+            Text('Traitements : ${data['traitements']?.length ?? 0}'),
+            Text('Produits : ${data['produits']?.length ?? 0}'),
+            const SizedBox(height: 16),
+            const Text(
+              'Les données existantes seront remplacées. '
+              'Voulez-vous continuer ?',
+              style: TextStyle(color: Colors.red),
             ),
           ],
         ),
-    ) ?? false;
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, data),
+            child: const Text('Importer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _performImport(Map<String, dynamic> data) async {
+    try {
+      print('ImportExportScreen: Starting Firebase import');
+      
+      // Importer les données (mode remplacement total)
+      await BackupService.instance.importFromJsonString(jsonEncode(data), wipeBefore: true);
+      
+      // Forcer le refresh des données locales
+      final provider = context.read<FirebaseProviderV4>();
+      await provider.refreshAllData();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Base de données importée avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      
+      print('ImportExportScreen: Firebase import completed successfully');
+    } catch (e) {
+      print('ImportExportScreen: Firebase import failed: $e');
+      rethrow;
+    }
+  }
+
+  bool _validateDataStructure(Map<String, dynamic> data) {
+    return data.containsKey('parcelles') &&
+           data.containsKey('cellules') &&
+           data.containsKey('chargements') &&
+           data.containsKey('semis') &&
+           data.containsKey('varietes') &&
+           data['parcelles'] is List &&
+           data['cellules'] is List &&
+           data['chargements'] is List &&
+           data['semis'] is List &&
+           data['varietes'] is List;
   }
 
   // Récupérer l'export Firebase natif
@@ -357,22 +510,15 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       
       // Construire la structure Firebase
       final firebaseData = {
-        '_meta': {
-          'exportDate': DateTime.now().toIso8601String(),
-          'version': '1.0',
-          'farmId': 'gaec_berard',
-          'exportedBy': 'current_user',
-        },
-        'data': {
-          'parcelles': _buildFirebaseParcelles(parcelles),
-          'cellules': _buildFirebaseCellules(cellules),
-          'chargements': _buildFirebaseChargements(chargements),
-          'semis': _buildFirebaseSemis(semis),
-          'varietes': _buildFirebaseVarietes(varietes),
-          'ventes': _buildFirebaseVentes(ventes),
-          'traitements': _buildFirebaseTraitements(traitements),
-          'produits': _buildFirebaseProduits(produits),
-        }
+        'version': '2.0', // Version mise à jour pour inclure toutes les données
+        'parcelles': parcelles.map((p) => _convertParcelleToMap(p)).toList(),
+        'cellules': cellules.map((c) => _convertCelluleToMap(c)).toList(),
+        'chargements': chargements.map((c) => _convertChargementToMap(c)).toList(),
+        'semis': semis.map((s) => _convertSemisToMap(s)).toList(),
+        'varietes': varietes.map((v) => _convertVarieteToMap(v)).toList(),
+        'ventes': ventes.map((v) => _convertVenteToMap(v)).toList(),
+        'traitements': traitements.map((t) => _convertTraitementToMap(t)).toList(),
+        'produits': produits.map((p) => _convertProduitToMap(p)).toList(),
       };
       
       return firebaseData;
@@ -382,198 +528,111 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     }
   }
 
-  // Construire la structure Firebase pour les parcelles
-  Map<String, dynamic> _buildFirebaseParcelles(List<Parcelle> parcelles) {
-    final Map<String, dynamic> result = {};
-    for (final parcelle in parcelles) {
-      final key = parcelle.firebaseId ?? 'parcelle_${parcelle.nom.toLowerCase().replaceAll(' ', '_')}_${(parcelle.surface * 1000).round()}';
-      result[key] = {
-        'firebaseId': key,
-        'nom': parcelle.nom,
-        'surface': parcelle.surface,
-        'date_creation': parcelle.dateCreation.toIso8601String(),
-        'notes': parcelle.notes,
-        'createdAt': parcelle.dateCreation.millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-    return result;
+  // Méthodes de conversion avec gestion explicite des types
+  Map<String, dynamic> _convertParcelleToMap(Parcelle parcelle) {
+    return {
+      'id': parcelle.id,
+      'firebaseId': parcelle.firebaseId,
+      'nom': parcelle.nom,
+      'surface': parcelle.surface,
+      'dateCreation': parcelle.dateCreation.toIso8601String(),
+      'notes': parcelle.notes,
+    };
   }
 
-  // Construire la structure Firebase pour les cellules
-  Map<String, dynamic> _buildFirebaseCellules(List<Cellule> cellules) {
-    final Map<String, dynamic> result = {};
-    for (final cellule in cellules) {
-      final key = cellule.firebaseId ?? 'cellule_${cellule.reference}';
-      result[key] = {
-        'firebaseId': key,
-        'reference': cellule.reference,
-        'capacite': cellule.capacite,
-        'date_creation': cellule.dateCreation.toIso8601String(),
-        'notes': cellule.notes,
-        'nom': cellule.nom,
-        'fermee': cellule.fermee,
-        'createdAt': cellule.dateCreation.millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-    return result;
+  Map<String, dynamic> _convertCelluleToMap(Cellule cellule) {
+    return {
+      'id': cellule.id,
+      'firebaseId': cellule.firebaseId,
+      'reference': cellule.reference,
+      'capacite': cellule.capacite,
+      'dateCreation': cellule.dateCreation.toIso8601String(),
+      'notes': cellule.notes,
+      'nom': cellule.nom,
+      'fermee': cellule.fermee,
+    };
   }
 
-  // Construire la structure Firebase pour les chargements
-  Map<String, dynamic> _buildFirebaseChargements(List<Chargement> chargements) {
-    final Map<String, dynamic> result = {};
-    for (final chargement in chargements) {
-      final key = chargement.firebaseId ?? 'chargement_${chargement.dateChargement.year}-${chargement.dateChargement.month.toString().padLeft(2, '0')}-${chargement.dateChargement.day.toString().padLeft(2, '0')}_${chargement.remorque}';
-      result[key] = {
-        'firebaseId': key,
-        'cellule_id': chargement.celluleId,
-        'parcelle_id': chargement.parcelleId,
-        'remorque': chargement.remorque,
-        'date_chargement': chargement.dateChargement.toIso8601String(),
-        'poids_plein': chargement.poidsPlein,
-        'poids_vide': chargement.poidsVide,
-        'poids_net': chargement.poidsNet,
-        'poids_normes': chargement.poidsNormes,
-        'humidite': chargement.humidite,
-        'variete': chargement.variete,
-        'createdAt': chargement.dateChargement.millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-    return result;
+  Map<String, dynamic> _convertChargementToMap(Chargement chargement) {
+    return {
+      'id': chargement.id,
+      'firebaseId': chargement.firebaseId,
+      'celluleId': chargement.celluleId,
+      'parcelleId': chargement.parcelleId,
+      'remorque': chargement.remorque,
+      'dateChargement': chargement.dateChargement.toIso8601String(),
+      'poidsPlein': chargement.poidsPlein,
+      'poidsVide': chargement.poidsVide,
+      'poidsNet': chargement.poidsNet,
+      'poidsNormes': chargement.poidsNormes,
+      'humidite': chargement.humidite,
+      'variete': chargement.variete,
+    };
   }
 
-  // Construire la structure Firebase pour les semis
-  Map<String, dynamic> _buildFirebaseSemis(List<Semis> semis) {
-    final Map<String, dynamic> result = {};
-    for (final s in semis) {
-      final key = s.firebaseId ?? 'semis_${s.parcelleId}_${s.date.year}-${s.date.month.toString().padLeft(2, '0')}-${s.date.day.toString().padLeft(2, '0')}';
-      result[key] = {
-        'firebaseId': key,
-        'parcelle_id': s.parcelleId,
-        'date': s.date.toIso8601String(),
-        'varietes_surfaces': s.varietesSurfaces.map((v) => v.toMap()).toList(),
-        'notes': s.notes,
-        'createdAt': s.date.millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-    return result;
+  Map<String, dynamic> _convertSemisToMap(Semis semis) {
+    return {
+      'id': semis.id,
+      'firebaseId': semis.firebaseId,
+      'parcelleId': semis.parcelleId,
+      'date': semis.date.toIso8601String(),
+      'varietesSurfaces': semis.varietesSurfaces.map((v) => v.toMap()).toList(),
+      'notes': semis.notes,
+    };
   }
 
-  // Construire la structure Firebase pour les variétés
-  Map<String, dynamic> _buildFirebaseVarietes(List<Variete> varietes) {
-    final Map<String, dynamic> result = {};
-    for (final variete in varietes) {
-      final key = variete.firebaseId ?? 'variete_${variete.nom.toLowerCase().replaceAll(' ', '_')}';
-      result[key] = {
-        'firebaseId': key,
-        'nom': variete.nom,
-        'description': variete.description,
-        'date_creation': variete.dateCreation.toIso8601String(),
-        'createdAt': variete.dateCreation.millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-    return result;
+  Map<String, dynamic> _convertVarieteToMap(Variete variete) {
+    return {
+      'id': variete.id,
+      'firebaseId': variete.firebaseId,
+      'nom': variete.nom,
+      'description': variete.description,
+      'dateCreation': variete.dateCreation.toIso8601String(),
+    };
   }
 
-  // Construire la structure Firebase pour les ventes
-  Map<String, dynamic> _buildFirebaseVentes(List<Vente> ventes) {
-    final Map<String, dynamic> result = {};
-    for (final vente in ventes) {
-      final key = vente.firebaseId ?? 'vente_${vente.numeroTicket}_${vente.date.year}-${vente.date.month.toString().padLeft(2, '0')}-${vente.date.day.toString().padLeft(2, '0')}';
-      result[key] = {
-        'firebaseId': key,
-        'date': vente.date.millisecondsSinceEpoch,
-        'annee': vente.annee,
-        'numeroTicket': vente.numeroTicket,
-        'client': vente.client,
-        'immatriculationRemorque': vente.immatriculationRemorque,
-        'cmr': vente.cmr,
-        'poidsVide': vente.poidsVide,
-        'poidsPlein': vente.poidsPlein,
-        'poidsNet': vente.poidsNet,
-        'ecartPoidsNet': vente.ecartPoidsNet,
-        'payer': vente.payer,
-        'prix': vente.prix,
-        'terminee': vente.terminee,
-        'createdAt': vente.date.millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-    return result;
+  Map<String, dynamic> _convertVenteToMap(Vente vente) {
+    return {
+      'id': vente.id,
+      'firebaseId': vente.firebaseId,
+      'date': vente.date.millisecondsSinceEpoch,
+      'annee': vente.annee,
+      'numeroTicket': vente.numeroTicket,
+      'client': vente.client,
+      'immatriculationRemorque': vente.immatriculationRemorque,
+      'cmr': vente.cmr,
+      'poidsVide': vente.poidsVide,
+      'poidsPlein': vente.poidsPlein,
+      'poidsNet': vente.poidsNet,
+      'ecartPoidsNet': vente.ecartPoidsNet,
+      'payer': vente.payer,
+      'prix': vente.prix,
+      'terminee': vente.terminee,
+    };
   }
 
-  // Construire la structure Firebase pour les traitements
-  Map<String, dynamic> _buildFirebaseTraitements(List<Traitement> traitements) {
-    final Map<String, dynamic> result = {};
-    for (final traitement in traitements) {
-      final key = traitement.firebaseId ?? 'traitement_${traitement.parcelleId}_${traitement.date.year}-${traitement.date.month.toString().padLeft(2, '0')}-${traitement.date.day.toString().padLeft(2, '0')}';
-      result[key] = {
-        'firebaseId': key,
-        'parcelleId': traitement.parcelleId,
-        'date': traitement.date.millisecondsSinceEpoch,
-        'annee': traitement.annee,
-        'notes': traitement.notes,
-        'produits': traitement.produits.map((p) => p.toMap()).toList(),
-        'coutTotal': traitement.coutTotal,
-        'createdAt': traitement.date.millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-    return result;
+  Map<String, dynamic> _convertTraitementToMap(Traitement traitement) {
+    return {
+      'id': traitement.id,
+      'firebaseId': traitement.firebaseId,
+      'parcelleId': traitement.parcelleId,
+      'date': traitement.date.millisecondsSinceEpoch,
+      'annee': traitement.annee,
+      'notes': traitement.notes,
+      'produits': traitement.produits.map((p) => p.toMap()).toList(),
+      'coutTotal': traitement.coutTotal,
+    };
   }
 
-  // Construire la structure Firebase pour les produits
-  Map<String, dynamic> _buildFirebaseProduits(List<Produit> produits) {
-    final Map<String, dynamic> result = {};
-    for (final produit in produits) {
-      final key = produit.firebaseId ?? 'produit_${produit.nom.toLowerCase().replaceAll(' ', '_')}';
-      result[key] = {
-        'firebaseId': key,
-        'nom': produit.nom,
-        'mesure': produit.mesure,
-        'notes': produit.notes,
-        'prixParAnnee': produit.prixParAnnee.map((k, v) => MapEntry(k.toString(), v)),
-        'createdAt': DateTime.now().millisecondsSinceEpoch,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-    return result;
-  }
-
-  /// Importe les données via BackupService
-  Future<void> _performImport(Map<String, dynamic> data) async {
-    try {
-      print('ImportExportScreen: Starting Firebase import');
-      
-      // Importer les données (mode remplacement total)
-      await BackupService.instance.importFromJsonString(jsonEncode(data), wipeBefore: true);
-      
-      // Forcer le refresh des données locales
-      final provider = context.read<FirebaseProviderV4>();
-      await provider.refreshAllData();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Import Firebase réussi ! Données restaurées.'),
-            backgroundColor: AppTheme.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
-          ),
-        );
-      }
-      
-      print('ImportExportScreen: Firebase import completed successfully');
-    } catch (e) {
-      print('ImportExportScreen: Firebase import failed: $e');
-      rethrow;
-    }
+  Map<String, dynamic> _convertProduitToMap(Produit produit) {
+    return {
+      'id': produit.id,
+      'firebaseId': produit.firebaseId,
+      'nom': produit.nom,
+      'mesure': produit.mesure,
+      'notes': produit.notes,
+      'prixParAnnee': produit.prixParAnnee.map((k, v) => MapEntry(k.toString(), v)),
+    };
   }
 
   void _downloadFile(String content, String fileName) {
