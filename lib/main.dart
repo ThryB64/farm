@@ -312,7 +312,7 @@ class _AuthGateState extends State<AuthGate> {
           });
         }
 
-        // Rendu UI
+        // ✅ si pas connecté -> on montre DIRECT le login (pas de Splash)
         if (uid == null) {
           print('AuthGate: Showing login screen');
           return const SecureLoginScreen();
