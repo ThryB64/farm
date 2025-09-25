@@ -176,8 +176,16 @@ class SplashScreen extends StatelessWidget {
 }
 
 // AuthGate : source de vérité unique pour l'authentification
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({Key? key}) : super(key: key);
+  
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  String? _lastUid;
+  bool _transitioning = false;
 
   @override
   Widget build(BuildContext context) {
@@ -185,39 +193,40 @@ class AuthGate extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         final user = snapshot.data;
-        print('AuthGate: Auth state changed - user: ${user?.uid ?? 'null'}');
+        final uid = user?.uid;
+        print('AuthGate: Auth state changed - user: ${uid ?? 'null'}');
         
-        if (user == null) {
-          // Utilisateur non connecté - nettoyer les données
-          print('AuthGate: User not authenticated, clearing data');
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-            provider.clearAll();
+        if (!_transitioning && uid != _lastUid) {
+          _transitioning = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+              if (uid == null) {
+                print('AuthGate: User not authenticated, disposing resources');
+                await provider.disposeAuthBoundResources();  // ✅ clear seulement ici
+              } else {
+                print('AuthGate: User authenticated, initializing data');
+                await provider.ensureInitializedFor(uid);
+              }
+              _lastUid = uid;
+            } finally {
+              if (mounted) _transitioning = false;
+            }
           });
-          return const SecureLoginScreen();
+        }
+
+        if (uid == null) {
+          print('AuthGate: Showing login screen');
+          return const SecureLoginScreen();            // ❌ JAMAIS de Splash ici
+        }
+
+        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+        if (!provider.ready) {
+          print('AuthGate: Showing splash screen (provider not ready)');
+          return const SplashScreen();
         }
         
-        // Utilisateur connecté - s'assurer que le provider est prêt
-        print('AuthGate: User authenticated, initializing data');
-        return FutureBuilder<void>(
-          future: Provider.of<FirebaseProviderV4>(context, listen: false).ensureInitializedFor(user.uid),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SplashScreen();
-            }
-            
-            if (snapshot.hasError) {
-              print('AuthGate: Error initializing provider: ${snapshot.error}');
-              return const SecureLoginScreen();
-            }
-            
-            if (snapshot.connectionState == ConnectionState.done) {
-              return const HomeScreen();
-            }
-            
-            return const SplashScreen();
-          },
-        );
+        return const HomeScreen();
       },
     );
   }

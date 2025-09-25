@@ -45,7 +45,7 @@ class Traitement {
         if (produitsList is List) {
           produits = produitsList.map((p) {
             try {
-              final normalizedP = normalizeLoose(p);
+              final normalizedP = normalize(p);
               return ProduitTraitement.fromMap(normalizedP);
             } catch (e) {
               print('Error parsing produit in traitement: $e');

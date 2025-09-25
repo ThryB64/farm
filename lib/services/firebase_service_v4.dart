@@ -630,13 +630,13 @@ class FirebaseServiceV4 {
         if (event.snapshot.value == null) return <Traitement>[];
         try {
           // Normalisation robuste via JSON round-trip
-          final root = normalizeLoose(event.snapshot.value);
+          final root = normalize(event.snapshot.value);
           print('FirebaseService V4: Received ${root.length} traitements from Firebase');
           print('FirebaseService V4: Traitements keys: ${root.keys.toList()}');
           
           return root.entries.map((e) {
             try {
-              final map = normalizeLoose(e.value);
+              final map = normalize(e.value);
               final traitement = Traitement.fromMap(map);
               // Assigner la clé Firebase comme firebaseId
               return traitement.copyWith(firebaseId: e.key);
@@ -692,11 +692,11 @@ class FirebaseServiceV4 {
         if (event.snapshot.value == null) return <Produit>[];
         try {
           // Normalisation robuste via JSON round-trip
-          final root = normalizeLoose(event.snapshot.value);
+          final root = normalize(event.snapshot.value);
           
           return root.entries.map((e) {
             try {
-              final map = normalizeLoose(e.value);
+              final map = normalize(e.value);
               final produit = Produit.fromMap(map);
               // Assigner la clé Firebase comme firebaseId
               return produit.copyWith(firebaseId: e.key);

@@ -899,26 +899,30 @@ class FirebaseProviderV4 extends ChangeNotifier {
     if (_ready && _initedUid == uid) return;
     
     print('FirebaseProvider V4: Initializing for user: $uid');
+    // 👉 OUVRIR les listeners RTDB ici via _service.initialize()
     await _service.initialize();
+    
     _initedUid = uid;
-    _ready = true;
-    notifyListeners();
+    _ready = true;                // ✅ indispensable
     print('FirebaseProvider V4: Initialization completed for user: $uid');
+    notifyListeners();            // ✅ indispensable
   }
 
   // Nettoyer les ressources liées à l'authentification
   Future<void> disposeAuthBoundResources() async {
+    if (!_ready && _initedUid == null) return;
+    
     print('FirebaseProvider V4: Disposing auth bound resources');
-    await _service.disposeListeners();
+    await _service.disposeListeners(); // annule TOUS les streams RTDB
     _initedUid = null;
     _ready = false;
-    clearAll();
-    notifyListeners();
+    _clearAll();
     print('FirebaseProvider V4: Auth bound resources disposed');
+    notifyListeners();
   }
 
-  // Vider toutes les données
-  void clearAll() {
+  // Vider toutes les données (méthode privée)
+  void _clearAll() {
     print('FirebaseProvider V4: Clearing all data');
     parcelles.clear();
     cellules.clear();
@@ -928,8 +932,13 @@ class FirebaseProviderV4 extends ChangeNotifier {
     ventes.clear();
     traitements.clear();
     produits.clear();
-    notifyListeners();
     print('FirebaseProvider V4: All data cleared');
+  }
+
+  // Vider toutes les données (méthode publique)
+  void clearAll() {
+    _clearAll();
+    notifyListeners();
   }
 
   // Forcer la mise à jour après la connexion (legacy)
