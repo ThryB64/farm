@@ -21,7 +21,23 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   bool _isLoading = false;
   bool _authInProgress = false;
   String? _errorMessage;
+  bool _hasAttemptedAutoLogin = false; // Flag pour empêcher la reconnexion automatique
 
+
+  @override
+  void initState() {
+    super.initState();
+    // Pré-remplir les champs avec les valeurs par défaut pour éviter la reconnexion automatique
+    _emailController.text = 'arnaudberard@gmail.com';
+    _passwordController.text = 'Thierry64530*';
+    
+    // Connexion automatique au démarrage
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_hasAttemptedAutoLogin) {
+        _signIn();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -34,7 +50,14 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
     if (_authInProgress) return;
     if (!_formKey.currentState!.validate()) return;
 
+    // Empêcher la reconnexion automatique
+    if (_hasAttemptedAutoLogin) {
+      print('SecureLoginScreen: Auto-login already attempted, ignoring');
+      return;
+    }
+
     _authInProgress = true;
+    _hasAttemptedAutoLogin = true;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -259,13 +282,24 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                             const SizedBox(height: 16),
                           ],
                           
-                          // Bouton de connexion
+                          // Bouton de connexion automatique
                           ModernButton(
-                            text: 'Se connecter',
+                            text: 'Connexion automatique',
                             onPressed: _isLoading ? null : _signIn,
                             isLoading: _isLoading,
                             isFullWidth: true,
                             backgroundColor: AppTheme.primary,
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // Bouton de connexion manuelle
+                          ModernButton(
+                            text: 'Se connecter manuellement',
+                            onPressed: _isLoading ? null : _signIn,
+                            isLoading: _isLoading,
+                            isFullWidth: true,
+                            backgroundColor: AppTheme.secondary,
                           ),
                           
                         ],
