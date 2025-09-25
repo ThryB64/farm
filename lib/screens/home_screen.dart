@@ -142,7 +142,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<FirebaseProviderV4>(context);
+    // S'abonner aux changements du provider
+    final provider = context.watch<FirebaseProviderV4>();
     print('HomeScreen: provider#${identityHashCode(provider)} ready=${provider.ready} parc=${provider.parcelles.length}');
     
     // Éviter l'affichage "fantôme" si le provider n'est pas prêt
