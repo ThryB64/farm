@@ -16,36 +16,6 @@ import 'import_export_screen.dart';
 import 'exports_pdf_screen.dart';
 import '../main.dart';
 
-// Widget de débogage pour vérifier que l'UI voit les données
-class DataDebugPanel extends StatelessWidget {
-  const DataDebugPanel({Key? key}) : super(key: key);
-  
-  @override
-  Widget build(BuildContext context) {
-    final ready = context.select<FirebaseProviderV4, bool>((p) => p.ready);
-    final parc = context.select<FirebaseProviderV4, int>((p) => p.parcelles.length);
-    final cel = context.select<FirebaseProviderV4, int>((p) => p.cellules.length);
-    final chg = context.select<FirebaseProviderV4, int>((p) => p.chargements.length);
-    final sem = context.select<FirebaseProviderV4, int>((p) => p.semis.length);
-    final varT = context.select<FirebaseProviderV4, int>((p) => p.varietes.length);
-    final ven = context.select<FirebaseProviderV4, int>((p) => p.ventes.length);
-    final trt = context.select<FirebaseProviderV4, int>((p) => p.traitements.length);
-    final prod = context.select<FirebaseProviderV4, int>((p) => p.produits.length);
-
-    return Card(
-      margin: const EdgeInsets.all(12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Text(
-          'ready=$ready | parc:$parc cel:$cel chg:$chg '
-          'sem:$sem var:$varT ven:$ven trt:$trt prod:$prod',
-          style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
-        ),
-      ),
-    );
-  }
-}
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -94,30 +64,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _signOut() async {
-    print('HomeScreen: _signOut() called - signingOut: $_signingOut');
     if (_signingOut) return;
     _signingOut = true;
     
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Déconnexion'),
-        content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Déconnexion'),
-          ),
-        ],
-      ),
-    );
+    try {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Déconnexion'),
+          content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Déconnexion'),
+            ),
+          ],
+        ),
+      );
 
-    if (confirmed == true) {
-      try {
+      if (confirmed == true) {
         print('HomeScreen: Starting sign out process');
         
         // Nettoyer les ressources liées à l'authentification
@@ -126,25 +95,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         
         await SecurityService().signOut();
         print('HomeScreen: Sign out successful, AuthGate will switch to login');
-        // AuthGate s'occupe de la navigation automatiquement
-      } catch (e) {
-        print('HomeScreen: Sign out error: $e');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur de déconnexion: $e')),
-          );
-        }
+        // AuthGate gère automatiquement la navigation
       }
+    } catch (e) {
+      print('HomeScreen: Sign out error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur de déconnexion: $e')),
+        );
+      }
+    } finally {
+      _signingOut = false;
     }
-    
-    _signingOut = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    // S'abonner aux changements du provider
-    final provider = context.watch<FirebaseProviderV4>();
-    print('HomeScreen: provider#${identityHashCode(provider)} ready=${provider.ready} parc=${provider.parcelles.length}');
+    final provider = Provider.of<FirebaseProviderV4>(context);
     
     // Éviter l'affichage "fantôme" si le provider n'est pas prêt
     if (!provider.ready) {
@@ -187,8 +154,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const DataDebugPanel(), // Panel de débogage temporaire
-                        const SizedBox(height: AppTheme.spacingM),
                         _buildHeader(),
                         const SizedBox(height: AppTheme.spacingL),
                         _buildStatsSection(provider),

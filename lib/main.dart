@@ -129,8 +129,47 @@ class PlaceholderHome extends StatelessWidget {
   }
 }
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  bool _isError = false;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    try {
+      // Attendre que le widget soit monté avant d'accéder au contexte
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      if (mounted) {
+        final provider = context.read<FirebaseProviderV4>();
+        await provider.initialize();
+        
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isError = true;
+          _errorMessage = e.toString();
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,29 +185,70 @@ class SplashScreen extends StatelessWidget {
             ],
           ),
         ),
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.agriculture,
-                color: Colors.white,
-                size: 64,
-              ),
-              SizedBox(height: 24),
-              CircularProgressIndicator(
-                color: Colors.white,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Chargement...',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
+        child: Center(
+          child: _isError
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.white,
+                      size: 64,
+                    ),
+                    SizedBox(height: 16),
+                    const Text(
+                      'Erreur lors de l\'initialisation',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      _errorMessage,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _initializeApp,
+                      child: const Text('Réessayer'),
+                    ),
+                  ],
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/logo.png',
+                      width: 120,
+                      height: 120,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.agriculture,
+                          color: Colors.white,
+                          size: 64,
+                        );
+                      },
+                    ),
+                    SizedBox(height: 24),
+                    const CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+                    SizedBox(height: 16),
+                    const Text(
+                      'Chargement...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -176,16 +256,8 @@ class SplashScreen extends StatelessWidget {
 }
 
 // AuthGate : source de vérité unique pour l'authentification
-class AuthGate extends StatefulWidget {
+class AuthGate extends StatelessWidget {
   const AuthGate({Key? key}) : super(key: key);
-  
-  @override
-  State<AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends State<AuthGate> {
-  String? _lastUid;
-  bool _transitioning = false;
 
   @override
   Widget build(BuildContext context) {
@@ -193,59 +265,29 @@ class _AuthGateState extends State<AuthGate> {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         final user = snapshot.data;
-        final uid = user?.uid;
-        print('AuthGate: Auth state changed - user: ${uid ?? 'null'}');
+        print('AuthGate: Auth state changed - user: ${user?.uid ?? 'null'}');
         
-        // Gérer les transitions d'utilisateur
-        if (!_transitioning && uid != _lastUid) {
-          _transitioning = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            try {
-              final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-              if (uid == null) {
-                print('AuthGate: User not authenticated, disposing resources');
-                await provider.disposeAuthBoundResources();
-              } else {
-                print('AuthGate: User authenticated, initializing data');
-                await provider.ensureInitializedFor(uid);
-              }
-              if (mounted) {
-                setState(() {
-                  _lastUid = uid;
-                  _transitioning = false;
-                });
-              }
-            } catch (e) {
-              print('AuthGate: Error during transition: $e');
-              if (mounted) {
-                setState(() {
-                  _transitioning = false;
-                });
-              }
-            }
+        if (user == null) {
+          // Utilisateur non connecté - nettoyer les données
+          print('AuthGate: User not authenticated, clearing data');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+            provider.clearAll();
           });
-        }
-
-        if (uid == null) {
-          print('AuthGate: Showing login screen');
           return const SecureLoginScreen();
         }
-
-               // Utiliser Consumer pour écouter les changements du provider
-               return Consumer<FirebaseProviderV4>(
-                 builder: (context, provider, child) {
-                   print('AuthGate: Provider ready: ${provider.ready}');
-                   print('AuthGate: provider#${identityHashCode(provider)} ready=${provider.ready}');
-                   
-                   if (!provider.ready) {
-                     print('AuthGate: Showing splash screen (provider not ready)');
-                     return const SplashScreen();
-                   }
-                   
-                   print('AuthGate: Showing home screen');
-                   return const HomeScreen();
-                 },
-               );
+        
+        // Utilisateur connecté - s'assurer que le provider est prêt
+        print('AuthGate: User authenticated, initializing data');
+        return FutureBuilder<void>(
+          future: Provider.of<FirebaseProviderV4>(context, listen: false).ensureInitializedFor(user.uid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return const HomeScreen();
+            }
+            return const SplashScreen();
+          },
+        );
       },
     );
   }

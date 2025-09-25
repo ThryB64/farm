@@ -43,12 +43,10 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
         _emailController.text.trim(),
         _passwordController.text,
       );
-
-      print('SecureLoginScreen: Sign in successful, letting AuthGate handle navigation');
-      // Laisser AuthGate gérer la navigation automatiquement
-      // Pas de navigation manuelle
+      print('SecureLoginScreen: Sign in successful, AuthGate will handle navigation');
+      // AuthGate gère automatiquement la navigation
     } on FirebaseAuthException catch (e) {
-      print('SecureLoginScreen: Firebase auth error: ${e.code} - ${e.message}');
+      print('SecureLoginScreen: Firebase auth error: ${e.code}');
       if (mounted) {
         setState(() {
           _errorMessage = _getErrorMessage(e.code);

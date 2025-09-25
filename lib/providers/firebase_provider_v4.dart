@@ -887,217 +887,31 @@ class FirebaseProviderV4 extends ChangeNotifier {
   // Getter pour vérifier si le provider est prêt
   bool get ready => _ready;
 
-  // Initialiser le service Firebase
-  Future<void> initializeService() async {
-    print('FirebaseProvider V4: Initializing service...');
-    await _service.initialize();
-    print('FirebaseProvider V4: Service initialized');
-  }
-
-  // Configurer les listeners Firebase pour charger les données
-  Future<void> _setupFirebaseListeners() async {
-    try {
-      print('FirebaseProvider V4: Setting up Firebase listeners...');
-      
-      // Configurer les listeners pour chaque type de données
-      await _setupParcellesListener();
-      await _setupCellulesListener();
-      await _setupChargementsListener();
-      await _setupSemisListener();
-      await _setupVarietesListener();
-      await _setupVentesListener();
-      await _setupTraitementsListener();
-      await _setupProduitsListener();
-      
-      print('✅ FirebaseProvider V4: All listeners configured successfully');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up listeners: $e');
-      rethrow;
-    }
-  }
-
-  // Configurer le listener pour les parcelles
-  Future<void> _setupParcellesListener() async {
-    try {
-      print('FirebaseProvider V4: Setting up parcelles listener...');
-      final stream = _service.getParcellesStream();
-      stream.listen((parcelles) {
-        print('FirebaseProvider V4: Updated ${parcelles.length} parcelles');
-        this.parcelles.clear();
-        this.parcelles.addAll(parcelles);
-        notifyListeners();
-      });
-      print('✅ FirebaseProvider V4: Parcelles listener configured');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up parcelles listener: $e');
-    }
-  }
-
-  // Configurer le listener pour les cellules
-  Future<void> _setupCellulesListener() async {
-    try {
-      print('FirebaseProvider V4: Setting up cellules listener...');
-      final stream = _service.getCellulesStream();
-      stream.listen((cellules) {
-        print('FirebaseProvider V4: Updated ${cellules.length} cellules');
-        this.cellules.clear();
-        this.cellules.addAll(cellules);
-        notifyListeners();
-      });
-      print('✅ FirebaseProvider V4: Cellules listener configured');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up cellules listener: $e');
-    }
-  }
-
-  // Configurer le listener pour les chargements
-  Future<void> _setupChargementsListener() async {
-    try {
-      print('FirebaseProvider V4: Setting up chargements listener...');
-      final stream = _service.getChargementsStream();
-      stream.listen((chargements) {
-        print('FirebaseProvider V4: Updated ${chargements.length} chargements');
-        this.chargements.clear();
-        this.chargements.addAll(chargements);
-        notifyListeners();
-      });
-      print('✅ FirebaseProvider V4: Chargements listener configured');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up chargements listener: $e');
-    }
-  }
-
-  // Configurer le listener pour les semis
-  Future<void> _setupSemisListener() async {
-    try {
-      print('FirebaseProvider V4: Setting up semis listener...');
-      final stream = _service.getSemisStream();
-      stream.listen((semis) {
-        print('FirebaseProvider V4: Updated ${semis.length} semis');
-        this.semis.clear();
-        this.semis.addAll(semis);
-        notifyListeners();
-      });
-      print('✅ FirebaseProvider V4: Semis listener configured');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up semis listener: $e');
-    }
-  }
-
-  // Configurer le listener pour les variétés
-  Future<void> _setupVarietesListener() async {
-    try {
-      print('FirebaseProvider V4: Setting up varietes listener...');
-      final stream = _service.getVarietesStream();
-      stream.listen((varietes) {
-        print('FirebaseProvider V4: Updated ${varietes.length} varietes');
-        this.varietes.clear();
-        this.varietes.addAll(varietes);
-        notifyListeners();
-      });
-      print('✅ FirebaseProvider V4: Varietes listener configured');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up varietes listener: $e');
-    }
-  }
-
-  // Configurer le listener pour les ventes
-  Future<void> _setupVentesListener() async {
-    try {
-      print('FirebaseProvider V4: Setting up ventes listener...');
-      final stream = _service.getVentesStream();
-      stream.listen((ventes) {
-        print('FirebaseProvider V4: Updated ${ventes.length} ventes');
-        this.ventes.clear();
-        this.ventes.addAll(ventes);
-        notifyListeners();
-      });
-      print('✅ FirebaseProvider V4: Ventes listener configured');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up ventes listener: $e');
-    }
-  }
-
-  // Configurer le listener pour les traitements
-  Future<void> _setupTraitementsListener() async {
-    try {
-      print('FirebaseProvider V4: Setting up traitements listener...');
-      final stream = _service.getTraitementsStream();
-      stream.listen((traitements) {
-        print('FirebaseProvider V4: Updated ${traitements.length} traitements');
-        this.traitements.clear();
-        this.traitements.addAll(traitements);
-        notifyListeners();
-      });
-      print('✅ FirebaseProvider V4: Traitements listener configured');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up traitements listener: $e');
-    }
-  }
-
-  // Configurer le listener pour les produits
-  Future<void> _setupProduitsListener() async {
-    try {
-      print('FirebaseProvider V4: Setting up produits listener...');
-      final stream = _service.getProduitsStream();
-      stream.listen((produits) {
-        print('FirebaseProvider V4: Updated ${produits.length} produits');
-        this.produits.clear();
-        this.produits.addAll(produits);
-        notifyListeners();
-      });
-      print('✅ FirebaseProvider V4: Produits listener configured');
-    } catch (e) {
-      print('❌ FirebaseProvider V4: Error setting up produits listener: $e');
-    }
-  }
-
   // Initialiser pour un utilisateur spécifique
   Future<void> ensureInitializedFor(String uid) async {
-    if (_ready && _initedUid == uid) {
-      print('FirebaseProvider V4: Already initialized for user: $uid');
-      return;
-    }
+    if (_ready && _initedUid == uid) return;
     
     print('FirebaseProvider V4: Initializing for user: $uid');
-    print('FirebaseProvider V4: Current state - ready: $_ready, uid: $_initedUid');
-    
-    try {
-      // 👉 OUVRIR les listeners RTDB ici via _service.initialize()
-      await _service.initialize();
-      
-      // Configurer les listeners Firebase pour charger les données
-      await _setupFirebaseListeners();
-      
-      _initedUid = uid;
-      _ready = true;                // ✅ indispensable
-      print('FirebaseProvider V4: Initialization completed for user: $uid');
-      print('FirebaseProvider V4: New state - ready: $_ready, uid: $_initedUid');
-      notifyListeners();            // ✅ indispensable
-    } catch (e) {
-      print('FirebaseProvider V4: Error during initialization: $e');
-      _ready = false;
-      _initedUid = null;
-      notifyListeners();
-      rethrow;
-    }
+    await _service.initialize();
+    _initedUid = uid;
+    _ready = true;
+    notifyListeners();
+    print('FirebaseProvider V4: Initialization completed for user: $uid');
   }
 
   // Nettoyer les ressources liées à l'authentification
   Future<void> disposeAuthBoundResources() async {
-    if (!_ready && _initedUid == null) return;
-    
     print('FirebaseProvider V4: Disposing auth bound resources');
-    await _service.disposeListeners(); // annule TOUS les streams RTDB
+    await _service.disposeListeners();
     _initedUid = null;
     _ready = false;
-    _clearAll();
-    print('FirebaseProvider V4: Auth bound resources disposed');
+    clearAll();
     notifyListeners();
+    print('FirebaseProvider V4: Auth bound resources disposed');
   }
 
-  // Vider toutes les données (méthode privée)
-  void _clearAll() {
+  // Vider toutes les données
+  void clearAll() {
     print('FirebaseProvider V4: Clearing all data');
     parcelles.clear();
     cellules.clear();
@@ -1107,13 +921,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
     ventes.clear();
     traitements.clear();
     produits.clear();
-    print('FirebaseProvider V4: All data cleared');
-  }
-
-  // Vider toutes les données (méthode publique)
-  void clearAll() {
-    _clearAll();
     notifyListeners();
+    print('FirebaseProvider V4: All data cleared');
   }
 
   // Forcer la mise à jour après la connexion (legacy)

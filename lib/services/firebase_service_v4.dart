@@ -72,13 +72,9 @@ class FirebaseServiceV4 {
       _isInitialized = true;
       _isGloballyInitialized = true;
       
-      // Configurer les listeners Firebase pour charger les données
-      await _setupFirebaseListeners();
-      
     } catch (e) {
       print('❌ FirebaseService V4: Init failed: $e');
       _isInitialized = true;
-      rethrow; // Propager l'erreur pour que le provider puisse la gérer
     }
   }
 
@@ -113,26 +109,6 @@ class FirebaseServiceV4 {
       print('FirebaseService V4: User $uid added to farm $_farmId');
     } catch (e) {
       print('FirebaseService V4: Failed to add user to farm: $e');
-    }
-  }
-
-  // Configurer les listeners Firebase pour charger les données
-  Future<void> _setupFirebaseListeners() async {
-    try {
-      print('FirebaseService V4: Setting up Firebase listeners...');
-      
-      if (_farmRef == null) {
-        print('FirebaseService V4: No farm reference, skipping listeners');
-        return;
-      }
-
-      // Pour l'instant, on se contente de logger que les listeners seraient configurés
-      // Les vrais listeners seront configurés par le FirebaseProviderV4
-      print('FirebaseService V4: Listeners will be configured by FirebaseProviderV4');
-      
-      print('✅ FirebaseService V4: All listeners configured successfully');
-    } catch (e) {
-      print('❌ FirebaseService V4: Error setting up listeners: $e');
     }
   }
 
@@ -654,13 +630,13 @@ class FirebaseServiceV4 {
         if (event.snapshot.value == null) return <Traitement>[];
         try {
           // Normalisation robuste via JSON round-trip
-          final root = normalize(event.snapshot.value);
+          final root = normalizeLoose(event.snapshot.value);
           print('FirebaseService V4: Received ${root.length} traitements from Firebase');
           print('FirebaseService V4: Traitements keys: ${root.keys.toList()}');
           
           return root.entries.map((e) {
             try {
-              final map = normalize(e.value);
+              final map = normalizeLoose(e.value);
               final traitement = Traitement.fromMap(map);
               // Assigner la clé Firebase comme firebaseId
               return traitement.copyWith(firebaseId: e.key);
@@ -716,11 +692,11 @@ class FirebaseServiceV4 {
         if (event.snapshot.value == null) return <Produit>[];
         try {
           // Normalisation robuste via JSON round-trip
-          final root = normalize(event.snapshot.value);
+          final root = normalizeLoose(event.snapshot.value);
           
           return root.entries.map((e) {
             try {
-              final map = normalize(e.value);
+              final map = normalizeLoose(e.value);
               final produit = Produit.fromMap(map);
               // Assigner la clé Firebase comme firebaseId
               return produit.copyWith(firebaseId: e.key);
