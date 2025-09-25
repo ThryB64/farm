@@ -78,8 +78,8 @@ class FirebaseProviderV4 extends ChangeNotifier {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
   
-  // Initialiser le provider
-  Future<void> initialize() async {
+  // Méthode privée pour l'initialisation interne (utilisée par initializeForUser)
+  Future<void> _initialize() async {
     if (_isInitialized) return;
     
     try {
@@ -898,18 +898,27 @@ class FirebaseProviderV4 extends ChangeNotifier {
   // Getter pour vérifier si le provider est prêt
   bool get ready => _ready;
 
-  // Initialiser pour un utilisateur spécifique
-  Future<void> ensureInitializedFor(String uid) async {
+  // Initialiser pour un utilisateur spécifique (API unique)
+  Future<void> initializeForUser(String uid) async {
     if (_ready && _initedUid == uid && _isInitialized) return;
     
     print('FirebaseProvider V4: Initializing for user: $uid');
-    _initedUid = uid;
-    _ready = false;
-    _isInitialized = false;
-    await initialize();     // Branche les streams
-    _ready = true;
-    notifyListeners();
-    print('FirebaseProvider V4: Initialization completed for user: $uid');
+    
+    try {
+      // Utiliser la méthode privée d'initialisation
+      await _initialize();
+      
+      _initedUid = uid;
+      _ready = true;
+      _error = null;
+      notifyListeners();
+      print('✅ FirebaseProvider V4: Initialization completed for user: $uid');
+      
+    } catch (e) {
+      _error = 'Erreur d\'initialisation: $e';
+      print('❌ FirebaseProvider V4: Initialization failed for user $uid: $e');
+      notifyListeners();
+    }
   }
 
   // Nettoyer les ressources liées à l'authentification
@@ -933,13 +942,13 @@ class FirebaseProviderV4 extends ChangeNotifier {
     _initedUid = null;
     _ready = false;
     _isInitialized = false;   // IMPORTANT : remettre à false
-    clearAll();
-    notifyListeners();
+    _clearAllInternal(); // Méthode interne sans notifyListeners
+    notifyListeners(); // Un seul notify à la fin
     print('FirebaseProvider V4: Auth bound resources disposed');
   }
 
-  // Vider toutes les données
-  void clearAll() {
+  // Vider toutes les données (version interne sans notify)
+  void _clearAllInternal() {
     print('FirebaseProvider V4: Clearing all data');
     _parcellesMap.clear();
     _cellulesMap.clear();
@@ -949,8 +958,13 @@ class FirebaseProviderV4 extends ChangeNotifier {
     _ventesMap.clear();
     _traitementsMap.clear();
     _produitsMap.clear();
-    notifyListeners();
     print('FirebaseProvider V4: All data cleared');
+  }
+
+  // Vider toutes les données (version publique avec notify)
+  void clearAll() {
+    _clearAllInternal();
+    notifyListeners();
   }
 
   // Forcer la mise à jour après la connexion (legacy)

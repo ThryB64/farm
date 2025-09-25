@@ -182,7 +182,6 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   String? _lastUid;
-  int _bootGen = 0; // token de génération
 
   @override
   Widget build(BuildContext context) {
@@ -195,14 +194,14 @@ class _AuthGateState extends State<AuthGate> {
         print('AuthGate: Auth state changed - user: ${uid ?? 'null'}');
         
         if (uid == null) {
-          // logout : vider et afficher login
+          // logout : vider et afficher login SEULEMENT si on était connecté
           if (_lastUid != null) {
             print('AuthGate: User not authenticated, clearing data');
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-              provider.disposeAuthBoundResources();
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              if (!mounted) return;
+              await context.read<FirebaseProviderV4>().disposeAuthBoundResources();
+              if (mounted) setState(() => _lastUid = null);
             });
-            _lastUid = null;
           }
           return const SecureLoginScreen();
         }
@@ -213,21 +212,15 @@ class _AuthGateState extends State<AuthGate> {
           return const HomeScreen();
         }
         
-        // nouveau boot ou pas prêt : lancer EXACTEMENT un init
-        final myGen = ++_bootGen;
-        _lastUid = uid;
-        
-        print('AuthGate: User authenticated, initializing data for $uid (gen: $myGen)');
-        
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          // NE JAMAIS disposer ici
-          await provider.ensureInitializedFor(uid);
-          if (!mounted || myGen != _bootGen) {
-            print('AuthGate: Boot $myGen obsolete (current: $_bootGen), ignoring');
-            return; // résultat obsolète
-          }
-          setState(() {}); // affichera Home quand provider.ready sera true
-        });
+        // nouveau UID : initialiser
+        if (uid != _lastUid) {
+          print('AuthGate: User authenticated, initializing data for $uid');
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            if (!mounted) return;
+            await context.read<FirebaseProviderV4>().initializeForUser(uid);
+            if (mounted) setState(() => _lastUid = uid);
+          });
+        }
         
         return const SplashScreen();
       },

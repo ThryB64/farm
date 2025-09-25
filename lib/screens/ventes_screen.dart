@@ -59,7 +59,12 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => provider.initialize(),
+                    onPressed: () {
+                      // L'initialisation est gérée par AuthGate
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('L\'initialisation est gérée automatiquement')),
+                      );
+                    },
                     child: Text('Réessayer'),
                   ),
                 ],

@@ -719,7 +719,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       print('🔄 Début du refresh forcé...');
       
       // Forcer le rechargement des données depuis Firebase
-      await provider.initialize();
+      // L'initialisation est gérée par AuthGate
       
       // Attendre un peu pour que les listeners se mettent à jour
       await Future.delayed(const Duration(milliseconds: 1000));
