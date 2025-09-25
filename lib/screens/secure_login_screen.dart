@@ -44,8 +44,8 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
         _passwordController.text,
       );
 
-      print('SecureLoginScreen: Sign in successful, AuthGate will handle navigation');
-      // AuthGate gère la navigation automatiquement via authStateChanges
+      print('SecureLoginScreen: Sign in successful, letting SecurityWrapper handle navigation');
+      // Laisser SecurityWrapper gérer la navigation automatiquement
       // Pas de navigation manuelle
     } on FirebaseAuthException catch (e) {
       print('SecureLoginScreen: Firebase auth error: ${e.code} - ${e.message}');

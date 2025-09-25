@@ -15,7 +15,6 @@ import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'exports_pdf_screen.dart';
 import '../main.dart';
-import 'secure_login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -88,20 +87,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     if (confirmed == true) {
       try {
-        print('HomeScreen: user pressed logout');
+        print('HomeScreen: Starting sign out process');
         
-        await SecurityService().signOut();                       // déconnexion
-        await context.read<FirebaseProviderV4>().disposeAuthBoundResources(); // nettoie data
-
-        // Revenir immédiatement sur l'écran de login et purger la pile
-        if (mounted) {
-          Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const SecureLoginScreen()),
-            (_) => false,
-          );
-        }
+        // Nettoyer les ressources liées à l'authentification
+        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+        await provider.disposeAuthBoundResources();
         
-        print('HomeScreen: logout flow done');
+        await SecurityService().signOut();
+        print('HomeScreen: Sign out successful, AuthGate will switch to login');
+        // AuthGate s'occupe de la navigation automatiquement
       } catch (e) {
         print('HomeScreen: Sign out error: $e');
         if (mounted) {

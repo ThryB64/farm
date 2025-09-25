@@ -5,14 +5,13 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
 import 'firebase_database_singleton.dart';
-import 'app_firebase.dart';
 
 class SecurityService {
   static final SecurityService _instance = SecurityService._internal();
   factory SecurityService() => _instance;
   SecurityService._internal();
 
-  final FirebaseAuth _auth = AppFirebase.auth;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final Uuid _uuid = const Uuid();
 
   // Clé pour le device ID dans localStorage
@@ -145,11 +144,7 @@ class SecurityService {
   Future<void> signOut() async {
     try {
       print('SecurityService: Signing out...');
-      
-      // Déconnexion Firebase Auth (déclenche authStateChanges)
       await _auth.signOut();
-      print('SecurityService: Firebase auth signOut completed');
-      print('SecurityService: post-signOut user=${AppFirebase.auth.currentUser}');
       
       // Nettoyer le device ID local
       html.window.localStorage.remove(_deviceIdKey);
@@ -164,7 +159,7 @@ class SecurityService {
       html.window.localStorage.remove('traitements');
       html.window.localStorage.remove('produits');
       
-      print('SecurityService: Sign out completed - authStateChanges should trigger');
+      print('SecurityService: Sign out completed');
     } catch (e) {
       print('SecurityService: Sign out error: $e');
       rethrow;
