@@ -373,28 +373,15 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     });
 
     try {
-      final provider = context.read<FirebaseProviderV4>();
+      // Utiliser l'export Firebase natif
+      final firebaseData = await _getFirebaseExport();
       
-      // Préparer les données à exporter avec conversion explicite des types
-      final exportData = {
-        'exportDate': DateTime.now().toIso8601String(),
-        'version': '2.0', // Version mise à jour pour inclure toutes les données
-        'parcelles': provider.parcelles.map((p) => _convertParcelleToMap(p)).toList(),
-        'cellules': provider.cellules.map((c) => _convertCelluleToMap(c)).toList(),
-        'chargements': provider.chargements.map((c) => _convertChargementToMap(c)).toList(),
-        'semis': provider.semis.map((s) => _convertSemisToMap(s)).toList(),
-        'varietes': provider.varietes.map((v) => _convertVarieteToMap(v)).toList(),
-        'ventes': provider.ventes.map((v) => _convertVenteToMap(v)).toList(),
-        'traitements': provider.traitements.map((t) => _convertTraitementToMap(t)).toList(),
-        'produits': provider.produits.map((p) => _convertProduitToMap(p)).toList(),
-      };
-
       // Convertir en JSON avec indentation
-      final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
+      final jsonString = const JsonEncoder.withIndent('  ').convert(firebaseData);
       
       // Créer le nom de fichier avec la date
       final now = DateTime.now();
-      final fileName = 'mais_tracker_export_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
+      final fileName = 'farmgaec-default-rtdb-export_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
       
       // Pour le web, on utilise la fonctionnalité de téléchargement
       _downloadFile(jsonString, fileName);
@@ -402,7 +389,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export réussi : $fileName'),
+            content: Text('Export Firebase réussi : $fileName'),
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -415,7 +402,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'export : $e'),
+            content: Text('Erreur lors de l\'export Firebase : $e'),
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -431,6 +418,215 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         });
       }
     }
+  }
+
+  // Récupérer l'export Firebase natif
+  Future<Map<String, dynamic>> _getFirebaseExport() async {
+    try {
+      // Utiliser le provider pour récupérer toutes les données
+      final provider = context.read<FirebaseProviderV4>();
+      
+      // Récupérer toutes les données depuis le provider
+      final parcelles = provider.parcelles;
+      final cellules = provider.cellules;
+      final chargements = provider.chargements;
+      final semis = provider.semis;
+      final varietes = provider.varietes;
+      final ventes = provider.ventes;
+      final traitements = provider.traitements;
+      final produits = provider.produits;
+      
+      // Construire la structure Firebase
+      final firebaseData = {
+        'allowedUsers': {
+          // Les utilisateurs autorisés seront ajoutés par le service
+        },
+        'farmMembers': {
+          'gaec_berard': {
+            // Les membres de la ferme seront ajoutés par le service
+          }
+        },
+        'farms': {
+          'gaec_berard': {
+            'parcelles': _buildFirebaseParcelles(parcelles),
+            'cellules': _buildFirebaseCellules(cellules),
+            'chargements': _buildFirebaseChargements(chargements),
+            'semis': _buildFirebaseSemis(semis),
+            'varietes': _buildFirebaseVarietes(varietes),
+            'ventes': _buildFirebaseVentes(ventes),
+            'traitements': _buildFirebaseTraitements(traitements),
+            'produits': _buildFirebaseProduits(produits),
+          }
+        }
+      };
+      
+      return firebaseData;
+    } catch (e) {
+      print('Erreur lors de la récupération des données Firebase: $e');
+      rethrow;
+    }
+  }
+
+  // Construire la structure Firebase pour les parcelles
+  Map<String, dynamic> _buildFirebaseParcelles(List<Parcelle> parcelles) {
+    final Map<String, dynamic> result = {};
+    for (final parcelle in parcelles) {
+      final key = parcelle.firebaseId ?? 'parcelle_${parcelle.nom.toLowerCase().replaceAll(' ', '_')}_${(parcelle.surface * 1000).round()}';
+      result[key] = {
+        'firebaseId': key,
+        'nom': parcelle.nom,
+        'surface': parcelle.surface,
+        'date_creation': parcelle.dateCreation.toIso8601String(),
+        'notes': parcelle.notes,
+        'createdAt': parcelle.dateCreation.millisecondsSinceEpoch,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    return result;
+  }
+
+  // Construire la structure Firebase pour les cellules
+  Map<String, dynamic> _buildFirebaseCellules(List<Cellule> cellules) {
+    final Map<String, dynamic> result = {};
+    for (final cellule in cellules) {
+      final key = cellule.firebaseId ?? 'cellule_${cellule.reference}';
+      result[key] = {
+        'firebaseId': key,
+        'reference': cellule.reference,
+        'capacite': cellule.capacite,
+        'date_creation': cellule.dateCreation.toIso8601String(),
+        'notes': cellule.notes,
+        'nom': cellule.nom,
+        'fermee': cellule.fermee,
+        'createdAt': cellule.dateCreation.millisecondsSinceEpoch,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    return result;
+  }
+
+  // Construire la structure Firebase pour les chargements
+  Map<String, dynamic> _buildFirebaseChargements(List<Chargement> chargements) {
+    final Map<String, dynamic> result = {};
+    for (final chargement in chargements) {
+      final key = chargement.firebaseId ?? 'chargement_${chargement.dateChargement.year}-${chargement.dateChargement.month.toString().padLeft(2, '0')}-${chargement.dateChargement.day.toString().padLeft(2, '0')}_${chargement.remorque}';
+      result[key] = {
+        'firebaseId': key,
+        'cellule_id': chargement.celluleId,
+        'parcelle_id': chargement.parcelleId,
+        'remorque': chargement.remorque,
+        'date_chargement': chargement.dateChargement.toIso8601String(),
+        'poids_plein': chargement.poidsPlein,
+        'poids_vide': chargement.poidsVide,
+        'poids_net': chargement.poidsNet,
+        'poids_normes': chargement.poidsNormes,
+        'humidite': chargement.humidite,
+        'variete': chargement.variete,
+        'createdAt': chargement.dateChargement.millisecondsSinceEpoch,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    return result;
+  }
+
+  // Construire la structure Firebase pour les semis
+  Map<String, dynamic> _buildFirebaseSemis(List<Semis> semis) {
+    final Map<String, dynamic> result = {};
+    for (final s in semis) {
+      final key = s.firebaseId ?? 'semis_${s.parcelleId}_${s.date.year}-${s.date.month.toString().padLeft(2, '0')}-${s.date.day.toString().padLeft(2, '0')}';
+      result[key] = {
+        'firebaseId': key,
+        'parcelle_id': s.parcelleId,
+        'date': s.date.toIso8601String(),
+        'varietes_surfaces': s.varietesSurfaces.map((v) => v.toMap()).toList(),
+        'notes': s.notes,
+        'createdAt': s.date.millisecondsSinceEpoch,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    return result;
+  }
+
+  // Construire la structure Firebase pour les variétés
+  Map<String, dynamic> _buildFirebaseVarietes(List<Variete> varietes) {
+    final Map<String, dynamic> result = {};
+    for (final variete in varietes) {
+      final key = variete.firebaseId ?? 'variete_${variete.nom.toLowerCase().replaceAll(' ', '_')}';
+      result[key] = {
+        'firebaseId': key,
+        'nom': variete.nom,
+        'description': variete.description,
+        'date_creation': variete.dateCreation.toIso8601String(),
+        'createdAt': variete.dateCreation.millisecondsSinceEpoch,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    return result;
+  }
+
+  // Construire la structure Firebase pour les ventes
+  Map<String, dynamic> _buildFirebaseVentes(List<Vente> ventes) {
+    final Map<String, dynamic> result = {};
+    for (final vente in ventes) {
+      final key = vente.firebaseId ?? 'vente_${vente.numeroTicket}_${vente.date.year}-${vente.date.month.toString().padLeft(2, '0')}-${vente.date.day.toString().padLeft(2, '0')}';
+      result[key] = {
+        'firebaseId': key,
+        'date': vente.date.millisecondsSinceEpoch,
+        'annee': vente.annee,
+        'numeroTicket': vente.numeroTicket,
+        'client': vente.client,
+        'immatriculationRemorque': vente.immatriculationRemorque,
+        'cmr': vente.cmr,
+        'poidsVide': vente.poidsVide,
+        'poidsPlein': vente.poidsPlein,
+        'poidsNet': vente.poidsNet,
+        'ecartPoidsNet': vente.ecartPoidsNet,
+        'payer': vente.payer,
+        'prix': vente.prix,
+        'terminee': vente.terminee,
+        'createdAt': vente.date.millisecondsSinceEpoch,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    return result;
+  }
+
+  // Construire la structure Firebase pour les traitements
+  Map<String, dynamic> _buildFirebaseTraitements(List<Traitement> traitements) {
+    final Map<String, dynamic> result = {};
+    for (final traitement in traitements) {
+      final key = traitement.firebaseId ?? 'traitement_${traitement.parcelleId}_${traitement.date.year}-${traitement.date.month.toString().padLeft(2, '0')}-${traitement.date.day.toString().padLeft(2, '0')}';
+      result[key] = {
+        'firebaseId': key,
+        'parcelleId': traitement.parcelleId,
+        'date': traitement.date.millisecondsSinceEpoch,
+        'annee': traitement.annee,
+        'notes': traitement.notes,
+        'produits': traitement.produits.map((p) => p.toMap()).toList(),
+        'coutTotal': traitement.coutTotal,
+        'createdAt': traitement.date.millisecondsSinceEpoch,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    return result;
+  }
+
+  // Construire la structure Firebase pour les produits
+  Map<String, dynamic> _buildFirebaseProduits(List<Produit> produits) {
+    final Map<String, dynamic> result = {};
+    for (final produit in produits) {
+      final key = produit.firebaseId ?? 'produit_${produit.nom.toLowerCase().replaceAll(' ', '_')}';
+      result[key] = {
+        'firebaseId': key,
+        'nom': produit.nom,
+        'mesure': produit.mesure,
+        'notes': produit.notes,
+        'prixParAnnee': produit.prixParAnnee.map((k, v) => MapEntry(k.toString(), v)),
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+    return result;
   }
 
   // Méthodes de conversion avec gestion explicite des types
