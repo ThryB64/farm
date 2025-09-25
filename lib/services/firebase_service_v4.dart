@@ -75,6 +75,7 @@ class FirebaseServiceV4 {
     } catch (e) {
       print('❌ FirebaseService V4: Init failed: $e');
       _isInitialized = true;
+      rethrow; // Propager l'erreur pour que le provider puisse la gérer
     }
   }
 

@@ -896,16 +896,30 @@ class FirebaseProviderV4 extends ChangeNotifier {
 
   // Initialiser pour un utilisateur spécifique
   Future<void> ensureInitializedFor(String uid) async {
-    if (_ready && _initedUid == uid) return;
+    if (_ready && _initedUid == uid) {
+      print('FirebaseProvider V4: Already initialized for user: $uid');
+      return;
+    }
     
     print('FirebaseProvider V4: Initializing for user: $uid');
-    // 👉 OUVRIR les listeners RTDB ici via _service.initialize()
-    await _service.initialize();
+    print('FirebaseProvider V4: Current state - ready: $_ready, uid: $_initedUid');
     
-    _initedUid = uid;
-    _ready = true;                // ✅ indispensable
-    print('FirebaseProvider V4: Initialization completed for user: $uid');
-    notifyListeners();            // ✅ indispensable
+    try {
+      // 👉 OUVRIR les listeners RTDB ici via _service.initialize()
+      await _service.initialize();
+      
+      _initedUid = uid;
+      _ready = true;                // ✅ indispensable
+      print('FirebaseProvider V4: Initialization completed for user: $uid');
+      print('FirebaseProvider V4: New state - ready: $_ready, uid: $_initedUid');
+      notifyListeners();            // ✅ indispensable
+    } catch (e) {
+      print('FirebaseProvider V4: Error during initialization: $e');
+      _ready = false;
+      _initedUid = null;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   // Nettoyer les ressources liées à l'authentification

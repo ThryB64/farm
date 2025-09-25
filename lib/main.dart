@@ -196,6 +196,7 @@ class _AuthGateState extends State<AuthGate> {
         final uid = user?.uid;
         print('AuthGate: Auth state changed - user: ${uid ?? 'null'}');
         
+        // Gérer les transitions d'utilisateur
         if (!_transitioning && uid != _lastUid) {
           _transitioning = true;
           WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -203,30 +204,47 @@ class _AuthGateState extends State<AuthGate> {
               final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
               if (uid == null) {
                 print('AuthGate: User not authenticated, disposing resources');
-                await provider.disposeAuthBoundResources();  // ✅ clear seulement ici
+                await provider.disposeAuthBoundResources();
               } else {
                 print('AuthGate: User authenticated, initializing data');
                 await provider.ensureInitializedFor(uid);
               }
-              _lastUid = uid;
-            } finally {
-              if (mounted) _transitioning = false;
+              if (mounted) {
+                setState(() {
+                  _lastUid = uid;
+                  _transitioning = false;
+                });
+              }
+            } catch (e) {
+              print('AuthGate: Error during transition: $e');
+              if (mounted) {
+                setState(() {
+                  _transitioning = false;
+                });
+              }
             }
           });
         }
 
         if (uid == null) {
           print('AuthGate: Showing login screen');
-          return const SecureLoginScreen();            // ❌ JAMAIS de Splash ici
+          return const SecureLoginScreen();
         }
 
-        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-        if (!provider.ready) {
-          print('AuthGate: Showing splash screen (provider not ready)');
-          return const SplashScreen();
-        }
-        
-        return const HomeScreen();
+        // Utiliser Consumer pour écouter les changements du provider
+        return Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
+            print('AuthGate: Provider ready: ${provider.ready}');
+            
+            if (!provider.ready) {
+              print('AuthGate: Showing splash screen (provider not ready)');
+              return const SplashScreen();
+            }
+            
+            print('AuthGate: Showing home screen');
+            return const HomeScreen();
+          },
+        );
       },
     );
   }
