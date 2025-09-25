@@ -560,7 +560,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       'date': vente.date.toIso8601String(),
       'numeroTicket': vente.numeroTicket,
       'client': vente.client,
-      'immatriculation': vente.immatriculation,
+      'immatriculationRemorque': vente.immatriculationRemorque,
       'cmr': vente.cmr,
       'poidsVide': vente.poidsVide,
       'poidsPlein': vente.poidsPlein,
@@ -569,6 +569,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       'payer': vente.payer,
       'prix': vente.prix,
       'annee': vente.annee,
+      'terminee': vente.terminee,
     };
   }
 
@@ -577,7 +578,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       'id': traitement.id,
       'firebaseId': traitement.firebaseId,
       'parcelleId': traitement.parcelleId,
-      'date': traitement.date.toIso8601String(),
+      'date': traitement.date.millisecondsSinceEpoch,
       'annee': traitement.annee,
       'notes': traitement.notes,
       'produits': traitement.produits.map((p) => _convertProduitTraitementToMap(p)).toList(),
@@ -593,7 +594,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       'mesure': produitTraitement.mesure,
       'prixUnitaire': produitTraitement.prixUnitaire,
       'coutTotal': produitTraitement.coutTotal,
-      'date': produitTraitement.date.toIso8601String(),
+      'date': produitTraitement.date.millisecondsSinceEpoch,
     };
   }
 
@@ -1248,17 +1249,18 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       'id': map['id'],
       'firebaseId': map['firebaseId'],
       'date': DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
-      'numeroTicket': map['numeroTicket']?.toString(),
-      'client': map['client']?.toString(),
-      'immatriculation': map['immatriculation']?.toString(),
-      'cmr': map['cmr']?.toString(),
+      'numeroTicket': map['numeroTicket']?.toString() ?? '',
+      'client': map['client']?.toString() ?? '',
+      'immatriculationRemorque': map['immatriculationRemorque']?.toString() ?? '',
+      'cmr': map['cmr']?.toString() ?? '',
       'poidsVide': double.tryParse(map['poidsVide'].toString()) ?? 0.0,
       'poidsPlein': double.tryParse(map['poidsPlein'].toString()) ?? 0.0,
-      'poidsNet': double.tryParse(map['poidsNet'].toString()) ?? 0.0,
-      'ecartPoidsNet': double.tryParse(map['ecartPoidsNet'].toString()) ?? 0.0,
+      'poidsNet': double.tryParse(map['poidsNet'].toString()),
+      'ecartPoidsNet': double.tryParse(map['ecartPoidsNet'].toString()),
       'payer': map['payer'] == true,
-      'prix': double.tryParse(map['prix'].toString()) ?? 0.0,
+      'prix': double.tryParse(map['prix'].toString()),
       'annee': int.tryParse(map['annee'].toString()) ?? DateTime.now().year,
+      'terminee': map['terminee'] == true,
     };
   }
 
@@ -1266,8 +1268,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     return {
       'id': map['id'],
       'firebaseId': map['firebaseId'],
-      'parcelleId': map['parcelleId']?.toString(),
-      'date': DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
+      'parcelleId': map['parcelleId']?.toString() ?? '',
+      'date': DateTime.fromMillisecondsSinceEpoch(map['date'] ?? DateTime.now().millisecondsSinceEpoch),
       'annee': int.tryParse(map['annee'].toString()) ?? DateTime.now().year,
       'notes': map['notes']?.toString(),
       'produits': (map['produits'] as List?)?.map((p) => _parseProduitTraitementFromMap(Map<String, dynamic>.from(p))).toList() ?? [],
@@ -1277,13 +1279,13 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
 
   dynamic _parseProduitTraitementFromMap(Map<String, dynamic> map) {
     return {
-      'produitId': map['produitId']?.toString(),
-      'nomProduit': map['nomProduit']?.toString(),
+      'produitId': map['produitId']?.toString() ?? '',
+      'nomProduit': map['nomProduit']?.toString() ?? '',
       'quantite': double.tryParse(map['quantite'].toString()) ?? 0.0,
-      'mesure': map['mesure']?.toString(),
+      'mesure': map['mesure']?.toString() ?? '',
       'prixUnitaire': double.tryParse(map['prixUnitaire'].toString()) ?? 0.0,
       'coutTotal': double.tryParse(map['coutTotal'].toString()) ?? 0.0,
-      'date': DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
+      'date': DateTime.fromMillisecondsSinceEpoch(map['date'] ?? DateTime.now().millisecondsSinceEpoch),
     };
   }
 
