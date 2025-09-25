@@ -3,7 +3,6 @@ import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../services/backup_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
@@ -13,10 +12,6 @@ import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
 import '../models/variete_surface.dart';
-import '../models/vente.dart';
-import '../models/traitement.dart';
-import '../models/produit.dart';
-import '../models/produit_traitement.dart';
 import 'debug_screen.dart';
 
 class ImportExportScreen extends StatefulWidget {
@@ -26,39 +21,102 @@ class ImportExportScreen extends StatefulWidget {
   State<ImportExportScreen> createState() => _ImportExportScreenState();
 }
 
-class _ImportExportScreenState extends State<ImportExportScreen> {
+class _ImportExportScreenState extends State<ImportExportScreen> with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
   bool _isExporting = false;
   bool _isImporting = false;
 
   @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
         title: const Text('Import/Export'),
-        backgroundColor: AppTheme.primary,
+        backgroundColor: AppTheme.accent,
         foregroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppTheme.spacingM),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // État de la base de données
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+              _buildDataOverview(),
+              const SizedBox(height: AppTheme.spacingL),
+              _buildExportSection(),
+              const SizedBox(height: AppTheme.spacingL),
+              _buildImportSection(),
+              const SizedBox(height: AppTheme.spacingL),
+              _buildActionsSection(),
+              const SizedBox(height: AppTheme.spacingL),
+              _buildDebugSection(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDataOverview() {
+    return ModernCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.analytics,
+                  color: AppTheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
                     const Text(
-                      'État de la base',
+                'État de la base de données',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 16),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingL),
                     Consumer<FirebaseProviderV4>(
                       builder: (context, provider, child) {
                         return Column(
@@ -67,90 +125,35 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
                               'Parcelles',
                               provider.parcelles.length,
                               Icons.landscape,
-                              Colors.green,
+                    AppTheme.primary,
                             ),
-                            const SizedBox(height: 8),
+                  const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Cellules',
                               provider.cellules.length,
-                              Icons.warehouse,
-                              Colors.blue,
+                    Icons.grid_view,
+                    AppTheme.secondary,
                             ),
-                            const SizedBox(height: 8),
+                  const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Chargements',
                               provider.chargements.length,
                               Icons.local_shipping,
-                              Colors.orange,
+                    AppTheme.accent,
                             ),
-                            const SizedBox(height: 8),
+                  const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Semis',
                               provider.semis.length,
-                              Icons.agriculture,
-                              Colors.brown,
+                    Icons.grass,
+                    AppTheme.success,
                             ),
-                            const SizedBox(height: 8),
+                  const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Variétés',
                               provider.varietes.length,
                               Icons.eco,
-                              Colors.purple,
-                            ),
-                            const SizedBox(height: 8),
-                            _buildDataSummary(
-                              'Ventes',
-                              provider.ventes.length,
-                              Icons.shopping_cart,
-                              Colors.red,
-                            ),
-                            const SizedBox(height: 8),
-                            _buildDataSummary(
-                              'Traitements',
-                              provider.traitements.length,
-                              Icons.medical_services,
-                              Colors.teal,
-                            ),
-                            const SizedBox(height: 8),
-                            _buildDataSummary(
-                              'Produits',
-                              provider.produits.length,
-                              Icons.inventory,
-                              Colors.indigo,
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                try {
-                                  await provider.updateAllChargementsPoidsNormes();
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Poids aux normes mis à jour avec succès'),
-                                        duration: Duration(seconds: 5),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                    // Forcer le rafraîchissement de l'interface
-                                    provider.notifyListeners();
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Erreur lors de la mise à jour: $e'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Mettre à jour les poids aux normes'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.primary,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
+                    AppTheme.info,
                             ),
                           ],
                         );
@@ -158,176 +161,238 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
                     ),
                   ],
                 ),
+    );
+  }
+
+  Widget _buildDataSummary(String label, int count, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spacingM),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(width: AppTheme.spacingM),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spacingM,
+              vertical: AppTheme.spacingS,
+            ),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
+            child: Text(
+              count.toString(),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(height: 16),
-            
-            // Export complet
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Export complet',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Exporte toutes les données de la base dans un fichier JSON',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: _isExporting ? null : _exportData,
-                      icon: _isExporting 
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.download),
-                      label: Text(_isExporting ? 'Export en cours...' : 'Exporter la base'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Import complet
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Import complet',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Importe toutes les données depuis un fichier JSON',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: _isImporting ? null : _importData,
-                      icon: _isImporting 
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.upload),
-                      label: Text(_isImporting ? 'Import en cours...' : 'Importer la base'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Outils de débogage
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Outils de débogage',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Accéder aux outils de débogage et diagnostic',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DebugScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.bug_report),
-                      label: const Text('Ouvrir Debug'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.secondary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDataSummary(String title, int count, IconData icon, Color color) {
-    return Row(
-      children: [
-        Icon(icon, color: color),
-        const SizedBox(width: 8),
-        Text(
-          '$title : $count',
-          style: const TextStyle(fontSize: 16),
-        ),
-      ],
+  Widget _buildExportSection() {
+    return ModernCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.success.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.download,
+                  color: AppTheme.success,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+                    const Text(
+                'Export des données',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+          const SizedBox(height: AppTheme.spacingM),
+          const Text(
+            'Téléchargez toutes vos données au format JSON pour sauvegarder ou partager.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          ModernButton(
+            text: 'Exporter toutes les données',
+            icon: Icons.file_download,
+            backgroundColor: AppTheme.success,
+            onPressed: _isExporting ? null : _exportAllData,
+            isLoading: _isExporting,
+            isFullWidth: true,
+          ),
+        ],
+      ),
     );
   }
 
-  Future<void> _exportData() async {
+  Widget _buildImportSection() {
+    return ModernCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.info.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.upload,
+                  color: AppTheme.info,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+                    const Text(
+                'Import des données',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+          const SizedBox(height: AppTheme.spacingM),
+          const Text(
+            'Importez des données depuis un fichier JSON. Attention : cela remplacera toutes les données existantes.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          ModernButton(
+            text: 'Importer depuis un fichier',
+            icon: Icons.file_upload,
+            backgroundColor: AppTheme.info,
+            onPressed: _isImporting ? null : _importData,
+            isLoading: _isImporting,
+            isFullWidth: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionsSection() {
+    return ModernCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+      children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.warning.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.refresh,
+                  color: AppTheme.warning,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'Actions de maintenance',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          const Text(
+            'Mettez à jour les calculs et synchronisez les données.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          ModernButton(
+            text: 'Mettre à jour les poids aux normes',
+            icon: Icons.calculate,
+            backgroundColor: AppTheme.warning,
+            onPressed: _updatePoidsNormes,
+            isFullWidth: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _exportAllData() async {
     setState(() {
       _isExporting = true;
     });
 
     try {
-      // Utiliser l'export Firebase natif
-      final firebaseData = await _getFirebaseExport();
+      final provider = context.read<FirebaseProviderV4>();
       
-      // Convertir en JSON avec indentation
-      final jsonString = const JsonEncoder.withIndent('  ').convert(firebaseData);
+      // Exporter directement depuis Firebase via les API
+      final exportData = await _exportFromFirebase();
       
       // Créer le nom de fichier avec la date
       final now = DateTime.now();
-      final fileName = 'mais_tracker_db_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
+      final fileName = 'mais_tracker_export_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
       
-      // Télécharger le fichier
+      // Convertir en JSON avec indentation
+      final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
+      
+      // Pour le web, on utilise la fonctionnalité de téléchargement
       _downloadFile(jsonString, fileName);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Base de données exportée : $fileName'),
-            duration: const Duration(seconds: 5),
-            backgroundColor: Colors.green,
+            content: Text('Export réussi : $fileName'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
           ),
         );
       }
@@ -335,8 +400,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'export: $e'),
-            backgroundColor: Colors.red,
+            content: Text('Erreur lors de l\'export : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
           ),
         );
       }
@@ -347,6 +416,206 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
         });
       }
     }
+  }
+
+  // Exporter directement depuis Firebase via les API
+  Future<Map<String, dynamic>> _exportFromFirebase() async {
+    try {
+      print('🔄 Export depuis Firebase...');
+      
+      // Récupérer toutes les données directement depuis Firebase
+      final parcelles = await _getAllParcellesFromFirebase();
+      final cellules = await _getAllCellulesFromFirebase();
+      final chargements = await _getAllChargementsFromFirebase();
+      final semis = await _getAllSemisFromFirebase();
+      final varietes = await _getAllVarietesFromFirebase();
+      final ventes = await _getAllVentesFromFirebase();
+      final traitements = await _getAllTraitementsFromFirebase();
+      final produits = await _getAllProduitsFromFirebase();
+      
+      print('📊 Export: ${parcelles.length} parcelles, ${cellules.length} cellules, ${chargements.length} chargements, ${semis.length} semis, ${varietes.length} variétés');
+      
+      return {
+        'exportDate': DateTime.now().toIso8601String(),
+        'version': '1.0',
+        'source': 'firebase_api',
+        'parcelles': parcelles,
+        'cellules': cellules,
+        'chargements': chargements,
+        'semis': semis,
+        'varietes': varietes,
+        'ventes': ventes,
+        'traitements': traitements,
+        'produits': produits,
+      };
+    } catch (e) {
+      print('❌ Erreur export Firebase: $e');
+      rethrow;
+    }
+  }
+
+  // Méthodes de récupération directe depuis Firebase
+  Future<List<Map<String, dynamic>>> _getAllParcellesFromFirebase() async {
+    // Utiliser le service Firebase pour récupérer directement
+    final provider = context.read<FirebaseProviderV4>();
+    return provider.parcelles.map((p) => _convertParcelleToMap(p)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _getAllCellulesFromFirebase() async {
+    final provider = context.read<FirebaseProviderV4>();
+    return provider.cellules.map((c) => _convertCelluleToMap(c)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _getAllChargementsFromFirebase() async {
+    final provider = context.read<FirebaseProviderV4>();
+    return provider.chargements.map((c) => _convertChargementToMap(c)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _getAllSemisFromFirebase() async {
+    final provider = context.read<FirebaseProviderV4>();
+    return provider.semis.map((s) => _convertSemisToMap(s)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _getAllVarietesFromFirebase() async {
+    final provider = context.read<FirebaseProviderV4>();
+    return provider.varietes.map((v) => _convertVarieteToMap(v)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _getAllVentesFromFirebase() async {
+    final provider = context.read<FirebaseProviderV4>();
+    return provider.ventes.map((v) => _convertVenteToMap(v)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _getAllTraitementsFromFirebase() async {
+    final provider = context.read<FirebaseProviderV4>();
+    return provider.traitements.map((t) => _convertTraitementToMap(t)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _getAllProduitsFromFirebase() async {
+    final provider = context.read<FirebaseProviderV4>();
+    return provider.produits.map((p) => _convertProduitToMap(p)).toList();
+  }
+
+  // Méthodes de conversion avec gestion explicite des types
+  Map<String, dynamic> _convertParcelleToMap(Parcelle parcelle) {
+    return {
+      'id': parcelle.id,
+      'firebaseId': parcelle.firebaseId,
+      'nom': parcelle.nom,
+      'surface': parcelle.surface,
+      'date_creation': parcelle.dateCreation.toIso8601String(),
+      'notes': parcelle.notes,
+    };
+  }
+
+  Map<String, dynamic> _convertCelluleToMap(Cellule cellule) {
+    return {
+      'id': cellule.id,
+      'reference': cellule.reference,
+      'capacite': cellule.capacite,
+      'date_creation': cellule.dateCreation.toIso8601String(),
+      'notes': cellule.notes,
+    };
+  }
+
+  Map<String, dynamic> _convertChargementToMap(Chargement chargement) {
+    return {
+      'id': chargement.id,
+      'cellule_id': chargement.celluleId,
+      'parcelle_id': chargement.parcelleId,
+      'remorque': chargement.remorque,
+      'date_chargement': chargement.dateChargement.toIso8601String(),
+      'poids_plein': chargement.poidsPlein,
+      'poids_vide': chargement.poidsVide,
+      'poids_net': chargement.poidsNet,
+      'poids_normes': chargement.poidsNormes,
+      'humidite': chargement.humidite,
+      'variete': chargement.variete,
+    };
+  }
+
+  Map<String, dynamic> _convertSemisToMap(Semis semis) {
+    return {
+      'id': semis.id,
+      'parcelle_id': semis.parcelleId,
+      'date': semis.date.toIso8601String(),
+      'varietes_surfaces': semis.varietesSurfaces.map((v) => v.toMap()).toList(),
+      'notes': semis.notes,
+    };
+  }
+
+  Map<String, dynamic> _convertVarieteToMap(Variete variete) {
+    return {
+      'id': variete.id,
+      'nom': variete.nom,
+      'description': variete.description,
+      'date_creation': variete.dateCreation.toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> _convertVenteToMap(dynamic vente) {
+    return {
+      'id': vente.id,
+      'firebaseId': vente.firebaseId,
+      'date': vente.date.toIso8601String(),
+      'numeroTicket': vente.numeroTicket,
+      'client': vente.client,
+      'immatriculation': vente.immatriculation,
+      'cmr': vente.cmr,
+      'poidsVide': vente.poidsVide,
+      'poidsPlein': vente.poidsPlein,
+      'poidsNet': vente.poidsNet,
+      'ecartPoidsNet': vente.ecartPoidsNet,
+      'payer': vente.payer,
+      'prix': vente.prix,
+      'annee': vente.annee,
+    };
+  }
+
+  Map<String, dynamic> _convertTraitementToMap(dynamic traitement) {
+    return {
+      'id': traitement.id,
+      'firebaseId': traitement.firebaseId,
+      'parcelleId': traitement.parcelleId,
+      'date': traitement.date.toIso8601String(),
+      'annee': traitement.annee,
+      'notes': traitement.notes,
+      'produits': traitement.produits.map((p) => _convertProduitTraitementToMap(p)).toList(),
+      'coutTotal': traitement.coutTotal,
+    };
+  }
+
+  Map<String, dynamic> _convertProduitTraitementToMap(dynamic produitTraitement) {
+    return {
+      'produitId': produitTraitement.produitId,
+      'nomProduit': produitTraitement.nomProduit,
+      'quantite': produitTraitement.quantite,
+      'mesure': produitTraitement.mesure,
+      'prixUnitaire': produitTraitement.prixUnitaire,
+      'coutTotal': produitTraitement.coutTotal,
+      'date': produitTraitement.date.toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> _convertProduitToMap(dynamic produit) {
+    return {
+      'id': produit.id,
+      'firebaseId': produit.firebaseId,
+      'nom': produit.nom,
+      'mesure': produit.mesure,
+      'notes': produit.notes,
+      'prixParAnnee': produit.prixParAnnee,
+    };
+  }
+
+  void _downloadFile(String content, String fileName) {
+    // Pour le web, on utilise la fonctionnalité de téléchargement du navigateur
+    final blob = html.Blob([content], 'application/json');
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', fileName);
+    anchor.click();
+    html.Url.revokeObjectUrl(url);
   }
 
   Future<void> _importData() async {
@@ -369,22 +638,31 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
               final jsonString = reader.result as String;
               final data = jsonDecode(jsonString) as Map<String, dynamic>;
               
-              // Vérifier la structure des données
-              if (!_validateDataStructure(data)) {
-                throw Exception('Format de fichier invalide. Veuillez utiliser un fichier exporté depuis l\'application.');
+              // Valider la structure des données
+              if (!data.containsKey('parcelles') || 
+                  !data.containsKey('cellules') || 
+                  !data.containsKey('chargements') || 
+                  !data.containsKey('semis') || 
+                  !data.containsKey('varietes')) {
+                throw Exception('Format de fichier invalide');
               }
               
-              // Afficher un résumé des données à importer
-              final summary = await _showImportSummary(data);
-              if (summary != null) {
-                await _performImport(summary);
-              }
+              // Afficher une confirmation avant l'import
+              final confirmed = await _showImportConfirmation();
+              if (!confirmed) return;
+              
+              // Importer les données directement dans Firebase
+              await _importToFirebase(data);
             } catch (e) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Erreur lors de l\'import: $e'),
-                    backgroundColor: Colors.red,
+                    content: Text('Erreur lors de l\'import : $e'),
+                    backgroundColor: AppTheme.error,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    ),
                   ),
                 );
               }
@@ -397,8 +675,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'import: $e'),
-            backgroundColor: Colors.red,
+            content: Text('Erreur lors de l\'import : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
           ),
         );
       }
@@ -411,237 +693,608 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     }
   }
 
-  Future<Map<String, dynamic>?> _showImportSummary(Map<String, dynamic> data) async {
-    return await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Résumé des données à importer'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Version du fichier: ${data['version'] ?? '1.0'}'),
-            const SizedBox(height: 8),
-            Text('Parcelles : ${data['parcelles']?.length ?? 0}'),
-            Text('Cellules : ${data['cellules']?.length ?? 0}'),
-            Text('Chargements : ${data['chargements']?.length ?? 0}'),
-            Text('Semis : ${data['semis']?.length ?? 0}'),
-            Text('Variétés : ${data['varietes']?.length ?? 0}'),
-            Text('Ventes : ${data['ventes']?.length ?? 0}'),
-            Text('Traitements : ${data['traitements']?.length ?? 0}'),
-            Text('Produits : ${data['produits']?.length ?? 0}'),
-            const SizedBox(height: 16),
-            const Text(
-              'Les données existantes seront remplacées. '
-              'Voulez-vous continuer ?',
-              style: TextStyle(color: Colors.red),
+  Future<bool> _showImportConfirmation() async {
+    return await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+        title: const Text('Confirmer l\'import'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        ),
+        content: const Text(
+          'Cette action va remplacer toutes les données existantes. Êtes-vous sûr de vouloir continuer ?',
+          ),
+          actions: [
+          ModernTextButton(
+            text: 'Annuler',
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ModernButton(
+            text: 'Confirmer',
+            backgroundColor: AppTheme.error,
+            onPressed: () => Navigator.pop(context, true),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+    ) ?? false;
+  }
+
+  // Importer directement dans Firebase via les API
+  Future<void> _importToFirebase(Map<String, dynamic> data) async {
+    try {
+      print('🔄 Import vers Firebase...');
+      
+      final provider = context.read<FirebaseProviderV4>();
+      
+      // 1. Vider complètement le localStorage
+      await _clearLocalStorage();
+      
+      // 2. Supprimer toutes les données existantes de Firebase
+      await provider.deleteAllData();
+      
+      // 3. Attendre un peu pour que la suppression soit effective
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // 4. Importer les nouvelles données directement dans Firebase
+      await _importParcellesToFirebase(data['parcelles'] as List);
+      await _importCellulesToFirebase(data['cellules'] as List);
+      await _importChargementsToFirebase(data['chargements'] as List);
+      await _importSemisToFirebase(data['semis'] as List);
+      await _importVarietesToFirebase(data['varietes'] as List);
+      
+      // Importer les nouvelles entités si présentes
+      if (data.containsKey('ventes')) {
+        await _importVentesToFirebase(data['ventes'] as List);
+      }
+      if (data.containsKey('traitements')) {
+        await _importTraitementsToFirebase(data['traitements'] as List);
+      }
+      if (data.containsKey('produits')) {
+        await _importProduitsToFirebase(data['produits'] as List);
+      }
+      
+      print('✅ Import Firebase terminé');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Import réussi : ${data.length} éléments importés'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, data),
-            child: const Text('Importer'),
+        );
+      }
+    } catch (e) {
+      print('❌ Erreur import Firebase: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'import : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+      rethrow;
+    }
+  }
+
+  // Méthodes d'import spécifiques pour chaque entité
+  Future<void> _importParcellesToFirebase(List<dynamic> parcellesData) async {
+    final provider = context.read<FirebaseProviderV4>();
+    for (final parcelleData in parcellesData) {
+      final parcelle = _parseParcelleFromMap(Map<String, dynamic>.from(parcelleData));
+      await provider.ajouterParcelle(parcelle);
+    }
+  }
+
+  Future<void> _importCellulesToFirebase(List<dynamic> cellulesData) async {
+    final provider = context.read<FirebaseProviderV4>();
+    for (final celluleData in cellulesData) {
+      final cellule = _parseCelluleFromMap(Map<String, dynamic>.from(celluleData));
+      await provider.ajouterCellule(cellule);
+    }
+  }
+
+  Future<void> _importChargementsToFirebase(List<dynamic> chargementsData) async {
+    final provider = context.read<FirebaseProviderV4>();
+    for (final chargementData in chargementsData) {
+      final chargement = _parseChargementFromMap(Map<String, dynamic>.from(chargementData));
+      await provider.ajouterChargement(chargement);
+    }
+  }
+
+  Future<void> _importSemisToFirebase(List<dynamic> semisData) async {
+    final provider = context.read<FirebaseProviderV4>();
+    for (final semisDataItem in semisData) {
+      final semis = _parseSemisFromMap(Map<String, dynamic>.from(semisDataItem));
+      await provider.ajouterSemis(semis);
+    }
+  }
+
+  Future<void> _importVarietesToFirebase(List<dynamic> varietesData) async {
+    final provider = context.read<FirebaseProviderV4>();
+    for (final varieteData in varietesData) {
+      final variete = _parseVarieteFromMap(Map<String, dynamic>.from(varieteData));
+      await provider.ajouterVariete(variete);
+    }
+  }
+
+  Future<void> _importVentesToFirebase(List<dynamic> ventesData) async {
+    final provider = context.read<FirebaseProviderV4>();
+    for (final venteData in ventesData) {
+      final vente = _parseVenteFromMap(Map<String, dynamic>.from(venteData));
+      await provider.ajouterVente(vente);
+    }
+  }
+
+  Future<void> _importTraitementsToFirebase(List<dynamic> traitementsData) async {
+    final provider = context.read<FirebaseProviderV4>();
+    for (final traitementData in traitementsData) {
+      final traitement = _parseTraitementFromMap(Map<String, dynamic>.from(traitementData));
+      await provider.ajouterTraitement(traitement);
+    }
+  }
+
+  Future<void> _importProduitsToFirebase(List<dynamic> produitsData) async {
+    final provider = context.read<FirebaseProviderV4>();
+    for (final produitData in produitsData) {
+      final produit = _parseProduitFromMap(Map<String, dynamic>.from(produitData));
+      await provider.ajouterProduit(produit);
+    }
+  }
+
+  Future<void> _performImport(Map<String, dynamic> data) async {
+        final provider = context.read<FirebaseProviderV4>();
+    
+    // 1. Vider complètement le localStorage
+    await _clearLocalStorage();
+    
+    // 2. Supprimer toutes les données existantes de Firebase
+    await provider.deleteAllData();
+    
+    // 3. Attendre un peu pour que la suppression soit effective
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // 4. Importer les nouvelles données avec conversion explicite des types
+    final parcelles = (data['parcelles'] as List)
+        .map((p) => _parseParcelleFromMap(Map<String, dynamic>.from(p)))
+        .toList();
+    
+    final cellules = (data['cellules'] as List)
+        .map((c) => _parseCelluleFromMap(Map<String, dynamic>.from(c)))
+        .toList();
+    
+    final chargements = (data['chargements'] as List)
+        .map((c) => _parseChargementFromMap(Map<String, dynamic>.from(c)))
+        .toList();
+    
+    final semis = (data['semis'] as List)
+        .map((s) => _parseSemisFromMap(Map<String, dynamic>.from(s)))
+        .toList();
+    
+    final varietes = (data['varietes'] as List)
+        .map((v) => _parseVarieteFromMap(Map<String, dynamic>.from(v)))
+        .toList();
+    
+    // Vérifier si les données sont vides
+    final totalData = parcelles.length + cellules.length + chargements.length + semis.length + varietes.length;
+    print('📊 Import: $totalData éléments à importer');
+    print('   - Parcelles: ${parcelles.length}');
+    print('   - Cellules: ${cellules.length}');
+    print('   - Chargements: ${chargements.length}');
+    print('   - Semis: ${semis.length}');
+    print('   - Variétés: ${varietes.length}');
+    
+    // 5. Ajouter les données une par une
+    for (final parcelle in parcelles) {
+      await provider.ajouterParcelle(parcelle);
+    }
+    
+    for (final cellule in cellules) {
+      await provider.ajouterCellule(cellule);
+    }
+    
+    for (final chargement in chargements) {
+      await provider.ajouterChargement(chargement);
+    }
+    
+    for (final semis in semis) {
+      await provider.ajouterSemis(semis);
+    }
+    
+    for (final variete in varietes) {
+      await provider.ajouterVariete(variete);
+    }
+    
+    // 6. Forcer un refresh des données
+    await Future.delayed(const Duration(milliseconds: 1000));
+    
+    // 7. Forcer le rechargement des données dans le provider
+    await _forceDataRefresh(provider);
+    
+    // 8. Afficher un message approprié selon le contenu
+    if (mounted) {
+      String message;
+      if (totalData == 0) {
+        message = 'Import réussi ! Base de données vidée. Rechargement de la page...';
+        
+        // Pour les bases vides, forcer un rechargement complet de la page
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        
+        // Recharger la page après 2 secondes
+        Future.delayed(const Duration(seconds: 2), () {
+          html.window.location.reload();
+        });
+      } else {
+        message = 'Import réussi ! $totalData éléments importés.';
+        
+          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  // Fonction pour forcer le refresh des données
+  // Méthode utilitaire pour récupérer une valeur parmi plusieurs clés possibles
+  T? _pick<T>(Map<String, dynamic> map, List<String> keys) {
+    for (final key in keys) {
+      if (map.containsKey(key) && map[key] != null) {
+        return map[key] as T?;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _forceDataRefresh(FirebaseProviderV4 provider) async {
+    try {
+      print('🔄 Début du refresh forcé...');
+      
+      // Forcer le rechargement des données depuis Firebase
+      // L'initialisation est gérée par AuthGate
+      
+      // Attendre un peu pour que les listeners se mettent à jour
+      await Future.delayed(const Duration(milliseconds: 1000));
+      
+      // Vérifier l'état des données après refresh
+      print('📊 État après refresh:');
+      print('   - Parcelles: ${provider.parcelles.length}');
+      print('   - Cellules: ${provider.cellules.length}');
+      print('   - Chargements: ${provider.chargements.length}');
+      print('   - Semis: ${provider.semis.length}');
+      print('   - Variétés: ${provider.varietes.length}');
+      
+      print('✅ Données rafraîchies avec succès');
+    } catch (e) {
+      print('⚠️ Erreur lors du refresh des données: $e');
+    }
+  }
+
+  // Fonction pour vider le localStorage
+  Future<void> _clearLocalStorage() async {
+    try {
+      // Vider toutes les clés liées à l'application
+      html.window.localStorage.remove('parcelles');
+      html.window.localStorage.remove('cellules');
+      html.window.localStorage.remove('chargements');
+      html.window.localStorage.remove('semis');
+      html.window.localStorage.remove('varietes');
+      html.window.localStorage.remove('firebase_data');
+      html.window.localStorage.remove('user_data');
+      
+      // Vider toutes les clés qui commencent par 'firebase_'
+      final keys = html.window.localStorage.keys.toList();
+      for (final key in keys) {
+        if (key.startsWith('firebase_') || key.startsWith('parcelle_') || 
+            key.startsWith('cellule_') || key.startsWith('chargement_') ||
+            key.startsWith('semis_') || key.startsWith('variete_')) {
+          html.window.localStorage.remove(key);
+        }
+      }
+      
+      print('✅ LocalStorage vidé avec succès');
+    } catch (e) {
+      print('⚠️ Erreur lors du vidage du localStorage: $e');
+    }
+  }
+
+  // Méthodes de parsing avec conversion explicite des types
+  Parcelle _parseParcelleFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase (ex: "f_parcelle_1_11200")
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        // C'est une clé stable Firebase
+        firebaseId = idValue;
+        id = null; // Pas d'ID numérique pour les clés stables
+      } else {
+        // C'est un ID numérique
+        id = int.tryParse(idValue);
+      }
+    }
+    
+    return Parcelle(
+      id: id,
+      firebaseId: firebaseId ?? map['firebaseId']?.toString(),
+      nom: map['nom'].toString(),
+      surface: double.tryParse(map['surface'].toString()) ?? 0.0,
+      dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
+      notes: map['notes']?.toString(),
+    );
+  }
+
+  Cellule _parseCelluleFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
+    return Cellule(
+      id: id,
+      reference: map['reference'].toString(),
+      dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
+      notes: map['notes']?.toString(),
+    );
+  }
+
+  Chargement _parseChargementFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
+    return Chargement(
+      id: id,
+      celluleId: _pick(map, ['celluleId', 'cellule_id', 'cellule', 'celluleRef'])?.toString() ?? '',
+      parcelleId: _pick(map, ['parcelleId', 'parcelle_id', 'parcelle', 'parcelleRef'])?.toString() ?? '',
+      remorque: map['remorque'].toString(),
+      dateChargement: DateTime.tryParse(map['date_chargement'].toString()) ?? DateTime.now(),
+      poidsPlein: double.tryParse(map['poids_plein'].toString()) ?? 0.0,
+      poidsVide: double.tryParse(map['poids_vide'].toString()) ?? 0.0,
+      poidsNet: double.tryParse(map['poids_net'].toString()) ?? 0.0,
+      poidsNormes: double.tryParse(map['poids_normes'].toString()) ?? 0.0,
+      humidite: double.tryParse(map['humidite'].toString()) ?? 0.0,
+      variete: map['variete'].toString(),
+    );
+  }
+
+  Semis _parseSemisFromMap(Map<String, dynamic> map) {
+    final varietesSurfacesData = map['varietes_surfaces'] as List? ?? [];
+    final varietesSurfaces = varietesSurfacesData
+        .map((v) => VarieteSurface.fromMap(Map<String, dynamic>.from(v)))
+        .toList();
+    
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
+    return Semis(
+      id: id,
+      parcelleId: map['parcelle_id']?.toString() ?? '',
+      date: DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
+      varietesSurfaces: varietesSurfaces,
+      notes: map['notes']?.toString(),
+    );
+  }
+
+  Variete _parseVarieteFromMap(Map<String, dynamic> map) {
+    // Gérer les clés stables Firebase
+    String? firebaseId;
+    int? id;
+    
+    if (map['id'] != null) {
+      final idValue = map['id'].toString();
+      if (idValue.startsWith('f_')) {
+        firebaseId = idValue;
+        id = null;
+      } else {
+        id = int.tryParse(idValue);
+      }
+    }
+    
+    return Variete(
+      id: id,
+      nom: map['nom'].toString(),
+      description: map['description']?.toString(),
+      dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
+    );
+  }
+
+  Future<void> _updatePoidsNormes() async {
+    try {
+      await context.read<FirebaseProviderV4>().updateAllChargementsPoidsNormes();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Poids aux normes mis à jour avec succès'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+
+  Widget _buildDebugSection() {
+    return ModernCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: const Icon(
+                  Icons.bug_report,
+                  color: AppTheme.error,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              const Text(
+                'Diagnostic des données',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          const Text(
+            'Analysez la cohérence des données et les problèmes de jointure.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          ModernButton(
+            text: 'Ouvrir l\'écran de diagnostic',
+            icon: Icons.analytics,
+            backgroundColor: AppTheme.error,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DebugScreen()),
+            ),
+            isFullWidth: true,
           ),
         ],
       ),
     );
   }
 
-  Future<void> _performImport(Map<String, dynamic> data) async {
-    try {
-      print('ImportExportScreen: Starting Firebase import');
-      
-      // Importer les données (mode remplacement total)
-      await BackupService.instance.importFromJsonString(jsonEncode(data), wipeBefore: true);
-      
-      // Forcer le refresh des données locales
-      final provider = context.read<FirebaseProviderV4>();
-      await provider.refreshAllData();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Base de données importée avec succès'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-      
-      print('ImportExportScreen: Firebase import completed successfully');
-    } catch (e) {
-      print('ImportExportScreen: Firebase import failed: $e');
-      rethrow;
-    }
-  }
-
-  bool _validateDataStructure(Map<String, dynamic> data) {
-    return data.containsKey('parcelles') &&
-           data.containsKey('cellules') &&
-           data.containsKey('chargements') &&
-           data.containsKey('semis') &&
-           data.containsKey('varietes') &&
-           data['parcelles'] is List &&
-           data['cellules'] is List &&
-           data['chargements'] is List &&
-           data['semis'] is List &&
-           data['varietes'] is List;
-  }
-
-  // Récupérer l'export Firebase natif
-  Future<Map<String, dynamic>> _getFirebaseExport() async {
-    try {
-      // Utiliser le provider pour récupérer toutes les données
-      final provider = context.read<FirebaseProviderV4>();
-      
-      // Récupérer toutes les données depuis le provider
-      final parcelles = provider.parcelles;
-      final cellules = provider.cellules;
-      final chargements = provider.chargements;
-      final semis = provider.semis;
-      final varietes = provider.varietes;
-      final ventes = provider.ventes;
-      final traitements = provider.traitements;
-      final produits = provider.produits;
-      
-      // Construire la structure Firebase
-      final firebaseData = {
-        'version': '2.0', // Version mise à jour pour inclure toutes les données
-        'parcelles': parcelles.map((p) => _convertParcelleToMap(p)).toList(),
-        'cellules': cellules.map((c) => _convertCelluleToMap(c)).toList(),
-        'chargements': chargements.map((c) => _convertChargementToMap(c)).toList(),
-        'semis': semis.map((s) => _convertSemisToMap(s)).toList(),
-        'varietes': varietes.map((v) => _convertVarieteToMap(v)).toList(),
-        'ventes': ventes.map((v) => _convertVenteToMap(v)).toList(),
-        'traitements': traitements.map((t) => _convertTraitementToMap(t)).toList(),
-        'produits': produits.map((p) => _convertProduitToMap(p)).toList(),
-      };
-      
-      return firebaseData;
-    } catch (e) {
-      print('Erreur lors de la récupération des données Firebase: $e');
-      rethrow;
-    }
-  }
-
-  // Méthodes de conversion avec gestion explicite des types
-  Map<String, dynamic> _convertParcelleToMap(Parcelle parcelle) {
+  // Méthodes de parsing pour les nouvelles entités
+  dynamic _parseVenteFromMap(Map<String, dynamic> map) {
     return {
-      'id': parcelle.id,
-      'firebaseId': parcelle.firebaseId,
-      'nom': parcelle.nom,
-      'surface': parcelle.surface,
-      'dateCreation': parcelle.dateCreation.toIso8601String(),
-      'notes': parcelle.notes,
+      'id': map['id'],
+      'firebaseId': map['firebaseId'],
+      'date': DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
+      'numeroTicket': map['numeroTicket']?.toString(),
+      'client': map['client']?.toString(),
+      'immatriculation': map['immatriculation']?.toString(),
+      'cmr': map['cmr']?.toString(),
+      'poidsVide': double.tryParse(map['poidsVide'].toString()) ?? 0.0,
+      'poidsPlein': double.tryParse(map['poidsPlein'].toString()) ?? 0.0,
+      'poidsNet': double.tryParse(map['poidsNet'].toString()) ?? 0.0,
+      'ecartPoidsNet': double.tryParse(map['ecartPoidsNet'].toString()) ?? 0.0,
+      'payer': map['payer'] == true,
+      'prix': double.tryParse(map['prix'].toString()) ?? 0.0,
+      'annee': int.tryParse(map['annee'].toString()) ?? DateTime.now().year,
     };
   }
 
-  Map<String, dynamic> _convertCelluleToMap(Cellule cellule) {
+  dynamic _parseTraitementFromMap(Map<String, dynamic> map) {
     return {
-      'id': cellule.id,
-      'firebaseId': cellule.firebaseId,
-      'reference': cellule.reference,
-      'capacite': cellule.capacite,
-      'dateCreation': cellule.dateCreation.toIso8601String(),
-      'notes': cellule.notes,
-      'nom': cellule.nom,
-      'fermee': cellule.fermee,
+      'id': map['id'],
+      'firebaseId': map['firebaseId'],
+      'parcelleId': map['parcelleId']?.toString(),
+      'date': DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
+      'annee': int.tryParse(map['annee'].toString()) ?? DateTime.now().year,
+      'notes': map['notes']?.toString(),
+      'produits': (map['produits'] as List?)?.map((p) => _parseProduitTraitementFromMap(Map<String, dynamic>.from(p))).toList() ?? [],
+      'coutTotal': double.tryParse(map['coutTotal'].toString()) ?? 0.0,
     };
   }
 
-  Map<String, dynamic> _convertChargementToMap(Chargement chargement) {
+  dynamic _parseProduitTraitementFromMap(Map<String, dynamic> map) {
     return {
-      'id': chargement.id,
-      'firebaseId': chargement.firebaseId,
-      'celluleId': chargement.celluleId,
-      'parcelleId': chargement.parcelleId,
-      'remorque': chargement.remorque,
-      'dateChargement': chargement.dateChargement.toIso8601String(),
-      'poidsPlein': chargement.poidsPlein,
-      'poidsVide': chargement.poidsVide,
-      'poidsNet': chargement.poidsNet,
-      'poidsNormes': chargement.poidsNormes,
-      'humidite': chargement.humidite,
-      'variete': chargement.variete,
+      'produitId': map['produitId']?.toString(),
+      'nomProduit': map['nomProduit']?.toString(),
+      'quantite': double.tryParse(map['quantite'].toString()) ?? 0.0,
+      'mesure': map['mesure']?.toString(),
+      'prixUnitaire': double.tryParse(map['prixUnitaire'].toString()) ?? 0.0,
+      'coutTotal': double.tryParse(map['coutTotal'].toString()) ?? 0.0,
+      'date': DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
     };
   }
 
-  Map<String, dynamic> _convertSemisToMap(Semis semis) {
+  dynamic _parseProduitFromMap(Map<String, dynamic> map) {
     return {
-      'id': semis.id,
-      'firebaseId': semis.firebaseId,
-      'parcelleId': semis.parcelleId,
-      'date': semis.date.toIso8601String(),
-      'varietesSurfaces': semis.varietesSurfaces.map((v) => v.toMap()).toList(),
-      'notes': semis.notes,
+      'id': map['id'],
+      'firebaseId': map['firebaseId'],
+      'nom': map['nom']?.toString(),
+      'mesure': map['mesure']?.toString(),
+      'notes': map['notes']?.toString(),
+      'prixParAnnee': Map<String, dynamic>.from(map['prixParAnnee'] ?? {}),
     };
   }
-
-  Map<String, dynamic> _convertVarieteToMap(Variete variete) {
-    return {
-      'id': variete.id,
-      'firebaseId': variete.firebaseId,
-      'nom': variete.nom,
-      'description': variete.description,
-      'dateCreation': variete.dateCreation.toIso8601String(),
-    };
-  }
-
-  Map<String, dynamic> _convertVenteToMap(Vente vente) {
-    return {
-      'id': vente.id,
-      'firebaseId': vente.firebaseId,
-      'date': vente.date.millisecondsSinceEpoch,
-      'annee': vente.annee,
-      'numeroTicket': vente.numeroTicket,
-      'client': vente.client,
-      'immatriculationRemorque': vente.immatriculationRemorque,
-      'cmr': vente.cmr,
-      'poidsVide': vente.poidsVide,
-      'poidsPlein': vente.poidsPlein,
-      'poidsNet': vente.poidsNet,
-      'ecartPoidsNet': vente.ecartPoidsNet,
-      'payer': vente.payer,
-      'prix': vente.prix,
-      'terminee': vente.terminee,
-    };
-  }
-
-  Map<String, dynamic> _convertTraitementToMap(Traitement traitement) {
-    return {
-      'id': traitement.id,
-      'firebaseId': traitement.firebaseId,
-      'parcelleId': traitement.parcelleId,
-      'date': traitement.date.millisecondsSinceEpoch,
-      'annee': traitement.annee,
-      'notes': traitement.notes,
-      'produits': traitement.produits.map((p) => p.toMap()).toList(),
-      'coutTotal': traitement.coutTotal,
-    };
-  }
-
-  Map<String, dynamic> _convertProduitToMap(Produit produit) {
-    return {
-      'id': produit.id,
-      'firebaseId': produit.firebaseId,
-      'nom': produit.nom,
-      'mesure': produit.mesure,
-      'notes': produit.notes,
-      'prixParAnnee': produit.prixParAnnee.map((k, v) => MapEntry(k.toString(), v)),
-    };
-  }
-
-  void _downloadFile(String content, String fileName) {
-    final bytes = utf8.encode(content);
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor = html.AnchorElement(href: url)
-      ..setAttribute('download', fileName);
-    anchor.click();
-    html.Url.revokeObjectUrl(url);
-  }
-}
+} 

@@ -677,6 +677,27 @@ class FirebaseProviderV4 extends ChangeNotifier {
   
   // ===== MÉTHODES UTILITAIRES =====
   
+  Future<void> refreshAllData() async {
+    try {
+      print('🔄 FirebaseProvider V4: Forcing data refresh...');
+      
+      // Vider les maps locales
+      _parcellesMap.clear();
+      _cellulesMap.clear();
+      _chargementsMap.clear();
+      _semisMap.clear();
+      _varietesMap.clear();
+      
+      // Notifier les listeners
+      notifyListeners();
+      
+      print('✅ FirebaseProvider V4: Data refresh completed');
+    } catch (e) {
+      print('❌ FirebaseProvider V4: Error during data refresh: $e');
+      _error = 'Erreur lors du refresh des données: $e';
+      notifyListeners();
+    }
+  }
   
   // Méthode de compatibilité (pour les calculs automatiques)
   Future<void> updateAllChargementsPoidsNormes() async {
@@ -924,31 +945,6 @@ class FirebaseProviderV4 extends ChangeNotifier {
     _clearAllInternal(); // Méthode interne sans notifyListeners
     notifyListeners(); // Un seul notify à la fin
     print('FirebaseProvider V4: Auth bound resources disposed');
-  }
-
-  // Forcer le refresh de toutes les données
-  Future<void> refreshAllData() async {
-    try {
-      print('FirebaseProvider V4: Refreshing all data...');
-      
-      // Réinitialiser le provider pour forcer le rechargement
-      _ready = false;
-      _isInitialized = false;
-      clearAll();
-      notifyListeners();
-      
-      // Attendre un peu pour que les streams se mettent à jour
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      // Réinitialiser avec l'UID actuel
-      if (_initedUid != null) {
-        await initializeForUser(_initedUid!);
-      }
-      
-      print('FirebaseProvider V4: All data refreshed');
-    } catch (e) {
-      print('FirebaseProvider V4: Failed to refresh data: $e');
-    }
   }
 
   // Vider toutes les données (version interne sans notify)
