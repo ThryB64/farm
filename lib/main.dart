@@ -265,74 +265,30 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-  String? _lastUid;
-  bool _transitioning = false;
-
   @override
   Widget build(BuildContext context) {
-    // Utiliser userChanges() plus "verbeux" que authStateChanges sur Web
-    final auth$ = AppFirebase.auth.userChanges();
-    
-    // Debug info
-    print('AuthGate: listening on app=${AppFirebase.app.name}');
-    print('AuthGate: user=${AppFirebase.auth.currentUser?.uid}');
-    
+    final auth$ = AppFirebase.auth.userChanges()
+        .distinct((a,b) => a?.uid == b?.uid);
+
     return StreamBuilder<User?>(
       stream: auth$,
-      builder: (ctx, snap) {
+      builder: (_, snap) {
         final uid = snap.data?.uid;
-        print('AuthGate: User changed - uid: ${uid ?? 'null'}, lastUid: $_lastUid, transitioning: $_transitioning');
-
-        // Déclenche la transition une seule fois par changement d'uid
-        if (!_transitioning && uid != _lastUid) {
-          _transitioning = true;
-          print('AuthGate: uid changed $_lastUid -> $uid');
-          
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            try {
-              final fp = context.read<FirebaseProviderV4>();
-              if (uid == null) {
-                print('AuthGate: Disposing auth bound resources');
-                await fp.disposeAuthBoundResources();
-              } else {
-                print('AuthGate: Initializing for user $uid');
-                await fp.ensureInitializedFor(uid);
-              }
-              _lastUid = uid;
-              print('AuthGate: Transition completed for uid: $uid');
-            } catch (e) {
-              print('AuthGate: Error during transition: $e');
-            } finally {
-              if (mounted) {
-                setState(() {
-                  _transitioning = false;
-                });
-              }
-            }
-          });
-        }
-
-        // ✅ si pas connecté -> on montre DIRECT le login (pas de Splash)
+        print('AuthGate: User changed - uid: ${uid ?? 'null'}');
+        
         if (uid == null) {
           print('AuthGate: Showing login screen');
-          return const SecureLoginScreen();
+          return const SecureLoginScreen();       // jamais de Splash ici
         }
 
-        // Vérifier l'état du provider
-        try {
-          final fp = context.read<FirebaseProviderV4>();
-          final ready = fp.ready;
-          print('AuthGate: User $uid, ready: $ready');
-          
-          if (ready) {
-            print('AuthGate: Showing home screen');
-            return const HomeScreen();
-          } else {
-            print('AuthGate: Showing splash screen (provider not ready)');
-            return const SplashScreen();
-          }
-        } catch (e) {
-          print('AuthGate: Error checking provider state: $e');
+        final ready = context.select<FirebaseProviderV4, bool>((fp) => fp.ready);
+        print('AuthGate: User $uid, ready: $ready');
+        
+        if (ready) {
+          print('AuthGate: Showing home screen');
+          return const HomeScreen();
+        } else {
+          print('AuthGate: Showing splash screen (provider not ready)');
           return const SplashScreen();
         }
       },

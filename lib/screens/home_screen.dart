@@ -1,10 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../services/security_service.dart';
-import '../services/app_firebase.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
@@ -33,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<Offset> _slideAnimation;
   int? _selectedYear;
   bool _signingOut = false;
-  late final StreamSubscription<User?> _authSubscription;
 
   @override
   void initState() {
@@ -60,23 +56,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ));
     
     _animationController.forward();
-    
-    // Abonnement de secours : écouter userChanges() et rerouter vers AuthGate si l'utilisateur devient null
-    _authSubscription = AppFirebase.auth.userChanges().listen((u) {
-      if (u == null && mounted) {
-        print('HomeScreen: Auth subscription detected user=null, navigating to AuthGate');
-        Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const AuthGate()),
-          (_) => false,
-        );
-      }
-    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-    _authSubscription.cancel();
     super.dispose();
   }
 
@@ -106,19 +90,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       try {
         print('HomeScreen: user pressed logout');
         
-        // 1) Déconnexion Firebase sur la même instance que l'AuthGate
-        await SecurityService().signOut();
-        
-        // 2) Nettoyage data (listeners + caches)
-        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-        await provider.disposeAuthBoundResources();
-        
-        // 3) Revenir immédiatement à la racine pour afficher le login
+        await SecurityService().signOut();                       // déconnexion
+        await context.read<FirebaseProviderV4>().disposeAuthBoundResources(); // nettoie data
+
+        // Revenir immédiatement sur l'écran de login et purger la pile
         if (mounted) {
           Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-            // Revenir sous l'AuthGate
-            MaterialPageRoute(builder: (_) => const AuthGate()),
-            (_) => false, // purge toute la pile
+            MaterialPageRoute(builder: (_) => const SecureLoginScreen()),
+            (_) => false,
           );
         }
         
