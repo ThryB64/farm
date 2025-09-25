@@ -1,144 +1,225 @@
 import 'dart:convert';
-import 'dart:typed_data';
-import 'dart:html' as html show AnchorElement, Blob, Url; // Web-only
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_database_singleton.dart';
 
 class BackupService {
-  BackupService._();
-  static final instance = BackupService._();
+  static final BackupService _instance = BackupService._internal();
+  factory BackupService() => _instance;
+  BackupService._internal();
 
-  final _auth = FirebaseAuth.instance;
-  final _db = FirebaseDatabase.instance;
+  static BackupService get instance => _instance;
 
-  /// Récupère le farmId (adapte à ton schéma)
-  Future<String> _resolveFarmId(String uid) async {
-    final snap = await _db.ref('userFarms/$uid').get();
-    if (!snap.exists || snap.value == null) {
-      throw Exception('FarmId introuvable pour $uid');
-    }
-    return snap.value.toString();
-  }
+  final FirebaseDatabase _database = FirebaseDatabaseSingleton.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Sections métier à exporter/importer
-  static const sections = <String>[
-    'parcelles',
-    'cellules',
-    'chargements',
-    'semis',
-    'varietes',
-    'ventes',
-    'traitements',
-    'produits',
-  ];
+  String get _currentUid => _auth.currentUser?.uid ?? '';
+  String get _farmId => 'gaec_berard'; // ID de la ferme
 
-  /// ----- EXPORT -----
+  // ===== EXPORT =====
 
-  /// Lit tout l'arbre et renvoie une String JSON
-  Future<String> exportToJsonString({String? farmId}) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) throw Exception('Utilisateur non connecté');
-
-    final resolvedFarmId = farmId ?? await _resolveFarmId(uid);
-    final rootPath = 'farms/$resolvedFarmId';
-
-    final data = <String, dynamic>{};
-    for (final s in sections) {
-      final snap = await _db.ref('$rootPath/$s').get();
-      data[s] = snap.exists ? snap.value : null; // null si section vide
-    }
-
-    final payload = {
-      '_meta': {
-        'version': 1,
-        'exportedAt': DateTime.now().toIso8601String(),
-        'uid': uid,
-        'farmId': resolvedFarmId,
-      },
-      'data': data,
-    };
-
-    return const JsonEncoder.withIndent('  ').convert(payload);
-  }
-
-  /// Upload du JSON dans Firebase Storage (désactivé pour simplifier)
-  Future<String> exportToFirebaseStorage({String? farmId}) async {
-    throw Exception('Firebase Storage non configuré - utilisez exportAndDownloadJson()');
-  }
-
-  /// Téléchargement local (Web) du JSON
-  Future<void> exportAndDownloadJson({String? farmId}) async {
-    final json = await exportToJsonString(farmId: farmId);
-    final bytes = Uint8List.fromList(utf8.encode(json));
-    final blob = html.Blob([bytes], 'application/json');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-
-    final a = html.AnchorElement(href: url)
-      ..download = 'backup_${DateTime.now().toIso8601String()}.json'
-      ..click();
-
-    html.Url.revokeObjectUrl(url);
-  }
-
-  /// ----- IMPORT -----
-
-  /// Valide rapidement la structure du backup
-  void _validateBackup(Map<String, dynamic> payload) {
-    if (!payload.containsKey('_meta') || !payload.containsKey('data')) {
-      throw Exception('Backup invalide: champs _meta/data manquants.');
-    }
-    if (payload['data'] is! Map) {
-      throw Exception('Backup invalide: data doit être un objet.');
-    }
-  }
-
-  /// Applique l'import par multi-path update (atomique).
-  /// [wipeBefore] : si true, on efface chaque section avant d'écrire
-  Future<void> importFromJsonString(
-    String json, {
-    bool wipeBefore = false,
-    String? farmId,
-  }) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) throw Exception('Utilisateur non connecté');
-
-    final Map<String, dynamic> payload = jsonDecode(json);
-    _validateBackup(payload);
-
-    final resolvedFarmId = farmId ?? await _resolveFarmId(uid);
-    final rootPath = 'farms/$resolvedFarmId';
-    final Map<String, dynamic> data = Map<String, dynamic>.from(payload['data'] ?? {});
-
-    // Optionnel : nettoyer avant d'écrire
-    if (wipeBefore) {
-      final futures = <Future>[];
-      for (final s in sections) {
-        futures.add(_db.ref('$rootPath/$s').remove());
+  /// Exporte toutes les données de la ferme depuis Firebase
+  Future<Map<String, dynamic>> exportFarmData() async {
+    try {
+      print('BackupService: Starting export for farm $_farmId');
+      
+      final farmRef = _database.ref('farms/$_farmId');
+      final snapshot = await farmRef.get();
+      
+      if (!snapshot.exists) {
+        throw Exception('Farm $_farmId not found');
       }
-      await Future.wait(futures);
-    }
 
-    // Construire un multi-location update (écriture atomique)
-    final updates = <String, dynamic>{};
-    for (final s in sections) {
-      if (data.containsKey(s)) {
-        updates['$rootPath/$s'] = data[s]; // peut être null (section vide)
+      final farmData = snapshot.value as Map<dynamic, dynamic>;
+      
+      // Construire l'export complet avec métadonnées
+      final exportData = {
+        '_meta': {
+          'exportDate': DateTime.now().toIso8601String(),
+          'version': '1.0',
+          'farmId': _farmId,
+          'exportedBy': _currentUid,
+        },
+        'data': _convertFirebaseData(farmData),
+      };
+
+      print('BackupService: Export completed - ${farmData.length} sections');
+      return exportData;
+    } catch (e) {
+      print('BackupService: Export failed: $e');
+      rethrow;
+    }
+  }
+
+  /// Convertit les données Firebase en format export
+  Map<String, dynamic> _convertFirebaseData(Map<dynamic, dynamic> farmData) {
+    final result = <String, dynamic>{};
+    
+    // Sections à exporter
+    final sections = [
+      'parcelles', 'cellules', 'chargements', 'semis', 'varietes',
+      'ventes', 'traitements', 'produits'
+    ];
+    
+    for (final section in sections) {
+      if (farmData.containsKey(section)) {
+        result[section] = farmData[section];
+      } else {
+        result[section] = {};
       }
     }
-
-    if (updates.isEmpty) {
-      throw Exception('Aucune section à importer.');
-    }
-
-    await _db.ref().update(updates);
+    
+    return result;
   }
 
-  /// Import depuis Firebase Storage (désactivé pour simplifier)
-  Future<void> importFromFirebaseStoragePath(
-    String storagePath, {
-    bool wipeBefore = false,
-    String? farmId,
-  }) async {
-    throw Exception('Firebase Storage non configuré - utilisez importFromJsonString()');
+  /// Sauvegarde l'export dans Firebase Storage
+  Future<String> saveBackupToStorage(Map<String, dynamic> exportData) async {
+    try {
+      final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
+      final fileName = 'backup_${DateTime.now().millisecondsSinceEpoch}.json';
+      final path = 'backups/$_currentUid/$fileName';
+      
+      final ref = _storage.ref(path);
+      await ref.putString(jsonString);
+      
+      final downloadUrl = await ref.getDownloadURL();
+      print('BackupService: Backup saved to Storage: $downloadUrl');
+      return downloadUrl;
+    } catch (e) {
+      print('BackupService: Failed to save backup to Storage: $e');
+      rethrow;
+    }
+  }
+
+  // ===== IMPORT =====
+
+  /// Importe des données depuis un JSON
+  Future<void> importFromJsonString(String jsonString, {bool wipeBefore = false}) async {
+    try {
+      print('BackupService: Starting import (wipeBefore: $wipeBefore)');
+      
+      final data = jsonDecode(jsonString) as Map<String, dynamic>;
+      
+      // Vérifier la structure
+      if (!data.containsKey('_meta') || !data.containsKey('data')) {
+        throw Exception('Invalid backup format - missing _meta or data');
+      }
+      
+      final meta = data['_meta'] as Map<String, dynamic>;
+      final farmData = data['data'] as Map<String, dynamic>;
+      
+      print('BackupService: Importing backup from ${meta['exportDate']}');
+      
+      // Préparer les données pour Firebase
+      final updates = <String, dynamic>{};
+      
+      if (wipeBefore) {
+        // Mode remplacement : vider d'abord
+        print('BackupService: Wiping existing data before import');
+        updates['farms/$_farmId'] = null;
+      }
+      
+      // Ajouter les nouvelles données
+      for (final section in farmData.keys) {
+        updates['farms/$_farmId/$section'] = farmData[section];
+      }
+      
+      // Appliquer l'import de manière atomique
+      await _database.ref().update(updates);
+      
+      print('BackupService: Import completed successfully');
+    } catch (e) {
+      print('BackupService: Import failed: $e');
+      rethrow;
+    }
+  }
+
+  /// Charge un backup depuis Firebase Storage
+  Future<Map<String, dynamic>> loadBackupFromStorage(String backupUrl) async {
+    try {
+      final ref = _storage.refFromURL(backupUrl);
+      final jsonString = await ref.getData();
+      
+      if (jsonString == null) {
+        throw Exception('Backup file not found');
+      }
+      
+      return jsonDecode(utf8.decode(jsonString)) as Map<String, dynamic>;
+    } catch (e) {
+      print('BackupService: Failed to load backup from Storage: $e');
+      rethrow;
+    }
+  }
+
+  /// Liste les backups disponibles pour l'utilisateur
+  Future<List<Map<String, dynamic>>> listUserBackups() async {
+    try {
+      final listRef = _storage.ref('backups/$_currentUid');
+      final result = await listRef.listAll();
+      
+      final backups = <Map<String, dynamic>>[];
+      
+      for (final item in result.items) {
+        final metadata = await item.getMetadata();
+        backups.add({
+          'name': item.name,
+          'path': item.fullPath,
+          'size': metadata.size,
+          'created': metadata.timeCreated,
+          'updated': metadata.updated,
+        });
+      }
+      
+      // Trier par date de création (plus récent en premier)
+      backups.sort((a, b) => (b['created'] as DateTime).compareTo(a['created'] as DateTime));
+      
+      return backups;
+    } catch (e) {
+      print('BackupService: Failed to list backups: $e');
+      return [];
+    }
+  }
+
+  /// Supprime un backup
+  Future<void> deleteBackup(String backupPath) async {
+    try {
+      final ref = _storage.ref(backupPath);
+      await ref.delete();
+      print('BackupService: Backup deleted: $backupPath');
+    } catch (e) {
+      print('BackupService: Failed to delete backup: $e');
+      rethrow;
+    }
+  }
+
+  // ===== UTILITAIRES =====
+
+  /// Vérifie si l'utilisateur a accès à la ferme
+  Future<bool> hasFarmAccess() async {
+    try {
+      final userFarmsRef = _database.ref('userFarms/$_currentUid');
+      final snapshot = await userFarmsRef.get();
+      
+      if (!snapshot.exists) return false;
+      
+      final userFarmId = snapshot.value as String;
+      return userFarmId == _farmId;
+    } catch (e) {
+      print('BackupService: Failed to check farm access: $e');
+      return false;
+    }
+  }
+
+  /// Force le refresh des données locales
+  Future<void> refreshLocalData() async {
+    try {
+      // Cette méthode sera appelée par le provider pour forcer un refresh
+      print('BackupService: Refreshing local data...');
+      // Le provider gérera le refresh via ses streams
+    } catch (e) {
+      print('BackupService: Failed to refresh local data: $e');
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,36 +16,9 @@ class ImportExportScreen extends StatefulWidget {
   State<ImportExportScreen> createState() => _ImportExportScreenState();
 }
 
-class _ImportExportScreenState extends State<ImportExportScreen> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+class _ImportExportScreenState extends State<ImportExportScreen> {
   bool _isExporting = false;
   bool _isImporting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,106 +27,151 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         title: const Text('Import / Export'),
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const DebugScreen()),
-            ),
-            tooltip: 'Debug',
-          ),
-        ],
+        elevation: 0,
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
               AppTheme.primary,
-              AppTheme.primaryLight,
+              AppTheme.primary.withOpacity(0.8),
             ],
           ),
         ),
         child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Section Export
-                  ModernCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.upload, color: AppTheme.primary),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Export Firebase',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Section Export
+                ModernCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.upload, color: AppTheme.primary),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Export des données',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
-                          ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Exporter toutes les données de la ferme depuis Firebase',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Exporter toutes les données vers un fichier JSON au format Firebase natif.',
-                          style: TextStyle(color: AppTheme.textSecondary),
-                        ),
-                        const SizedBox(height: 20),
-                        ModernButton(
-                          text: _isExporting ? 'Export en cours...' : 'Exporter vers JSON',
-                          onPressed: _isExporting ? null : _exportData,
-                          backgroundColor: AppTheme.success,
-                          icon: Icons.download,
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 24),
+                      ModernButton(
+                        text: 'Exporter vers fichier',
+                        onPressed: _isExporting ? null : _exportAllData,
+                        isLoading: _isExporting,
+                        icon: Icons.download,
+                      ),
+                    ],
                   ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Section Import
-                  ModernCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.download, color: AppTheme.warning),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Import Firebase',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Section Import
+                ModernCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.download, color: AppTheme.primary),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Import des données',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
-                          ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Importer des données depuis un fichier JSON',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Importer des données depuis un fichier JSON Firebase. ATTENTION: Cela remplacera toutes les données existantes.',
-                          style: TextStyle(color: AppTheme.textSecondary),
-                        ),
-                        const SizedBox(height: 20),
-                        ModernButton(
-                          text: _isImporting ? 'Import en cours...' : 'Importer depuis JSON',
-                          onPressed: _isImporting ? null : _importData,
-                          backgroundColor: AppTheme.warning,
-                          icon: Icons.upload,
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 24),
+                      ModernButton(
+                        text: 'Importer depuis un fichier',
+                        onPressed: _isImporting ? null : _importData,
+                        isLoading: _isImporting,
+                        icon: Icons.upload,
+                        backgroundColor: AppTheme.warning,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Section Debug
+                ModernCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.bug_report, color: AppTheme.primary),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Outils de débogage',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Accéder aux outils de débogage et diagnostic',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ModernButton(
+                        text: 'Ouvrir Debug',
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DebugScreen(),
+                            ),
+                          );
+                        },
+                        icon: Icons.settings,
+                        backgroundColor: AppTheme.secondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -160,19 +179,43 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     );
   }
 
-  Future<void> _exportData() async {
+  Future<void> _exportAllData() async {
     setState(() {
       _isExporting = true;
     });
 
     try {
-      // Utiliser le BackupService pour l'export Firebase natif
-      await BackupService.instance.exportAndDownloadJson();
+      // Vérifier l'accès à la ferme
+      final hasAccess = await BackupService.instance.hasFarmAccess();
+      if (!hasAccess) {
+        throw Exception('Accès à la ferme non autorisé');
+      }
+
+      // Exporter les données depuis Firebase
+      final exportData = await BackupService.instance.exportFarmData();
+      
+      // Convertir en JSON avec indentation
+      final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
+      
+      // Créer le nom de fichier avec la date
+      final now = DateTime.now();
+      final fileName = 'farmgaec-backup_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
+      
+      // Télécharger le fichier
+      _downloadFile(jsonString, fileName);
+      
+      // Optionnel : sauvegarder dans Firebase Storage
+      try {
+        await BackupService.instance.saveBackupToStorage(exportData);
+        print('BackupService: Backup also saved to Firebase Storage');
+      } catch (e) {
+        print('BackupService: Failed to save to Storage (non-critical): $e');
+      }
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Export Firebase réussi - Téléchargement en cours'),
+            content: Text('Export Firebase réussi : $fileName'),
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -209,10 +252,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     });
 
     try {
-      // Afficher une confirmation avant l'import
-      final confirmed = await _showImportConfirmation();
-      if (!confirmed) return;
-      
+      // Vérifier l'accès à la ferme
+      final hasAccess = await BackupService.instance.hasFarmAccess();
+      if (!hasAccess) {
+        throw Exception('Accès à la ferme non autorisé');
+      }
+
       // Pour le web, on utilise un input file
       final input = html.FileUploadInputElement()
         ..accept = '.json'
@@ -226,26 +271,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             try {
               final jsonString = reader.result as String;
               
-              // Utiliser le BackupService pour l'import Firebase natif
-              await BackupService.instance.importFromJsonString(jsonString, wipeBefore: true);
+              // Afficher une confirmation avant l'import
+              final confirmed = await _showImportConfirmation();
+              if (!confirmed) return;
               
-              // Forcer un refresh des données
-              final provider = context.read<FirebaseProviderV4>();
-              await provider.disposeAuthBoundResources();
-              // Le provider se réinitialisera automatiquement via AuthGate
-              
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Import Firebase réussi - Données restaurées'),
-                    backgroundColor: AppTheme.success,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    ),
-                  ),
-                );
-              }
+              // Importer les données via BackupService
+              await _performFirebaseImport(jsonString);
             } catch (e) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -310,5 +341,47 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           ],
         ),
     ) ?? false;
+  }
+
+  /// Importe les données via BackupService
+  Future<void> _performFirebaseImport(String jsonString) async {
+    try {
+      print('ImportExportScreen: Starting Firebase import');
+      
+      // Importer les données (mode remplacement total)
+      await BackupService.instance.importFromJsonString(jsonString, wipeBefore: true);
+      
+      // Forcer le refresh des données locales
+      final provider = context.read<FirebaseProviderV4>();
+      await provider.refreshAllData();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Import Firebase réussi ! Données restaurées.'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+      
+      print('ImportExportScreen: Firebase import completed successfully');
+    } catch (e) {
+      print('ImportExportScreen: Firebase import failed: $e');
+      rethrow;
+    }
+  }
+
+  void _downloadFile(String content, String fileName) {
+    final bytes = utf8.encode(content);
+    final blob = html.Blob([bytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', fileName);
+    anchor.click();
+    html.Url.revokeObjectUrl(url);
   }
 }
