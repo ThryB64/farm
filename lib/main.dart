@@ -129,47 +129,8 @@ class PlaceholderHome extends StatelessWidget {
   }
 }
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  bool _isError = false;
-  String _errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    try {
-      // Attendre que le widget soit monté avant d'accéder au contexte
-      await Future.delayed(const Duration(milliseconds: 100));
-      
-      if (mounted) {
-        final provider = context.read<FirebaseProviderV4>();
-        await provider.initialize();
-        
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isError = true;
-          _errorMessage = e.toString();
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -185,70 +146,26 @@ class _SplashScreenState extends State<SplashScreen> {
             ],
           ),
         ),
-        child: Center(
-          child: _isError
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: Colors.white,
-                      size: 64,
-                    ),
-                    SizedBox(height: 16),
-                    const Text(
-                      'Erreur lors de l\'initialisation',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      _errorMessage,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _initializeApp,
-                      child: const Text('Réessayer'),
-                    ),
-                  ],
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/logo.png',
-                      width: 120,
-                      height: 120,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.agriculture,
-                          color: Colors.white,
-                          size: 64,
-                        );
-                      },
-                    ),
-                    SizedBox(height: 24),
-                    const CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                    SizedBox(height: 16),
-                    const Text(
-                      'Chargement...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
+        child: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.agriculture, color: Colors.white, size: 64),
+              SizedBox(height: 16),
+              Text(
+                'Chargement...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+              SizedBox(height: 24),
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ],
+          ),
         ),
       ),
     );
