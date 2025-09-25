@@ -274,9 +274,10 @@ class _AuthGateState extends State<AuthGate> {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         final user = snapshot.data;
-        print('AuthGate: Auth state changed - user: ${user?.uid ?? 'null'}');
+        final uid = user?.uid;
+        print('AuthGate: Auth state changed - user: ${uid ?? 'null'}');
         
-        if (user == null) {
+        if (uid == null) {
           // logout : vider et afficher login
           if (_lastUid != null) {
             print('AuthGate: User not authenticated, clearing data');
@@ -290,20 +291,20 @@ class _AuthGateState extends State<AuthGate> {
         }
         
         // user != null
-        if (_lastUid == user.uid && provider.ready) {
+        if (_lastUid == uid && provider.ready) {
           // déjà prêt
           return const HomeScreen();
         }
         
         // nouveau boot ou pas prêt : lancer EXACTEMENT un init
         final myGen = ++_bootGen;
-        _lastUid = user.uid;
+        _lastUid = uid;
         
-        print('AuthGate: User authenticated, initializing data for ${user.uid} (gen: $myGen)');
+        print('AuthGate: User authenticated, initializing data for $uid (gen: $myGen)');
         
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           // NE JAMAIS disposer ici
-          await provider.ensureInitializedFor(user.uid);
+          await provider.ensureInitializedFor(uid);
           if (!mounted || myGen != _bootGen) {
             print('AuthGate: Boot $myGen obsolete (current: $_bootGen), ignoring');
             return; // résultat obsolète
