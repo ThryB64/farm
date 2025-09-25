@@ -265,7 +265,7 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   String? _lastUid;
-  bool _booting = false;
+  int _bootGen = 0; // token de génération
 
   @override
   Widget build(BuildContext context) {
@@ -277,7 +277,7 @@ class _AuthGateState extends State<AuthGate> {
         print('AuthGate: Auth state changed - user: ${user?.uid ?? 'null'}');
         
         if (user == null) {
-          // Utilisateur non connecté - nettoyer les données SEULEMENT si on était connecté
+          // logout : vider et afficher login
           if (_lastUid != null) {
             print('AuthGate: User not authenticated, clearing data');
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -289,21 +289,29 @@ class _AuthGateState extends State<AuthGate> {
           return const SecureLoginScreen();
         }
         
-        // Utilisateur connecté - s'assurer que le provider est prêt
-        if (_lastUid != user.uid || !provider.isInitialized) {
-          print('AuthGate: User authenticated, initializing data for ${user.uid}');
-          _lastUid = user.uid;
-          if (!_booting) {
-            _booting = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              await provider.ensureInitializedFor(user.uid);
-              if (mounted) setState(() => _booting = false);
-            });
-          }
-          return const SplashScreen();
+        // user != null
+        if (_lastUid == user.uid && provider.ready) {
+          // déjà prêt
+          return const HomeScreen();
         }
         
-        return provider.ready ? const HomeScreen() : const SplashScreen();
+        // nouveau boot ou pas prêt : lancer EXACTEMENT un init
+        final myGen = ++_bootGen;
+        _lastUid = user.uid;
+        
+        print('AuthGate: User authenticated, initializing data for ${user.uid} (gen: $myGen)');
+        
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          // NE JAMAIS disposer ici
+          await provider.ensureInitializedFor(user.uid);
+          if (!mounted || myGen != _bootGen) {
+            print('AuthGate: Boot $myGen obsolete (current: $_bootGen), ignoring');
+            return; // résultat obsolète
+          }
+          setState(() {}); // affichera Home quand provider.ready sera true
+        });
+        
+        return const SplashScreen();
       },
     );
   }

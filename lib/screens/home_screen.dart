@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../services/security_service.dart';
 import '../theme/app_theme.dart';
@@ -86,17 +87,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       );
 
-      if (confirmed == true) {
-        print('HomeScreen: Starting sign out process');
-        
-        // Nettoyer les ressources liées à l'authentification
-        final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
-        await provider.disposeAuthBoundResources();
-        
-        // SEULE ACTION : signOut() - AuthGate gère le reste
-        await SecurityService().signOut();
-        print('HomeScreen: Sign out successful, AuthGate will handle navigation');
-      }
+      if (confirmed != true) return;
+
+      print('HomeScreen: Starting sign out process');
+
+      final auth = FirebaseAuth.instance;
+
+      // 1) Couper proprement les listeners
+      final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+      await provider.disposeAuthBoundResources();
+
+      // 2) Déconnexion
+      await SecurityService().signOut();
+
+      // 3) IMPORTANT : attendre le passage à user == null pour éviter le yo-yo
+      await auth.authStateChanges().firstWhere((u) => u == null);
+
+      print('HomeScreen: Sign out successful, AuthGate will handle navigation');
     } catch (e) {
       print('HomeScreen: Sign out error: $e');
       if (mounted) {
@@ -126,8 +133,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _signOut,
-            tooltip: 'Déconnexion',
+            onPressed: _signingOut ? null : _signOut,
+            tooltip: _signingOut ? 'Déconnexion en cours...' : 'Déconnexion',
           ),
         ],
       ),
