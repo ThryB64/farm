@@ -411,27 +411,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
 
   // ===== API REST FIREBASE (IDENTIQUE CONSOLE) =====
 
-  // 1) Récupérer farmId (selon le schéma) - SANS initialiser Firebase
+  // 1) Utiliser le farmId par défaut (pas de récupération via API)
   Future<String> _resolveFarmId() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) throw Exception('Utilisateur non connecté');
-    
-    // Utiliser l'API REST pour récupérer le farmId sans initialiser Firebase
-    final dbUrl = FirebaseDatabase.instance.databaseURL;
-    final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    final url = '$dbUrl/userFarms/$uid.json?auth=$idToken';
-    
-    final res = await http.get(Uri.parse(url));
-    if (res.statusCode != 200) {
-      throw Exception('FarmId introuvable pour $uid: ${res.statusCode}');
-    }
-    
-    final data = jsonDecode(res.body);
-    if (data == null) {
-      throw Exception('FarmId introuvable pour $uid');
-    }
-    
-    return data.toString();
+    // Utiliser directement le farmId par défaut
+    return 'gaec_berard';
   }
 
 
