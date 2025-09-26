@@ -19,7 +19,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _dateController;
   late TextEditingController _notesController;
-  late TextEditingController _prixController;
   late TextEditingController _densiteController;
   String? _selectedParcelleId;
   List<VarieteSurface> _selectedVarietesSurfaces = [];
@@ -35,8 +34,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
           : _formatDate(DateTime.now()),
     );
     _notesController = TextEditingController(text: widget.semis?.notes ?? '');
-    _prixController = TextEditingController(text: widget.semis?.prix?.toString() ?? '');
-    _densiteController = TextEditingController(text: widget.semis?.densite?.toString() ?? '');
+    _densiteController = TextEditingController(text: widget.semis?.densite?.toString() ?? '83000');
     _selectedParcelleId = widget.semis?.parcelleId?.toString();
     _selectedVarietesSurfaces = widget.semis?.varietesSurfaces ?? [];
     _showHectares = _selectedVarietesSurfaces.length > 1;
@@ -47,7 +45,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   void dispose() {
     _dateController.dispose();
     _notesController.dispose();
-    _prixController.dispose();
     _densiteController.dispose();
     super.dispose();
   }
@@ -57,30 +54,42 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   }
 
   Widget _buildCalculInfo() {
-    final prix = double.tryParse(_prixController.text);
     final densite = double.tryParse(_densiteController.text);
     
-    if (prix == null || densite == null || _selectedVarietesSurfaces.isEmpty) {
-      return Text('Veuillez remplir le prix et la densité pour voir le calcul');
+    if (densite == null || _selectedVarietesSurfaces.isEmpty) {
+      return Text('Veuillez remplir la densité et sélectionner des variétés pour voir le calcul');
     }
     
+    // Récupérer les variétés depuis le provider
+    final provider = context.read<FirebaseProviderV4>();
+    final varietes = provider.varietesById;
+    final annee = _selectedYear ?? DateTime.now().year;
+    
+    double coutTotal = 0.0;
     double surfaceTotale = 0.0;
+    
     for (final varieteSurface in _selectedVarietesSurfaces) {
       surfaceTotale += varieteSurface.surface;
+      final variete = varietes.values.firstWhere(
+        (v) => v.nom == varieteSurface.nom,
+        orElse: () => Variete(nom: '', dateCreation: DateTime.now()),
+      );
+      
+      if (variete.prixParAnnee.containsKey(annee)) {
+        final prixDose = variete.prixParAnnee[annee]!;
+        final nombreDoses = (densite * varieteSurface.surface) / 50000;
+        coutTotal += nombreDoses * prixDose;
+      }
     }
-    
-    final coutTotal = prix * surfaceTotale;
-    final nombreDoses = (densite * surfaceTotale) / 50000;
-    final coutDoses = nombreDoses * 150; // 150€ par dose
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Surface totale: ${surfaceTotale.toStringAsFixed(2)} ha'),
-        Text('Coût semences: ${coutTotal.toStringAsFixed(2)} €'),
-        Text('Nombre de doses: ${nombreDoses.toStringAsFixed(2)}'),
-        Text('Coût doses: ${coutDoses.toStringAsFixed(2)} €'),
-        Text('Coût total: ${(coutTotal + coutDoses).toStringAsFixed(2)} €', 
+        Text('Densité: ${densite.toStringAsFixed(0)} graines/ha'),
+        Text('Année: $annee'),
+        SizedBox(height: 8),
+        Text('Coût total: ${coutTotal.toStringAsFixed(2)} €', 
              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade700)),
       ],
     );
@@ -427,7 +436,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       date: DateTime(year, month, day),
       varietesSurfaces: _selectedVarietesSurfaces,
       notes: _notesController.text.isEmpty ? null : _notesController.text,
-      prix: double.tryParse(_prixController.text),
       densite: double.tryParse(_densiteController.text),
     );
 
@@ -585,7 +593,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
 
               const SizedBox(height: 16),
 
-              // Prix et densité
+              // Densité de semis
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -593,41 +601,28 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Coût du semis',
+                        'Densité de semis',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       SizedBox(height: 16),
                       
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _prixController,
-                              decoration: const InputDecoration(
-                                labelText: 'Prix (€/ha)',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _densiteController,
-                              decoration: const InputDecoration(
-                                labelText: 'Densité (graines/ha)',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
+                      TextFormField(
+                        controller: _densiteController,
+                        decoration: const InputDecoration(
+                          labelText: 'Densité (graines/ha)',
+                          border: OutlineInputBorder(),
+                          hintText: '83000',
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {}); // Recalculer l'affichage
+                        },
                       ),
                       
                       SizedBox(height: 16),
                       
                       // Calcul automatique du coût
-                      if (_prixController.text.isNotEmpty && _selectedVarietesSurfaces.isNotEmpty)
+                      if (_densiteController.text.isNotEmpty && _selectedVarietesSurfaces.isNotEmpty)
                         Container(
                           padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(

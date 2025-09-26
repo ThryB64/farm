@@ -4,7 +4,7 @@ class Variete {
   final String nom;
   final String? description;
   final DateTime dateCreation;
-  final Map<int, double> prixParAnnee; // Prix par année (comme Produit)
+  final Map<int, double> prixParAnnee; // Prix de la dose par année (€/dose)
 
   Variete({
     this.id,

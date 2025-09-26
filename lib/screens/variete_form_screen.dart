@@ -137,7 +137,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                             child: TextFormField(
                               controller: _prixController,
                               decoration: InputDecoration(
-                                labelText: 'Prix (€/ha)',
+                                labelText: 'Prix de la dose (€)',
                                 border: OutlineInputBorder(),
                               ),
                               keyboardType: TextInputType.number,
@@ -165,7 +165,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                         SizedBox(height: 8),
                         ..._prixParAnnee.entries.map((entry) => 
                           ListTile(
-                            title: Text('${entry.key}: ${entry.value.toStringAsFixed(2)} €/ha'),
+                            title: Text('${entry.key}: ${entry.value.toStringAsFixed(2)} €/dose'),
                             trailing: IconButton(
                               icon: Icon(Icons.delete, color: Colors.red),
                               onPressed: () {
