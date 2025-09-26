@@ -527,22 +527,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           reader.onLoadEnd.listen((e) async {
             try {
               final jsonString = reader.result as String;
-              final data = jsonDecode(jsonString) as Map<String, dynamic>;
-              
-              // Valider la structure des données
-              if (!data.containsKey('parcelles') || 
-                  !data.containsKey('cellules') || 
-                  !data.containsKey('chargements') || 
-                  !data.containsKey('semis') || 
-                  !data.containsKey('varietes')) {
-                throw Exception('Format de fichier invalide');
-              }
               
               // Afficher une confirmation avant l'import
               final confirmed = await _showImportConfirmation();
               if (!confirmed) return;
               
-              // Import exact via API REST Firebase (identique console)
+              // Import direct du JSON Firebase (sans validation de structure)
               await _importExactJsonReplace(jsonString);
             } catch (e) {
               if (mounted) {
@@ -593,7 +583,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
         content: const Text(
-          'Cette action va remplacer toutes les données existantes. Êtes-vous sûr de vouloir continuer ?',
+          'Cette action va remplacer directement la base de données Firebase. Toutes les données existantes seront perdues. Êtes-vous sûr de vouloir continuer ?',
           ),
           actions: [
           ModernTextButton(
@@ -610,245 +600,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     ) ?? false;
   }
 
-  // Importer directement dans Firebase via les API
-  Future<void> _importToFirebase(Map<String, dynamic> data) async {
-    try {
-      print('🔄 Import vers Firebase...');
-      
-      final provider = context.read<FirebaseProviderV4>();
-      
-      // 1. Vider complètement le localStorage
-      await _clearLocalStorage();
-      
-      // 2. Supprimer toutes les données existantes de Firebase
-      await provider.deleteAllData();
-      
-      // 3. Attendre un peu pour que la suppression soit effective
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      // 4. Importer les nouvelles données directement dans Firebase
-      await _importParcellesToFirebase(data['parcelles'] as List);
-      await _importCellulesToFirebase(data['cellules'] as List);
-      await _importChargementsToFirebase(data['chargements'] as List);
-      await _importSemisToFirebase(data['semis'] as List);
-      await _importVarietesToFirebase(data['varietes'] as List);
-      
-      // Importer les nouvelles entités si présentes
-      if (data.containsKey('ventes')) {
-        await _importVentesToFirebase(data['ventes'] as List);
-      }
-      if (data.containsKey('traitements')) {
-        await _importTraitementsToFirebase(data['traitements'] as List);
-      }
-      if (data.containsKey('produits')) {
-        await _importProduitsToFirebase(data['produits'] as List);
-      }
-      
-      print('✅ Import Firebase terminé');
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Import réussi : ${data.length} éléments importés'),
-            backgroundColor: AppTheme.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      print('❌ Erreur import Firebase: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de l\'import : $e'),
-            backgroundColor: AppTheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
-          ),
-        );
-      }
-      rethrow;
-    }
-  }
+  // ===== ANCIENNES MÉTHODES D'IMPORT (SUPPRIMÉES - REMPLACÉES PAR API REST) =====
 
-  // Méthodes d'import spécifiques pour chaque entité
-  Future<void> _importParcellesToFirebase(List<dynamic> parcellesData) async {
-    final provider = context.read<FirebaseProviderV4>();
-    for (final parcelleData in parcellesData) {
-      final parcelle = _parseParcelleFromMap(Map<String, dynamic>.from(parcelleData));
-      await provider.ajouterParcelle(parcelle);
-    }
-  }
 
-  Future<void> _importCellulesToFirebase(List<dynamic> cellulesData) async {
-    final provider = context.read<FirebaseProviderV4>();
-    for (final celluleData in cellulesData) {
-      final cellule = _parseCelluleFromMap(Map<String, dynamic>.from(celluleData));
-      await provider.ajouterCellule(cellule);
-    }
-  }
-
-  Future<void> _importChargementsToFirebase(List<dynamic> chargementsData) async {
-    final provider = context.read<FirebaseProviderV4>();
-    for (final chargementData in chargementsData) {
-      final chargement = _parseChargementFromMap(Map<String, dynamic>.from(chargementData));
-      await provider.ajouterChargement(chargement);
-    }
-  }
-
-  Future<void> _importSemisToFirebase(List<dynamic> semisData) async {
-    final provider = context.read<FirebaseProviderV4>();
-    for (final semisDataItem in semisData) {
-      final semis = _parseSemisFromMap(Map<String, dynamic>.from(semisDataItem));
-      await provider.ajouterSemis(semis);
-    }
-  }
-
-  Future<void> _importVarietesToFirebase(List<dynamic> varietesData) async {
-    final provider = context.read<FirebaseProviderV4>();
-    for (final varieteData in varietesData) {
-      final variete = _parseVarieteFromMap(Map<String, dynamic>.from(varieteData));
-      await provider.ajouterVariete(variete);
-    }
-  }
-
-  Future<void> _importVentesToFirebase(List<dynamic> ventesData) async {
-    final provider = context.read<FirebaseProviderV4>();
-    for (final venteData in ventesData) {
-      final vente = _parseVenteFromMap(Map<String, dynamic>.from(venteData));
-      await provider.ajouterVente(vente);
-    }
-  }
-
-  Future<void> _importTraitementsToFirebase(List<dynamic> traitementsData) async {
-    final provider = context.read<FirebaseProviderV4>();
-    for (final traitementData in traitementsData) {
-      final traitement = _parseTraitementFromMap(Map<String, dynamic>.from(traitementData));
-      await provider.ajouterTraitement(traitement);
-    }
-  }
-
-  Future<void> _importProduitsToFirebase(List<dynamic> produitsData) async {
-    final provider = context.read<FirebaseProviderV4>();
-    for (final produitData in produitsData) {
-      final produit = _parseProduitFromMap(Map<String, dynamic>.from(produitData));
-      await provider.ajouterProduit(produit);
-    }
-  }
-
-  Future<void> _performImport(Map<String, dynamic> data) async {
-        final provider = context.read<FirebaseProviderV4>();
-    
-    // 1. Vider complètement le localStorage
-    await _clearLocalStorage();
-    
-    // 2. Supprimer toutes les données existantes de Firebase
-    await provider.deleteAllData();
-    
-    // 3. Attendre un peu pour que la suppression soit effective
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    // 4. Importer les nouvelles données avec conversion explicite des types
-    final parcelles = (data['parcelles'] as List)
-        .map((p) => _parseParcelleFromMap(Map<String, dynamic>.from(p)))
-        .toList();
-    
-    final cellules = (data['cellules'] as List)
-        .map((c) => _parseCelluleFromMap(Map<String, dynamic>.from(c)))
-        .toList();
-    
-    final chargements = (data['chargements'] as List)
-        .map((c) => _parseChargementFromMap(Map<String, dynamic>.from(c)))
-        .toList();
-    
-    final semis = (data['semis'] as List)
-        .map((s) => _parseSemisFromMap(Map<String, dynamic>.from(s)))
-        .toList();
-    
-    final varietes = (data['varietes'] as List)
-        .map((v) => _parseVarieteFromMap(Map<String, dynamic>.from(v)))
-        .toList();
-    
-    // Vérifier si les données sont vides
-    final totalData = parcelles.length + cellules.length + chargements.length + semis.length + varietes.length;
-    print('📊 Import: $totalData éléments à importer');
-    print('   - Parcelles: ${parcelles.length}');
-    print('   - Cellules: ${cellules.length}');
-    print('   - Chargements: ${chargements.length}');
-    print('   - Semis: ${semis.length}');
-    print('   - Variétés: ${varietes.length}');
-    
-    // 5. Ajouter les données une par une
-    for (final parcelle in parcelles) {
-      await provider.ajouterParcelle(parcelle);
-    }
-    
-    for (final cellule in cellules) {
-      await provider.ajouterCellule(cellule);
-    }
-    
-    for (final chargement in chargements) {
-      await provider.ajouterChargement(chargement);
-    }
-    
-    for (final semis in semis) {
-      await provider.ajouterSemis(semis);
-    }
-    
-    for (final variete in varietes) {
-      await provider.ajouterVariete(variete);
-    }
-    
-    // 6. Forcer un refresh des données
-    await Future.delayed(const Duration(milliseconds: 1000));
-    
-    // 7. Forcer le rechargement des données dans le provider
-    await _forceDataRefresh(provider);
-    
-    // 8. Afficher un message approprié selon le contenu
-    if (mounted) {
-      String message;
-      if (totalData == 0) {
-        message = 'Import réussi ! Base de données vidée. Rechargement de la page...';
-        
-        // Pour les bases vides, forcer un rechargement complet de la page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: AppTheme.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        
-        // Recharger la page après 2 secondes
-        Future.delayed(const Duration(seconds: 2), () {
-          html.window.location.reload();
-        });
-      } else {
-        message = 'Import réussi ! $totalData éléments importés.';
-        
-          ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: AppTheme.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            ),
-          ),
-        );
-      }
-    }
-  }
 
   // Fonction pour forcer le refresh des données
   // Méthode utilitaire pour récupérer une valeur parmi plusieurs clés possibles
