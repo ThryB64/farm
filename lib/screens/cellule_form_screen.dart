@@ -113,80 +113,6 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
               
               SizedBox(height: 16),
               
-              // Section Gaz
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Gaz utilisé',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SizedBox(height: 16),
-                      
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _quantiteGazController,
-                              decoration: const InputDecoration(
-                                labelText: 'Quantité (kg)',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                setState(() {}); // Recalculer l'affichage
-                              },
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _prixGazController,
-                              decoration: const InputDecoration(
-                                labelText: 'Prix (€/kg)',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                setState(() {}); // Recalculer l'affichage
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      SizedBox(height: 16),
-                      
-                      // Calcul automatique du coût
-                      if (_quantiteGazController.text.isNotEmpty && _prixGazController.text.isNotEmpty)
-                        Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Calcul automatique:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 8),
-                              _buildGazCalculInfo(),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              SizedBox(height: 16),
-              
               // Notes
               TextFormField(
                 controller: _notesController,
@@ -209,8 +135,9 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                         dateCreation: dateCreation,
                         nom: _nomController.text.isEmpty ? null : _nomController.text.trim(),
                         notes: _notesController.text.isEmpty ? null : _notesController.text.trim(),
-                        quantiteGaz: double.tryParse(_quantiteGazController.text),
-                        prixGaz: double.tryParse(_prixGazController.text),
+                        // Conserver les données gaz existantes lors de la modification
+                        quantiteGaz: widget.cellule?.quantiteGaz,
+                        prixGaz: widget.cellule?.prixGaz,
                       );
 
                       if (widget.cellule == null) {

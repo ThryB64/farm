@@ -4,6 +4,7 @@ import '../providers/firebase_provider_v4.dart';
 import '../models/cellule.dart';
 import 'cellule_form_screen.dart';
 import 'cellule_details_screen.dart';
+import 'fermer_cellule_screen.dart';
 
 class CellulesScreen extends StatefulWidget {
   const CellulesScreen({Key? key}) : super(key: key);
@@ -505,27 +506,41 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
     
     if (controller == null) return;
 
-    // Animer le changement
     if (cellule.fermee) {
-      // Ouvrir la cellule
+      // Ouvrir la cellule - action directe
       await controller.reverse();
+      
+      final updatedCellule = Cellule(
+        id: cellule.id,
+        firebaseId: cellule.firebaseId,
+        reference: cellule.reference,
+        dateCreation: cellule.dateCreation,
+        notes: cellule.notes,
+        nom: cellule.nom,
+        fermee: false,
+        quantiteGaz: cellule.quantiteGaz,
+        prixGaz: cellule.prixGaz,
+      );
+
+      try {
+        await context.read<FirebaseProviderV4>().modifierCellule(updatedCellule);
+      } catch (e) {
+        // En cas d'erreur, annuler l'animation
+        await controller.forward();
+      }
     } else {
-      // Fermer la cellule
-      await controller.forward();
+      // Fermer la cellule - ouvrir l'écran de fermeture
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FermerCelluleScreen(cellule: cellule),
+        ),
+      );
+      
+      // Si la fermeture a réussi, animer
+      if (result == true) {
+        await controller.forward();
+      }
     }
-
-    // Mettre à jour l'état dans Firebase
-    final updatedCellule = Cellule(
-      id: cellule.id,
-      firebaseId: cellule.firebaseId,
-      reference: cellule.reference,
-      dateCreation: cellule.dateCreation,
-      notes: cellule.notes,
-      nom: cellule.nom,
-      fermee: !cellule.fermee,
-    );
-
-    // Mettre à jour via le provider
-    context.read<FirebaseProviderV4>().modifierCellule(updatedCellule);
   }
 } 
