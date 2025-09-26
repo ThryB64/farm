@@ -183,10 +183,10 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                             .removeWhere((v) => v.nom == variete.nom);
                       }
                       _showHectares = _selectedVarietesSurfaces.length > 1;
-                      // Auto-complétion immédiate si une seule variété
-                      if (_selectedVarietesSurfaces.length == 1) {
+                      // Auto-complétion immédiate
+                      Future.delayed(Duration(milliseconds: 50), () {
                         _autoCompleteRemaining();
-                      }
+                      });
                     });
                   },
                 );
@@ -347,6 +347,8 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     final total = _getParcelleSurface();
     final count = _selectedVarietesSurfaces.length;
     
+    if (count == 0) return;
+    
     if (count == 1) {
       // Une seule variété : assigner le total
       setState(() {
@@ -356,9 +358,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
         );
       });
     } else if (count == 2) {
-      // Deux variétés : auto-compléter la deuxième
+      // Deux variétés : auto-compléter la deuxième si la première est remplie
       final firstSurface = _selectedVarietesSurfaces[0].surface;
-      if (firstSurface > 0) {
+      if (firstSurface > 0 && firstSurface < total) {
         setState(() {
           _selectedVarietesSurfaces[1] = VarieteSurface(
             nom: _selectedVarietesSurfaces[1].nom,
@@ -367,16 +369,19 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
         });
       }
     } else {
-      // Plusieurs variétés : auto-compléter la dernière
+      // Plusieurs variétés : auto-compléter la dernière si toutes les autres sont remplies
       final filledCount = _selectedVarietesSurfaces.where((v) => v.surface > 0).length;
       if (filledCount == count - 1) {
         final filledTotal = _selectedVarietesSurfaces.take(count - 1).fold<double>(0, (sum, v) => sum + v.surface);
-        setState(() {
-          _selectedVarietesSurfaces[count - 1] = VarieteSurface(
-            nom: _selectedVarietesSurfaces[count - 1].nom,
-            surface: total - filledTotal,
-          );
-        });
+        final remaining = total - filledTotal;
+        if (remaining > 0) {
+          setState(() {
+            _selectedVarietesSurfaces[count - 1] = VarieteSurface(
+              nom: _selectedVarietesSurfaces[count - 1].nom,
+              surface: remaining,
+            );
+          });
+        }
       }
     }
   }

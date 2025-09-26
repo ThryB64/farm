@@ -19,7 +19,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
   
   // Gestion des prix par année
   Map<int, double> _prixParAnnee = {};
-  int _selectedAnnee = DateTime.now().year;
+  int? _selectedAnnee;
   final TextEditingController _prixController = TextEditingController();
 
   @override
@@ -32,6 +32,9 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
     if (widget.variete != null) {
       _prixParAnnee = Map.from(widget.variete!.prixParAnnee);
     }
+    
+    // Initialiser l'année sélectionnée
+    _selectedAnnee = DateTime.now().year;
   }
 
   @override
@@ -125,7 +128,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                               }),
                               onChanged: (value) {
                                 setState(() {
-                                  _selectedAnnee = value!;
+                                  _selectedAnnee = value;
                                   _prixController.text = _prixParAnnee[value]?.toString() ?? '';
                                 });
                               },
@@ -143,9 +146,9 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                               keyboardType: TextInputType.number,
                               onChanged: (value) {
                                 final prix = double.tryParse(value);
-                                if (prix != null && prix > 0) {
-                                  _prixParAnnee[_selectedAnnee] = prix;
-                                } else {
+                                if (prix != null && prix > 0 && _selectedAnnee != null) {
+                                  _prixParAnnee[_selectedAnnee!] = prix;
+                                } else if (_selectedAnnee != null) {
                                   _prixParAnnee.remove(_selectedAnnee);
                                 }
                               },
