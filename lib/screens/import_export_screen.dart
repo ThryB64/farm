@@ -15,7 +15,6 @@ import '../models/chargement.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
 import '../models/variete_surface.dart';
-import 'debug_screen.dart';
 
 class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({Key? key}) : super(key: key);
@@ -872,16 +871,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             ),
           ),
           const SizedBox(height: AppTheme.spacingL),
-          ModernButton(
-            text: 'Ouvrir l\'écran de diagnostic',
-            icon: Icons.analytics,
-            backgroundColor: AppTheme.error,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const DebugScreen()),
-            ),
-            isFullWidth: true,
-          ),
         ],
       ),
     );

@@ -699,9 +699,42 @@ class FirebaseProviderV4 extends ChangeNotifier {
     }
   }
   
-  // Méthode de compatibilité (pour les calculs automatiques)
+  // Méthode pour recalculer tous les poids aux normes
   Future<void> updateAllChargementsPoidsNormes() async {
-    print('FirebaseProvider V4: updateAllChargementsPoidsNormes - not needed for V4 (calculations are automatic)');
+    print('FirebaseProvider V4: Recalcul des poids aux normes...');
+    
+    try {
+      // Parcourir tous les chargements et recalculer les poids aux normes
+      for (final chargement in _chargementsMap.values) {
+        if (chargement.poidsNet > 0 && chargement.humidite > 0) {
+          // Créer un nouveau chargement avec le poids aux normes recalculé
+          final nouveauChargement = Chargement(
+            id: chargement.id,
+            firebaseId: chargement.firebaseId,
+            celluleId: chargement.celluleId,
+            parcelleId: chargement.parcelleId,
+            remorque: chargement.remorque,
+            dateChargement: chargement.dateChargement,
+            poidsPlein: chargement.poidsPlein,
+            poidsVide: chargement.poidsVide,
+            poidsNet: chargement.poidsNet,
+            poidsNormes: 0, // Sera recalculé automatiquement
+            humidite: chargement.humidite,
+            variete: chargement.variete,
+          );
+          
+          // Mettre à jour dans Firebase
+          if (chargement.firebaseId != null) {
+            await _service.updateChargement(nouveauChargement);
+          }
+        }
+      }
+      
+      print('✅ Poids aux normes recalculés avec succès');
+    } catch (e) {
+      print('❌ Erreur lors du recalcul des poids aux normes: $e');
+      rethrow;
+    }
   }
   
   // ===== MÉTHODES UTILITAIRES POUR LES RELATIONS =====

@@ -1,3 +1,5 @@
+import '../utils/poids_utils.dart';
+
 class Chargement {
   int? id;
   String? firebaseId; // ID Firebase (string)
@@ -26,10 +28,21 @@ class Chargement {
     required this.humidite,
     required this.variete,
   }) : _poidsNet = poidsNet,
-       _poidsNormes = poidsNormes;
+       _poidsNormes = poidsNormes {
+    // Calculer automatiquement le poids aux normes si pas fourni
+    if (_poidsNormes == 0 && _poidsNet > 0 && humidite > 0) {
+      _poidsNormes = PoidsUtils.calculPoidsNormes(_poidsNet, humidite);
+    }
+  }
 
   double get poidsNet => _poidsNet;
-  set poidsNet(double value) => _poidsNet = value;
+  set poidsNet(double value) {
+    _poidsNet = value;
+    // Recalculer automatiquement le poids aux normes
+    if (humidite > 0) {
+      _poidsNormes = PoidsUtils.calculPoidsNormes(_poidsNet, humidite);
+    }
+  }
 
   double get poidsNormes => _poidsNormes;
   set poidsNormes(double value) => _poidsNormes = value;
@@ -52,6 +65,16 @@ class Chargement {
   }
 
   factory Chargement.fromMap(Map<String, dynamic> map) {
+    final poidsNet = (map['poids_net'] ?? 0).toDouble();
+    final humidite = (map['humidite'] ?? 0).toDouble();
+    final poidsNormes = (map['poids_normes'] ?? 0).toDouble();
+    
+    // Calculer le poids aux normes si pas fourni ou si les données ont changé
+    double poidsNormesCalcule = poidsNormes;
+    if (poidsNormes == 0 && poidsNet > 0 && humidite > 0) {
+      poidsNormesCalcule = PoidsUtils.calculPoidsNormes(poidsNet, humidite);
+    }
+    
     return Chargement(
       id: map['id'],
       firebaseId: map['firebaseId'],
@@ -61,9 +84,9 @@ class Chargement {
       dateChargement: DateTime.parse(map['date_chargement']),
       poidsPlein: (map['poids_plein'] ?? 0).toDouble(),
       poidsVide: (map['poids_vide'] ?? 0).toDouble(),
-      poidsNet: (map['poids_net'] ?? 0).toDouble(),
-      poidsNormes: (map['poids_normes'] ?? 0).toDouble(),
-      humidite: (map['humidite'] ?? 0).toDouble(),
+      poidsNet: poidsNet,
+      poidsNormes: poidsNormesCalcule,
+      humidite: humidite,
       variete: map['variete'] ?? '',
     );
   }
