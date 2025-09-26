@@ -15,11 +15,50 @@ class CelluleFormScreen extends StatefulWidget {
 class _CelluleFormScreenState extends State<CelluleFormScreen> {
   final _formKey = GlobalKey<FormState>();
   int? _selectedYear;
+  late TextEditingController _nomController;
+  late TextEditingController _notesController;
+  late TextEditingController _quantiteGazController;
+  late TextEditingController _prixGazController;
 
   @override
   void initState() {
     super.initState();
     _selectedYear = widget.cellule?.dateCreation.year ?? DateTime.now().year;
+    _nomController = TextEditingController(text: widget.cellule?.nom ?? '');
+    _notesController = TextEditingController(text: widget.cellule?.notes ?? '');
+    _quantiteGazController = TextEditingController(text: widget.cellule?.quantiteGaz?.toString() ?? '');
+    _prixGazController = TextEditingController(text: widget.cellule?.prixGaz?.toString() ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nomController.dispose();
+    _notesController.dispose();
+    _quantiteGazController.dispose();
+    _prixGazController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildGazCalculInfo() {
+    final quantite = double.tryParse(_quantiteGazController.text);
+    final prix = double.tryParse(_prixGazController.text);
+    
+    if (quantite == null || prix == null) {
+      return Text('Veuillez remplir la quantité et le prix pour voir le calcul');
+    }
+    
+    final coutTotal = quantite * prix;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Quantité: ${quantite.toStringAsFixed(2)} kg'),
+        Text('Prix: ${prix.toStringAsFixed(2)} €/kg'),
+        SizedBox(height: 8),
+        Text('Coût total: ${coutTotal.toStringAsFixed(2)} €', 
+             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade700)),
+      ],
+    );
   }
 
   @override
@@ -61,6 +100,103 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                   return null;
                 },
               ),
+              SizedBox(height: 16),
+              
+              // Nom de la cellule
+              TextFormField(
+                controller: _nomController,
+                decoration: const InputDecoration(
+                  labelText: 'Nom de la cellule (optionnel)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              
+              SizedBox(height: 16),
+              
+              // Section Gaz
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Gaz utilisé',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      SizedBox(height: 16),
+                      
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _quantiteGazController,
+                              decoration: const InputDecoration(
+                                labelText: 'Quantité (kg)',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {}); // Recalculer l'affichage
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _prixGazController,
+                              decoration: const InputDecoration(
+                                labelText: 'Prix (€/kg)',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {}); // Recalculer l'affichage
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      SizedBox(height: 16),
+                      
+                      // Calcul automatique du coût
+                      if (_quantiteGazController.text.isNotEmpty && _prixGazController.text.isNotEmpty)
+                        Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Calcul automatique:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 8),
+                              _buildGazCalculInfo(),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              SizedBox(height: 16),
+              
+              // Notes
+              TextFormField(
+                controller: _notesController,
+                decoration: const InputDecoration(
+                  labelText: 'Notes',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              
               SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
@@ -71,6 +207,10 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                         id: widget.cellule?.id,
                         firebaseId: widget.cellule?.firebaseId, // ✅ Préserver le firebaseId
                         dateCreation: dateCreation,
+                        nom: _nomController.text.isEmpty ? null : _nomController.text.trim(),
+                        notes: _notesController.text.isEmpty ? null : _notesController.text.trim(),
+                        quantiteGaz: double.tryParse(_quantiteGazController.text),
+                        prixGaz: double.tryParse(_prixGazController.text),
                       );
 
                       if (widget.cellule == null) {

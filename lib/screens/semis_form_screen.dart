@@ -24,6 +24,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   List<VarieteSurface> _selectedVarietesSurfaces = [];
   bool _showHectares = false;
   int? _selectedYear;
+  List<TextEditingController> _hectaresControllers = [];
 
   @override
   void initState() {
@@ -46,11 +47,26 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     _dateController.dispose();
     _notesController.dispose();
     _densiteController.dispose();
+    for (final controller in _hectaresControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  void _updateHectaresControllers() {
+    // Dispose old controllers
+    for (final controller in _hectaresControllers) {
+      controller.dispose();
+    }
+    
+    // Create new controllers
+    _hectaresControllers = _selectedVarietesSurfaces.map((vs) {
+      return TextEditingController(text: vs.surface > 0 ? vs.surface.toString() : '');
+    }).toList();
   }
 
   Widget _buildCalculInfo() {
@@ -183,6 +199,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                             .removeWhere((v) => v.nom == variete.nom);
                       }
                       _showHectares = _selectedVarietesSurfaces.length > 1;
+                      _updateHectaresControllers();
                       // Auto-complétion immédiate
                       Future.delayed(Duration(milliseconds: 50), () {
                         _autoCompleteRemaining();
@@ -277,9 +294,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 trailing: SizedBox(
                   width: 100,
                   child: TextFormField(
-                    initialValue: varieteSurface.surface > 0
-                        ? varieteSurface.surface.toString()
-                        : '',
+                    controller: index < _hectaresControllers.length ? _hectaresControllers[index] : null,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       suffix: const Text('ha'),
@@ -356,16 +371,23 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
           nom: _selectedVarietesSurfaces[0].nom,
           surface: total,
         );
+        if (_hectaresControllers.isNotEmpty) {
+          _hectaresControllers[0].text = total.toString();
+        }
       });
     } else if (count == 2) {
       // Deux variétés : auto-compléter la deuxième si la première est remplie
       final firstSurface = _selectedVarietesSurfaces[0].surface;
       if (firstSurface > 0 && firstSurface < total) {
+        final secondSurface = total - firstSurface;
         setState(() {
           _selectedVarietesSurfaces[1] = VarieteSurface(
             nom: _selectedVarietesSurfaces[1].nom,
-            surface: total - firstSurface,
+            surface: secondSurface,
           );
+          if (_hectaresControllers.length > 1) {
+            _hectaresControllers[1].text = secondSurface.toString();
+          }
         });
       }
     } else {
@@ -380,6 +402,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               nom: _selectedVarietesSurfaces[count - 1].nom,
               surface: remaining,
             );
+            if (_hectaresControllers.length > count - 1) {
+              _hectaresControllers[count - 1].text = remaining.toString();
+            }
           });
         }
       }
