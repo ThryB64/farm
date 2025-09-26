@@ -424,11 +424,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       print('🔄 Téléchargement direct depuis Firebase...');
       
       final farmId = await _resolveFarmId();
-      final dbUrl = FirebaseDatabase.instance.databaseURL;
       final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
       
-      // URL REST exacte comme la console Firebase
-      final url = '$dbUrl/farms/$farmId.json?auth=$idToken&format=export&print=pretty';
+      // URL REST directe vers Firebase (URL fixe)
+      final url = 'https://farmgaec-default-rtdb.firebaseio.com/farms/$farmId.json?auth=$idToken&format=export&print=pretty';
       
       print('📡 URL REST: $url');
       
@@ -461,11 +460,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       print('🔄 Remplacement direct dans Firebase...');
       
       final farmId = await _resolveFarmId();
-      final dbUrl = FirebaseDatabase.instance.databaseURL;
       final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
       
-      // URL REST pour remplacement (comme la console)
-      final url = '$dbUrl/farms/$farmId.json?auth=$idToken';
+      // URL REST directe vers Firebase (URL fixe)
+      final url = 'https://farmgaec-default-rtdb.firebaseio.com/farms/$farmId.json?auth=$idToken';
       
       print('📡 URL REST: $url');
       
