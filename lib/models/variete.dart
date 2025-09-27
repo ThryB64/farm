@@ -1,3 +1,5 @@
+import '../utils/firebase_normalize.dart';
+
 class Variete {
   int? id;
   String? firebaseId; // ID Firebase (string)
@@ -37,8 +39,12 @@ class Variete {
         final prixData = map['prixParAnnee'];
         print('🔍 Model: Prix data trouvée: $prixData (type: ${prixData.runtimeType})');
         
-        if (prixData is Map<String, dynamic>) {
-          prixParAnnee = prixData.map((k, v) {
+        // Normaliser l'objet Firebase en Map<String, dynamic>
+        final prixDataNormalized = normalizeToStringKeyMap(prixData);
+        print('🔍 Model: Prix data normalisée: $prixDataNormalized');
+        
+        if (prixDataNormalized != null) {
+          prixParAnnee = prixDataNormalized.map((k, v) {
             try {
               final annee = int.parse(k);
               final prix = v.toDouble();
@@ -50,7 +56,7 @@ class Variete {
             }
           });
         } else {
-          print('❌ Model: Prix data n\'est pas une Map: ${prixData.runtimeType}');
+          print('❌ Model: Impossible de normaliser les prix');
         }
       } else {
         print('🔍 Model: Pas de prixParAnnee dans les données');
