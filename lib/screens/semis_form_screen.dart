@@ -540,11 +540,42 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 builder: (context, provider, child) {
                   final parcellesDisponibles = _getParcellesDisponibles(provider);
                   
-                  return DropdownButtonFormField<String>(
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Message explicatif si on modifie un semis existant
+                      if (widget.semis != null)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            border: Border.all(color: Colors.blue.shade200),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'La parcelle ne peut pas être modifiée lors de l\'édition d\'un semis existant.',
+                                  style: TextStyle(
+                                    color: Colors.blue.shade700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Parcelle *',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
+                      // Désactiver visuellement si on modifie un semis existant
+                      enabled: widget.semis == null,
                     ),
                     items: parcellesDisponibles.map((parcelle) {
                       final key = parcelle.firebaseId ?? parcelle.id.toString();
@@ -553,15 +584,17 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         child: Text('${parcelle.nom} (${parcelle.surface} ha)'),
                       );
                     }).toList(),
-                    onChanged: (value) {
+                    onChanged: widget.semis == null ? (value) {
                       setState(() {
                         _selectedParcelleId = value;
                       });
-                    },
+                    } : null, // Désactiver la modification si on édite
                     validator: (value) {
                       if (value == null) return 'Veuillez sélectionner une parcelle';
                       return null;
                     },
+                  ),
+                    ],
                   );
                 },
               ),
