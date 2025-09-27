@@ -76,11 +76,11 @@ class _SemisScreenState extends State<SemisScreen> {
               // Sélecteur d'année
               _buildYearSelector(annees),
               
-              // Statistiques
+              // Statistiques (fixes)
               if (_selectedYear != null) 
                 _buildStatistics(semisParAnnee[_selectedYear]!, parcelles),
               
-              // Liste des semis
+              // Liste des semis (scrollable)
               Expanded(
                 child: _selectedYear == null
                     ? _buildEmptyYearState()

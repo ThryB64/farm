@@ -241,7 +241,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      'Coût total:',
+                      'Coût total (parcelle):',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -312,7 +312,15 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
   }
 
   double _calculerCoutTotal() {
-    return _produits.fold(0.0, (sum, produit) => sum + produit.coutTotal);
+    if (_selectedParcelleId == null) return 0.0;
+    
+    // Récupérer la surface de la parcelle
+    final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+    final parcelle = provider.getParcelleById(_selectedParcelleId!);
+    if (parcelle == null) return 0.0;
+    
+    // Calculer le coût total en multipliant par la surface de la parcelle
+    return _produits.fold(0.0, (sum, produit) => sum + (produit.coutTotal * parcelle.surface));
   }
 
   Future<void> _saveTraitement() async {
@@ -461,8 +469,9 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   child: TextFormField(
                     controller: _quantiteController,
                     decoration: const InputDecoration(
-                      labelText: 'Quantité *',
+                      labelText: 'Quantité par hectare *',
                       border: OutlineInputBorder(),
+                      helperText: 'Quantité à appliquer par hectare de parcelle',
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
@@ -536,7 +545,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                         Text('Quantité: ${_quantiteController.text} ${_selectedProduit!.mesure}'),
                         Text('Prix unitaire (${_selectedAnnee}): ${_prixUnitaire.toStringAsFixed(2)} €/${_selectedProduit!.mesure}'),
                         Text(
-                          'Coût total: ${_calculerCoutTotal().toStringAsFixed(2)} €',
+                          'Coût par hectare: ${_calculerCoutTotal().toStringAsFixed(2)} €/ha',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -583,6 +592,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
 
   double _calculerCoutTotal() {
     final quantite = double.tryParse(_quantiteController.text) ?? 0.0;
+    // Calculer le coût par hectare (quantité * prix unitaire)
     return quantite * _prixUnitaire;
   }
 
