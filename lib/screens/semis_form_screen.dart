@@ -540,62 +540,51 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 builder: (context, provider, child) {
                   final parcellesDisponibles = _getParcellesDisponibles(provider);
                   
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Message explicatif si on modifie un semis existant
-                      if (widget.semis != null)
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          margin: const EdgeInsets.only(bottom: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            border: Border.all(color: Colors.blue.shade200),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'La parcelle ne peut pas être modifiée lors de l\'édition d\'un semis existant.',
-                                  style: TextStyle(
-                                    color: Colors.blue.shade700,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      DropdownButtonFormField<String>(
-                    value: _selectedParcelleId,
-                    decoration: InputDecoration(
-                      labelText: 'Parcelle *',
-                      border: const OutlineInputBorder(),
-                      // Désactiver visuellement si on modifie un semis existant
-                      enabled: widget.semis == null,
-                    ),
-                    items: parcellesDisponibles.map((parcelle) {
-                      final key = parcelle.firebaseId ?? parcelle.id.toString();
-                      return DropdownMenuItem<String>(
-                        value: key,
-                        child: Text('${parcelle.nom} (${parcelle.surface} ha)'),
-                      );
-                    }).toList(),
-                    onChanged: widget.semis == null ? (value) {
-                      setState(() {
-                        _selectedParcelleId = value;
-                      });
-                    } : null, // Désactiver la modification si on édite
-                    validator: (value) {
-                      if (value == null) return 'Veuillez sélectionner une parcelle';
-                      return null;
-                    },
-                  ),
-                    ],
-                  );
+                  // Si on modifie un semis existant, afficher le nom de la parcelle
+                  if (widget.semis != null) {
+                    final parcelleActuelle = provider.getParcelleById(_selectedParcelleId);
+                    return TextFormField(
+                      initialValue: parcelleActuelle != null 
+                        ? '${parcelleActuelle.nom} (${parcelleActuelle.surface} ha)'
+                        : 'Parcelle inconnue',
+                      decoration: const InputDecoration(
+                        labelText: 'Parcelle *',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.grey,
+                      ),
+                      readOnly: true,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    );
+                  } else {
+                    // Si on crée un nouveau semis, afficher le dropdown
+                    return DropdownButtonFormField<String>(
+                      value: _selectedParcelleId,
+                      decoration: const InputDecoration(
+                        labelText: 'Parcelle *',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: parcellesDisponibles.map((parcelle) {
+                        final key = parcelle.firebaseId ?? parcelle.id.toString();
+                        return DropdownMenuItem<String>(
+                          value: key,
+                          child: Text('${parcelle.nom} (${parcelle.surface} ha)'),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedParcelleId = value;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) return 'Veuillez sélectionner une parcelle';
+                        return null;
+                      },
+                    );
+                  }
                 },
               ),
               const SizedBox(height: 16),
