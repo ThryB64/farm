@@ -27,19 +27,32 @@ class Variete {
   }
 
   factory Variete.fromMap(Map<String, dynamic> map) {
-    // Parser les prix par année
+    // Parser les prix par année de manière robuste
     Map<int, double> prixParAnnee = {};
-    if (map['prixParAnnee'] != null) {
-      final prixData = map['prixParAnnee'] as Map<String, dynamic>;
-      prixParAnnee = prixData.map((k, v) => MapEntry(int.parse(k), v.toDouble()));
+    try {
+      if (map['prixParAnnee'] != null) {
+        final prixData = map['prixParAnnee'];
+        if (prixData is Map<String, dynamic>) {
+          prixParAnnee = prixData.map((k, v) {
+            try {
+              return MapEntry(int.parse(k), v.toDouble());
+            } catch (e) {
+              print('Erreur parsing prix pour année $k: $e');
+              return MapEntry(0, 0.0);
+            }
+          });
+        }
+      }
+    } catch (e) {
+      print('Erreur parsing prixParAnnee: $e');
     }
     
     return Variete(
       id: map['id'],
       firebaseId: map['firebaseId'],
-      nom: map['nom'],
+      nom: map['nom'] ?? '',
       description: map['description'],
-      dateCreation: DateTime.parse(map['date_creation']),
+      dateCreation: DateTime.tryParse(map['date_creation'] ?? '') ?? DateTime.now(),
       prixParAnnee: prixParAnnee,
     );
   }

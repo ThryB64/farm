@@ -4,6 +4,7 @@ import '../providers/firebase_provider_v4.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/parcelle.dart';
+import 'fermer_cellule_screen.dart';
 
 class CelluleDetailsScreen extends StatelessWidget {
   final Cellule cellule;
@@ -26,7 +27,13 @@ class CelluleDetailsScreen extends StatelessWidget {
                   if (cellule.fermee) {
                     provider.ouvrirCellule(key);
                   } else {
-                    provider.fermerCellule(key);
+                    // Rediriger vers l'écran de fermeture pour saisir les données de gaz
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FermerCelluleScreen(cellule: cellule),
+                      ),
+                    );
                   }
                 },
                 tooltip: cellule.fermee ? 'Ouvrir la cellule' : 'Fermer la cellule',
