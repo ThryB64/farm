@@ -381,7 +381,14 @@ class FirebaseServiceV4 {
         return data.entries.map((entry) {
           final Map<String, dynamic> varieteData = Map<String, dynamic>.from(entry.value as Map);
           varieteData['firebaseId'] = entry.key;
-          return Variete.fromMap(varieteData);
+          
+          print('🔍 Service: Chargement variété ${entry.key}');
+          print('🔍 Service: Données reçues: $varieteData');
+          
+          final variete = Variete.fromMap(varieteData);
+          print('🔍 Service: Variété parsée: ${variete.nom}, Prix: ${variete.prixParAnnee}');
+          
+          return variete;
         }).toList();
       });
     } else {
@@ -392,12 +399,18 @@ class FirebaseServiceV4 {
   Future<String> insertVariete(Variete variete) async {
     if (_farmRef != null) {
       final key = generateVarieteKey(variete);
+      final varieteMap = variete.toMap();
+      
+      print('🔍 Service: Création variété $key');
+      print('🔍 Service: Données à sauvegarder: $varieteMap');
+      
       await _farmRef!.child('varietes').child(key).set({
-        ...variete.toMap(),
+        ...varieteMap,
         'firebaseId': key,
         'createdAt': ServerValue.timestamp,
       });
-      print('FirebaseService V4: Variete inserted: $key');
+      
+      print('✅ Service: Variété créée avec succès');
       return key;
     } else {
       final id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -410,11 +423,19 @@ class FirebaseServiceV4 {
   Future<void> updateVariete(Variete variete) async {
     if (_farmRef != null) {
       final key = variete.firebaseId ?? generateVarieteKey(variete);
-      await _farmRef!.child('varietes').child(key).update({
-        ...variete.toMap(),
+      final varieteMap = variete.toMap();
+      
+      print('🔍 Service: Mise à jour variété $key');
+      print('🔍 Service: Données à sauvegarder: $varieteMap');
+      
+      // Forcer la sauvegarde de tous les champs, y compris prixParAnnee
+      await _farmRef!.child('varietes').child(key).set({
+        ...varieteMap,
         'firebaseId': key,
         'updatedAt': ServerValue.timestamp,
       });
+      
+      print('✅ Service: Variété mise à jour avec succès');
     } else {
       _saveVarieteToStorage(variete);
     }

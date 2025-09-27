@@ -29,23 +29,37 @@ class Variete {
   factory Variete.fromMap(Map<String, dynamic> map) {
     // Parser les prix par année de manière robuste
     Map<int, double> prixParAnnee = {};
+    print('🔍 Model: Parsing variété ${map['nom']}');
+    print('🔍 Model: Données reçues: $map');
+    
     try {
       if (map['prixParAnnee'] != null) {
         final prixData = map['prixParAnnee'];
+        print('🔍 Model: Prix data trouvée: $prixData (type: ${prixData.runtimeType})');
+        
         if (prixData is Map<String, dynamic>) {
           prixParAnnee = prixData.map((k, v) {
             try {
-              return MapEntry(int.parse(k), v.toDouble());
+              final annee = int.parse(k);
+              final prix = v.toDouble();
+              print('🔍 Model: Prix parsé: $annee -> $prix');
+              return MapEntry(annee, prix);
             } catch (e) {
-              print('Erreur parsing prix pour année $k: $e');
+              print('❌ Model: Erreur parsing prix pour année $k: $e');
               return MapEntry(0, 0.0);
             }
           });
+        } else {
+          print('❌ Model: Prix data n\'est pas une Map: ${prixData.runtimeType}');
         }
+      } else {
+        print('🔍 Model: Pas de prixParAnnee dans les données');
       }
     } catch (e) {
-      print('Erreur parsing prixParAnnee: $e');
+      print('❌ Model: Erreur parsing prixParAnnee: $e');
     }
+    
+    print('🔍 Model: Prix parsés finaux: $prixParAnnee');
     
     return Variete(
       id: map['id'],
