@@ -48,6 +48,13 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     _selectedYear = widget.semis?.date.year ?? DateTime.now().year;
     _densiteMais = widget.semis?.densiteMais ?? CoutUtils.DENSITE_DEFAUT;
     _prixSemis = widget.semis?.prixSemis ?? 0.0;
+    
+    // Calculer le prix initial si on modifie un semis existant
+    if (widget.semis != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _calculerPrixSemis();
+      });
+    }
   }
 
   @override
@@ -68,14 +75,25 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     double totalPrix = 0.0;
     final provider = context.read<FirebaseProviderV4>();
     
+    print('🔍 Calcul prix semis - Année: $_selectedYear, Densité: $_densiteMais');
+    
     for (final varieteSurface in _selectedVarietesSurfaces) {
       final variete = provider.getVarieteById(varieteSurface.varieteId);
+      print('🔍 Variété: ${variete?.nom}, Prix par année: ${variete?.prixParAnnee}');
+      
       if (variete != null && variete.prixParAnnee.containsKey(_selectedYear)) {
         final prixDose = variete.prixParAnnee[_selectedYear]!;
         final coutParHectare = CoutUtils.calculerCoutSemisParHectare(prixDose, _densiteMais);
-        totalPrix += coutParHectare * varieteSurface.surface;
+        final coutTotal = coutParHectare * varieteSurface.surface;
+        totalPrix += coutTotal;
+        
+        print('💰 Prix dose: $prixDose, Coût/ha: $coutParHectare, Surface: ${varieteSurface.surface}, Total: $coutTotal');
+      } else {
+        print('⚠️ Pas de prix trouvé pour ${variete?.nom} en $_selectedYear');
       }
     }
+    
+    print('💰 Prix total semis: $totalPrix');
     
     setState(() {
       _prixSemis = totalPrix;
@@ -507,6 +525,8 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                     _selectedYear = value;
                     _selectedParcelleId = null; // Réinitialiser la parcelle
                   });
+                  // Recalculer le prix après changement d'année
+                  _calculerPrixSemis();
                 },
                 validator: (value) {
                   if (value == null) return 'Veuillez sélectionner une année';

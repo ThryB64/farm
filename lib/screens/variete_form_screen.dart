@@ -45,6 +45,8 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
         _prixParAnnee[_anneeSelectionnee] = prix;
         _prixController.clear();
       });
+      print('💰 Prix ajouté: ${_anneeSelectionnee} -> $prix €');
+      print('💰 Tous les prix: $_prixParAnnee');
     }
   }
 
@@ -256,6 +258,9 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                         dateCreation: widget.variete?.dateCreation ?? DateTime.now(),
                         prixParAnnee: _prixParAnnee,
                       );
+                      
+                      print('💾 Sauvegarde variété: ${variete.nom}');
+                      print('💾 Prix par année: ${variete.prixParAnnee}');
 
                       if (widget.variete == null) {
                         await context.read<FirebaseProviderV4>().ajouterVariete(variete);
