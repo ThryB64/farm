@@ -76,15 +76,11 @@ class _SemisScreenState extends State<SemisScreen> {
               // Sélecteur d'année
               _buildYearSelector(annees),
               
-              // Statistiques (fixes)
-              if (_selectedYear != null) 
-                _buildStatistics(semisParAnnee[_selectedYear]!, parcelles),
-              
-              // Liste des semis (scrollable)
+              // Liste des semis avec résumé qui suit le scroll
               Expanded(
                 child: _selectedYear == null
                     ? _buildEmptyYearState()
-                    : _buildSemisList(semisParAnnee[_selectedYear]!, parcelles, varietes),
+                    : _buildSemisListWithStats(semisParAnnee[_selectedYear]!, parcelles, varietes),
               ),
             ],
           );
@@ -364,6 +360,148 @@ class _SemisScreenState extends State<SemisScreen> {
               ),
             ],
           ),
+    );
+  }
+
+  Widget _buildSemisListWithStats(List<Semis> semisAnnee, List<Parcelle> parcelles, List<Variete> varietes) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Statistiques en haut de la liste (suivent le scroll)
+        _buildStatistics(semisAnnee, parcelles),
+        const SizedBox(height: 16),
+        
+        // Liste des semis
+        ...semisAnnee.asMap().entries.map((entry) {
+          final index = entry.key;
+          final semis = entry.value;
+          final parcelle = parcelles.firstWhere(
+            (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
+            orElse: () => Parcelle(
+              id: 0,
+              nom: 'Parcelle inconnue',
+              surface: 0,
+              dateCreation: DateTime.now(),
+            ),
+          );
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              border: Border.all(color: AppTheme.border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // En-tête de la carte
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withOpacity(0.1),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(AppTheme.radiusMedium),
+                      topRight: Radius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.grass, color: AppTheme.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          parcelle.nom,
+                          style: AppTheme.textTheme.titleLarge?.copyWith(
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _editSemis(semis);
+                          } else if (value == 'delete') {
+                            _showDeleteConfirmation(context, semis);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, size: 20),
+                                SizedBox(width: 8),
+                                Text('Modifier'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Colors.red, size: 20),
+                                SizedBox(width: 8),
+                                Text('Supprimer', style: TextStyle(color: Colors.red)),
+                              ],
+                            ),
+                          ),
+                        ],
+                        child: Icon(Icons.more_vert, color: AppTheme.primary),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Contenu de la carte
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Date
+                      _buildInfoRow(Icons.calendar_today, 'Date', _formatDate(semis.date)),
+                      const SizedBox(height: 8),
+                      
+                      // Variétés avec surfaces
+                      _buildVarietesInfo(semis, varietes),
+                      const SizedBox(height: 8),
+                      
+                      // Surface totale
+                      _buildInfoRow(Icons.area_chart, 'Surface totale', '${_getTotalSurface(semis.varietesSurfaces).toStringAsFixed(2)} ha'),
+                      
+                      // Prix du semis si défini
+                      if (semis.prixSemis > 0) ...[
+                        const SizedBox(height: 8),
+                        _buildInfoRow(Icons.euro, 'Prix semis', '${semis.prixSemis.toStringAsFixed(2)} €'),
+                      ],
+                      
+                      // Densité de maïs
+                      if (semis.densiteMais > 0) ...[
+                        const SizedBox(height: 8),
+                        _buildInfoRow(Icons.grain, 'Densité maïs', '${semis.densiteMais.toStringAsFixed(0)} graines/ha'),
+                      ],
+                      
+                      // Notes si présentes
+                      if (semis.notes?.isNotEmpty ?? false) ...[
+                        const SizedBox(height: 8),
+                        _buildInfoRow(Icons.note, 'Notes', semis.notes!),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
     );
   }
 

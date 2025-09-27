@@ -115,6 +115,9 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
               ),
               const SizedBox(height: AppTheme.spacingM),
               
+              // Informations de la parcelle sélectionnée
+              if (_selectedParcelleId != null) _buildParcelleInfo(),
+              
               // Notes
               TextFormField(
                 controller: _notesController,
@@ -380,6 +383,59 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       }
     }
   }
+
+  Widget _buildParcelleInfo() {
+    return Consumer<FirebaseProviderV4>(
+      builder: (context, provider, child) {
+        final parcelle = provider.getParcelleById(_selectedParcelleId!);
+        if (parcelle == null) return const SizedBox.shrink();
+        
+        return Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.landscape, color: AppTheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Parcelle sélectionnée',
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      parcelle.nom,
+                      style: AppTheme.textTheme.titleMedium?.copyWith(
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${parcelle.surface.toStringAsFixed(2)} hectares',
+                      style: AppTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 // Écran de sélection de produit
@@ -632,4 +688,5 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
     widget.onProduitSelected(produitTraitement);
     Navigator.pop(context);
   }
+
 }
