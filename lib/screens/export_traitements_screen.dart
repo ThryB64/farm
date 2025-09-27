@@ -24,6 +24,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       final traitements = db.traitements;
       final parcelles = db.parcelles;
       final produits = db.produits;
+      final semis = db.semis;
       
       final traitementsAnnee = traitements
           .where((t) => t.annee == _selectedYear)
@@ -164,6 +165,15 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                 pw.SizedBox(width: 20),
                                 pw.Text(
                                   'Surface: ${parcelle.surface.toStringAsFixed(2)} ha',
+                                  style: pw.TextStyle(
+                                    fontSize: 16,
+                                    color: mainColor,
+                                  ),
+                                ),
+                                pw.SizedBox(width: 20),
+                                // Ajouter le prix du semis pour cette parcelle et cette année
+                                pw.Text(
+                                  _getPrixSemisParcelle(parcelle, semis, _selectedYear!),
                                   style: pw.TextStyle(
                                     fontSize: 16,
                                     color: mainColor,
@@ -523,5 +533,21 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         },
       ),
     );
+  }
+
+  String _getPrixSemisParcelle(Parcelle parcelle, List<dynamic> semis, int annee) {
+    try {
+      final semisParcelle = semis.firstWhere(
+        (s) => s.parcelleId == parcelle.firebaseId && s.date.year == annee,
+        orElse: () => null,
+      );
+      if (semisParcelle != null && semisParcelle.prixSemis > 0) {
+        return 'Prix semis: ${semisParcelle.prixSemis.toStringAsFixed(2)} €';
+      } else {
+        return 'Prix semis: Non défini';
+      }
+    } catch (e) {
+      return 'Prix semis: Non défini';
+    }
   }
 }

@@ -550,8 +550,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Parcelle *',
                         border: OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Colors.grey,
                       ),
                       readOnly: true,
                       style: const TextStyle(
