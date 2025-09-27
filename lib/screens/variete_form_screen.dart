@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../models/variete.dart';
+import '../theme/app_theme.dart';
+import '../widgets/modern_buttons.dart';
 
 class VarieteFormScreen extends StatefulWidget {
   final Variete? variete;
@@ -16,10 +18,8 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nomController;
   late TextEditingController _descriptionController;
-  
-  // Gestion des prix par année
   Map<int, double> _prixParAnnee = {};
-  int? _selectedAnnee;
+  int _anneeSelectionnee = DateTime.now().year;
   final TextEditingController _prixController = TextEditingController();
 
   @override
@@ -27,14 +27,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
     super.initState();
     _nomController = TextEditingController(text: widget.variete?.nom ?? '');
     _descriptionController = TextEditingController(text: widget.variete?.description ?? '');
-    
-    // Initialiser les prix par année
-    if (widget.variete != null) {
-      _prixParAnnee = Map.from(widget.variete!.prixParAnnee);
-    }
-    
-    // Initialiser l'année sélectionnée
-    _selectedAnnee = DateTime.now().year;
+    _prixParAnnee = Map.from(widget.variete?.prixParAnnee ?? {});
   }
 
   @override
@@ -45,25 +38,52 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
     super.dispose();
   }
 
+  void _ajouterPrix() {
+    final prix = double.tryParse(_prixController.text);
+    if (prix != null && prix > 0) {
+      setState(() {
+        _prixParAnnee[_anneeSelectionnee] = prix;
+        _prixController.clear();
+      });
+    }
+  }
+
+  void _supprimerPrix(int annee) {
+    setState(() {
+      _prixParAnnee.remove(annee);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: Text(widget.variete == null ? 'Nouvelle variété' : 'Modifier la variété'),
-        backgroundColor: Colors.orange,
+        title: Text(
+          widget.variete == null ? 'Nouvelle variété' : 'Modifier la variété',
+          style: AppTheme.textTheme.headlineSmall?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: AppTheme.primary,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppTheme.spacingL),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Nom de la variété
               TextFormField(
                 controller: _nomController,
-                decoration: const InputDecoration(
-                  labelText: 'Nom',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'Nom de la variété',
+                  hintText: 'Ex: Pioneer P1234',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -78,12 +98,19 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: AppTheme.spacingL),
+              
+              // Description
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'Description (optionnel)',
+                  hintText: 'Caractéristiques de la variété...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
                 maxLines: 3,
                 validator: (value) {
@@ -93,106 +120,137 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: AppTheme.spacingXL),
               
               // Section Prix par année
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+              Text(
+                'Prix de la dose par année',
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingM),
+              
+              // Ajout d'un nouveau prix
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingM),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: DropdownButtonFormField<int>(
+                            value: _anneeSelectionnee,
+                            decoration: const InputDecoration(
+                              labelText: 'Année',
+                              border: OutlineInputBorder(),
+                            ),
+                            items: List.generate(5, (index) {
+                              final annee = DateTime.now().year - 2 + index;
+                              return DropdownMenuItem(
+                                value: annee,
+                                child: Text(annee.toString()),
+                              );
+                            }),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _anneeSelectionnee = value;
+                                  _prixController.text = _prixParAnnee[value]?.toString() ?? '';
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: AppTheme.spacingM),
+                        Expanded(
+                          flex: 3,
+                          child: TextFormField(
+                            controller: _prixController,
+                            decoration: const InputDecoration(
+                              labelText: 'Prix de la dose (€)',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        const SizedBox(width: AppTheme.spacingM),
+                        ElevatedButton(
+                          onPressed: _ajouterPrix,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                            ),
+                          ),
+                          child: const Icon(Icons.add, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingM),
+              
+              // Liste des prix existants
+              if (_prixParAnnee.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.all(AppTheme.spacingM),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    border: Border.all(color: AppTheme.border),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Prix par année',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SizedBox(height: 16),
-                      
-                      // Sélection d'année et prix
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: DropdownButtonFormField<int>(
-                              value: _selectedAnnee,
-                              decoration: InputDecoration(
-                                labelText: 'Année',
-                                border: OutlineInputBorder(),
-                              ),
-                              items: List.generate(5, (index) {
-                                final annee = DateTime.now().year - 2 + index;
-                                return DropdownMenuItem(
-                                  value: annee,
-                                  child: Text(annee.toString()),
-                                );
-                              }),
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedAnnee = value;
-                                  _prixController.text = _prixParAnnee[value]?.toString() ?? '';
-                                });
-                              },
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Expanded(
-                            flex: 3,
-                            child: TextFormField(
-                              controller: _prixController,
-                              decoration: InputDecoration(
-                                labelText: 'Prix de la dose (€)',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                final prix = double.tryParse(value);
-                                if (prix != null && prix > 0 && _selectedAnnee != null) {
-                                  _prixParAnnee[_selectedAnnee!] = prix;
-                                } else if (_selectedAnnee != null) {
-                                  _prixParAnnee.remove(_selectedAnnee);
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      SizedBox(height: 16),
-                      
-                      // Liste des prix existants
-                      if (_prixParAnnee.isNotEmpty) ...[
-                        Text(
-                          'Prix enregistrés:',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                        'Prix configurés',
+                        style: AppTheme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 8),
-                        ..._prixParAnnee.entries.map((entry) => 
-                          ListTile(
-                            title: Text('${entry.key}: ${entry.value.toStringAsFixed(2)} €/dose'),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                setState(() {
-                                  _prixParAnnee.remove(entry.key);
-                                });
-                              },
-                            ),
+                      ),
+                      const SizedBox(height: AppTheme.spacingS),
+                      ..._prixParAnnee.entries.map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingXS),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text('${entry.key}: ${entry.value.toStringAsFixed(2)} €'),
+                              ),
+                              IconButton(
+                                onPressed: () => _supprimerPrix(entry.key),
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                        );
+                      }).toList(),
                     ],
                   ),
                 ),
-              ),
+                const SizedBox(height: AppTheme.spacingL),
+              ],
               
-              SizedBox(height: 24),
-              ElevatedButton(
+              // Bouton de validation
+              ModernButton(
+                text: widget.variete == null ? 'Ajouter la variété' : 'Modifier la variété',
+                icon: Icons.save,
+                backgroundColor: AppTheme.primary,
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {
                       final variete = Variete(
                         id: widget.variete?.id,
-                        firebaseId: widget.variete?.firebaseId, // ✅ Préserver le firebaseId
+                        firebaseId: widget.variete?.firebaseId,
                         nom: _nomController.text.trim(),
                         description: _descriptionController.text.isEmpty ? null : _descriptionController.text.trim(),
                         dateCreation: widget.variete?.dateCreation ?? DateTime.now(),
@@ -213,21 +271,18 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Erreur: ${e.toString()}'),
-                            backgroundColor: Colors.red,
+                            backgroundColor: AppTheme.error,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                            ),
                           ),
                         );
                       }
                     }
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  widget.variete == null ? 'Ajouter' : 'Modifier',
-                  style: TextStyle(fontSize: 16),
-                ),
+                isFullWidth: true,
               ),
             ],
           ),

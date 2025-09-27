@@ -5,6 +5,9 @@ import '../models/semis.dart';
 import '../models/variete_surface.dart';
 import '../models/parcelle.dart';
 import '../models/variete.dart';
+import '../utils/cout_utils.dart';
+import '../theme/app_theme.dart';
+import '../widgets/modern_buttons.dart';
 
 class SemisFormScreen extends StatefulWidget {
   final Semis? semis;
@@ -24,7 +27,8 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   List<VarieteSurface> _selectedVarietesSurfaces = [];
   bool _showHectares = false;
   int? _selectedYear;
-  List<TextEditingController> _hectaresControllers = [];
+  double _densiteMais = CoutUtils.DENSITE_DEFAUT;
+  double _prixSemis = 0.0;
 
   @override
   void initState() {
@@ -35,11 +39,15 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
           : _formatDate(DateTime.now()),
     );
     _notesController = TextEditingController(text: widget.semis?.notes ?? '');
-    _densiteController = TextEditingController(text: widget.semis?.densite?.toString() ?? '83000');
+    _densiteController = TextEditingController(
+      text: widget.semis?.densiteMais.toString() ?? CoutUtils.DENSITE_DEFAUT.toString(),
+    );
     _selectedParcelleId = widget.semis?.parcelleId?.toString();
     _selectedVarietesSurfaces = widget.semis?.varietesSurfaces ?? [];
     _showHectares = _selectedVarietesSurfaces.length > 1;
     _selectedYear = widget.semis?.date.year ?? DateTime.now().year;
+    _densiteMais = widget.semis?.densiteMais ?? CoutUtils.DENSITE_DEFAUT;
+    _prixSemis = widget.semis?.prixSemis ?? 0.0;
   }
 
   @override
@@ -47,9 +55,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     _dateController.dispose();
     _notesController.dispose();
     _densiteController.dispose();
-    for (final controller in _hectaresControllers) {
-      controller.dispose();
-    }
     super.dispose();
   }
 
@@ -57,58 +62,34 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  void _updateHectaresControllers() {
-    // Dispose old controllers
-    for (final controller in _hectaresControllers) {
-      controller.dispose();
-    }
+  void _calculerPrixSemis() {
+    if (_selectedYear == null) return;
     
-    // Create new controllers
-    _hectaresControllers = _selectedVarietesSurfaces.map((vs) {
-      return TextEditingController(text: vs.surface > 0 ? vs.surface.toString() : '');
-    }).toList();
-  }
-
-  Widget _buildCalculInfo() {
-    final densite = double.tryParse(_densiteController.text);
-    
-    if (densite == null || _selectedVarietesSurfaces.isEmpty) {
-      return Text('Veuillez remplir la densité et sélectionner des variétés pour voir le calcul');
-    }
-    
-    // Récupérer les variétés depuis le provider
+    double totalPrix = 0.0;
     final provider = context.read<FirebaseProviderV4>();
-    final varietes = provider.varietesById;
-    final annee = _selectedYear ?? DateTime.now().year;
-    
-    double coutTotal = 0.0;
-    double surfaceTotale = 0.0;
     
     for (final varieteSurface in _selectedVarietesSurfaces) {
-      surfaceTotale += varieteSurface.surface;
-      final variete = varietes.values.firstWhere(
-        (v) => v.nom == varieteSurface.nom,
-        orElse: () => Variete(nom: '', dateCreation: DateTime.now()),
-      );
-      
-      if (variete.prixParAnnee.containsKey(annee)) {
-        final prixDose = variete.prixParAnnee[annee]!;
-        final nombreDoses = (densite * varieteSurface.surface) / 50000;
-        coutTotal += nombreDoses * prixDose;
+      final variete = provider.getVarieteById(varieteSurface.varieteId);
+      if (variete != null && variete.prixParAnnee.containsKey(_selectedYear)) {
+        final prixDose = variete.prixParAnnee[_selectedYear]!;
+        final coutParHectare = CoutUtils.calculerCoutSemisParHectare(prixDose, _densiteMais);
+        totalPrix += coutParHectare * varieteSurface.surface;
       }
     }
     
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Surface totale: ${surfaceTotale.toStringAsFixed(2)} ha'),
-        Text('Densité: ${densite.toStringAsFixed(0)} graines/ha'),
-        Text('Année: $annee'),
-        SizedBox(height: 8),
-        Text('Coût total: ${coutTotal.toStringAsFixed(2)} €', 
-             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade700)),
-      ],
-    );
+    setState(() {
+      _prixSemis = totalPrix;
+    });
+  }
+
+  void _onDensiteChanged(String value) {
+    final densite = double.tryParse(value);
+    if (densite != null && CoutUtils.estDensiteValide(densite)) {
+      setState(() {
+        _densiteMais = densite;
+      });
+      _calculerPrixSemis();
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -191,7 +172,11 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       if (selected) {
                         if (!isSelected) {
                           _selectedVarietesSurfaces.add(
-                            VarieteSurface(nom: variete.nom, surface: 0),
+                            VarieteSurface(
+                              nom: variete.nom, 
+                              surface: 0,
+                              varieteId: variete.firebaseId ?? variete.id.toString(),
+                            ),
                           );
                         }
                       } else {
@@ -199,12 +184,13 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                             .removeWhere((v) => v.nom == variete.nom);
                       }
                       _showHectares = _selectedVarietesSurfaces.length > 1;
-                      _updateHectaresControllers();
-                      // Auto-complétion immédiate
-                      Future.delayed(Duration(milliseconds: 50), () {
+                      // Auto-complétion immédiate si une seule variété
+                      if (_selectedVarietesSurfaces.length == 1) {
                         _autoCompleteRemaining();
-                      });
+                      }
                     });
+                    // Recalculer le prix après changement de variétés
+                    _calculerPrixSemis();
                   },
                 );
               }).toList(),
@@ -294,7 +280,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 trailing: SizedBox(
                   width: 100,
                   child: TextFormField(
-                    controller: index < _hectaresControllers.length ? _hectaresControllers[index] : null,
+                    initialValue: varieteSurface.surface > 0
+                        ? varieteSurface.surface.toString()
+                        : '',
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       suffix: const Text('ha'),
@@ -308,9 +296,12 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         _selectedVarietesSurfaces[index] = VarieteSurface(
                           nom: varieteSurface.nom,
                           surface: hectares,
+                          varieteId: varieteSurface.varieteId,
                         );
                         _autoCompleteRemaining();
                       });
+                      // Recalculer le prix après changement de surface
+                      _calculerPrixSemis();
                     },
                     validator: (value) {
                       if (value != null && value.isNotEmpty) {
@@ -362,51 +353,39 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     final total = _getParcelleSurface();
     final count = _selectedVarietesSurfaces.length;
     
-    if (count == 0) return;
-    
     if (count == 1) {
       // Une seule variété : assigner le total
       setState(() {
         _selectedVarietesSurfaces[0] = VarieteSurface(
           nom: _selectedVarietesSurfaces[0].nom,
           surface: total,
+          varieteId: _selectedVarietesSurfaces[0].varieteId,
         );
-        if (_hectaresControllers.isNotEmpty) {
-          _hectaresControllers[0].text = total.toString();
-        }
       });
     } else if (count == 2) {
-      // Deux variétés : auto-compléter la deuxième si la première est remplie
+      // Deux variétés : auto-compléter la deuxième
       final firstSurface = _selectedVarietesSurfaces[0].surface;
-      if (firstSurface > 0 && firstSurface < total) {
-        final secondSurface = total - firstSurface;
+      if (firstSurface > 0) {
         setState(() {
           _selectedVarietesSurfaces[1] = VarieteSurface(
             nom: _selectedVarietesSurfaces[1].nom,
-            surface: secondSurface,
+            surface: total - firstSurface,
+            varieteId: _selectedVarietesSurfaces[1].varieteId,
           );
-          if (_hectaresControllers.length > 1) {
-            _hectaresControllers[1].text = secondSurface.toString();
-          }
         });
       }
     } else {
-      // Plusieurs variétés : auto-compléter la dernière si toutes les autres sont remplies
+      // Plusieurs variétés : auto-compléter la dernière
       final filledCount = _selectedVarietesSurfaces.where((v) => v.surface > 0).length;
       if (filledCount == count - 1) {
         final filledTotal = _selectedVarietesSurfaces.take(count - 1).fold<double>(0, (sum, v) => sum + v.surface);
-        final remaining = total - filledTotal;
-        if (remaining > 0) {
-          setState(() {
-            _selectedVarietesSurfaces[count - 1] = VarieteSurface(
-              nom: _selectedVarietesSurfaces[count - 1].nom,
-              surface: remaining,
-            );
-            if (_hectaresControllers.length > count - 1) {
-              _hectaresControllers[count - 1].text = remaining.toString();
-            }
-          });
-        }
+        setState(() {
+          _selectedVarietesSurfaces[count - 1] = VarieteSurface(
+            nom: _selectedVarietesSurfaces[count - 1].nom,
+            surface: total - filledTotal,
+            varieteId: _selectedVarietesSurfaces[count - 1].varieteId,
+          );
+        });
       }
     }
   }
@@ -466,7 +445,8 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       date: DateTime(year, month, day),
       varietesSurfaces: _selectedVarietesSurfaces,
       notes: _notesController.text.isEmpty ? null : _notesController.text,
-      densite: double.tryParse(_densiteController.text),
+      densiteMais: _densiteMais,
+      prixSemis: _prixSemis,
     );
 
     try {
@@ -623,59 +603,66 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
 
               const SizedBox(height: 16),
 
-              // Densité de semis
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Densité de semis',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SizedBox(height: 16),
-                      
-                      TextFormField(
-                        controller: _densiteController,
-                        decoration: const InputDecoration(
-                          labelText: 'Densité (graines/ha)',
-                          border: OutlineInputBorder(),
-                          hintText: '83000',
-                        ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          setState(() {}); // Recalculer l'affichage
-                        },
-                      ),
-                      
-                      SizedBox(height: 16),
-                      
-                      // Calcul automatique du coût
-                      if (_densiteController.text.isNotEmpty && _selectedVarietesSurfaces.isNotEmpty)
-                        Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(8),
+              // Densité de maïs
+              TextFormField(
+                controller: _densiteController,
+                decoration: const InputDecoration(
+                  labelText: 'Densité de maïs (graines/ha)',
+                  hintText: 'Ex: 83000',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: _onDensiteChanged,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer une densité';
+                  }
+                  final densite = double.tryParse(value);
+                  if (densite == null || !CoutUtils.estDensiteValide(densite)) {
+                    return 'Densité invalide (entre 50 000 et 150 000)';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Prix du semis (calculé automatiquement)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.calculate, color: Colors.blue.shade700),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Prix du semis calculé',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue.shade700,
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Calcul automatique:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 8),
-                              _buildCalculInfo(),
-                            ],
+                          Text(
+                            '${_prixSemis.toStringAsFixed(2)} €',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue.shade900,
+                            ),
                           ),
-                        ),
-                    ],
-                  ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
               const SizedBox(height: 16),
 
               // Notes

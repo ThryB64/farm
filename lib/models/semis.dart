@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'variete_surface.dart';
-import 'variete.dart';
 
 class Semis {
   int? id;
@@ -9,7 +8,8 @@ class Semis {
   final DateTime date;
   final List<VarieteSurface> varietesSurfaces;
   final String? notes;
-  final double? densite; // Densité de semis (graines/hectare)
+  final double densiteMais; // Densité de maïs (défaut: 83000)
+  final double prixSemis; // Prix du semis calculé automatiquement
 
   Semis({
     this.id,
@@ -18,42 +18,12 @@ class Semis {
     required this.date,
     required this.varietesSurfaces,
     this.notes,
-    this.densite,
+    this.densiteMais = 83000.0, // Valeur par défaut
+    this.prixSemis = 0.0,
   });
 
   // Getter pour la compatibilité avec le code existant
   List<String> get varietes => varietesSurfaces.map((v) => v.nom).toList();
-  
-  // Calculer le coût total du semis (nécessite les prix des variétés)
-  double coutTotal(Map<String, Variete> varietes, int annee) {
-    if (densite == null || densite! <= 0) return 0.0;
-    
-    double coutTotal = 0.0;
-    for (final varieteSurface in varietesSurfaces) {
-      final variete = varietes[varieteSurface.nom];
-      if (variete != null && variete.prixParAnnee.containsKey(annee)) {
-        final prixDose = variete.prixParAnnee[annee]!;
-        final nombreDoses = (densite! * varieteSurface.surface) / 50000;
-        coutTotal += nombreDoses * prixDose;
-      }
-    }
-    
-    return coutTotal;
-  }
-  
-  // Calculer le nombre de doses nécessaires
-  double get nombreDoses {
-    if (densite == null || densite! <= 0) return 0.0;
-    
-    double surfaceTotale = 0.0;
-    for (final varieteSurface in varietesSurfaces) {
-      surfaceTotale += varieteSurface.surface;
-    }
-    
-    // 1 dose = 50000 graines, densité = graines/hectare
-    // Nombre de doses = (densité * surface) / 50000
-    return (densite! * surfaceTotale) / 50000;
-  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -63,7 +33,8 @@ class Semis {
       'date': date.toIso8601String(),
       'varietes_surfaces': jsonEncode(varietesSurfaces.map((v) => v.toMap()).toList()),
       'notes': notes,
-      'densite': densite,
+      'densite_mais': densiteMais,
+      'prix_semis': prixSemis,
     };
   }
 
@@ -76,7 +47,8 @@ class Semis {
       date: DateTime.parse(map['date']),
       varietesSurfaces: varietesData.map((v) => VarieteSurface.fromMap(v)).toList(),
       notes: map['notes'],
-      densite: double.tryParse(map['densite']?.toString() ?? ''),
+      densiteMais: (map['densite_mais'] ?? 83000.0).toDouble(),
+      prixSemis: (map['prix_semis'] ?? 0.0).toDouble(),
     );
   }
 

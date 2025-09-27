@@ -7,8 +7,8 @@ class Cellule {
   final String? notes;
   final String? nom; // Nom optionnel pour l'affichage
   final bool fermee; // Indique si la cellule est fermée
-  final double? quantiteGaz; // Quantité de gaz utilisée (kg)
-  final double? prixGaz; // Prix du gaz (€/kg)
+  final double? quantiteGaz; // Quantité de gaz utilisée en m3 (enregistrée à la fermeture)
+  final double? prixGaz; // Prix du gaz en €/kWh (enregistré à la fermeture)
 
   Cellule({
     this.id,
@@ -38,8 +38,8 @@ class Cellule {
       'notes': notes,
       'nom': nom,
       'fermee': fermee,
-      'quantiteGaz': quantiteGaz,
-      'prixGaz': prixGaz,
+      'quantite_gaz': quantiteGaz,
+      'prix_gaz': prixGaz,
     };
   }
 
@@ -52,19 +52,13 @@ class Cellule {
       notes: map['notes'],
       nom: map['nom'],
       fermee: map['fermee'] ?? false,
-      quantiteGaz: double.tryParse(map['quantiteGaz']?.toString() ?? ''),
-      prixGaz: double.tryParse(map['prixGaz']?.toString() ?? ''),
+      quantiteGaz: map['quantite_gaz']?.toDouble(),
+      prixGaz: map['prix_gaz']?.toDouble(),
     );
   }
   
   // Getter pour l'affichage (nom si présent, sinon reference)
   String get label => nom?.isNotEmpty == true ? nom! : reference;
-  
-  // Calculer le coût total du gaz
-  double get coutGaz {
-    if (quantiteGaz == null || prixGaz == null) return 0.0;
-    return quantiteGaz! * prixGaz!;
-  }
 
   @override
   String toString() => 'Cellule(id: $id, reference: $reference, capacite: $capacite)';

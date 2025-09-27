@@ -30,6 +30,9 @@ class AppTheme {
   static const Color error = Color(0xFFF44336); // Rouge
   static const Color info = Color(0xFF2196F3); // Bleu
   
+  // Couleurs de bordure
+  static const Color border = Color(0xFFE0E0E0); // Gris clair pour les bordures
+  
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -207,4 +210,53 @@ class AppTheme {
       ),
     );
   }
+
+  // TextTheme personnalisé
+  static const TextTheme textTheme = TextTheme(
+    headlineLarge: TextStyle(
+      fontSize: 32,
+      fontWeight: FontWeight.bold,
+      color: textPrimary,
+    ),
+    headlineMedium: TextStyle(
+      fontSize: 28,
+      fontWeight: FontWeight.bold,
+      color: textPrimary,
+    ),
+    headlineSmall: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+      color: textPrimary,
+    ),
+    titleLarge: TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.w600,
+      color: textPrimary,
+    ),
+    titleMedium: TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: textPrimary,
+    ),
+    titleSmall: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: textPrimary,
+    ),
+    bodyLarge: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.normal,
+      color: textPrimary,
+    ),
+    bodyMedium: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.normal,
+      color: textPrimary,
+    ),
+    bodySmall: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.normal,
+      color: textSecondary,
+    ),
+  );
 }

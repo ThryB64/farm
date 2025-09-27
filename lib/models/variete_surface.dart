@@ -2,11 +2,16 @@
 class VarieteSurface {
   final String nom;
   final double surface; // En hectares maintenant
+  final String? varieteId; // ID de la variété pour les calculs
 
   VarieteSurface({
     required this.nom,
     required this.surface,
+    this.varieteId,
   });
+
+  // Getter pour la compatibilité
+  double get surfaceHectares => surface;
 
   // Getter pour la compatibilité avec l'ancien code
   double get pourcentage => surface; // Pour la compatibilité - surface en hectares
@@ -16,6 +21,7 @@ class VarieteSurface {
       'nom': nom,
       'surface': surface,
       'pourcentage': surface, // Pour la compatibilité
+      'varieteId': varieteId,
     };
   }
 
@@ -23,6 +29,7 @@ class VarieteSurface {
     return VarieteSurface(
       nom: map['nom'],
       surface: map['surface'] ?? map['pourcentage'] ?? 0.0, // Compatibilité
+      varieteId: map['varieteId'],
     );
   }
 } 

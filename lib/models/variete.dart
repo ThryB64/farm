@@ -4,7 +4,7 @@ class Variete {
   final String nom;
   final String? description;
   final DateTime dateCreation;
-  final Map<int, double> prixParAnnee; // Prix de la dose par année (€/dose)
+  final Map<int, double> prixParAnnee; // Prix de la dose par année
 
   Variete({
     this.id,
@@ -22,22 +22,16 @@ class Variete {
       'nom': nom,
       'description': description,
       'date_creation': dateCreation.toIso8601String(),
-      'prixParAnnee': prixParAnnee.map((key, value) => MapEntry(key.toString(), value)),
+      'prixParAnnee': prixParAnnee.map((k, v) => MapEntry(k.toString(), v)),
     };
   }
 
   factory Variete.fromMap(Map<String, dynamic> map) {
-    // Parser prixParAnnee avec gestion des types (int vs String)
+    // Parser les prix par année
     Map<int, double> prixParAnnee = {};
     if (map['prixParAnnee'] != null) {
-      final prixData = map['prixParAnnee'] as Map;
-      prixData.forEach((key, value) {
-        final annee = int.tryParse(key.toString());
-        final prix = double.tryParse(value.toString());
-        if (annee != null && prix != null) {
-          prixParAnnee[annee] = prix;
-        }
-      });
+      final prixData = map['prixParAnnee'] as Map<String, dynamic>;
+      prixParAnnee = prixData.map((k, v) => MapEntry(int.parse(k), v.toDouble()));
     }
     
     return Variete(
