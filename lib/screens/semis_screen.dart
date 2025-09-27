@@ -191,25 +191,25 @@ class _SemisScreenState extends State<SemisScreen> {
           const SizedBox(width: 16),
           Expanded(
             child: DropdownButton<int>(
-              value: _selectedYear,
+                  value: _selectedYear,
               isExpanded: true,
               underline: const SizedBox(),
-              items: annees.map((annee) {
-                return DropdownMenuItem(
-                  value: annee,
+                  items: annees.map((annee) {
+                    return DropdownMenuItem(
+                      value: annee,
                   child: Text(
                     annee.toString(),
                     style: AppTheme.textTheme.bodyLarge,
                   ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedYear = value;
-                });
-              },
-            ),
-          ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedYear = value;
+                    });
+                  },
+                ),
+              ),
         ],
       ),
     );
@@ -375,15 +375,15 @@ class _SemisScreenState extends State<SemisScreen> {
         ...semisAnnee.asMap().entries.map((entry) {
           final index = entry.key;
           final semis = entry.value;
-          final parcelle = parcelles.firstWhere(
+                          final parcelle = parcelles.firstWhere(
             (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
-            orElse: () => Parcelle(
-              id: 0,
+                            orElse: () => Parcelle(
+                              id: 0,
               nom: 'Parcelle inconnue',
-              surface: 0,
-              dateCreation: DateTime.now(),
-            ),
-          );
+                              surface: 0,
+                              dateCreation: DateTime.now(),
+                            ),
+                          );
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -412,7 +412,7 @@ class _SemisScreenState extends State<SemisScreen> {
                     ),
                   ),
                   child: Row(
-                    children: [
+                                children: [
                       Icon(Icons.grass, color: AppTheme.primary),
                       const SizedBox(width: 8),
                       Expanded(
@@ -429,7 +429,7 @@ class _SemisScreenState extends State<SemisScreen> {
                           if (value == 'edit') {
                             _editSemis(semis);
                           } else if (value == 'delete') {
-                            _showDeleteConfirmation(context, semis);
+                                      _showDeleteConfirmation(context, semis);
                           }
                         },
                         itemBuilder: (context) => [
@@ -455,9 +455,9 @@ class _SemisScreenState extends State<SemisScreen> {
                           ),
                         ],
                         child: Icon(Icons.more_vert, color: AppTheme.primary),
-                      ),
-                    ],
-                  ),
+                                  ),
+                                ],
+                              ),
                 ),
                 
                 // Contenu de la carte
@@ -631,7 +631,7 @@ class _SemisScreenState extends State<SemisScreen> {
                       _buildInfoRow(Icons.note, 'Notes', semis.notes!),
                     ],
                   ],
-                ),
+                      ),
               ),
             ],
           ),
@@ -755,4 +755,4 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
     );
   }
-}
+} 
