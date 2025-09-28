@@ -177,7 +177,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                             ),
                           ),
                           pw.Text(
-                            'Coût total: ${coutTotalParcelle.toStringAsFixed(2)} €',
+                            'Coût total: ${coutTotalParcelle.toStringAsFixed(2)}',
                             style: pw.TextStyle(
                               fontSize: 16,
                               fontWeight: pw.FontWeight.bold,
@@ -229,7 +229,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                     _buildDataCell('Aucun produit'),
                                     _buildDataCell('-'),
                                     _buildDataCell('-'),
-                                    _buildDataCell('${traitement.coutTotal.toStringAsFixed(2)} €'),
+                                    _buildDataCell('${traitement.coutTotal.toStringAsFixed(2)}'),
                                     _buildDataCell('-'),
                                   ],
                                 ),
@@ -245,8 +245,8 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                   _buildDataCell('${produit.date.day}/${produit.date.month}'),
                                   _buildDataCell(produit.nomProduit),
                                   _buildDataCell('${produit.quantite.toStringAsFixed(2)}'),
-                                  _buildDataCell('${produit.prixUnitaire.toStringAsFixed(2)} €'),
-                                  _buildDataCell('${produit.coutTotal.toStringAsFixed(2)} €'),
+                                  _buildDataCell('${produit.prixUnitaire.toStringAsFixed(2)}'),
+                                  _buildDataCell('${produit.coutTotal.toStringAsFixed(2)}'),
                                   _buildDataCell(produit.mesure),
                                 ],
                               );
@@ -273,7 +273,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                             ),
                           ),
                           pw.Text(
-                            'Total Coût: ${coutTotalParcelle.toStringAsFixed(2)} €',
+                            'Total Coût: ${coutTotalParcelle.toStringAsFixed(2)}',
                             style: pw.TextStyle(
                               fontSize: 14,
                               fontWeight: pw.FontWeight.bold,
@@ -376,7 +376,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                             pw.Expanded(
                               child: _buildStatCard(
                                 'Coût total',
-                                '${coutTotalGlobal.toStringAsFixed(2)} €',
+                                '${coutTotalGlobal.toStringAsFixed(2)}',
                                 'Coût des traitements',
                                 secondaryColor,
                               ),
@@ -501,8 +501,8 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
   }
 
   pw.Widget _buildDataCell(String text) {
-    // Nettoyer le texte pour enlever les caractères problématiques
-    final cleanText = text.replaceAll(RegExp(r'[^\w\s\.,€\-/]'), '');
+    // Nettoyer le texte pour enlever les caractères problématiques et les euros
+    final cleanText = text.replaceAll(RegExp(r'[^\w\s\.,\-/]'), '').replaceAll('€', '');
     
     return pw.Padding(
       padding: const pw.EdgeInsets.all(8),
@@ -666,7 +666,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         orElse: () => null,
       );
       if (semisParcelle != null && semisParcelle.prixSemis > 0) {
-        return 'Prix semis: ${semisParcelle.prixSemis.toStringAsFixed(2)} €';
+        return 'Prix semis: ${semisParcelle.prixSemis.toStringAsFixed(2)}';
       } else {
         return 'Prix semis: Non défini';
       }
@@ -677,18 +677,28 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
 
   List<pw.TableRow> _buildSemisAsTreatment(Parcelle parcelle, List<dynamic> semis, int annee) {
     try {
+      print('🔍 Recherche semis pour parcelle ${parcelle.nom} (${parcelle.firebaseId}) année $annee');
+      print('🔍 Semis disponibles: ${semis.length}');
+      
       final semisParcelle = semis.firstWhere(
         (s) => s.parcelleId == parcelle.firebaseId && s.date.year == annee,
         orElse: () => null,
       );
       
-      if (semisParcelle == null || semisParcelle.prixSemis <= 0) {
+      print('🔍 Semis trouvé: ${semisParcelle != null}');
+      if (semisParcelle != null) {
+        print('🔍 Prix semis: ${semisParcelle.prixSemis}');
+        print('🔍 Densité: ${semisParcelle.densiteMais}');
+      }
+      
+      // Toujours afficher le semis même si prixSemis = 0
+      if (semisParcelle == null) {
         return [];
       }
 
       // Calculer le nombre de doses pour toute la parcelle
       final nombreDoses = (semisParcelle.densiteMais * parcelle.surface) / 50000;
-      final prixUnitaire = semisParcelle.prixSemis / nombreDoses;
+      final prixUnitaire = semisParcelle.prixSemis > 0 ? semisParcelle.prixSemis / nombreDoses : 0.0;
 
       return [
         pw.TableRow(
@@ -699,13 +709,14 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
             _buildDataCell('${semisParcelle.date.day}/${semisParcelle.date.month}'),
             _buildDataCell('Semis (${semisParcelle.varietesSurfaces.map((v) => v.nomVariete).join(', ')})'),
             _buildDataCell('${nombreDoses.toStringAsFixed(2)}'),
-            _buildDataCell('${prixUnitaire.toStringAsFixed(2)} €'),
-            _buildDataCell('${semisParcelle.prixSemis.toStringAsFixed(2)} €'),
+            _buildDataCell('${prixUnitaire.toStringAsFixed(2)}'),
+            _buildDataCell('${semisParcelle.prixSemis.toStringAsFixed(2)}'),
             _buildDataCell('${semisParcelle.densiteMais.toStringAsFixed(0)} graines/ha'),
           ],
         ),
       ];
     } catch (e) {
+      print('❌ Erreur _buildSemisAsTreatment: $e');
       return [];
     }
   }
