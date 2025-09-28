@@ -8,6 +8,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import 'traitement_form_screen.dart';
 import 'produits_screen.dart';
+import 'traitement_raccourci_screen.dart';
 
 class TraitementsScreen extends StatefulWidget {
   const TraitementsScreen({Key? key}) : super(key: key);
@@ -181,19 +182,41 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TraitementFormScreen(
-              annee: _selectedYear ?? DateTime.now().year,
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Bouton raccourci
+          FloatingActionButton.extended(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TraitementRaccourciScreen(),
+              ),
             ),
+            icon: const Icon(Icons.speed),
+            label: const Text('Raccourci'),
+            backgroundColor: AppTheme.secondary,
+            foregroundColor: Colors.white,
+            heroTag: "raccourci",
           ),
-        ),
-        icon: const Icon(Icons.add),
-        label: const Text('Nouveau traitement'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+          const SizedBox(height: 16),
+          // Bouton principal
+          FloatingActionButton.extended(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TraitementFormScreen(
+                  annee: _selectedYear ?? DateTime.now().year,
+                ),
+              ),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text('Nouveau traitement'),
+            backgroundColor: AppTheme.primary,
+            foregroundColor: Colors.white,
+            heroTag: "nouveau",
+          ),
+        ],
       ),
     );
   }
