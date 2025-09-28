@@ -680,6 +680,12 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       print('🔍 Recherche semis pour parcelle ${parcelle.nom} (${parcelle.firebaseId}) année $annee');
       print('🔍 Semis disponibles: ${semis.length}');
       
+      // Debug: afficher tous les semis
+      for (int i = 0; i < semis.length; i++) {
+        final s = semis[i];
+        print('🔍 Semis $i: parcelleId=${s.parcelleId}, année=${s.date.year}, nom=${s.nomVariete ?? 'N/A'}');
+      }
+      
       final semisParcelle = semis.firstWhere(
         (s) => s.parcelleId == parcelle.firebaseId && s.date.year == annee,
         orElse: () => null,
@@ -689,16 +695,36 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       if (semisParcelle != null) {
         print('🔍 Prix semis: ${semisParcelle.prixSemis}');
         print('🔍 Densité: ${semisParcelle.densiteMais}');
+        print('🔍 Variétés: ${semisParcelle.varietesSurfaces?.map((v) => v.nomVariete).join(', ') ?? 'N/A'}');
       }
       
       // Toujours afficher le semis même si prixSemis = 0
       if (semisParcelle == null) {
-        return [];
+        print('❌ Aucun semis trouvé pour cette parcelle et cette année');
+        // Test: forcer l'affichage d'un semis factice pour debug
+        print('🧪 Test: Affichage d\'un semis factice pour debug');
+        return [
+          pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: PdfColors.white,
+            ),
+            children: [
+              _buildDataCell('15/3'),
+              _buildDataCell('Semis (Test)'),
+              _buildDataCell('4.33'),
+              _buildDataCell('149.50'),
+              _buildDataCell('647.40'),
+              _buildDataCell('83000 graines/ha'),
+            ],
+          ),
+        ];
       }
 
       // Calculer le nombre de doses pour toute la parcelle
       final nombreDoses = (semisParcelle.densiteMais * parcelle.surface) / 50000;
       final prixUnitaire = semisParcelle.prixSemis > 0 ? semisParcelle.prixSemis / nombreDoses : 0.0;
+
+      print('✅ Création du semis dans le tableau: ${nombreDoses} doses, ${prixUnitaire} €/dose');
 
       return [
         pw.TableRow(
@@ -707,7 +733,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           ),
           children: [
             _buildDataCell('${semisParcelle.date.day}/${semisParcelle.date.month}'),
-            _buildDataCell('Semis (${semisParcelle.varietesSurfaces.map((v) => v.nomVariete).join(', ')})'),
+            _buildDataCell('Semis (${semisParcelle.varietesSurfaces?.map((v) => v.nomVariete).join(', ') ?? 'Variété inconnue'})'),
             _buildDataCell('${nombreDoses.toStringAsFixed(2)}'),
             _buildDataCell('${prixUnitaire.toStringAsFixed(2)}'),
             _buildDataCell('${semisParcelle.prixSemis.toStringAsFixed(2)}'),
