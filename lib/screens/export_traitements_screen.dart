@@ -695,7 +695,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       if (semisParcelle != null) {
         print('🔍 Prix semis: ${semisParcelle.prixSemis}');
         print('🔍 Densité: ${semisParcelle.densiteMais}');
-        print('🔍 Variétés: ${semisParcelle.varietesSurfaces?.map((v) => v.nomVariete).join(', ') ?? 'N/A'}');
+        print('🔍 Variétés: ${semisParcelle.varietesSurfaces?.map((v) => v.nom).join(', ') ?? 'N/A'}');
       }
       
       // Toujours afficher le semis même si prixSemis = 0
@@ -733,7 +733,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           ),
           children: [
             _buildDataCell('${semisParcelle.date.day}/${semisParcelle.date.month}'),
-            _buildDataCell('Semis (${semisParcelle.varietesSurfaces?.map((v) => v.nomVariete).join(', ') ?? 'Variété inconnue'})'),
+            _buildDataCell('Semis (${semisParcelle.varietesSurfaces?.map((v) => v.nom).join(', ') ?? 'Variété inconnue'})'),
             _buildDataCell('${nombreDoses.toStringAsFixed(2)}'),
             _buildDataCell('${prixUnitaire.toStringAsFixed(2)}'),
             _buildDataCell('${semisParcelle.prixSemis.toStringAsFixed(2)}'),
