@@ -151,12 +151,30 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Parcelles sélectionnées (${_selectedParcelleIds.length})',
-            style: AppTheme.textTheme.titleMedium?.copyWith(
-              color: AppTheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Parcelles sélectionnées (${_selectedParcelleIds.length})',
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                children: [
+                  ModernOutlinedButton(
+                    text: 'Tout sélectionner',
+                    onPressed: _selectAllParcelles,
+                  ),
+                  const SizedBox(width: 8),
+                  ModernOutlinedButton(
+                    text: 'Tout désélectionner',
+                    onPressed: _deselectAllParcelles,
+                  ),
+                ],
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           if (_selectedParcelleIds.isEmpty)
@@ -335,6 +353,20 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
   void _removeProduit(int index) {
     setState(() {
       _produits.removeAt(index);
+    });
+  }
+
+  void _selectAllParcelles() {
+    setState(() {
+      final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+      _selectedParcelleIds.clear();
+      _selectedParcelleIds.addAll(provider.parcelles.map((p) => p.firebaseId!).toList());
+    });
+  }
+
+  void _deselectAllParcelles() {
+    setState(() {
+      _selectedParcelleIds.clear();
     });
   }
 
