@@ -172,13 +172,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                 ),
                                 pw.SizedBox(width: 20),
                                 // Ajouter le prix du semis pour cette parcelle et cette année
-                                pw.Text(
-                                  _getPrixSemisParcelle(parcelle, semis, _selectedYear!),
-                                  style: pw.TextStyle(
-                                    fontSize: 16,
-                                    color: mainColor,
-                                  ),
-                                ),
+                        // Prix semis retiré de l'en-tête car affiché dans le tableau
                               ],
                             ),
                           ),
@@ -219,6 +213,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                               _buildHeaderCell('MESURE'),
                             ],
                           ),
+                          // Ajouter le semis comme premier traitement
+                          ..._buildSemisAsTreatment(parcelle, semis, _selectedYear!),
+                          
+                          // Puis les traitements normaux
                           ...pageTraitements.expand((traitement) {
                             if (traitement.produits.isEmpty) {
                               return [
@@ -503,10 +501,13 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
   }
 
   pw.Widget _buildDataCell(String text) {
+    // Nettoyer le texte pour enlever les caractères problématiques
+    final cleanText = text.replaceAll(RegExp(r'[^\w\s\.,€\-/]'), '');
+    
     return pw.Padding(
       padding: const pw.EdgeInsets.all(8),
       child: pw.Text(
-        text,
+        cleanText,
         style: const pw.TextStyle(fontSize: 10),
         textAlign: pw.TextAlign.center,
       ),
@@ -671,6 +672,41 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       }
     } catch (e) {
       return 'Prix semis: Non défini';
+    }
+  }
+
+  List<pw.TableRow> _buildSemisAsTreatment(Parcelle parcelle, List<dynamic> semis, int annee) {
+    try {
+      final semisParcelle = semis.firstWhere(
+        (s) => s.parcelleId == parcelle.firebaseId && s.date.year == annee,
+        orElse: () => null,
+      );
+      
+      if (semisParcelle == null || semisParcelle.prixSemis <= 0) {
+        return [];
+      }
+
+      // Calculer le nombre de doses pour toute la parcelle
+      final nombreDoses = (semisParcelle.densiteMais * parcelle.surface) / 50000;
+      final prixUnitaire = semisParcelle.prixSemis / nombreDoses;
+
+      return [
+        pw.TableRow(
+          decoration: pw.BoxDecoration(
+            color: PdfColors.white,
+          ),
+          children: [
+            _buildDataCell('${semisParcelle.date.day}/${semisParcelle.date.month}'),
+            _buildDataCell('Semis (${semisParcelle.varietesSurfaces.map((v) => v.nomVariete).join(', ')})'),
+            _buildDataCell('${nombreDoses.toStringAsFixed(2)}'),
+            _buildDataCell('${prixUnitaire.toStringAsFixed(2)} €'),
+            _buildDataCell('${semisParcelle.prixSemis.toStringAsFixed(2)} €'),
+            _buildDataCell('${semisParcelle.densiteMais.toStringAsFixed(0)} graines/ha'),
+          ],
+        ),
+      ];
+    } catch (e) {
+      return [];
     }
   }
 }
