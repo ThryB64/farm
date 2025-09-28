@@ -7,6 +7,7 @@ import '../providers/firebase_provider_v4.dart';
 import '../models/traitement.dart';
 import '../models/parcelle.dart';
 import '../models/produit.dart';
+import '../models/semis.dart';
 
 class ExportTraitementsScreen extends StatefulWidget {
   const ExportTraitementsScreen({Key? key}) : super(key: key);
@@ -120,11 +121,27 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
             .toList()
           ..sort((a, b) => a.date.compareTo(b.date));
 
-        if (traitementsP.isEmpty) continue;
+        // Vérifier s'il y a un semis même si pas de traitements
+        Semis? semisParcelle;
+        try {
+          semisParcelle = semis.firstWhere(
+            (s) => s.parcelleId == parcelle.firebaseId && s.date.year == _selectedYear,
+          );
+        } catch (e) {
+          semisParcelle = null;
+        }
+        
+        if (traitementsP.isEmpty && (semisParcelle == null || semisParcelle.prixSemis <= 0)) continue;
 
         nombreTraitementsTotal += traitementsP.length;
         double coutTotalParcelle = 0;
         int nombreProduitsParcelle = 0;
+
+        // Ajouter le coût du semis
+        if (semisParcelle != null && semisParcelle.prixSemis > 0) {
+          coutTotalParcelle += semisParcelle.prixSemis;
+          print('💰 Coût semis ajouté pour ${parcelle.nom}: ${semisParcelle.prixSemis}');
+        }
 
         for (var t in traitementsP) {
           coutTotalParcelle += t.coutTotal;
