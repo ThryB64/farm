@@ -683,7 +683,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       // Debug: afficher tous les semis
       for (int i = 0; i < semis.length; i++) {
         final s = semis[i];
-        print('🔍 Semis $i: parcelleId=${s.parcelleId}, année=${s.date.year}, nom=${s.nomVariete ?? 'N/A'}');
+        print('🔍 Semis $i: parcelleId=${s.parcelleId}, année=${s.date.year}');
       }
       
       final semisParcelle = semis.firstWhere(
