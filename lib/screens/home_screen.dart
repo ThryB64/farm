@@ -1,9 +1,8 @@
-import 'dart:ui'; // pour ImageFilter (blur)
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../services/security_service.dart';
-// On ne touche pas au reste de ton archi ni aux écrans :
 import 'parcelles_screen.dart';
 import 'cellules_screen.dart';
 import 'chargements_screen.dart';
@@ -15,45 +14,50 @@ import 'import_export_screen.dart';
 import 'exports_pdf_screen.dart';
 import '../main.dart';
 
-/// ----- Palette & Tokens inspirés des maquettes -----
+/// ====== Palette agricole & tokens ======
 class _UX {
-  static const Color bgPeach = Color(0xFFF6E8DF); // #F6E8DF
-  static const Color peach = Color(0xFFFEAE96);   // #FEAE96
-  static const Color coral = Color(0xFFFE979C);   // #FE979C
-  static const Color navy = Color(0xFF013237);    // #013237
+  // Teintes "agricoles"
+  static const Color leaf = Color(0xFF1F8A48);   // feuille
+  static const Color meadow = Color(0xFF5CAF7A); // prairie
+  static const Color wheat = Color(0xFFF3E7D3);  // blé clair
+  static const Color cream = Color(0xFFFFF9F2);  // crème
+  static const Color clay  = Color(0xFFC69C7B);  // terre cuite
+  static const Color soil  = Color(0xFF8B6B5C);  // terre
+  static const Color ink   = Color(0xFF163227);  // bleu-vert profond (texte)
 
   static const double rLg = 28;
   static const double rMd = 20;
   static const double rSm = 14;
 
-  static const double sS = 10;
-  static const double sM = 14;
-  static const double sL = 20;
-  static const double sXL = 28;
-
-  static const List<BoxShadow> softShadow = [
-    BoxShadow(color: Colors.black12, blurRadius: 18, offset: Offset(0, 10)),
+  static const List<BoxShadow> floatShadow = [
+    BoxShadow(color: Colors.black12, blurRadius: 28, offset: Offset(0, 14)),
   ];
 
+  /// Dégradé “verre” doux
+  static LinearGradient glassGrad = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Colors.white.withOpacity(.55),
+      Colors.white.withOpacity(.28),
+    ],
+  );
+
+  /// Dégradé des boutons pilules
   static const LinearGradient pillGrad = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [peach, coral],
+    colors: [leaf, Color(0xFFE6B980)], // vert -> or doux
   );
 
-  static const LinearGradient cardGrad = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Colors.white, Color(0xFFF9F6F4)],
-  );
-
+  /// Fond doux avec blobs
   static const LinearGradient bgGrad = LinearGradient(
     begin: Alignment(-1, -1),
     end: Alignment(1, 1),
     colors: [
-      Color(0xFFFFF7F1),
-      Color(0xFFFCEFE7),
-      Color(0xFFF6E8DF),
+      cream,        // haut gauche
+      Color(0xFFF6EFE7),
+      Color(0xFFE9F5EE), // une pointe de vert pour l’ambiance agricole
     ],
   );
 }
@@ -67,20 +71,17 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fade;
+  late Animation<Offset> _slide;
   int? _selectedYear;
   bool _signingOut = false;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 700),
-      vsync: this,
-    );
-    _fadeAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOutCubic);
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, .08), end: Offset.zero)
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _fade = CurvedAnimation(parent: _animationController, curve: Curves.easeInOutCubic);
+    _slide = Tween<Offset>(begin: const Offset(0, .06), end: Offset.zero)
         .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic));
     _animationController.forward();
   }
@@ -125,25 +126,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (!provider.ready) return const SplashScreen();
 
     return Scaffold(
-      // AppBar “flottant”, transparent, avec titre fin + bouton logout en pilule
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         scrolledUnderElevation: 0,
-        centerTitle: false,
         titleSpacing: 20,
         title: const Text(
           'GAEC de la BARADE',
-          style: TextStyle(
-            color: _UX.navy,
-            fontWeight: FontWeight.w700,
-            fontSize: 22,
-          ),
+          style: TextStyle(color: _UX.ink, fontWeight: FontWeight.w800, fontSize: 22),
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: const EdgeInsets.only(right: 16),
             child: _Pill.icon(
               icon: Icons.logout,
               label: 'Logout',
@@ -152,51 +147,56 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: _UX.bgGrad),
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: 22),
-                    _buildStatsSection(provider),
-                    const SizedBox(height: 22),
-                    _buildMenuSection(),
-                    const SizedBox(height: 22),
-                    _buildQuickActions(provider),
-                  ],
+      body: Stack(
+        children: [
+          // Fond dégradé + blobs lumineux
+          const DecoratedBox(decoration: BoxDecoration(gradient: _UX.bgGrad)),
+          const _BackgroundBlobs(),
+          SafeArea(
+            child: FadeTransition(
+              opacity: _fade,
+              child: SlideTransition(
+                position: _slide,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 22),
+                      _buildStatsSection(provider),
+                      const SizedBox(height: 22),
+                      _buildMenuSection(),
+                      const SizedBox(height: 22),
+                      _buildQuickActions(provider),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  // ----- HEADER : “verre dépoli” + actions -----
+  // ----- HEADER (verre liquide + reflet latéral) -----
   Widget _buildHeader() {
-    return _Glass(
+    return _LiquidGlass(
       padding: const EdgeInsets.all(18),
       radius: _UX.rLg,
+      tint: _UX.clay.withOpacity(.06),
       child: Stack(
         children: [
           Row(
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: _UX.navy.withOpacity(.08),
+                  color: _UX.leaf.withOpacity(.10),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 padding: const EdgeInsets.all(14),
-                child: const Icon(Icons.agriculture, color: _UX.navy, size: 28),
+                child: const Icon(Icons.agriculture, color: _UX.leaf, size: 28),
               ),
               const SizedBox(width: 14),
               const Expanded(
@@ -204,10 +204,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('GAEC de la BARADE',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: _UX.navy)),
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: _UX.ink)),
                     SizedBox(height: 4),
                     Text('Gestion des récoltes de maïs',
-                        style: TextStyle(fontSize: 14, color: Color(0xFF5E6B6D))),
+                        style: TextStyle(fontSize: 14, color: Color(0xFF51635B))),
                   ],
                 ),
               ),
@@ -219,10 +219,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: _Pill.icon(
               icon: Icons.analytics_outlined,
               label: 'Stats',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const StatistiquesScreen()),
-              ),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatistiquesScreen())),
             ),
           ),
         ],
@@ -230,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ----- STATS : cartes “neumorph” + sélecteur année arrondi -----
+  // ----- STATS (cartes verre + sélecteur pilule) -----
   Widget _buildStatsSection(FirebaseProviderV4 provider) {
     final parcelles = provider.parcelles;
     final chargements = provider.chargements;
@@ -239,7 +236,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final years = chargements.map((c) => c.dateChargement.year).toSet().toList()..sort((a, b) => b - a);
       _selectedYear = years.isNotEmpty ? years.first : DateTime.now().year;
     }
-
     final yearLoads = chargements.where((c) => c.dateChargement.year == _selectedYear).toList();
 
     final parcellesRecoltees = <String>{};
@@ -253,54 +249,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (parcellesRecoltees.contains(id)) surfaceRecoltee += p.surface;
     }
 
-    final poidsTotalNormeAnnee =
-        yearLoads.fold<double>(0, (sum, c) => sum + c.poidsNormes);
+    final poidsTotalNormeAnnee = yearLoads.fold<double>(0, (sum, c) => sum + c.poidsNormes);
     final rendementMoyenNorme =
         surfaceRecoltee > 0 ? poidsTotalNormeAnnee / (surfaceRecoltee * 1000) : 0.0;
 
-    return _Glass(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+    return _LiquidGlass(
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
       radius: _UX.rLg,
+      tint: _UX.wheat.withOpacity(.10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: const [
-            Icon(Icons.insights, color: _UX.navy, size: 22),
+            Icon(Icons.insights, color: _UX.leaf, size: 22),
             SizedBox(width: 10),
             Text('Aperçu général',
-                style: TextStyle(color: _UX.navy, fontSize: 18, fontWeight: FontWeight.w800)),
+                style: TextStyle(color: _UX.ink, fontSize: 18, fontWeight: FontWeight.w900)),
           ]),
           const SizedBox(height: 16),
 
-          // Sélecteur d’année en pilule
+          // Sélecteur d’année style pilule/verre
           Row(
             children: [
-              const Icon(Icons.calendar_today, size: 18, color: _UX.navy),
+              const Icon(Icons.calendar_today, size: 18, color: _UX.ink),
               const SizedBox(width: 8),
-              const Text('Année',
-                  style: TextStyle(color: _UX.navy, fontWeight: FontWeight.w700)),
+              const Text('Année', style: TextStyle(color: _UX.ink, fontWeight: FontWeight.w700)),
               const SizedBox(width: 12),
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: const LinearGradient(
-                      colors: [Colors.white, Color(0xFFF5F2F0)],
-                    ),
-                    boxShadow: _UX.softShadow,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: _LiquidGlass(
+                  radius: 16,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<int>(
                       value: _selectedYear,
-                      icon: const Icon(Icons.expand_more, color: _UX.navy),
+                      icon: const Icon(Icons.expand_more, color: _UX.ink),
                       isExpanded: true,
                       items: () {
                         final years = chargements.map((c) => c.dateChargement.year).toSet().toList()
                           ..sort((a, b) => b - a);
-                        return years
-                            .map((y) => DropdownMenuItem(value: y, child: Text(y.toString())))
-                            .toList();
+                        return years.map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))).toList();
                       }(),
                       onChanged: (v) => setState(() => _selectedYear = v),
                     ),
@@ -315,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Row(
             children: [
               Expanded(
-                child: _NeoCard(
+                child: _StatGlass(
                   title: 'Surface récoltée',
                   value: '${surfaceRecoltee.toStringAsFixed(1)} ha',
                   icon: Icons.landscape,
@@ -323,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: _NeoCard(
+                child: _StatGlass(
                   title: 'Rendement $_selectedYear',
                   value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
                   icon: Icons.trending_up,
@@ -335,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Row(
             children: [
               Expanded(
-                child: _NeoCard(
+                child: _StatGlass(
                   title: 'Poids total $_selectedYear',
                   value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
                   icon: Icons.scale,
@@ -343,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: _NeoCard(
+                child: _StatGlass(
                   title: 'Parcelles',
                   value: '${parcelles.length}',
                   icon: Icons.grid_view_rounded,
@@ -356,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ----- MENU : tuiles 2 colonnes, visuel doux -----
+  // ----- MENU (tuiles verre) -----
   Widget _buildMenuSection() {
     Widget tile({
       required String title,
@@ -367,27 +354,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(_UX.rMd),
-        child: _Glass(
+        child: _LiquidGlass(
           radius: _UX.rMd,
           padding: const EdgeInsets.all(16),
+          tint: _UX.clay.withOpacity(.06),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFFFDFCFB), Color(0xFFF6EFEA)]),
+                  color: _UX.leaf.withOpacity(.10),
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: _UX.softShadow,
+                  boxShadow: _UX.floatShadow,
                 ),
                 padding: const EdgeInsets.all(12),
-                child: Icon(icon, color: _UX.navy, size: 26),
+                child: Icon(icon, color: _UX.leaf, size: 26),
               ),
               const Spacer(),
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w800, color: _UX.navy)),
+              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: _UX.ink)),
               const SizedBox(height: 4),
-              Text(subtitle, style: const TextStyle(color: Color(0xFF6F7A7C))),
+              Text(subtitle, style: const TextStyle(color: Color(0xFF5E6B64))),
             ],
           ),
         ),
@@ -449,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ----- ACTIONS RAPIDES : deux boutons pilules -----
+  // ----- ACTIONS RAPIDES -----
   Widget _buildQuickActions(FirebaseProviderV4 provider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,10 +448,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: _Pill.big(
                 icon: Icons.import_export,
                 label: 'Import / Export',
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ImportExportScreen()),
-                ),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ImportExportScreen())),
               ),
             ),
             const SizedBox(width: 14),
@@ -473,10 +456,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: _Pill.bigOutline(
                 icon: Icons.picture_as_pdf,
                 label: 'Exports PDF',
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ExportsPdfScreen()),
-                ),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportsPdfScreen())),
               ),
             ),
           ],
@@ -486,81 +466,161 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-/// ====== Petits widgets de style (glass, neo, pills) ======
+/// ====== Fond avec “blobs” lumineux pour l’effet maquette ======
+class _BackgroundBlobs extends StatelessWidget {
+  const _BackgroundBlobs();
 
-class _Glass extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          Positioned(
+            top: -80, left: -60,
+            child: _GlowBlob(size: 220, color: _UX.wheat.withOpacity(.6)),
+          ),
+          Positioned(
+            bottom: -60, right: -40,
+            child: _GlowBlob(size: 200, color: _UX.clay.withOpacity(.35)),
+          ),
+          Positioned(
+            top: 140, right: -50,
+            child: _GlowBlob(size: 160, color: _UX.meadow.withOpacity(.22)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlowBlob extends StatelessWidget {
+  final double size;
+  final Color color;
+  const _GlowBlob({Key? key, required this.size, required this.color}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size, height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [BoxShadow(color: color, blurRadius: size * .8, spreadRadius: size * .3)],
+      ),
+    );
+  }
+}
+
+/// ====== Verre liquide réutilisable (blur + bordure + reflets) ======
+class _LiquidGlass extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final double radius;
+  final Color? tint;
 
-  const _Glass({
+  const _LiquidGlass({
     Key? key,
     required this.child,
     this.padding,
     this.radius = _UX.rLg,
+    this.tint,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: _UX.cardGrad,
-            borderRadius: BorderRadius.circular(radius),
-            boxShadow: _UX.softShadow,
+      child: Stack(
+        children: [
+          // flou de l’arrière-plan
+          BackdropFilter(filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22)),
+          // couche verre + légère teinte
+          Container(
+            decoration: BoxDecoration(
+              gradient: _UX.glassGrad,
+              color: (tint ?? Colors.transparent),
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(color: Colors.white.withOpacity(.35), width: 1),
+              boxShadow: _UX.floatShadow,
+            ),
+            padding: padding ?? const EdgeInsets.all(20),
+            child: child,
           ),
-          padding: padding ?? const EdgeInsets.all(20),
-          child: child,
-        ),
+          // Reflet haut gauche
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(.25),
+                      Colors.white.withOpacity(.05),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.3, 0.7],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Ombre interne bas droit (profondeur du verre)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomRight,
+                    end: Alignment.topLeft,
+                    colors: [
+                      Colors.black.withOpacity(.06),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _NeoCard extends StatelessWidget {
+/// ====== Carte Stat en verre ======
+class _StatGlass extends StatelessWidget {
   final String title;
   final String value;
   final IconData icon;
 
-  const _NeoCard({
-    Key? key,
-    required this.title,
-    required this.value,
-    required this.icon,
-  }) : super(key: key);
+  const _StatGlass({Key? key, required this.title, required this.value, required this.icon}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return _LiquidGlass(
+      radius: _UX.rMd,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Colors.white, Color(0xFFF7F4F2)]),
-        borderRadius: BorderRadius.circular(_UX.rMd),
-        boxShadow: _UX.softShadow,
-      ),
+      tint: _UX.wheat.withOpacity(.06),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _UX.navy.withOpacity(.06),
+              color: _UX.leaf.withOpacity(.10),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: _UX.navy),
+            child: Icon(icon, color: _UX.leaf),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(fontSize: 13, color: Color(0xFF6F7A7C), fontWeight: FontWeight.w600)),
+                Text(title, style: const TextStyle(fontSize: 13, color: Color(0xFF54665D), fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
-                Text(value,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _UX.navy)),
+                Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: _UX.ink)),
               ],
             ),
           ),
@@ -570,6 +630,7 @@ class _NeoCard extends StatelessWidget {
   }
 }
 
+/// ====== Boutons pilules (plein / contour) ======
 class _Pill extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -577,35 +638,24 @@ class _Pill extends StatelessWidget {
   final bool outline;
   final bool big;
 
-  const _Pill.icon({required this.icon, required this.label, required this.onTap, Key? key})
-      : outline = false,
-        big = false,
-        super(key: key);
+  const _Pill.icon({Key? key, required this.icon, required this.label, required this.onTap})
+      : outline = false, big = false, super(key: key);
 
-  const _Pill.big({required this.icon, required this.label, required this.onTap, Key? key})
-      : outline = false,
-        big = true,
-        super(key: key);
+  const _Pill.big({Key? key, required this.icon, required this.label, required this.onTap})
+      : outline = false, big = true, super(key: key);
 
-  const _Pill.bigOutline({required this.icon, required this.label, required this.onTap, Key? key})
-      : outline = true,
-        big = true,
-        super(key: key);
+  const _Pill.bigOutline({Key? key, required this.icon, required this.label, required this.onTap})
+      : outline = true, big = true, super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final child = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: outline ? _UX.navy : Colors.white, size: big ? 22 : 18),
+        Icon(icon, color: outline ? _UX.leaf : Colors.white, size: big ? 22 : 18),
         const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: outline ? _UX.navy : Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        Text(label,
+            style: TextStyle(color: outline ? _UX.leaf : Colors.white, fontWeight: FontWeight.w800)),
       ],
     );
 
@@ -617,8 +667,8 @@ class _Pill extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: big ? 16 : 12, vertical: big ? 14 : 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: _UX.navy.withOpacity(.2), width: 1.4),
-            color: Colors.white.withOpacity(.8),
+            border: Border.all(color: _UX.leaf.withOpacity(.35), width: 1.6),
+            color: Colors.white.withOpacity(.85),
           ),
           child: child,
         ),
@@ -630,10 +680,9 @@ class _Pill extends StatelessWidget {
       borderRadius: BorderRadius.circular(32),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: big ? 16 : 12, vertical: big ? 14 : 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(32)),
           gradient: _UX.pillGrad,
-          boxShadow: _UX.softShadow,
         ),
         child: child,
       ),
@@ -644,12 +693,7 @@ class _Pill extends StatelessWidget {
 class _SectionTitle extends StatelessWidget {
   final IconData icon;
   final String title;
-
-  const _SectionTitle({
-    Key? key,
-    required this.icon,
-    required this.title,
-  }) : super(key: key);
+  const _SectionTitle({Key? key, required this.icon, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -658,20 +702,13 @@ class _SectionTitle extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: _UX.navy.withOpacity(.08),
+            color: _UX.leaf.withOpacity(.12),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Icon(icon, color: _UX.navy, size: 22),
+          child: Icon(icon, color: _UX.leaf, size: 22),
         ),
         const SizedBox(width: 12),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            color: _UX.navy,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        Text(title, style: const TextStyle(fontSize: 18, color: _UX.ink, fontWeight: FontWeight.w900)),
       ],
     );
   }
