@@ -14,63 +14,54 @@ import 'import_export_screen.dart';
 import 'exports_pdf_screen.dart';
 import '../main.dart';
 
-/// ====== Palette agricole & tokens ======
-class _UX {
-  // Teintes "agricoles"
-  static const Color leaf = Color(0xFF1F8A48);   // feuille
-  static const Color meadow = Color(0xFF5CAF7A); // prairie
-  static const Color wheat = Color(0xFFF3E7D3);  // blé clair
-  static const Color cream = Color(0xFFFFF9F2);  // crème
-  static const Color clay  = Color(0xFFC69C7B);  // terre cuite
-  static const Color soil  = Color(0xFF8B6B5C);  // terre
-  static const Color ink   = Color(0xFF163227);  // bleu-vert profond (texte)
+/// ===================== THEME AGRI LIQUID GLASS =====================
+class _AG {
+  // Couleurs agricoles
+  static const Color leaf     = Color(0xFF1F8A48);
+  static const Color leafDark = Color(0xFF156A37);
+  static const Color meadow   = Color(0xFF9ED6B5);
+  static const Color wheat    = Color(0xFFF2E7D9);
+  static const Color sand     = Color(0xFFF7F1E9);
+  static const Color clay     = Color(0xFFC9A07A);
+  static const Color soil     = Color(0xFF8E6B57);
+  static const Color ink      = Color(0xFF172A23);
 
-  static const double rLg = 28;
-  static const double rMd = 20;
-  static const double rSm = 14;
+  // Rayons
+  static const double rXXL = 32;
+  static const double rXL  = 26;
+  static const double rL   = 20;
+  static const double rM   = 16;
+  static const double rS   = 12;
 
-  static const List<BoxShadow> floatShadow = [
+  // Ombres
+  static const List<BoxShadow> shadowFloat = [
     BoxShadow(color: Colors.black12, blurRadius: 28, offset: Offset(0, 14)),
   ];
 
-  /// Dégradé “verre” doux
-  static LinearGradient glassGrad = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Colors.white.withOpacity(.55),
-      Colors.white.withOpacity(.28),
-    ],
-  );
-
-  /// Dégradé des boutons pilules
-  static const LinearGradient pillGrad = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [leaf, Color(0xFFE6B980)], // vert -> or doux
-  );
-
-  /// Fond doux avec blobs
-  static const LinearGradient bgGrad = LinearGradient(
+  // Fond doux
+  static const LinearGradient bg = LinearGradient(
     begin: Alignment(-1, -1),
     end: Alignment(1, 1),
-    colors: [
-      cream,        // haut gauche
-      Color(0xFFF6EFE7),
-      Color(0xFFE9F5EE), // une pointe de vert pour l’ambiance agricole
-    ],
+    colors: [sand, Color(0xFFEFF6F1), Color(0xFFFFF7EF)],
+  );
+
+  // Dégradé pilule
+  static const LinearGradient pill = LinearGradient(
+    colors: [leaf, clay],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 }
 
+/// ================ ECRAN ==================
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late AnimationController _animationController;
+  late AnimationController _anim;
   late Animation<double> _fade;
   late Animation<Offset> _slide;
   int? _selectedYear;
@@ -79,16 +70,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
-    _fade = CurvedAnimation(parent: _animationController, curve: Curves.easeInOutCubic);
+    _anim = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _fade = CurvedAnimation(parent: _anim, curve: Curves.easeInOutCubic);
     _slide = Tween<Offset>(begin: const Offset(0, .06), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic));
-    _animationController.forward();
+        .animate(CurvedAnimation(parent: _anim, curve: Curves.easeOutCubic));
+    _anim.forward();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _anim.dispose();
     super.dispose();
   }
 
@@ -96,9 +87,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_signingOut) return;
     _signingOut = true;
     try {
-      final confirmed = await showDialog<bool>(
+      final ok = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (_) => AlertDialog(
           title: const Text('Déconnexion'),
           content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
           actions: [
@@ -107,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
       );
-      if (confirmed != true) return;
+      if (ok != true) return;
       await SecurityService().signOut();
       await context.read<FirebaseProviderV4>().disposeAuthBoundResources();
     } catch (e) {
@@ -128,83 +119,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        scrolledUnderElevation: 0,
-        titleSpacing: 20,
-        title: const Text(
-          'GAEC de la BARADE',
-          style: TextStyle(color: _UX.ink, fontWeight: FontWeight.w800, fontSize: 22),
-        ),
+        elevation: 0, backgroundColor: Colors.transparent, scrolledUnderElevation: 0, centerTitle: true,
+        title: const Text('GAEC de la BARADE',
+            style: TextStyle(color: _AG.ink, fontWeight: FontWeight.w900, letterSpacing: .2)),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: _Pill.icon(
-              icon: Icons.logout,
-              label: 'Logout',
-              onTap: _signingOut ? null : _signOut,
-            ),
+            child: _Pill.icon(icon: Icons.logout, label: 'Logout', onTap: _signingOut ? null : _signOut),
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          // Fond dégradé + blobs lumineux
-          const DecoratedBox(decoration: BoxDecoration(gradient: _UX.bgGrad)),
-          const _BackgroundBlobs(),
-          SafeArea(
-            child: FadeTransition(
-              opacity: _fade,
-              child: SlideTransition(
-                position: _slide,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 22),
-                      _buildStatsSection(provider),
-                      const SizedBox(height: 22),
-                      _buildMenuSection(),
-                      const SizedBox(height: 22),
-                      _buildQuickActions(provider),
-                    ],
-                  ),
+      body: Stack(children: [
+        const DecoratedBox(decoration: BoxDecoration(gradient: _AG.bg)),
+        const _Blobs(),
+        SafeArea(
+          child: FadeTransition(
+            opacity: _fade,
+            child: SlideTransition(
+              position: _slide,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _heroHeader(),
+                    const SizedBox(height: 22),
+                    _stats(provider),
+                    const SizedBox(height: 22),
+                    _menu(),
+                    const SizedBox(height: 22),
+                    _quickActions(),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 
-  // ----- HEADER (verre liquide + reflet latéral) -----
-  Widget _buildHeader() {
-    return _LiquidGlass(
-      padding: const EdgeInsets.all(18),
-      radius: _UX.rLg,
-      tint: _UX.clay.withOpacity(.06),
+  /// ---------------- HERO HEADER (comme la maquette) ----------------
+  Widget _heroHeader() {
+    return _Glass(
+      radius: _AG.rXXL,
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
       child: Stack(
         children: [
           Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: _UX.leaf.withOpacity(.10),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.all(14),
-                child: const Icon(Icons.agriculture, color: _UX.leaf, size: 28),
-              ),
+              _SoftIcon(icon: Icons.agriculture, color: _AG.leaf),
               const SizedBox(width: 14),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('GAEC de la BARADE',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: _UX.ink)),
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: _AG.ink)),
                     SizedBox(height: 4),
                     Text('Gestion des récoltes de maïs',
                         style: TextStyle(fontSize: 14, color: Color(0xFF51635B))),
@@ -227,8 +198,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ----- STATS (cartes verre + sélecteur pilule) -----
-  Widget _buildStatsSection(FirebaseProviderV4 provider) {
+  /// ---------------- STATS ----------------
+  Widget _stats(FirebaseProviderV4 provider) {
     final parcelles = provider.parcelles;
     final chargements = provider.chargements;
 
@@ -236,146 +207,115 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final years = chargements.map((c) => c.dateChargement.year).toSet().toList()..sort((a, b) => b - a);
       _selectedYear = years.isNotEmpty ? years.first : DateTime.now().year;
     }
-    final yearLoads = chargements.where((c) => c.dateChargement.year == _selectedYear).toList();
 
-    final parcellesRecoltees = <String>{};
-    for (final ch in yearLoads) {
-      parcellesRecoltees.add(ch.parcelleId);
-    }
+    final yearLoads = chargements.where((c) => c.dateChargement.year == _selectedYear).toList();
+    final idsRecoltees = <String>{}..addAll(yearLoads.map((c) => c.parcelleId));
 
     double surfaceRecoltee = 0.0;
     for (final p in parcelles) {
       final id = p.firebaseId ?? p.id.toString();
-      if (parcellesRecoltees.contains(id)) surfaceRecoltee += p.surface;
+      if (idsRecoltees.contains(id)) surfaceRecoltee += p.surface;
     }
+    final poidsTotalNormeAnnee = yearLoads.fold<double>(0, (s, c) => s + c.poidsNormes);
+    final rendementMoyenNorme = surfaceRecoltee > 0 ? poidsTotalNormeAnnee / (surfaceRecoltee * 1000) : 0.0;
 
-    final poidsTotalNormeAnnee = yearLoads.fold<double>(0, (sum, c) => sum + c.poidsNormes);
-    final rendementMoyenNorme =
-        surfaceRecoltee > 0 ? poidsTotalNormeAnnee / (surfaceRecoltee * 1000) : 0.0;
+    return _Glass(
+      radius: _AG.rXL,
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: const [
+          Icon(Icons.insights, color: _AG.leaf, size: 22),
+          SizedBox(width: 10),
+          Text('Aperçu général', style: TextStyle(color: _AG.ink, fontSize: 18, fontWeight: FontWeight.w900)),
+        ]),
+        const SizedBox(height: 16),
 
-    return _LiquidGlass(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-      radius: _UX.rLg,
-      tint: _UX.wheat.withOpacity(.10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: const [
-            Icon(Icons.insights, color: _UX.leaf, size: 22),
-            SizedBox(width: 10),
-            Text('Aperçu général',
-                style: TextStyle(color: _UX.ink, fontSize: 18, fontWeight: FontWeight.w900)),
-          ]),
-          const SizedBox(height: 16),
-
-          // Sélecteur d’année style pilule/verre
-          Row(
-            children: [
-              const Icon(Icons.calendar_today, size: 18, color: _UX.ink),
-              const SizedBox(width: 8),
-              const Text('Année', style: TextStyle(color: _UX.ink, fontWeight: FontWeight.w700)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _LiquidGlass(
-                  radius: 16,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: _selectedYear,
-                      icon: const Icon(Icons.expand_more, color: _UX.ink),
-                      isExpanded: true,
-                      items: () {
-                        final years = chargements.map((c) => c.dateChargement.year).toSet().toList()
-                          ..sort((a, b) => b - a);
-                        return years.map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))).toList();
-                      }(),
-                      onChanged: (v) => setState(() => _selectedYear = v),
-                    ),
+        // Sélecteur Année -> pilule verre
+        Row(
+          children: [
+            const Icon(Icons.calendar_today, size: 18, color: _AG.ink),
+            const SizedBox(width: 8),
+            const Text('Année', style: TextStyle(color: _AG.ink, fontWeight: FontWeight.w700)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _Glass(
+                radius: 16,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    value: _selectedYear,
+                    icon: const Icon(Icons.expand_more, color: _AG.ink),
+                    isExpanded: true,
+                    items: () {
+                      final years = chargements.map((c) => c.dateChargement.year).toSet().toList()
+                        ..sort((a, b) => b - a);
+                      return years.map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))).toList();
+                    }(),
+                    onChanged: (v) => setState(() => _selectedYear = v),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
 
-          const SizedBox(height: 16),
+        const SizedBox(height: 16),
 
-          Row(
-            children: [
-              Expanded(
-                child: _StatGlass(
-                  title: 'Surface récoltée',
-                  value: '${surfaceRecoltee.toStringAsFixed(1)} ha',
-                  icon: Icons.landscape,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _StatGlass(
-                  title: 'Rendement $_selectedYear',
-                  value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
-                  icon: Icons.trending_up,
-                ),
-              ),
-            ],
+        Row(children: [
+          Expanded(
+            child: _StatTile(
+              title: 'Surface récoltée',
+              value: '${surfaceRecoltee.toStringAsFixed(1)} ha',
+              icon: Icons.landscape,
+            ),
           ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: _StatGlass(
-                  title: 'Poids total $_selectedYear',
-                  value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
-                  icon: Icons.scale,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _StatGlass(
-                  title: 'Parcelles',
-                  value: '${parcelles.length}',
-                  icon: Icons.grid_view_rounded,
-                ),
-              ),
-            ],
+          const SizedBox(width: 14),
+          Expanded(
+            child: _StatTile(
+              title: 'Rendement $_selectedYear',
+              value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
+              icon: Icons.trending_up,
+            ),
           ),
-        ],
-      ),
+        ]),
+        const SizedBox(height: 14),
+        Row(children: [
+          Expanded(
+            child: _StatTile(
+              title: 'Poids total $_selectedYear',
+              value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
+              icon: Icons.scale,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: _StatTile(
+              title: 'Parcelles',
+              value: '${parcelles.length}',
+              icon: Icons.grid_view_rounded,
+            ),
+          ),
+        ]),
+      ]),
     );
   }
 
-  // ----- MENU (tuiles verre) -----
-  Widget _buildMenuSection() {
-    Widget tile({
-      required String title,
-      required String subtitle,
-      required IconData icon,
-      required VoidCallback onTap,
-    }) {
+  /// ---------------- MENU ----------------
+  Widget _menu() {
+    Widget tile({required String title, required String subtitle, required IconData icon, required VoidCallback onTap}) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(_UX.rMd),
-        child: _LiquidGlass(
-          radius: _UX.rMd,
+        borderRadius: BorderRadius.circular(_AG.rL),
+        child: _Glass(
+          radius: _AG.rL,
           padding: const EdgeInsets.all(16),
-          tint: _UX.clay.withOpacity(.06),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: _UX.leaf.withOpacity(.10),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: _UX.floatShadow,
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Icon(icon, color: _UX.leaf, size: 26),
-              ),
-              const Spacer(),
-              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: _UX.ink)),
-              const SizedBox(height: 4),
-              Text(subtitle, style: const TextStyle(color: Color(0xFF5E6B64))),
-            ],
-          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            _SoftIcon(icon: icon, color: _AG.leaf),
+            const Spacer(),
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: _AG.ink)),
+            const SizedBox(height: 4),
+            Text(subtitle, style: const TextStyle(color: Color(0xFF5E6B64))),
+          ]),
         ),
       );
     }
@@ -386,12 +326,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         const _SectionTitle(icon: Icons.menu_rounded, title: 'Menu principal'),
         const SizedBox(height: 16),
         GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          crossAxisSpacing: 14,
-          mainAxisSpacing: 14,
-          childAspectRatio: 1.14,
+          shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2, crossAxisSpacing: 14, mainAxisSpacing: 14, childAspectRatio: 1.14,
           children: [
             tile(
               title: 'Parcelles',
@@ -435,192 +371,172 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ----- ACTIONS RAPIDES -----
-  Widget _buildQuickActions(FirebaseProviderV4 provider) {
+  /// ---------------- QUICK ACTIONS ----------------
+  Widget _quickActions() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const _SectionTitle(icon: Icons.flash_on_rounded, title: 'Actions rapides'),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _Pill.big(
-                icon: Icons.import_export,
-                label: 'Import / Export',
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ImportExportScreen())),
-              ),
+        Row(children: [
+          Expanded(
+            child: _Pill.big(
+              icon: Icons.import_export,
+              label: 'Import / Export',
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ImportExportScreen())),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: _Pill.bigOutline(
-                icon: Icons.picture_as_pdf,
-                label: 'Exports PDF',
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportsPdfScreen())),
-              ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: _Pill.bigOutline(
+              icon: Icons.picture_as_pdf,
+              label: 'Exports PDF',
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportsPdfScreen())),
             ),
-          ],
-        ),
+          ),
+        ]),
       ],
     );
   }
 }
 
-/// ====== Fond avec “blobs” lumineux pour l’effet maquette ======
-class _BackgroundBlobs extends StatelessWidget {
-  const _BackgroundBlobs();
+/// ===================== WIDGETS STYLE =====================
 
+/// Fond avec blobs lumineux (évite l’aspect “plat” et renforce l’effet verre)
+class _Blobs extends StatelessWidget {
+  const _Blobs();
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
-      child: Stack(
-        children: [
-          Positioned(
-            top: -80, left: -60,
-            child: _GlowBlob(size: 220, color: _UX.wheat.withOpacity(.6)),
-          ),
-          Positioned(
-            bottom: -60, right: -40,
-            child: _GlowBlob(size: 200, color: _UX.clay.withOpacity(.35)),
-          ),
-          Positioned(
-            top: 140, right: -50,
-            child: _GlowBlob(size: 160, color: _UX.meadow.withOpacity(.22)),
-          ),
-        ],
-      ),
+      child: Stack(children: const [
+        _Blob(top: -80, left: -60, size: 220, color: _AG.wheat),
+        _Blob(bottom: -50, right: -50, size: 200, color: _AG.meadow),
+        _Blob(top: 140, right: -40, size: 160, color: _AG.clay),
+      ]),
     );
   }
 }
 
-class _GlowBlob extends StatelessWidget {
+class _Blob extends StatelessWidget {
   final double size;
   final Color color;
-  const _GlowBlob({Key? key, required this.size, required this.color}) : super(key: key);
+  final double? top, left, bottom, right;
+  const _Blob({Key? key, this.top, this.left, this.bottom, this.right, required this.size, required this.color})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size, height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: color, blurRadius: size * .8, spreadRadius: size * .3)],
+    return Positioned(
+      top: top, left: left, bottom: bottom, right: right,
+      child: Container(
+        width: size, height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [BoxShadow(color: color.withOpacity(.55), blurRadius: size * .8, spreadRadius: size * .3)],
+        ),
       ),
     );
   }
 }
 
-/// ====== Verre liquide réutilisable (blur + bordure + reflets) ======
-class _LiquidGlass extends StatelessWidget {
+/// Carte verre : blur + dégradé + bordure + reflet + ombre interne
+class _Glass extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final double radius;
-  final Color? tint;
-
-  const _LiquidGlass({
-    Key? key,
-    required this.child,
-    this.padding,
-    this.radius = _UX.rLg,
-    this.tint,
-  }) : super(key: key);
+  const _Glass({Key? key, required this.child, this.padding, this.radius = _AG.rXL}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: Stack(
-        children: [
-          // flou de l’arrière-plan
-          BackdropFilter(filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22)),
-          // couche verre + légère teinte
-          Container(
-            decoration: BoxDecoration(
-              gradient: _UX.glassGrad,
-              color: (tint ?? Colors.transparent),
-              borderRadius: BorderRadius.circular(radius),
-              border: Border.all(color: Colors.white.withOpacity(.35), width: 1),
-              boxShadow: _UX.floatShadow,
+      child: Stack(children: [
+        // blur AR BG (faible pour web pour éviter les artefacts)
+        BackdropFilter(filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14)),
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.white.withOpacity(.55), Colors.white.withOpacity(.30)],
+              begin: Alignment.topLeft, end: Alignment.bottomRight,
             ),
-            padding: padding ?? const EdgeInsets.all(20),
-            child: child,
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(color: Colors.white.withOpacity(.38), width: 1),
+            boxShadow: _AG.shadowFloat,
           ),
-          // Reflet haut gauche
-          Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radius),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withOpacity(.25),
-                      Colors.white.withOpacity(.05),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.3, 0.7],
-                  ),
+          padding: padding ?? const EdgeInsets.all(20),
+          child: child,
+        ),
+        // Reflet doux
+        Positioned.fill(
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(radius),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft, end: Alignment.bottomRight,
+                  colors: [Colors.white.withOpacity(.18), Colors.transparent],
+                  stops: const [.0, .6],
                 ),
               ),
             ),
           ),
-          // Ombre interne bas droit (profondeur du verre)
-          Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radius),
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomRight,
-                    end: Alignment.topLeft,
-                    colors: [
-                      Colors.black.withOpacity(.06),
-                      Colors.transparent,
-                    ],
-                  ),
+        ),
+        // Ombre interne bas/droite
+        Positioned.fill(
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(radius),
+                gradient: LinearGradient(
+                  begin: Alignment.bottomRight, end: Alignment.topLeft,
+                  colors: [Colors.black.withOpacity(.05), Colors.transparent],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }
 
-/// ====== Carte Stat en verre ======
-class _StatGlass extends StatelessWidget {
-  final String title;
-  final String value;
+/// Petite tuile statut “verre”
+class _StatTile extends StatelessWidget {
+  final String title, value;
   final IconData icon;
-
-  const _StatGlass({Key? key, required this.title, required this.value, required this.icon}) : super(key: key);
+  const _StatTile({Key? key, required this.title, required this.value, required this.icon}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return _LiquidGlass(
-      radius: _UX.rMd,
+    return _Glass(
+      radius: _AG.rL,
       padding: const EdgeInsets.all(16),
-      tint: _UX.wheat.withOpacity(.06),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: _UX.leaf.withOpacity(.10),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: _UX.leaf),
-          ),
+          _SoftIcon(icon: icon, color: _AG.leaf),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 13, color: Color(0xFF54665D), fontWeight: FontWeight.w600)),
+                // <- ICI la correction : on enlève une parenthèse
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF5B6A63),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: _UX.ink)),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: _AG.ink,
+                  ),
+                ),
               ],
             ),
           ),
@@ -630,86 +546,85 @@ class _StatGlass extends StatelessWidget {
   }
 }
 
-/// ====== Boutons pilules (plein / contour) ======
+
+/// Icône sur pastille douce (comme les ronds de la maquette)
+class _SoftIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  const _SoftIcon({Key? key, required this.icon, required this.color}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(color: color.withOpacity(.10), borderRadius: BorderRadius.circular(16)),
+      padding: const EdgeInsets.all(12),
+      child: Icon(icon, color: color, size: 26),
+    );
+  }
+}
+
+/// Titres de section
+class _SectionTitle extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  const _SectionTitle({Key? key, required this.icon, required this.title}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: [
+      Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: _AG.leaf.withOpacity(.12), borderRadius: BorderRadius.circular(14)),
+        child: Icon(icon, color: _AG.leaf, size: 22),
+      ),
+      const SizedBox(width: 12),
+      Text(title, style: const TextStyle(fontSize: 18, color: _AG.ink, fontWeight: FontWeight.w900)),
+    ]);
+  }
+}
+
+/// Boutons pilule (plein/outline)
 class _Pill extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
-  final bool outline;
-  final bool big;
+  final bool outline, big;
 
   const _Pill.icon({Key? key, required this.icon, required this.label, required this.onTap})
       : outline = false, big = false, super(key: key);
-
   const _Pill.big({Key? key, required this.icon, required this.label, required this.onTap})
       : outline = false, big = true, super(key: key);
-
   const _Pill.bigOutline({Key? key, required this.icon, required this.label, required this.onTap})
       : outline = true, big = true, super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final child = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: outline ? _UX.leaf : Colors.white, size: big ? 22 : 18),
-        const SizedBox(width: 8),
-        Text(label,
-            style: TextStyle(color: outline ? _UX.leaf : Colors.white, fontWeight: FontWeight.w800)),
-      ],
-    );
+    final inner = Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, color: outline ? _AG.leaf : Colors.white, size: big ? 22 : 18),
+      const SizedBox(width: 8),
+      Text(label, style: TextStyle(color: outline ? _AG.leaf : Colors.white, fontWeight: FontWeight.w800)),
+    ]);
 
     if (outline) {
       return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(32),
+        onTap: onTap, borderRadius: BorderRadius.circular(32),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: big ? 16 : 12, vertical: big ? 14 : 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: _UX.leaf.withOpacity(.35), width: 1.6),
+            border: Border.all(color: _AG.leaf.withOpacity(.35), width: 1.6),
             color: Colors.white.withOpacity(.85),
           ),
-          child: child,
+          child: inner,
         ),
       );
     }
-
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(32),
+      onTap: onTap, borderRadius: BorderRadius.circular(32),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: big ? 16 : 12, vertical: big ? 14 : 8),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(32)),
-          gradient: _UX.pillGrad,
-        ),
-        child: child,
+        decoration: const BoxDecoration(gradient: _AG.pill, borderRadius: BorderRadius.all(Radius.circular(32))),
+        child: inner,
       ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  const _SectionTitle({Key? key, required this.icon, required this.title}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: _UX.leaf.withOpacity(.12),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(icon, color: _UX.leaf, size: 22),
-        ),
-        const SizedBox(width: 12),
-        Text(title, style: const TextStyle(fontSize: 18, color: _UX.ink, fontWeight: FontWeight.w900)),
-      ],
     );
   }
 }
