@@ -259,4 +259,387 @@ class AppTheme {
       color: textSecondary,
     ),
   );
+
+  // ========================================
+  // SYSTÈME DE DESIGN COMPLET
+  // ========================================
+
+  // ========================================
+  // COMPOSANTS UI - CARTES
+  // ========================================
+
+  /// Style pour les cartes principales avec ombre
+  static BoxDecoration get cardDecoration => BoxDecoration(
+    color: background,
+    borderRadius: BorderRadius.circular(radiusMedium),
+    boxShadow: cardShadow,
+    border: Border.all(color: border.withOpacity(0.5)),
+  );
+
+  /// Style pour les cartes avec accent coloré
+  static BoxDecoration cardDecorationWithAccent(Color accentColor) => BoxDecoration(
+    color: background,
+    borderRadius: BorderRadius.circular(radiusMedium),
+    boxShadow: cardShadow,
+    border: Border.all(color: accentColor.withOpacity(0.3), width: 2),
+  );
+
+  /// Style pour les cartes de section (avec fond coloré)
+  static BoxDecoration get sectionCardDecoration => BoxDecoration(
+    color: primary.withOpacity(0.05),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: primary.withOpacity(0.2)),
+  );
+
+  /// Style pour les cartes d'information
+  static BoxDecoration get infoCardDecoration => BoxDecoration(
+    color: info.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: info.withOpacity(0.3)),
+  );
+
+  /// Style pour les cartes de succès
+  static BoxDecoration get successCardDecoration => BoxDecoration(
+    color: success.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: success.withOpacity(0.3)),
+  );
+
+  /// Style pour les cartes d'avertissement
+  static BoxDecoration get warningCardDecoration => BoxDecoration(
+    color: warning.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: warning.withOpacity(0.3)),
+  );
+
+  /// Style pour les cartes d'erreur
+  static BoxDecoration get errorCardDecoration => BoxDecoration(
+    color: error.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: error.withOpacity(0.3)),
+  );
+
+  // ========================================
+  // COMPOSANTS UI - BOUTONS
+  // ========================================
+
+  /// Style pour les boutons principaux
+  static ButtonStyle get primaryButtonStyle => ElevatedButton.styleFrom(
+    backgroundColor: primary,
+    foregroundColor: Colors.white,
+    elevation: 2,
+    padding: const EdgeInsets.symmetric(horizontal: spacingL, vertical: spacingM),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+  );
+
+  /// Style pour les boutons secondaires
+  static ButtonStyle get secondaryButtonStyle => ElevatedButton.styleFrom(
+    backgroundColor: secondary,
+    foregroundColor: Colors.white,
+    elevation: 2,
+    padding: const EdgeInsets.symmetric(horizontal: spacingL, vertical: spacingM),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+  );
+
+  /// Style pour les boutons d'accent
+  static ButtonStyle get accentButtonStyle => ElevatedButton.styleFrom(
+    backgroundColor: accent,
+    foregroundColor: Colors.white,
+    elevation: 2,
+    padding: const EdgeInsets.symmetric(horizontal: spacingL, vertical: spacingM),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+  );
+
+  /// Style pour les boutons outlined
+  static ButtonStyle get outlinedButtonStyle => OutlinedButton.styleFrom(
+    foregroundColor: primary,
+    side: const BorderSide(color: primary, width: 2),
+    padding: const EdgeInsets.symmetric(horizontal: spacingL, vertical: spacingM),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+  );
+
+  /// Style pour les boutons de texte
+  static ButtonStyle get textButtonStyle => TextButton.styleFrom(
+    foregroundColor: primary,
+    padding: const EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingS),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusSmall)),
+    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+  );
+
+  /// Style pour les boutons d'action flottants
+  static FloatingActionButtonThemeData get floatingActionButtonTheme => const FloatingActionButtonThemeData(
+    backgroundColor: primary,
+    foregroundColor: Colors.white,
+    elevation: 4,
+  );
+
+  // ========================================
+  // COMPOSANTS UI - FORMULAIRES
+  // ========================================
+
+  /// Style pour les champs de saisie
+  static InputDecoration get inputDecoration => InputDecoration(
+    filled: true,
+    fillColor: surface,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusMedium),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusMedium),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusMedium),
+      borderSide: const BorderSide(color: primary, width: 2),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusMedium),
+      borderSide: const BorderSide(color: error, width: 2),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingM),
+    labelStyle: const TextStyle(color: textSecondary, fontSize: 16),
+    hintStyle: const TextStyle(color: textLight, fontSize: 16),
+  );
+
+  /// Style pour les champs de saisie avec icône
+  static InputDecoration inputDecorationWithIcon(IconData icon) => InputDecoration(
+    filled: true,
+    fillColor: surface,
+    prefixIcon: Icon(icon, color: primary),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusMedium),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusMedium),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusMedium),
+      borderSide: const BorderSide(color: primary, width: 2),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusMedium),
+      borderSide: const BorderSide(color: error, width: 2),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingM),
+    labelStyle: const TextStyle(color: textSecondary, fontSize: 16),
+    hintStyle: const TextStyle(color: textLight, fontSize: 16),
+  );
+
+  // ========================================
+  // COMPOSANTS UI - LISTES ET ÉLÉMENTS
+  // ========================================
+
+  /// Style pour les éléments de liste
+  static BoxDecoration get listItemDecoration => BoxDecoration(
+    color: background,
+    borderRadius: BorderRadius.circular(radiusSmall),
+    border: Border.all(color: border),
+  );
+
+  /// Style pour les éléments de liste sélectionnés
+  static BoxDecoration get selectedListItemDecoration => BoxDecoration(
+    color: primary.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusSmall),
+    border: Border.all(color: primary, width: 2),
+  );
+
+  /// Style pour les puces de sélection (FilterChip)
+  static BoxDecoration get filterChipDecoration => BoxDecoration(
+    color: surface,
+    borderRadius: BorderRadius.circular(radiusSmall),
+    border: Border.all(color: border),
+  );
+
+  /// Style pour les puces de sélection actives
+  static BoxDecoration get activeFilterChipDecoration => BoxDecoration(
+    color: primary.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusSmall),
+    border: Border.all(color: primary, width: 2),
+  );
+
+  // ========================================
+  // COMPOSANTS UI - SECTIONS ET CONTAINERS
+  // ========================================
+
+  /// Style pour les sections principales
+  static BoxDecoration get sectionDecoration => BoxDecoration(
+    color: surface,
+    borderRadius: BorderRadius.circular(radiusLarge),
+    border: Border.all(color: border),
+  );
+
+  /// Style pour les containers avec gradient
+  static BoxDecoration get gradientDecoration => BoxDecoration(
+    gradient: primaryGradient,
+    borderRadius: BorderRadius.circular(radiusLarge),
+  );
+
+  /// Style pour les containers d'information
+  static BoxDecoration get infoContainerDecoration => BoxDecoration(
+    color: info.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: info.withOpacity(0.3)),
+  );
+
+  // ========================================
+  // COMPOSANTS UI - APP BARS
+  // ========================================
+
+  /// Style pour les AppBars principales
+  static AppBarTheme get primaryAppBarTheme => const AppBarTheme(
+    backgroundColor: primary,
+    foregroundColor: Colors.white,
+    elevation: 0,
+    centerTitle: true,
+    titleTextStyle: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: Colors.white,
+    ),
+  );
+
+  /// Style pour les AppBars secondaires
+  static AppBarTheme get secondaryAppBarTheme => const AppBarTheme(
+    backgroundColor: secondary,
+    foregroundColor: Colors.white,
+    elevation: 0,
+    centerTitle: true,
+    titleTextStyle: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: Colors.white,
+    ),
+  );
+
+  /// Style pour les AppBars d'accent
+  static AppBarTheme get accentAppBarTheme => const AppBarTheme(
+    backgroundColor: accent,
+    foregroundColor: Colors.white,
+    elevation: 0,
+    centerTitle: true,
+    titleTextStyle: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: Colors.white,
+    ),
+  );
+
+  // ========================================
+  // MÉTHODES HELPER POUR LES STYLES COURANTS
+  // ========================================
+
+  /// Crée un style de texte avec une couleur personnalisée
+  static TextStyle textStyleWithColor(TextStyle baseStyle, Color color) {
+    return baseStyle.copyWith(color: color);
+  }
+
+  /// Crée un style de bouton avec une couleur personnalisée
+  static ButtonStyle buttonStyleWithColor(Color backgroundColor, Color foregroundColor) {
+    return ElevatedButton.styleFrom(
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      elevation: 2,
+      padding: const EdgeInsets.symmetric(horizontal: spacingL, vertical: spacingM),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    );
+  }
+
+  /// Crée un style de carte avec une couleur d'accent personnalisée
+  static BoxDecoration cardDecorationWithCustomAccent(Color accentColor) {
+    return BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(radiusMedium),
+      boxShadow: cardShadow,
+      border: Border.all(color: accentColor.withOpacity(0.3), width: 2),
+    );
+  }
+
+  /// Crée un style de container avec un gradient personnalisé
+  static BoxDecoration containerWithGradient(List<Color> colors) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: colors,
+      ),
+      borderRadius: BorderRadius.circular(radiusLarge),
+    );
+  }
+
+  // ========================================
+  // STYLES SPÉCIALISÉS POUR LES PAGES
+  // ========================================
+
+  /// Style pour la page d'accueil
+  static BoxDecoration get homeCardDecoration => BoxDecoration(
+    color: background,
+    borderRadius: BorderRadius.circular(radiusLarge),
+    boxShadow: elevatedShadow,
+    border: Border.all(color: border.withOpacity(0.5)),
+  );
+
+  /// Style pour les statistiques
+  static BoxDecoration get statsCardDecoration => BoxDecoration(
+    color: background,
+    borderRadius: BorderRadius.circular(radiusMedium),
+    boxShadow: cardShadow,
+    border: Border.all(color: primary.withOpacity(0.2)),
+  );
+
+  /// Style pour les exports PDF
+  static BoxDecoration get exportCardDecoration => BoxDecoration(
+    color: accent.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: accent.withOpacity(0.3)),
+  );
+
+  /// Style pour les imports
+  static BoxDecoration get importCardDecoration => BoxDecoration(
+    color: info.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: info.withOpacity(0.3)),
+  );
+
+  /// Style pour les traitements
+  static BoxDecoration get treatmentCardDecoration => BoxDecoration(
+    color: secondary.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: secondary.withOpacity(0.3)),
+  );
+
+  /// Style pour les semis
+  static BoxDecoration get semisCardDecoration => BoxDecoration(
+    color: success.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: success.withOpacity(0.3)),
+  );
+
+  /// Style pour les parcelles
+  static BoxDecoration get parcelleCardDecoration => BoxDecoration(
+    color: primary.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: primary.withOpacity(0.3)),
+  );
+
+  /// Style pour les cellules
+  static BoxDecoration get celluleCardDecoration => BoxDecoration(
+    color: warning.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: warning.withOpacity(0.3)),
+  );
+
+  /// Style pour les chargements
+  static BoxDecoration get chargementCardDecoration => BoxDecoration(
+    color: error.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(radiusMedium),
+    border: Border.all(color: error.withOpacity(0.3)),
+  );
 }

@@ -1,3 +1,4 @@
+// Import des modèles individuels si nécessaire
 class Parcelle {
   int? id;
   String? firebaseId; // ID Firebase (string)

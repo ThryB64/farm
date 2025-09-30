@@ -195,14 +195,10 @@ class _HomeScreenState extends State<HomeScreen>
               children: [
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spacingM),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.radiusLarge),
-                  ),
+                  decoration: AppTheme.cardDecorationWithAccent(Colors.white),
                   child: const Icon(
                     Icons.agriculture,
-                    color: Colors.white,
+                    color: AppTheme.primary,
                     size: 32,
                   ),
                 ),
