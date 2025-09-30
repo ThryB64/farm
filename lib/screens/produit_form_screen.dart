@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,17 +14,12 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/produit.dart';
-
 class ProduitFormScreen extends StatefulWidget {
   final Produit? produit;
-
   const ProduitFormScreen({Key? key, this.produit}) : super(key: key);
-
   @override
   State<ProduitFormScreen> createState() => _ProduitFormScreenState();
 }
-
 class _ProduitFormScreenState extends State<ProduitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
@@ -28,7 +31,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
   final _prixController = TextEditingController();
   
   bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
@@ -36,7 +38,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
       _loadProduitData();
     }
   }
-
   void _loadProduitData() {
     final produit = widget.produit!;
     _nomController.text = produit.nom;
@@ -44,7 +45,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
     _notesController.text = produit.notes ?? '';
     _prixParAnnee = Map.from(produit.prixParAnnee);
   }
-
   @override
   void dispose() {
     _nomController.dispose();
@@ -52,7 +52,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
     _prixController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,7 +150,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
       ),
     );
   }
-
   Widget _buildPrixSection() {
     return Card(
       child: Padding(
@@ -247,7 +245,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
       ),
     );
   }
-
   void _addPrix() {
     final prix = double.tryParse(_prixController.text);
     if (prix != null && prix > 0) {
@@ -261,14 +258,11 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
       );
     }
   }
-
   Future<void> _saveProduit() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() {
       _isLoading = true;
     });
-
     try {
       final produit = Produit(
         id: widget.produit?.id,
@@ -278,7 +272,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         prixParAnnee: _prixParAnnee,
       );
-
       final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
       
       if (widget.produit == null) {
@@ -286,7 +279,6 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
       } else {
         await provider.modifierProduit(produit);
       }
-
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(

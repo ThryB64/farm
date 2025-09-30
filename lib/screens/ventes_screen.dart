@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,32 +14,25 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/vente.dart';
 import 'vente_form_screen.dart';
-
 class VentesScreen extends StatefulWidget {
   const VentesScreen({Key? key}) : super(key: key);
-
   @override
   State<VentesScreen> createState() => _VentesScreenState();
 }
-
 class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int? _selectedAnnee;
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
-
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +75,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
               ),
             );
           }
-
           return TabBarView(
             controller: _tabController,
             children: [
@@ -91,7 +91,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   Widget _buildAnneeSelector(FirebaseProviderV4 provider) {
     final annees = provider.anneesDisponibles;
     if (annees.isEmpty) return SizedBox.shrink();
@@ -138,7 +137,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   Widget _buildVentesEnCours(FirebaseProviderV4 provider) {
     final ventesEnCours = provider.ventesEnCours;
     
@@ -149,7 +147,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
         Icons.shopping_cart_outlined,
       );
     }
-
     return Column(
       children: [
         Expanded(
@@ -166,7 +163,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ],
     );
   }
-
   Widget _buildVentesTerminees(FirebaseProviderV4 provider) {
     return Column(
       children: [
@@ -177,7 +173,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ],
     );
   }
-
   Widget _buildVentesTermineesContent(FirebaseProviderV4 provider) {
     if (_selectedAnnee == null) {
       return Center(
@@ -217,7 +212,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
         ),
       );
     }
-
     return Column(
       children: [
         Expanded(
@@ -234,7 +228,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ],
     );
   }
-
   Widget _buildStockSummary(FirebaseProviderV4 provider) {
     if (_selectedAnnee == null) return SizedBox.shrink();
     
@@ -242,7 +235,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     final ventesEnCours = provider.getVentesEnCoursParAnnee(_selectedAnnee!);
     final totalVentesEnCours = ventesEnCours.fold<double>(0, (sum, v) => sum + (v.poidsNet ?? v.poidsNetCalcule));
     final chiffreAffaires = provider.getChiffreAffairesParAnnee(_selectedAnnee!);
-
     return ModernCard(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -299,7 +291,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   Widget _buildVenteCard(Vente vente, FirebaseProviderV4 provider, {required bool isEnCours}) {
     return ModernCard(
       margin: const EdgeInsets.only(bottom: 12),
@@ -350,11 +341,9 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-
   Widget _buildEmptyState(String title, [String? subtitle, IconData? icon]) {
     return Center(
       child: Column(
@@ -412,7 +401,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   void _showAddVenteDialog(BuildContext context) {
     Navigator.push(
       context,
@@ -421,7 +409,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   void _showEditVenteDialog(BuildContext context, Vente vente) {
     Navigator.push(
       context,
@@ -430,7 +417,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   void _showDeleteConfirmation(BuildContext context, Vente vente, FirebaseProviderV4 provider) {
     showDialog(
       context: context,
@@ -454,7 +440,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   Widget _buildTotauxVentesEnCours(FirebaseProviderV4 provider) {
     final ventesEnCours = provider.ventesEnCours;
     
@@ -494,7 +479,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   Widget _buildTotauxVentesTerminees(FirebaseProviderV4 provider) {
     if (_selectedAnnee == null) return SizedBox.shrink();
     
@@ -560,7 +544,6 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   Widget _buildTotalItem(String label, String value, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

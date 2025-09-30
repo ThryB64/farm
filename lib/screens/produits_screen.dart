@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,16 +14,12 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/produit.dart';
 import 'produit_form_screen.dart';
-
 class ProduitsScreen extends StatefulWidget {
   const ProduitsScreen({Key? key}) : super(key: key);
-
   @override
   State<ProduitsScreen> createState() => _ProduitsScreenState();
 }
-
 class _ProduitsScreenState extends State<ProduitsScreen> {
   @override
   Widget build(BuildContext context) {
@@ -28,11 +32,9 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final produits = provider.produits;
-
           if (produits.isEmpty) {
             return _buildEmptyState();
           }
-
           return ListView.builder(
             padding: const EdgeInsets.all(AppTheme.spacingM),
             itemCount: produits.length,
@@ -100,7 +102,6 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
       ),
     );
   }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -151,7 +152,6 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
       ),
     );
   }
-
   void _confirmDelete(FirebaseProviderV4 provider, Produit produit) {
     showDialog(
       context: context,

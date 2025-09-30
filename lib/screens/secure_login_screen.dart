@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,16 +14,11 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/security_service.dart';
-import '../theme/app_theme.dart';
-import '../widgets/modern_buttons.dart';
-
 class SecureLoginScreen extends StatefulWidget {
   const SecureLoginScreen({Key? key}) : super(key: key);
-
   @override
   State<SecureLoginScreen> createState() => _SecureLoginScreenState();
 }
-
 class _SecureLoginScreenState extends State<SecureLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -25,25 +28,20 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   bool _isLoading = false;
   bool _authInProgress = false;
   String? _errorMessage;
-
-
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
-
   Future<void> _signIn() async {
     if (_authInProgress) return;
     if (!_formKey.currentState!.validate()) return;
-
     _authInProgress = true;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-
     try {
       print('SecureLoginScreen: Starting sign in process');
       await _securityService.signInOncePerDevice(
@@ -75,7 +73,6 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
       _authInProgress = false;
     }
   }
-
   String _getErrorMessage(String code) {
     switch (code) {
       case 'user-not-found':
@@ -94,7 +91,6 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
         return 'Erreur de connexion: $code';
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

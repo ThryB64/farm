@@ -1,8 +1,3 @@
-import '../models/variete.dart';
-import '../models/parcelle.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
-import '../theme/app_theme.dart';
 import 'dart:convert';
 import 'dart:html' as html;
 import 'package:firebase_database/firebase_database.dart';

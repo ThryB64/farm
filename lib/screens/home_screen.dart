@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -5,10 +13,11 @@ import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/firebase_provider_v4.dart';
 import '../services/security_service.dart';
-
+import '../theme/app_theme.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
 import 'parcelles_screen.dart';
 import 'cellules_screen.dart';
 import 'chargements_screen.dart';
@@ -18,39 +27,31 @@ import 'traitements_screen.dart';
 import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'exports_pdf_screen.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
-
 class _HomeScreenState extends State<HomeScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-
   int? _selectedYear;
   bool _signingOut = false;
-
   @override
   void initState() {
     super.initState();
-
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeInOut,
       ),
     );
-
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
@@ -60,20 +61,16 @@ class _HomeScreenState extends State<HomeScreen>
         curve: Curves.easeOutCubic,
       ),
     );
-
     _animationController.forward();
   }
-
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-
   Future<void> _signOut() async {
     if (_signingOut) return;
     _signingOut = true;
-
     try {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -94,19 +91,14 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         ),
       );
-
       if (confirmed != true) return;
-
       print('HomeScreen: user pressed logout');
-
       // 1) Déconnexion d'abord
       await SecurityService().signOut();
-
       // 2) Nettoyage des ressources liées à l'auth (streams, caches)
       await context
           .read<FirebaseProviderV4>()
           .disposeAuthBoundResources();
-
       // 3) NE PAS NAVIGUER — AuthGate rendra SecureLoginScreen tout seul
       print('HomeScreen: logout flow done');
     } catch (e) {
@@ -120,11 +112,9 @@ class _HomeScreenState extends State<HomeScreen>
       _signingOut = false;
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<FirebaseProviderV4>(context);
-
     // Éviter l'affichage "fantôme" si le provider n'est pas prêt
     if (!provider.ready) {
       return const Scaffold(
@@ -133,7 +123,6 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       );
     }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('GAEC de la BARADE'),
@@ -189,7 +178,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
   Widget _buildHeader() {
     return Stack(
       children: [
@@ -235,7 +223,6 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ],
         ),
-
         // Logo/accès Stats en haut à droite
         Positioned(
           top: 0,
@@ -265,11 +252,9 @@ class _HomeScreenState extends State<HomeScreen>
       ],
     );
   }
-
   Widget _buildStatsSection(FirebaseProviderV4 provider) {
     final parcelles = provider.parcelles;
     final chargements = provider.chargements;
-
     // Initialiser l'année sélectionnée si pas encore fait
     if (_selectedYear == null) {
       final anneesDisponibles = chargements
@@ -277,23 +262,19 @@ class _HomeScreenState extends State<HomeScreen>
           .toSet()
           .toList()
         ..sort((a, b) => b.compareTo(a));
-
       _selectedYear = anneesDisponibles.isNotEmpty
           ? anneesDisponibles.first
           : DateTime.now().year;
     }
-
     // Calculer les stats pour l'année sélectionnée
     final chargementsAnnee = chargements
         .where((c) => c.dateChargement.year == _selectedYear)
         .toList();
-
     // Parcelles récoltées cette année
     final parcellesRecoltees = <String>{};
     for (final chargement in chargementsAnnee) {
       parcellesRecoltees.add(chargement.parcelleId);
     }
-
     // Surface récoltée
     double surfaceRecoltee = 0.0;
     for (final parcelle in parcelles) {
@@ -302,16 +283,13 @@ class _HomeScreenState extends State<HomeScreen>
         surfaceRecoltee += parcelle.surface;
       }
     }
-
     final poidsTotalNormeAnnee = chargementsAnnee.fold<double>(
       0,
       (sum, c) => sum + c.poidsNormes,
     );
-
     final rendementMoyenNorme = surfaceRecoltee > 0
         ? poidsTotalNormeAnnee / (surfaceRecoltee * 1000)
         : 0.0;
-
     return GradientCard(
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
@@ -348,7 +326,6 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
           const SizedBox(height: AppTheme.spacingL),
-
           // Sélecteur d'année
           Row(
             children: [
@@ -402,7 +379,6 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
           const SizedBox(height: AppTheme.spacingL),
-
           Row(
             children: [
               Expanded(
@@ -451,7 +427,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
   Widget _buildMenuSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -483,7 +458,6 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         ),
         const SizedBox(height: AppTheme.spacingL),
-
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -569,7 +543,6 @@ class _HomeScreenState extends State<HomeScreen>
       ],
     );
   }
-
   Widget _buildQuickActions(FirebaseProviderV4 provider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -601,7 +574,6 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         ),
         const SizedBox(height: AppTheme.spacingL),
-
         Row(
           children: [
             Expanded(

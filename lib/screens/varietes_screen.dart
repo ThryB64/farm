@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -7,10 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import 'variete_form_screen.dart';
-
 class VarietesScreen extends StatelessWidget {
   const VarietesScreen({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +27,6 @@ class VarietesScreen extends StatelessWidget {
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final varietes = provider.varietes;
-
           if (varietes.isEmpty) {
             return Center(
               child: Column(
@@ -56,7 +61,6 @@ class VarietesScreen extends StatelessWidget {
               ),
             );
           }
-
           return ListView.builder(
             itemCount: varietes.length,
             itemBuilder: (context, index) {

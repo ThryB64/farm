@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,30 +14,22 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/produit.dart';
-import '../models/traitement.dart';
-import '../models/produit_traitement.dart';
-
 class TraitementRaccourciScreen extends StatefulWidget {
   const TraitementRaccourciScreen({Key? key}) : super(key: key);
-
   @override
   State<TraitementRaccourciScreen> createState() => _TraitementRaccourciScreenState();
 }
-
 class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
   final List<String> _selectedParcelleIds = [];
   final List<ProduitTraitement> _produits = [];
   final TextEditingController _notesController = TextEditingController();
   int _selectedAnnee = DateTime.now().year;
   bool _isLoading = false;
-
   @override
   void dispose() {
     _notesController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +43,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
           final parcelles = provider.parcelles;
           final produits = provider.produits;
           final annees = _getAvailableYears(provider);
-
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -99,7 +98,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       ),
     );
   }
-
   Widget _buildYearSelector(List<int> annees) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -141,7 +139,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       ),
     );
   }
-
   Widget _buildParcellesSection(List<Parcelle> parcelles) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -233,7 +230,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       ),
     );
   }
-
   Widget _buildProduitsSection(List<Produit> produits) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -314,7 +310,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       ),
     );
   }
-
   List<int> _getAvailableYears(FirebaseProviderV4 provider) {
     final traitements = provider.traitements;
     final semis = provider.semis;
@@ -331,11 +326,9 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
     
     return annees;
   }
-
   bool _canSave() {
     return _selectedParcelleIds.isNotEmpty && _produits.isNotEmpty;
   }
-
   void _addProduit() {
     Navigator.push(
       context,
@@ -351,13 +344,11 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       ),
     );
   }
-
   void _removeProduit(int index) {
     setState(() {
       _produits.removeAt(index);
     });
   }
-
   void _selectAllParcelles() {
     setState(() {
       final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
@@ -365,20 +356,16 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       _selectedParcelleIds.addAll(provider.parcelles.map((p) => p.firebaseId!).toList());
     });
   }
-
   void _deselectAllParcelles() {
     setState(() {
       _selectedParcelleIds.clear();
     });
   }
-
   Future<void> _saveTraitements() async {
     if (_selectedParcelleIds.isEmpty || _produits.isEmpty) return;
-
     setState(() {
       _isLoading = true;
     });
-
     try {
       final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
       
@@ -396,7 +383,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
             coutTotal: 0,
           ),
         );
-
         if (existingTraitement.id != 0) {
           // Mettre à jour le traitement existant
           final updatedTraitement = Traitement(
@@ -428,7 +414,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
           await provider.ajouterTraitement(nouveauTraitement);
         }
       }
-
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -452,35 +437,29 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
     }
   }
 }
-
 // Écran de sélection de produit (réutilisé depuis TraitementFormScreen)
 class _ProduitSelectionScreen extends StatefulWidget {
   final int annee;
   final Function(ProduitTraitement) onProduitSelected;
-
   const _ProduitSelectionScreen({
     required this.annee,
     required this.onProduitSelected,
   });
-
   @override
   State<_ProduitSelectionScreen> createState() => _ProduitSelectionScreenState();
 }
-
 class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
   final TextEditingController _quantiteController = TextEditingController();
   final TextEditingController _prixController = TextEditingController();
   Produit? _selectedProduit;
   DateTime _selectedDate = DateTime.now();
   double _prixUnitaire = 0.0;
-
   @override
   void dispose() {
     _quantiteController.dispose();
     _prixController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -492,7 +471,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final produits = provider.produits;
-
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -523,7 +501,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   },
                 ),
                 const SizedBox(height: AppTheme.spacingM),
-
                 // Quantité
                 TextFormField(
                   controller: _quantiteController,
@@ -536,7 +513,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   onChanged: (_) => _calculerCoutTotal(),
                 ),
                 const SizedBox(height: AppTheme.spacingM),
-
                 // Prix unitaire
                 TextFormField(
                   controller: _prixController,
@@ -552,7 +528,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   },
                 ),
                 const SizedBox(height: AppTheme.spacingM),
-
                 // Date
                 ListTile(
                   title: const Text('Date'),
@@ -573,7 +548,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   },
                 ),
                 const SizedBox(height: AppTheme.spacingM),
-
                 // Coût total
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -591,7 +565,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   ),
                 ),
                 const SizedBox(height: AppTheme.spacingL),
-
                 // Boutons
                 Row(
                   children: [
@@ -617,18 +590,15 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       ),
     );
   }
-
   bool _canSave() {
     return _selectedProduit != null &&
            _quantiteController.text.isNotEmpty &&
            _prixController.text.isNotEmpty;
   }
-
   double _calculerCoutTotal() {
     final quantite = double.tryParse(_quantiteController.text) ?? 0.0;
     return quantite * _prixUnitaire;
   }
-
   void _saveProduit() {
     final quantite = double.tryParse(_quantiteController.text) ?? 0.0;
     
@@ -641,7 +611,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       coutTotal: _calculerCoutTotal(),
       date: _selectedDate,
     );
-
     widget.onProduitSelected(produitTraitement);
     Navigator.pop(context);
   }

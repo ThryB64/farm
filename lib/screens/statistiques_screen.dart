@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -7,33 +15,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/chargement.dart';
-import '../models/semis.dart';
-
 class StatistiquesScreen extends StatefulWidget {
   const StatistiquesScreen({Key? key}) : super(key: key);
-
   @override
   State<StatistiquesScreen> createState() => _StatistiquesScreenState();
 }
-
 class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int? _selectedYear;
   String? _selectedParcelleId;
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
   }
-
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +61,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           final chargements = provider.chargements;
           final semis = provider.semis;
           final parcelles = provider.parcelles;
-
           // Calculer les statistiques annuelles
           final Map<int, Map<String, dynamic>> statsParAnnee = {};
           for (var chargement in chargements) {
@@ -77,22 +76,18 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             statsParAnnee[annee]!['humiditeMoyenne'] = statsParAnnee[annee]!['humiditeMoyenne'] + chargement.humidite;
             statsParAnnee[annee]!['nombreChargements'] = statsParAnnee[annee]!['nombreChargements'] + 1;
           }
-
           // Calculer les moyennes d'humidité
           statsParAnnee.forEach((annee, stats) {
             stats['humiditeMoyenne'] /= stats['nombreChargements'];
           });
-
           // Trier les années par ordre décroissant
           final annees = statsParAnnee.keys.toList()..sort((a, b) => b.compareTo(a));
-
           // Si aucune année n'est sélectionnée, prendre la plus récente
           if (_selectedYear == null && annees.isNotEmpty) {
             _selectedYear = annees.first;
           } else if (_selectedYear == null) {
             _selectedYear = DateTime.now().year;
           }
-
           return Column(
             children: [
               Padding(
@@ -234,7 +229,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       ),
     );
   }
-
   Widget _buildEvolutionRendementChart(Map<int, Map<String, dynamic>> statsParAnnee) {
     final annees = statsParAnnee.keys.toList()..sort();
     if (annees.isEmpty) {
@@ -327,7 +321,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       ),
     );
   }
-
   Widget _buildEvolutionHumiditeChart(Map<int, Map<String, dynamic>> statsParAnnee) {
     final annees = statsParAnnee.keys.toList()..sort();
     if (annees.isEmpty) {
@@ -420,7 +413,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       ),
     );
   }
-
   Widget _buildComparaisonRendementsParcellesChart(List<Chargement> chargements, List<Parcelle> parcelles) {
     final Map<String, double> rendements = {};
     for (var parcelle in parcelles) {
@@ -436,7 +428,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         rendements[parcelleKey] = (poidsTotal / 1000) / parcelle.surface;
       }
     }
-
     if (rendements.isEmpty) {
       return Card(
         child: Padding(
@@ -460,7 +451,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         ),
       );
     }
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -535,14 +525,12 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       ),
     );
   }
-
   Widget _buildEvolutionRendementParcelleChart(List<Chargement> chargements, String parcelleId, List<Parcelle> parcelles) {
     final parcelle = parcelles.firstWhere(
       (p) => (p.firebaseId ?? p.id.toString()) == parcelleId,
       orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
     );
     final chargementsParcelle = chargements.where((c) => c.parcelleId == parcelleId).toList();
-
     // Grouper les chargements par année
     final Map<int, double> rendementsParAnnee = {};
     for (var chargement in chargementsParcelle) {
@@ -552,7 +540,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       }
       rendementsParAnnee[annee] = rendementsParAnnee[annee]! + chargement.poidsNormes;
     }
-
     final annees = rendementsParAnnee.keys.toList()..sort();
     if (annees.isEmpty) {
       return Card(
@@ -577,9 +564,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         ),
       );
     }
-
     final maxRendement = rendementsParAnnee.values.reduce((a, b) => a > b ? a : b);
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -650,14 +635,12 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       ),
     );
   }
-
   Widget _buildEvolutionHumiditeParcelleChart(List<Chargement> chargements, String parcelleId, List<Parcelle> parcelles) {
     final parcelle = parcelles.firstWhere(
       (p) => (p.firebaseId ?? p.id.toString()) == parcelleId,
       orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
     );
     final chargementsParcelle = chargements.where((c) => c.parcelleId == parcelleId).toList();
-
     // Grouper les chargements par année
     final Map<int, double> humiditeParAnnee = {};
     final Map<int, int> nombreChargementsParAnnee = {};
@@ -670,12 +653,10 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       humiditeParAnnee[annee] = humiditeParAnnee[annee]! + chargement.humidite;
       nombreChargementsParAnnee[annee] = nombreChargementsParAnnee[annee]! + 1;
     }
-
     // Calculer les moyennes
     humiditeParAnnee.forEach((annee, total) {
       humiditeParAnnee[annee] = total / nombreChargementsParAnnee[annee]!;
     });
-
     final annees = humiditeParAnnee.keys.toList()..sort();
     if (annees.isEmpty) {
       return Card(
@@ -700,9 +681,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         ),
       );
     }
-
     final maxHumidite = humiditeParAnnee.values.reduce((a, b) => a > b ? a : b);
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -773,7 +752,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       ),
     );
   }
-
   Widget _buildComparaisonRendementsVarietesChart(List<Chargement> chargements, List<Semis> semis, List<Parcelle> parcelles) {
     final anneeSelectionnee = _selectedYear ?? DateTime.now().year;
     
@@ -817,7 +795,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         child: Text('Aucune donnée disponible pour cette année'),
       );
     }
-
     return Column(
       children: [
         const Text(
@@ -893,7 +870,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
       ],
     );
   }
-
   Widget _buildRepartitionSurfacesVarietesChart(List<Semis> semis, List<Parcelle> parcelles) {
     final anneeSelectionnee = _selectedYear ?? DateTime.now().year;
     
@@ -924,7 +900,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         child: Text('Aucune donnée disponible pour cette année'),
       );
     }
-
     final totalSurface = surfacesParVariete.values.reduce((a, b) => a + b);
     
     return Column(

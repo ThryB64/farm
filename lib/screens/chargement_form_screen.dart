@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,18 +14,13 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/chargement.dart';
 import '../utils/poids_utils.dart';
-
 class ChargementFormScreen extends StatefulWidget {
   final Chargement? chargement;
-
   const ChargementFormScreen({Key? key, this.chargement}) : super(key: key);
-
   @override
   State<ChargementFormScreen> createState() => _ChargementFormScreenState();
 }
-
 class _ChargementFormScreenState extends State<ChargementFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _poidsPleinController;
@@ -28,9 +31,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
   String? _selectedCelluleId;
   int? _selectedYear;
   String? _selectedVariete;
-
   final List<String> _remorques = ['Duchesne', 'Leboulch', 'Maupu', 'Autres'];
-
   @override
   void initState() {
     super.initState();
@@ -38,7 +39,6 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
     _poidsPleinController = TextEditingController();
     _poidsVideController = TextEditingController();
     _humiditeController = TextEditingController();
-
     // Si on modifie un chargement existant, utiliser ses valeurs
     if (widget.chargement != null) {
       _poidsPleinController.text = widget.chargement!.poidsPlein.toString();
@@ -77,7 +77,6 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
       });
     }
   }
-
   @override
   void dispose() {
     _poidsPleinController.dispose();
@@ -85,18 +84,14 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
     _humiditeController.dispose();
     super.dispose();
   }
-
   List<String> _getVarietesDisponibles(FirebaseProviderV4 provider) {
     if (_selectedParcelleId == null || _selectedYear == null) return [];
-
     final anneeSelectionnee = _selectedYear!;  // Non-null assertion car vérifié au-dessus
-
     // Chercher d'abord dans les semis de l'année
     final semisAnnee = provider.semis.where((s) => 
       s.parcelleId == _selectedParcelleId && 
       s.date.year == anneeSelectionnee
     ).toList();
-
     final varietes = <String>{};
     
     // Si on a des semis, utiliser leurs variétés
@@ -110,25 +105,21 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
         c.parcelleId == _selectedParcelleId &&
         c.dateChargement.year == anneeSelectionnee
       ).toList();
-
       for (var chargement in chargementsParcelleAnnee) {
         if (chargement.variete.isNotEmpty) {
           varietes.add(chargement.variete);
         }
       }
-
       // Si toujours pas de variétés, prendre celles de l'année précédente
       if (varietes.isEmpty) {
         final semisAnneePrecedente = provider.semis.where((s) => 
           s.parcelleId == _selectedParcelleId && 
           s.date.year == anneeSelectionnee - 1
         ).toList();
-
         for (var semis in semisAnneePrecedente) {
           varietes.addAll(semis.varietes);
         }
       }
-
       // Si toujours rien, ajouter les variétés connues des chargements précédents
       if (varietes.isEmpty) {
         final toutesVarietes = provider.chargements
@@ -139,10 +130,8 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
         varietes.addAll(toutesVarietes);
       }
     }
-
     return varietes.toList()..sort();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,21 +152,16 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
           
           // Convertir en liste triée
           final annees = anneesSet.toList()..sort((a, b) => b.compareTo(a));
-
           // Vérifier si l'année sélectionnée est toujours valide
           if (_selectedYear != null && !annees.contains(_selectedYear)) {
             _selectedYear = anneeEnCours;
           }
-
           // Si aucune année n'est sélectionnée, utiliser l'année en cours
           _selectedYear ??= anneeEnCours;
-
           final cellulesAnnee = provider.cellules
               .where((c) => c.dateCreation.year == _selectedYear && !c.fermee)
               .toList();
-
           final varietesDisponibles = _getVarietesDisponibles(provider);
-
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Form(
@@ -382,7 +366,6 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                           final humidite = double.parse(_humiditeController.text);
                           final poidsNet = poidsPlein - poidsVide;
                           final poidsNormes = PoidsUtils.calculPoidsNormes(poidsNet, humidite);
-
                           final chargement = Chargement(
                             id: widget.chargement?.id,
                             firebaseId: widget.chargement?.firebaseId, // ✅ Préserver le firebaseId
@@ -397,14 +380,12 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                             humidite: humidite,
                             variete: _selectedVariete!,
                           );
-
                           final provider = context.read<FirebaseProviderV4>();
                           if (widget.chargement == null) {
                             await provider.ajouterChargement(chargement);
                           } else {
                             await provider.modifierChargement(chargement);
                           }
-
                           if (mounted) {
                             Navigator.pop(context);
                           }
@@ -437,7 +418,6 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
       ),
     );
   }
-
   void _calculerPoidsNet(String _) {
     if (_poidsPleinController.text.isNotEmpty && _poidsVideController.text.isNotEmpty) {
       final poidsPlein = double.tryParse(_poidsPleinController.text);

@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,16 +14,12 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-
 class VarieteFormScreen extends StatefulWidget {
   final Variete? variete;
-
   const VarieteFormScreen({Key? key, this.variete}) : super(key: key);
-
   @override
   State<VarieteFormScreen> createState() => _VarieteFormScreenState();
 }
-
 class _VarieteFormScreenState extends State<VarieteFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nomController;
@@ -23,7 +27,6 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
   Map<int, double> _prixParAnnee = {};
   int _anneeSelectionnee = DateTime.now().year;
   final TextEditingController _prixController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -31,7 +34,6 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
     _descriptionController = TextEditingController(text: widget.variete?.description ?? '');
     _prixParAnnee = Map.from(widget.variete?.prixParAnnee ?? {});
   }
-
   @override
   void dispose() {
     _nomController.dispose();
@@ -39,7 +41,6 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
     _prixController.dispose();
     super.dispose();
   }
-
   void _ajouterPrix() {
     final prix = double.tryParse(_prixController.text);
     if (prix != null && prix > 0) {
@@ -51,13 +52,11 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
       print('💰 Tous les prix: $_prixParAnnee');
     }
   }
-
   void _supprimerPrix(int annee) {
     setState(() {
       _prixParAnnee.remove(annee);
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -263,13 +262,11 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                       
                       print('💾 Sauvegarde variété: ${variete.nom}');
                       print('💾 Prix par année: ${variete.prixParAnnee}');
-
                       if (widget.variete == null) {
                         await context.read<FirebaseProviderV4>().ajouterVariete(variete);
                       } else {
                         await context.read<FirebaseProviderV4>().modifierVariete(variete);
                       }
-
                       if (mounted) {
                         Navigator.pop(context);
                       }

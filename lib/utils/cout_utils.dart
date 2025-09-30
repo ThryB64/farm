@@ -1,8 +1,3 @@
-import '../models/variete.dart';
-import '../models/parcelle.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
-import '../theme/app_theme.dart';
 class CoutUtils {
   // Constantes pour les calculs
   static const double DOSE_GRAINES = 50000.0; // Une dose = 50 000 graines

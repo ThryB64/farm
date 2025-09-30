@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -9,18 +17,13 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/semis.dart';
-
 class ExportTraitementsScreen extends StatefulWidget {
   const ExportTraitementsScreen({Key? key}) : super(key: key);
-
   @override
   State<ExportTraitementsScreen> createState() => _ExportTraitementsScreenState();
 }
-
 class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
   int? _selectedYear;
-
   Future<void> _generatePDF() async {
     try {
       final db = Provider.of<FirebaseProviderV4>(context, listen: false);
@@ -41,14 +44,11 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         }
         return;
       }
-
       final pdf = pw.Document();
-
       // Couleurs personnalisées (même que récolte)
       final mainColor = PdfColor.fromHex('#2E7D32'); // Vert foncé
       final secondaryColor = PdfColor.fromHex('#81C784'); // Vert clair
       final headerBgColor = PdfColor.fromHex('#E8F5E9'); // Vert très clair
-
       // Page de garde
       pdf.addPage(
         pw.Page(
@@ -95,14 +95,12 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           },
         ),
       );
-
       // Variables pour le résumé final
       double coutTotalGlobal = 0;
       int nombreTraitementsTotal = 0;
       int nombreProduitsTotal = 0;
       int currentPage = 1;
       int totalPages = 1;
-
       // Calculer le nombre total de pages
       for (var parcelle in parcelles) {
         final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
@@ -114,7 +112,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         }
       }
       if (parcelles.isNotEmpty) totalPages += 1; // Page de résumé
-
       // Pour chaque parcelle
       for (var parcelle in parcelles) {
         final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
@@ -122,7 +119,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
             .where((t) => t.parcelleId == parcelleId)
             .toList()
           ..sort((a, b) => a.date.compareTo(b.date));
-
         // Vérifier s'il y a un semis même si pas de traitements
         Semis? semisParcelle;
         try {
@@ -134,25 +130,20 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         }
         
         if (traitementsP.isEmpty && (semisParcelle == null || semisParcelle.prixSemis <= 0)) continue;
-
         nombreTraitementsTotal += traitementsP.length;
         double coutTotalParcelle = 0;
         int nombreProduitsParcelle = 0;
-
         // Ajouter le coût du semis
         if (semisParcelle != null && semisParcelle.prixSemis > 0) {
           coutTotalParcelle += semisParcelle.prixSemis;
           print('💰 Coût semis ajouté pour ${parcelle.nom}: ${semisParcelle.prixSemis}');
         }
-
         for (var t in traitementsP) {
           coutTotalParcelle += t.coutTotal;
           nombreProduitsParcelle += t.produits.length;
         }
-
         coutTotalGlobal += coutTotalParcelle;
         nombreProduitsTotal += nombreProduitsParcelle;
-
         // Diviser les traitements en pages de 25 lignes
         for (var i = 0; i < traitementsP.length; i += 25) {
           final pageTraitements = traitementsP.skip(i).take(25).toList();
@@ -326,7 +317,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           );
         }
       }
-
       // Page de résumé global (même design que les autres pages)
       pdf.addPage(
         pw.Page(
@@ -489,12 +479,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           },
         ),
       );
-
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
         name: 'Traitements_$_selectedYear.pdf',
       );
-
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -503,7 +491,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       }
     }
   }
-
   pw.Widget _buildHeaderCell(String text) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(8),
@@ -518,7 +505,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       ),
     );
   }
-
   pw.Widget _buildDataCell(String text) {
     // Nettoyer le texte pour enlever les caractères problématiques et les euros
     final cleanText = text.replaceAll(RegExp(r'[^\w\s\.,\-/]'), '').replaceAll('€', '');
@@ -532,7 +518,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       ),
     );
   }
-
   pw.Widget _buildStatCard(String title, String value, String subtitle, PdfColor color) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(20),
@@ -577,7 +562,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -593,7 +577,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               .toSet()
               .toList()
             ..sort((a, b) => b.compareTo(a));
-
           if (annees.isEmpty) {
             return const Center(
               child: Column(
@@ -616,7 +599,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               ),
             );
           }
-
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -677,7 +659,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       ),
     );
   }
-
   String _getPrixSemisParcelle(Parcelle parcelle, List<dynamic> semis, int annee) {
     try {
       final semisParcelle = semis.firstWhere(
@@ -693,7 +674,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       return 'Prix semis: Non défini';
     }
   }
-
   List<pw.TableRow> _buildSemisAsTreatment(Parcelle parcelle, List<dynamic> semis, int annee) {
     try {
       print('🔍 Recherche semis pour parcelle ${parcelle.nom} (${parcelle.firebaseId}) année $annee');
@@ -738,13 +718,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           ),
         ];
       }
-
       // Calculer le nombre de doses pour toute la parcelle
       final nombreDoses = (semisParcelle.densiteMais * parcelle.surface) / 50000;
       final prixUnitaire = semisParcelle.prixSemis > 0 ? semisParcelle.prixSemis / nombreDoses : 0.0;
-
       print('✅ Création du semis dans le tableau: ${nombreDoses} doses, ${prixUnitaire} €/dose');
-
       return [
         pw.TableRow(
           decoration: pw.BoxDecoration(

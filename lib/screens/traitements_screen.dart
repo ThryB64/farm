@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,22 +14,17 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/traitement.dart';
 import 'traitement_form_screen.dart';
 import 'produits_screen.dart';
 import 'traitement_raccourci_screen.dart';
-
 class TraitementsScreen extends StatefulWidget {
   const TraitementsScreen({Key? key}) : super(key: key);
-
   @override
   State<TraitementsScreen> createState() => _TraitementsScreenState();
 }
-
 class _TraitementsScreenState extends State<TraitementsScreen> {
   int? _selectedYear;
   String? _selectedParcelleId;
-
   @override
   void initState() {
     super.initState();
@@ -29,7 +32,6 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       _initializeSelections();
     });
   }
-
   void _initializeSelections() {
     final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
     
@@ -51,7 +53,6 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +75,6 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
         builder: (context, provider, child) {
           final traitements = provider.traitements;
           final parcelles = provider.parcelles;
-
           return Column(
             children: [
               // Filtres
@@ -221,7 +221,6 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       ),
     );
   }
-
   Widget _buildTraitementsList(
     FirebaseProviderV4 provider,
     List<Traitement> traitements,
@@ -233,14 +232,11 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       if (_selectedParcelleId != null && t.parcelleId != _selectedParcelleId) return false;
       return true;
     }).toList();
-
     // Trier par date décroissante
     traitementsFiltres.sort((a, b) => b.date.compareTo(a.date));
-
     if (traitementsFiltres.isEmpty) {
       return _buildEmptyState();
     }
-
     return ListView.builder(
       padding: const EdgeInsets.all(AppTheme.spacingM),
       itemCount: traitementsFiltres.length,
@@ -255,7 +251,6 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
             dateCreation: DateTime.now(),
           ),
         );
-
         return Card(
           margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
           child: ListTile(
@@ -321,7 +316,6 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       },
     );
   }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -374,12 +368,9 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       ),
     );
   }
-
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-
   void _confirmDelete(FirebaseProviderV4 provider, Traitement traitement) {
     showDialog(
       context: context,

@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,25 +14,19 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/cellule.dart';
 import '../utils/cout_utils.dart';
-
 class CelluleFormScreen extends StatefulWidget {
   final Cellule? cellule;
-
   const CelluleFormScreen({Key? key, this.cellule}) : super(key: key);
-
   @override
   State<CelluleFormScreen> createState() => _CelluleFormScreenState();
 }
-
 class _CelluleFormScreenState extends State<CelluleFormScreen> {
   final _formKey = GlobalKey<FormState>();
   int? _selectedYear;
   late TextEditingController _quantiteGazController;
   late TextEditingController _prixGazController;
   double _coutTotalGaz = 0.0;
-
   @override
   void initState() {
     super.initState();
@@ -37,14 +39,12 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
     );
     _calculerCoutTotalGaz();
   }
-
   @override
   void dispose() {
     _quantiteGazController.dispose();
     _prixGazController.dispose();
     super.dispose();
   }
-
   void _calculerCoutTotalGaz() {
     final quantite = double.tryParse(_quantiteGazController.text) ?? 0.0;
     final prix = double.tryParse(_prixGazController.text) ?? 0.0;
@@ -52,7 +52,6 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
       _coutTotalGaz = CoutUtils.calculerCoutTotalGaz(quantite, prix);
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,13 +226,11 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                             ? double.tryParse(_prixGazController.text) 
                             : null,
                       );
-
                       if (widget.cellule == null) {
                         await context.read<FirebaseProviderV4>().ajouterCellule(cellule);
                       } else {
                         await context.read<FirebaseProviderV4>().modifierCellule(cellule);
                       }
-
                       if (mounted) {
                         Navigator.pop(context);
                       }

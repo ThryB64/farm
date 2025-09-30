@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -9,24 +17,16 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/cellule.dart';
-import '../models/chargement.dart';
-import '../models/semis.dart';
-import '../models/variete_surface.dart';
-
 class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({Key? key}) : super(key: key);
-
   @override
   State<ImportExportScreen> createState() => _ImportExportScreenState();
 }
-
 class _ImportExportScreenState extends State<ImportExportScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   bool _isExporting = false;
   bool _isImporting = false;
-
   @override
   void initState() {
     super.initState();
@@ -45,13 +45,11 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     
     _animationController.forward();
   }
-
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,7 +83,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       ),
     );
   }
-
   Widget _buildDataOverview() {
     return ModernCard(
                 child: Column(
@@ -163,7 +160,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                 ),
     );
   }
-
   Widget _buildDataSummary(String label, int count, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -207,7 +203,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       ),
     );
   }
-
   Widget _buildExportSection() {
     return ModernCard(
                 child: Column(
@@ -259,7 +254,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       ),
     );
   }
-
   Widget _buildImportSection() {
     return ModernCard(
                 child: Column(
@@ -311,7 +305,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       ),
     );
   }
-
   Widget _buildActionsSection() {
     return ModernCard(
       child: Column(
@@ -362,12 +355,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       ),
     );
   }
-
   Future<void> _exportAllData() async {
     setState(() {
       _isExporting = true;
     });
-
     try {
       // Export exact via API REST Firebase (identique console)
       await _exportExactJsonAndDownload();
@@ -405,16 +396,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       }
     }
   }
-
   // ===== API REST FIREBASE (IDENTIQUE CONSOLE) =====
-
   // 1) Utiliser le farmId par défaut (pas de récupération via API)
   Future<String> _resolveFarmId() async {
     // Utiliser directement le farmId par défaut
     return 'gaec_berard';
   }
-
-
   // 3) EXPORT — téléchargement direct depuis Firebase (sans reconstruction)
   Future<void> _exportExactJsonAndDownload() async {
     try {
@@ -432,7 +419,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       if (res.statusCode != 200) {
         throw Exception('Téléchargement échoué: ${res.statusCode} ${res.body}');
       }
-
       // Télécharger le JSON brut (identique console)
       final now = DateTime.now();
       final fileName = 'firebase_export_${farmId}_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.json';
@@ -450,7 +436,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       rethrow;
     }
   }
-
   // 4) IMPORT — remplacement direct dans Firebase (sans reconstruction)
   Future<void> _importExactJsonReplace(String jsonString) async {
     try {
@@ -493,9 +478,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       rethrow;
     }
   }
-
   // ===== ANCIENNES MÉTHODES (SUPPRIMÉES - REMPLACÉES PAR API REST) =====
-
   void _downloadFile(String content, String fileName) {
     // Pour le web, on utilise la fonctionnalité de téléchargement du navigateur
     final blob = html.Blob([content], 'application/json');
@@ -505,12 +488,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     anchor.click();
     html.Url.revokeObjectUrl(url);
   }
-
   Future<void> _importData() async {
     setState(() {
       _isImporting = true;
     });
-
     try {
       // Pour le web, on utilise un input file
       final input = html.FileUploadInputElement()
@@ -570,7 +551,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       }
     }
   }
-
   Future<bool> _showImportConfirmation() async {
     return await showDialog<bool>(
         context: context,
@@ -596,11 +576,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         ),
     ) ?? false;
   }
-
   // ===== ANCIENNES MÉTHODES D'IMPORT (SUPPRIMÉES - REMPLACÉES PAR API REST) =====
-
-
-
   // Fonction pour forcer le refresh des données
   // Méthode utilitaire pour récupérer une valeur parmi plusieurs clés possibles
   T? _pick<T>(Map<String, dynamic> map, List<String> keys) {
@@ -611,7 +587,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     }
     return null;
   }
-
   Future<void> _forceDataRefresh(FirebaseProviderV4 provider) async {
     try {
       print('🔄 Début du refresh forcé...');
@@ -635,7 +610,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       print('⚠️ Erreur lors du refresh des données: $e');
     }
   }
-
   // Fonction pour vider le localStorage
   Future<void> _clearLocalStorage() async {
     try {
@@ -663,7 +637,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       print('⚠️ Erreur lors du vidage du localStorage: $e');
     }
   }
-
   // Méthodes de parsing avec conversion explicite des types
   Parcelle _parseParcelleFromMap(Map<String, dynamic> map) {
     // Gérer les clés stables Firebase (ex: "f_parcelle_1_11200")
@@ -691,7 +664,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       notes: map['notes']?.toString(),
     );
   }
-
   Cellule _parseCelluleFromMap(Map<String, dynamic> map) {
     // Gérer les clés stables Firebase
     String? firebaseId;
@@ -714,7 +686,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       notes: map['notes']?.toString(),
     );
   }
-
   Chargement _parseChargementFromMap(Map<String, dynamic> map) {
     // Gérer les clés stables Firebase
     String? firebaseId;
@@ -744,7 +715,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       variete: map['variete'].toString(),
     );
   }
-
   Semis _parseSemisFromMap(Map<String, dynamic> map) {
     final varietesSurfacesData = map['varietes_surfaces'] as List? ?? [];
     final varietesSurfaces = varietesSurfacesData
@@ -773,7 +743,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       notes: map['notes']?.toString(),
     );
   }
-
   Variete _parseVarieteFromMap(Map<String, dynamic> map) {
     // Gérer les clés stables Firebase
     String? firebaseId;
@@ -796,7 +765,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
     );
   }
-
   Future<void> _updatePoidsNormes() async {
     try {
       await context.read<FirebaseProviderV4>().updateAllChargementsPoidsNormes();
@@ -828,8 +796,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       }
     }
   }
-
-
   Widget _buildDebugSection() {
     return ModernCard(
       child: Column(
@@ -873,7 +839,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       ),
     );
   }
-
   // Méthodes de parsing pour les nouvelles entités
   dynamic _parseVenteFromMap(Map<String, dynamic> map) {
     return {
@@ -894,7 +859,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       'terminee': map['terminee'] == true,
     };
   }
-
   dynamic _parseTraitementFromMap(Map<String, dynamic> map) {
     return {
       'id': map['id'],
@@ -907,7 +871,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       'coutTotal': double.tryParse(map['coutTotal'].toString()) ?? 0.0,
     };
   }
-
   dynamic _parseProduitTraitementFromMap(Map<String, dynamic> map) {
     return {
       'produitId': map['produitId']?.toString() ?? '',
@@ -919,7 +882,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       'date': DateTime.fromMillisecondsSinceEpoch(map['date'] ?? DateTime.now().millisecondsSinceEpoch),
     };
   }
-
   dynamic _parseProduitFromMap(Map<String, dynamic> map) {
     return {
       'id': map['id'],

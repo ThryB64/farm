@@ -1,8 +1,3 @@
-import '../models/variete.dart';
-import '../models/parcelle.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
-import '../theme/app_theme.dart';
 class PoidsUtils {
   // Table de conversion des poids selon l'humidité
   static const Map<Range, double> _coefficientsHumidite = {

@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,17 +14,12 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/vente.dart';
-
 class VenteFormScreen extends StatefulWidget {
   final Vente? vente;
-
   const VenteFormScreen({Key? key, this.vente}) : super(key: key);
-
   @override
   State<VenteFormScreen> createState() => _VenteFormScreenState();
 }
-
 class _VenteFormScreenState extends State<VenteFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _numeroTicketController = TextEditingController();
@@ -29,13 +32,11 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
   final _ecartPoidsNetController = TextEditingController();
   final _prixController = TextEditingController();
   final _notesController = TextEditingController();
-
   DateTime _selectedDate = DateTime.now();
   int _selectedAnnee = DateTime.now().year;
   bool _payer = false;
   bool _terminee = false;
   bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
@@ -43,7 +44,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       _loadVenteData();
     }
   }
-
   void _loadVenteData() {
     final vente = widget.vente!;
     _numeroTicketController.text = vente.numeroTicket;
@@ -68,7 +68,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     _payer = vente.payer;
     _terminee = vente.terminee;
   }
-
   @override
   void dispose() {
     _numeroTicketController.dispose();
@@ -83,7 +82,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     _notesController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,7 +109,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       ),
     );
   }
-
   Widget _buildBasicInfoCard() {
     return ModernCard(
       child: Padding(
@@ -244,7 +241,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       ),
     );
   }
-
   Widget _buildWeightCard() {
     return ModernCard(
       child: Padding(
@@ -346,7 +342,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       ),
     );
   }
-
   Widget _buildStatusCard() {
     return ModernCard(
       child: Padding(
@@ -419,7 +414,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       ),
     );
   }
-
   Widget _buildActionButtons() {
     return Row(
       children: [
@@ -440,7 +434,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       ],
     );
   }
-
   void _selectDate() async {
     final date = await showDatePicker(
       context: context,
@@ -454,11 +447,9 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       });
     }
   }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-
   List<int> _getAnneeOptions() {
     final currentYear = DateTime.now().year;
     final years = <int>[];
@@ -468,7 +459,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     }
     return years.reversed.toList(); // Années récentes en premier
   }
-
   void _calculatePoidsNet(String value) {
     final poidsVide = double.tryParse(_poidsVideController.text);
     final poidsPlein = double.tryParse(_poidsPleinController.text);
@@ -479,39 +469,32 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       _calculatePrixTotal('');
     }
   }
-
   void _calculatePoidsNetFinal(String value) {
     setState(() {
       // Recalculer l'affichage du poids net final
     });
   }
-
   double _getPoidsNetFinal() {
     final poidsNet = double.tryParse(_poidsNetController.text) ?? 0;
     final ecart = double.tryParse(_ecartPoidsNetController.text) ?? 0;
     return poidsNet + ecart; // L'écart peut être positif ou négatif
   }
-
   void _calculatePrixTotal(String value) {
     setState(() {
       // Recalculer l'affichage du prix total
     });
   }
-
   double _getPrixTotal() {
     final prixParTonne = double.tryParse(_prixController.text) ?? 0;
     final poidsNetFinal = _getPoidsNetFinal();
     final tonnes = poidsNetFinal / 1000; // Convertir kg en tonnes
     return prixParTonne * tonnes;
   }
-
   void _saveVente() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() {
       _isLoading = true;
     });
-
     try {
       final poidsNetFinal = _getPoidsNetFinal();
       final prixTotal = _getPrixTotal();
@@ -533,7 +516,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
         prix: _prixController.text.isNotEmpty ? prixTotal : null, // Utiliser le prix total calculé
         terminee: _terminee,
       );
-
       final provider = context.read<FirebaseProviderV4>();
       
       if (widget.vente == null) {
@@ -547,7 +529,6 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
           SnackBar(content: Text('Vente modifiée avec succès')),
         );
       }
-
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

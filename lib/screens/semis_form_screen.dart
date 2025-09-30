@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,19 +14,13 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/semis.dart';
-import '../models/variete_surface.dart';
 import '../utils/cout_utils.dart';
-
 class SemisFormScreen extends StatefulWidget {
   final Semis? semis;
-
   const SemisFormScreen({Key? key, this.semis}) : super(key: key);
-
   @override
   State<SemisFormScreen> createState() => _SemisFormScreenState();
 }
-
 class _SemisFormScreenState extends State<SemisFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _dateController;
@@ -30,7 +32,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   int? _selectedYear;
   double _densiteMais = CoutUtils.DENSITE_DEFAUT;
   double _prixSemis = 0.0;
-
   @override
   void initState() {
     super.initState();
@@ -57,7 +58,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       });
     }
   }
-
   @override
   void dispose() {
     _dateController.dispose();
@@ -65,11 +65,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     _densiteController.dispose();
     super.dispose();
   }
-
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
-
   void _calculerPrixSemis() {
     if (_selectedYear == null) return;
     
@@ -100,7 +98,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       _prixSemis = totalPrix;
     });
   }
-
   void _onDensiteChanged(String value) {
     final densite = double.tryParse(value);
     if (densite != null && CoutUtils.estDensiteValide(densite)) {
@@ -110,7 +107,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       _calculerPrixSemis();
     }
   }
-
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -124,9 +120,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       });
     }
   }
-
-
-
   List<Parcelle> _getParcellesDisponibles(FirebaseProviderV4 provider) {
     if (_selectedYear == null) return provider.parcelles;
     
@@ -144,7 +137,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       return !parcellesAvecSemis.contains(parcelleKey);
     }).toList();
   }
-
   double _getParcelleSurface() {
     if (_selectedParcelleId == null) return 0.0;
     
@@ -155,7 +147,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     );
     return parcelle.surface;
   }
-
   Widget _buildVarietesSection(FirebaseProviderV4 provider) {
     return Container(
       decoration: BoxDecoration(
@@ -182,7 +173,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               children: provider.varietes.map((variete) {
                 final isSelected = _selectedVarietesSurfaces
                     .any((v) => v.nom == variete.nom);
-
                 return FilterChip(
                   label: Text(variete.nom),
                   selected: isSelected,
@@ -236,7 +226,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       ),
     );
   }
-
   Widget _buildHectaresSection() {
     return Container(
       decoration: BoxDecoration(
@@ -340,7 +329,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       ),
     );
   }
-
   String _getAutoCompleteHint() {
     final total = _getParcelleSurface();
     final count = _selectedVarietesSurfaces.length;
@@ -353,7 +341,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       return 'Plusieurs variétés : remplissez ${count - 1} variétés, la dernière sera auto-complétée.';
     }
   }
-
   bool _isAutoCompleted(int index) {
     final total = _getParcelleSurface();
     final filledCount = _selectedVarietesSurfaces.where((v) => v.surface > 0).length;
@@ -367,7 +354,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       return index == count - 1 && filledCount == count - 1; // La dernière est auto-complétée
     }
   }
-
   void _autoCompleteRemaining() {
     final total = _getParcelleSurface();
     final count = _selectedVarietesSurfaces.length;
@@ -408,35 +394,29 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       }
     }
   }
-
   double _getTotalHectares() {
     return _selectedVarietesSurfaces.fold<double>(0, (sum, v) => sum + v.surface);
   }
-
   bool _isTotalValid() {
     if (_selectedVarietesSurfaces.length <= 1) return true;
     final parcelleSurface = _getParcelleSurface();
     final totalHectares = _getTotalHectares();
     return (totalHectares - parcelleSurface).abs() < 0.01; // Tolérance de 0.01 ha
   }
-
   Future<void> _saveSemis() async {
     if (!_formKey.currentState!.validate()) return;
-
     if (_selectedParcelleId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Veuillez sélectionner une parcelle')),
       );
       return;
     }
-
     if (_selectedVarietesSurfaces.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Veuillez sélectionner au moins une variété')),
       );
       return;
     }
-
     // Vérifier la cohérence des hectares si plusieurs variétés
     if (_selectedVarietesSurfaces.length > 1 && !_isTotalValid()) {
       final parcelleSurface = _getParcelleSurface();
@@ -450,7 +430,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       );
       return;
     }
-
     // Utiliser l'année sélectionnée pour la date
     final dateParts = _dateController.text.split('/');
     final day = int.parse(dateParts[0]);
@@ -467,7 +446,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       densiteMais: _densiteMais,
       prixSemis: _prixSemis,
     );
-
     try {
       if (widget.semis == null) {
         await context.read<FirebaseProviderV4>().ajouterSemis(semis);
@@ -487,7 +465,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -587,7 +564,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
               // Date
               TextFormField(
                 controller: _dateController,
@@ -606,14 +582,12 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
               // Sélection des variétés
               Consumer<FirebaseProviderV4>(
                 builder: (context, provider, child) {
                   return _buildVarietesSection(provider);
                 },
               ),
-
               // Résumé des surfaces
               if (_showHectares && _selectedParcelleId != null) ...[
                 const SizedBox(height: 16),
@@ -641,9 +615,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                   ),
                 ),
               ],
-
               const SizedBox(height: 16),
-
               // Densité de maïs
               TextFormField(
                 controller: _densiteController,
@@ -666,7 +638,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
               // Prix du semis (calculé automatiquement)
               Container(
                 padding: const EdgeInsets.all(16),
@@ -705,7 +676,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
               // Notes
               TextFormField(
                 controller: _notesController,
@@ -715,9 +685,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 ),
                 maxLines: 3,
               ),
-
               const SizedBox(height: 24),
-
               // Boutons de validation
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -755,7 +723,6 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
       ),
     );
   }
-
   bool _canSave() {
     return _selectedParcelleId != null &&
            _selectedVarietesSurfaces.isNotEmpty &&

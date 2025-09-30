@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -7,18 +15,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import 'parcelle_details_screen.dart';
-
 class ParcellesScreen extends StatefulWidget {
   const ParcellesScreen({Key? key}) : super(key: key);
-
   @override
   State<ParcellesScreen> createState() => _ParcellesScreenState();
 }
-
 class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-
   @override
   void initState() {
     super.initState();
@@ -37,13 +41,11 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
     
     _animationController.forward();
   }
-
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,11 +68,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
         builder: (context, provider, child) {
           final parcelles = List<Parcelle>.from(provider.parcelles)
             ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
-
           if (parcelles.isEmpty) {
             return _buildEmptyState();
           }
-
           return FadeTransition(
             opacity: _fadeAnimation,
             child: ListView.builder(
@@ -92,7 +92,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
   }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -139,7 +138,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
   }
-
   Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV4 provider) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
@@ -249,7 +247,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
   }
-
   Widget _buildInfoChip(String text, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -281,16 +278,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
   }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-
   Future<void> _showAddParcelleDialog() async {
     final formKey = GlobalKey<FormState>();
     String nom = '';
     double surface = 0;
-
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -373,12 +367,10 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
   }
-
   Future<void> _showEditParcelleDialog(Parcelle parcelle) async {
     final formKey = GlobalKey<FormState>();
     String nom = parcelle.nom;
     double surface = parcelle.surface;
-
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -464,7 +456,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
   }
-
   Future<void> _showDeleteConfirmation(Parcelle parcelle) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -487,7 +478,6 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
         ],
       ),
     );
-
     if (confirmed == true) {
       final key = parcelle.firebaseId ?? parcelle.id.toString();
       context.read<FirebaseProviderV4>().supprimerParcelle(key);

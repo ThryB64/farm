@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,21 +14,14 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/chargement.dart';
-import '../models/semis.dart';
-
 class ParcelleDetailsScreen extends StatefulWidget {
   final Parcelle parcelle;
-
   const ParcelleDetailsScreen({Key? key, required this.parcelle}) : super(key: key);
-
   @override
   State<ParcelleDetailsScreen> createState() => _ParcelleDetailsScreenState();
 }
-
 class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
   int? _selectedYear;
-
   Widget _buildSemisDetails(Semis s) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +40,6 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
       ],
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,31 +74,26 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
           for (var s in semis) {
             print('  - Semis: ${s.id} -> ParcelleId: ${s.parcelleId}');
           }
-
           // Grouper les chargements par année
           final Map<int, List<Chargement>> chargementsParAnnee = {};
           for (var chargement in chargements) {
             final annee = chargement.dateChargement.year;
             chargementsParAnnee.putIfAbsent(annee, () => []).add(chargement);
           }
-
           // Grouper les semis par année
           final Map<int, List<Semis>> semisParAnnee = {};
           for (var s in semis) {
             final annee = s.date.year;
             semisParAnnee.putIfAbsent(annee, () => []).add(s);
           }
-
           // Trier les années par ordre décroissant
           final List<int> annees = [...chargementsParAnnee.keys, ...semisParAnnee.keys].toSet().toList()..sort((a, b) => b.compareTo(a));
-
           // Si aucune année n'est sélectionnée, sélectionner la plus récente
           if (_selectedYear == null && annees.isNotEmpty) {
             _selectedYear = annees.first;
           } else if (_selectedYear == null) {
             _selectedYear = DateTime.now().year;
           }
-
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -234,7 +229,6 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
       ),
     );
   }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }

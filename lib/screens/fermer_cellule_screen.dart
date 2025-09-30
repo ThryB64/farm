@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,38 +14,30 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/cellule.dart';
 import '../utils/cout_utils.dart';
-
 class FermerCelluleScreen extends StatefulWidget {
   final Cellule cellule;
-
   const FermerCelluleScreen({Key? key, required this.cellule}) : super(key: key);
-
   @override
   State<FermerCelluleScreen> createState() => _FermerCelluleScreenState();
 }
-
 class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _quantiteGazController;
   late TextEditingController _prixGazController;
   double _coutTotalGaz = 0.0;
-
   @override
   void initState() {
     super.initState();
     _quantiteGazController = TextEditingController();
     _prixGazController = TextEditingController();
   }
-
   @override
   void dispose() {
     _quantiteGazController.dispose();
     _prixGazController.dispose();
     super.dispose();
   }
-
   void _calculerCoutTotalGaz() {
     final quantite = double.tryParse(_quantiteGazController.text) ?? 0.0;
     final prix = double.tryParse(_prixGazController.text) ?? 0.0;
@@ -45,10 +45,8 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
       _coutTotalGaz = CoutUtils.calculerCoutTotalGaz(quantite, prix);
     });
   }
-
   Future<void> _fermerCellule() async {
     if (!_formKey.currentState!.validate()) return;
-
     try {
       final quantiteGaz = double.tryParse(_quantiteGazController.text);
       final prixGaz = double.tryParse(_prixGazController.text);
@@ -65,10 +63,8 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
         quantiteGaz: quantiteGaz,
         prixGaz: prixGaz,
       );
-
       // Mettre à jour dans Firebase
       await context.read<FirebaseProviderV4>().modifierCellule(celluleFermee);
-
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -97,7 +93,6 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,8 +1,3 @@
-import '../models/variete.dart';
-import '../models/parcelle.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
-import '../theme/app_theme.dart';
 // Import des modèles individuels si nécessaire
 class Parcelle {
   int? id;

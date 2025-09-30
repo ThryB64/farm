@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,19 +14,12 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../theme/theme.dart';
-import '../widgets/glass.dart';
-import '../widgets/gradient_button.dart';
-
 class ParcelleFormScreen extends StatefulWidget {
   final Parcelle? parcelle;
-
   const ParcelleFormScreen({Key? key, this.parcelle}) : super(key: key);
-
   @override
   State<ParcelleFormScreen> createState() => _ParcelleFormScreenState();
 }
-
 class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
@@ -26,9 +27,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
   final _surfaceController = TextEditingController();
   final _anneeController = TextEditingController();
   final _descriptionController = TextEditingController();
-
   bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
@@ -42,7 +41,6 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       _anneeController.text = DateTime.now().year.toString();
     }
   }
-
   @override
   void dispose() {
     _nomController.dispose();
@@ -52,11 +50,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
     _descriptionController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.parcelle != null;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -237,7 +233,6 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       ),
     );
   }
-
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -288,16 +283,13 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       ],
     );
   }
-
   Future<void> _saveParcelle() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
     setState(() {
       _isLoading = true;
     });
-
     try {
       final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
       
@@ -313,7 +305,6 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
             : _descriptionController.text.trim(),
         dateCreation: widget.parcelle?.dateCreation ?? DateTime.now(),
       );
-
       if (widget.parcelle != null) {
         await provider.modifierParcelle(parcelle);
         if (mounted) {
@@ -335,7 +326,6 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
           );
         }
       }
-
       if (mounted) {
         Navigator.pop(context);
       }

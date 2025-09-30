@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,15 +14,10 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/cellule.dart';
-import '../models/chargement.dart';
 import 'fermer_cellule_screen.dart';
-
 class CelluleDetailsScreen extends StatelessWidget {
   final Cellule cellule;
-
   const CelluleDetailsScreen({Key? key, required this.cellule}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +55,6 @@ class CelluleDetailsScreen extends StatelessWidget {
               .where((c) => c.celluleId == (cellule.firebaseId ?? cellule.id.toString()))
               .toList();
           final parcelles = db.parcelles.toList();
-
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -70,7 +72,6 @@ class CelluleDetailsScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildInfoCard(BuildContext context) {
     return Card(
       child: Padding(
@@ -99,7 +100,6 @@ class CelluleDetailsScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildStatistiquesCard(BuildContext context, List<Chargement> chargements) {
     if (chargements.isEmpty) {
       return const Card(
@@ -109,14 +109,12 @@ class CelluleDetailsScreen extends StatelessWidget {
         ),
       );
     }
-
     // Calculer les statistiques par année
     final Map<int, List<Chargement>> chargementsParAnnee = {};
     for (var chargement in chargements) {
       final annee = chargement.dateChargement.year;
       chargementsParAnnee.putIfAbsent(annee, () => []).add(chargement);
     }
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -144,7 +142,6 @@ class CelluleDetailsScreen extends StatelessWidget {
                 (sum, c) => sum + c.humidite,
               ) / chargementsAnnee.length;
               final tauxRemplissage = (poidsTotalNorme / cellule.capacite) * 100;
-
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -167,7 +164,6 @@ class CelluleDetailsScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildChargementsCard(BuildContext context, List<Chargement> chargements, List<Parcelle> parcelles) {
     if (chargements.isEmpty) {
       return const Card(
@@ -177,7 +173,6 @@ class CelluleDetailsScreen extends StatelessWidget {
         ),
       );
     }
-
     // Grouper les chargements par année
     final Map<int, List<Chargement>> chargementsParAnnee = {};
     for (var chargement in chargements) {
@@ -187,10 +182,8 @@ class CelluleDetailsScreen extends StatelessWidget {
       }
       chargementsParAnnee[annee]!.add(chargement);
     }
-
     // Trier les années par ordre décroissant
     final annees = chargementsParAnnee.keys.toList()..sort((a, b) => b.compareTo(a));
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -205,7 +198,6 @@ class CelluleDetailsScreen extends StatelessWidget {
             ...annees.map((annee) {
               final chargementsAnnee = chargementsParAnnee[annee]!;
               chargementsAnnee.sort((a, b) => b.dateChargement.compareTo(a.dateChargement));
-
               final poidsTotalNet = chargementsAnnee.fold<double>(
                 0,
                 (sum, c) => sum + c.poidsNet,
@@ -218,7 +210,6 @@ class CelluleDetailsScreen extends StatelessWidget {
                 0,
                 (sum, c) => sum + c.humidite,
               ) / chargementsAnnee.length;
-
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -277,7 +268,6 @@ class CelluleDetailsScreen extends StatelessWidget {
                         dateCreation: DateTime.now(),
                       ),
                     );
-
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
@@ -333,7 +323,6 @@ class CelluleDetailsScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -349,11 +338,9 @@ class CelluleDetailsScreen extends StatelessWidget {
       ),
     );
   }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-
   String _formatDateTime(DateTime date) {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }

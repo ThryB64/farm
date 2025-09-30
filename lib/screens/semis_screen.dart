@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,20 +14,15 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/semis.dart';
 import 'semis_form_screen.dart';
 import 'varietes_screen.dart';
-
 class SemisScreen extends StatefulWidget {
   const SemisScreen({Key? key}) : super(key: key);
-
   @override
   State<SemisScreen> createState() => _SemisScreenState();
 }
-
 class _SemisScreenState extends State<SemisScreen> {
   int? _selectedYear;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,33 +48,27 @@ class _SemisScreenState extends State<SemisScreen> {
           final semis = provider.semis;
           final parcelles = provider.parcelles;
           final varietes = provider.varietes;
-
           if (semis.isEmpty) {
             return _buildEmptyState();
           }
-
           // Grouper les semis par année
           final Map<int, List<Semis>> semisParAnnee = {};
           for (var s in semis) {
             final annee = s.date.year;
             semisParAnnee.putIfAbsent(annee, () => []).add(s);
           }
-
           // Trier les années par ordre décroissant
           final List<int> annees = semisParAnnee.keys.toList()..sort((a, b) => b.compareTo(a));
-
           // Trier les semis par date décroissante dans chaque année
           semisParAnnee.forEach((annee, semis) {
             semis.sort((a, b) => b.date.compareTo(a.date));
           });
-
           // Si aucune année n'est sélectionnée, sélectionner la plus récente
           if (_selectedYear == null && annees.isNotEmpty) {
             _selectedYear = annees.first;
           } else if (_selectedYear == null) {
             _selectedYear = DateTime.now().year;
           }
-
           return Column(
             children: [
               // Sélecteur d'année
@@ -96,7 +93,6 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
     );
   }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -140,7 +136,6 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
     );
   }
-
   Widget _buildEmptyYearState() {
     return Center(
       child: Column(
@@ -162,7 +157,6 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
     );
   }
-
   Widget _buildYearSelector(List<int> annees) {
     return Container(
       margin: const EdgeInsets.all(16),
@@ -215,7 +209,6 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
     );
   }
-
   Widget _buildStatistics(List<Semis> semisAnnee, List<Parcelle> parcelles) {
     // Calculer le total des hectares semés
     double totalHectaresSemes = 0;
@@ -226,15 +219,12 @@ class _SemisScreenState extends State<SemisScreen> {
       totalHectaresSemes += hectaresSemes;
       totalPrixSemis += semis.prixSemis;
     }
-
     // Calculer le total des surfaces de toutes les parcelles
     double totalSurfaceParcelles = 0;
     for (final parcelle in parcelles) {
       totalSurfaceParcelles += parcelle.surface;
     }
-
     final hectaresRestants = totalSurfaceParcelles - totalHectaresSemes;
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(20),
@@ -297,7 +287,6 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
     );
   }
-
   Widget _buildStatCard(String title, String value, IconData icon, Color color, {bool fullWidth = false}) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -363,7 +352,6 @@ class _SemisScreenState extends State<SemisScreen> {
           ),
     );
   }
-
   Widget _buildSemisListWithStats(List<Semis> semisAnnee, List<Parcelle> parcelles, List<Variete> varietes) {
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -385,7 +373,6 @@ class _SemisScreenState extends State<SemisScreen> {
                               dateCreation: DateTime.now(),
                             ),
                           );
-
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
@@ -505,7 +492,6 @@ class _SemisScreenState extends State<SemisScreen> {
       ],
     );
   }
-
   Widget _buildSemisList(List<Semis> semisAnnee, List<Parcelle> parcelles, List<Variete> varietes) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -521,7 +507,6 @@ class _SemisScreenState extends State<SemisScreen> {
             dateCreation: DateTime.now(),
           ),
         );
-
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
@@ -640,7 +625,6 @@ class _SemisScreenState extends State<SemisScreen> {
       },
     );
   }
-
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
@@ -665,7 +649,6 @@ class _SemisScreenState extends State<SemisScreen> {
       ],
     );
   }
-
   Widget _buildVarietesInfo(Semis semis, List<Variete> varietes) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -708,22 +691,18 @@ class _SemisScreenState extends State<SemisScreen> {
       ],
     );
   }
-
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
-
   double _getTotalSurface(List<dynamic> varietesSurfaces) {
     return varietesSurfaces.fold<double>(0, (sum, v) => sum + v.surface);
   }
-
   void _addSemis() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SemisFormScreen()),
     );
   }
-
   void _editSemis(Semis semis) {
     Navigator.push(
       context,
@@ -732,7 +711,6 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
     );
   }
-
   void _showDeleteConfirmation(BuildContext context, Semis semis) {
     showDialog(
       context: context,

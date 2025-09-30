@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,23 +14,17 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/chargement.dart';
-import '../models/cellule.dart';
 import 'chargement_form_screen.dart';
-
 class ChargementsScreen extends StatefulWidget {
   const ChargementsScreen({Key? key}) : super(key: key);
-
   @override
   State<ChargementsScreen> createState() => _ChargementsScreenState();
 }
-
 class _ChargementsScreenState extends State<ChargementsScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   int? _selectedYear;
   bool _showDebugInfo = false;
-
   @override
   void initState() {
     super.initState();
@@ -41,13 +43,11 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
     
     _animationController.forward();
   }
-
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,37 +78,30 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           final chargements = provider.chargements;
           final cellules = provider.cellules;
           final parcelles = provider.parcelles;
-
           if (chargements.isEmpty) {
             return _buildEmptyState();
           }
-
           // Utiliser les maps optimisées du provider
           final cellulesById = provider.cellulesById;
           final parcellesById = provider.parcellesById;
-
           // Grouper les chargements par année
           final Map<int, List<Chargement>> chargementsParAnnee = {};
           for (var chargement in chargements) {
             final annee = chargement.dateChargement.year;
             chargementsParAnnee.putIfAbsent(annee, () => []).add(chargement);
           }
-
           // Trier les années par ordre décroissant
           final List<int> annees = chargementsParAnnee.keys.toList()..sort((a, b) => b.compareTo(a));
-
           // Trier les chargements par date décroissante dans chaque année
           chargementsParAnnee.forEach((annee, chargements) {
             chargements.sort((a, b) => b.dateChargement.compareTo(a.dateChargement));
           });
-
           // Si aucune année n'est sélectionnée, sélectionner la plus récente
           if (_selectedYear == null && annees.isNotEmpty) {
             _selectedYear = annees.first;
           } else if (_selectedYear == null) {
             _selectedYear = DateTime.now().year;
           }
-
           return FadeTransition(
             opacity: _fadeAnimation,
             child: Column(
@@ -142,7 +135,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       ),
     );
   }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -194,7 +186,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       ),
     );
   }
-
   Widget _buildHeader(Map<int, List<Chargement>> chargementsParAnnee) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -243,7 +234,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                 ),
     );
   }
-
   Widget _buildDebugInfo(List<Chargement> chargements, List<Cellule> cellules, List<Parcelle> parcelles) {
     // Utiliser les maps optimisées du provider
     final cellulesById = {for (final c in cellules) 
@@ -259,7 +249,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
     int chargementsAvecParcelle = 0;
     int chargementsSansCellule = 0;
     int chargementsSansParcelle = 0;
-
     for (final chargement in chargements) {
       if (cellulesById.containsKey(chargement.celluleId)) {
         chargementsAvecCellule++;
@@ -273,7 +262,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
         chargementsSansParcelle++;
       }
     }
-
     return Container(
       margin: const EdgeInsets.all(AppTheme.spacingM),
       child: ModernCard(
@@ -311,7 +299,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       ),
     );
   }
-
   Widget _buildDebugStat(String label, int avec, int sans, Color color) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingS),
@@ -352,7 +339,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       ),
     );
   }
-
   Widget _buildChargementsList(
     List<Chargement> chargements,
     Map<String, Cellule> cellulesById,
@@ -373,7 +359,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           print('  - Cellules disponibles: ${cellulesById.keys.toList()}');
           print('  - Cellules: ${cellulesById.values.map((c) => '${c.firebaseId ?? c.id}: ${c.reference}').toList()}');
         }
-
         return Container(
           margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
           child: ModernCard(
@@ -538,7 +523,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       },
     );
   }
-
   Widget _buildInfoChip(String text, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -573,11 +557,9 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       ),
     );
   }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-
   // Méthode de diagnostic des jointures
   void _debugJoins(BuildContext context, FirebaseProviderV4 provider) {
     final stats = provider.debugJoins();
@@ -620,7 +602,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       ),
     );
   }
-
   Future<void> _showDeleteConfirmation(Chargement chargement) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -643,7 +624,6 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
         ],
       ),
     );
-
     if (confirmed == true) {
       final key = chargement.firebaseId ?? chargement.id.toString();
       await context.read<FirebaseProviderV4>().supprimerChargement(key);

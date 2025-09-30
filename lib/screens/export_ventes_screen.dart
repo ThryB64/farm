@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -9,17 +17,13 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-
 class ExportVentesScreen extends StatefulWidget {
   const ExportVentesScreen({Key? key}) : super(key: key);
-
   @override
   State<ExportVentesScreen> createState() => _ExportVentesScreenState();
 }
-
 class _ExportVentesScreenState extends State<ExportVentesScreen> {
   int? _selectedYear;
-
   Future<void> _generatePDF() async {
     try {
       final db = Provider.of<FirebaseProviderV4>(context, listen: false);
@@ -39,14 +43,11 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
         }
         return;
       }
-
       final pdf = pw.Document();
-
       // Couleurs personnalisées (même que récolte)
       final mainColor = PdfColor.fromHex('#2E7D32'); // Vert foncé
       final secondaryColor = PdfColor.fromHex('#81C784'); // Vert clair
       final headerBgColor = PdfColor.fromHex('#E8F5E9'); // Vert très clair
-
       // Page de garde
       pdf.addPage(
         pw.Page(
@@ -93,14 +94,12 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
           },
         ),
       );
-
       // Variables pour le résumé final
       double poidsNetTotalGlobal = 0;
       double prixTotalGlobal = 0;
       double ecartTotalGlobal = 0;
       int currentPage = 1;
       int totalPages = 1;
-
       // Calculer le nombre total de pages
       final ventesEnCours = ventesAnnee.where((v) => !v.terminee).toList();
       final ventesTerminees = ventesAnnee.where((v) => v.terminee).toList();
@@ -108,7 +107,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
       totalPages += (ventesEnCours.length / 25).ceil();
       totalPages += (ventesTerminees.length / 25).ceil();
       totalPages += 2; // Pages de résumé
-
       // Page des ventes en cours
       if (ventesEnCours.isNotEmpty) {
         // Calculer les totaux pour les ventes en cours
@@ -246,7 +244,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
           ),
         );
       }
-
       // Page des ventes terminées
       if (ventesTerminees.isNotEmpty) {
         // Calculer les totaux pour les ventes terminées
@@ -387,7 +384,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
           ),
         );
       }
-
       // Page de résumé global
       pdf.addPage(
         pw.Page(
@@ -408,7 +404,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
             }
             final stockRestant = db.getStockRestantParAnnee(_selectedYear!);
             final chiffreAffaires = db.getChiffreAffairesParAnnee(_selectedYear!);
-
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
@@ -459,13 +454,11 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
           },
         ),
       );
-
       final bytes = await pdf.save();
       await Printing.sharePdf(
         bytes: bytes,
         filename: 'ventes_${_selectedYear}.pdf',
       );
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -482,7 +475,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
       }
     }
   }
-
   pw.Widget _buildHeaderCell(String text) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 10),
@@ -498,7 +490,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
       ),
     );
   }
-
   pw.Widget _buildDataCell(String text) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 10),
@@ -510,7 +501,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
       ),
     );
   }
-
   pw.Widget _buildInfoBox(String label, String value) {
     return pw.Column(
       children: [
@@ -532,7 +522,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
       ],
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -547,13 +536,11 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
               .toSet()
               .toList()
             ..sort((a, b) => b.compareTo(a));
-
           if (years.isEmpty) {
             return const Center(
               child: Text('Aucune donnée de vente disponible pour l\'export'),
             );
           }
-
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

@@ -1,3 +1,11 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
 import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
@@ -6,24 +14,17 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../models/traitement.dart';
-import '../models/produit.dart';
-import '../models/produit_traitement.dart';
-
 class TraitementFormScreen extends StatefulWidget {
   final Traitement? traitement;
   final int annee;
-
   const TraitementFormScreen({
     Key? key,
     this.traitement,
     required this.annee,
   }) : super(key: key);
-
   @override
   State<TraitementFormScreen> createState() => _TraitementFormScreenState();
 }
-
 class _TraitementFormScreenState extends State<TraitementFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
@@ -32,7 +33,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
   List<ProduitTraitement> _produits = [];
   
   bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
@@ -40,20 +40,17 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       _loadTraitementData();
     }
   }
-
   void _loadTraitementData() {
     final traitement = widget.traitement!;
     _notesController.text = traitement.notes ?? '';
     _selectedParcelleId = traitement.parcelleId;
     _produits = List.from(traitement.produits);
   }
-
   @override
   void dispose() {
     _notesController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -161,7 +158,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       ),
     );
   }
-
   Widget _buildProduitsSection() {
     return Card(
       child: Padding(
@@ -269,11 +265,9 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       ),
     );
   }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-
   void _addProduit() {
     Navigator.push(
       context,
@@ -289,7 +283,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       ),
     );
   }
-
   void _editProduit(int index) {
     Navigator.push(
       context,
@@ -309,13 +302,11 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       setState(() {});
     });
   }
-
   void _removeProduit(int index) {
     setState(() {
       _produits.removeAt(index);
     });
   }
-
   double _calculerCoutTotal() {
     if (_selectedParcelleId == null) return 0.0;
     
@@ -327,7 +318,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
     // Calculer le coût total en multipliant par la surface de la parcelle
     return _produits.fold(0.0, (sum, produit) => sum + (produit.coutTotal * parcelle.surface));
   }
-
   Future<void> _saveTraitement() async {
     if (!_formKey.currentState!.validate()) return;
     if (_produits.isEmpty) {
@@ -336,11 +326,9 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       );
       return;
     }
-
     setState(() {
       _isLoading = true;
     });
-
     try {
       final traitement = Traitement(
         id: widget.traitement?.id,
@@ -352,7 +340,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
         produits: _produits,
         coutTotal: _calculerCoutTotal(),
       );
-
       final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
       
       if (widget.traitement == null) {
@@ -360,7 +347,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       } else {
         await provider.modifierTraitement(traitement);
       }
-
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -385,7 +371,6 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       }
     }
   }
-
   Widget _buildParcelleInfo() {
     return Consumer<FirebaseProviderV4>(
       builder: (context, provider, child) {
@@ -439,31 +424,26 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
     );
   }
 }
-
 // Écran de sélection de produit
 class _ProduitSelectionScreen extends StatefulWidget {
   final int annee;
   final ProduitTraitement? produit;
   final Function(ProduitTraitement) onProduitSelected;
-
   const _ProduitSelectionScreen({
     Key? key,
     required this.annee,
     this.produit,
     required this.onProduitSelected,
   }) : super(key: key);
-
   @override
   State<_ProduitSelectionScreen> createState() => _ProduitSelectionScreenState();
 }
-
 class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
   Produit? _selectedProduit;
   final _quantiteController = TextEditingController();
   double _prixUnitaire = 0.0;
   DateTime _selectedDate = DateTime.now();
   int _selectedAnnee = DateTime.now().year;
-
   @override
   void initState() {
     super.initState();
@@ -471,7 +451,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       _loadProduitData();
     }
   }
-
   void _loadProduitData() {
     final produitTraitement = widget.produit!;
     _quantiteController.text = produitTraitement.quantite.toString();
@@ -479,7 +458,6 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
     _selectedDate = produitTraitement.date;
     _selectedAnnee = widget.annee;
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -647,13 +625,11 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       ),
     );
   }
-
   double _calculerCoutTotal() {
     final quantite = double.tryParse(_quantiteController.text) ?? 0.0;
     // Calculer le coût par hectare (quantité * prix unitaire)
     return quantite * _prixUnitaire;
   }
-
   Future<void> _selectDate() async {
     final date = await showDatePicker(
       context: context,
@@ -668,15 +644,12 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       });
     }
   }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-
   void _addProduit() {
     final quantite = double.tryParse(_quantiteController.text) ?? 0.0;
     if (quantite <= 0) return;
-
     final produitTraitement = ProduitTraitement(
       produitId: _selectedProduit!.firebaseId ?? _selectedProduit!.id.toString(),
       nomProduit: _selectedProduit!.nom,
@@ -686,9 +659,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       coutTotal: _calculerCoutTotal(),
       date: _selectedDate,
     );
-
     widget.onProduitSelected(produitTraitement);
     Navigator.pop(context);
   }
-
 }

@@ -1,9 +1,5 @@
-import '../models/variete.dart';
-import '../models/parcelle.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
-import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class ModernCard extends StatelessWidget {
   final Widget child;
