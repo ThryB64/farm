@@ -1,10 +1,14 @@
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
+import '../theme/app_theme.dart';
 import 'dart:async';
 import 'dart:html' as html;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
-import 'firebase_database_singleton.dart';
 
 class SecurityService {
   static final SecurityService _instance = SecurityService._internal();
@@ -31,7 +35,7 @@ class SecurityService {
   Future<bool> isUserAllowed(String uid) async {
     try {
       // Initialiser la base de données si nécessaire
-      final database = await FirebaseDatabaseSingleton.initialize();
+      final database = await FirebaseDatabase.instance;
       final snapshot = await database.ref('allowedUsers/$uid').get();
       return snapshot.exists && snapshot.value == true;
     } catch (e) {
@@ -88,7 +92,7 @@ class SecurityService {
   Future<void> _handleDeviceBinding(String uid, String deviceId) async {
     try {
       print('SecurityService: Handling device binding for $uid');
-      final database = await FirebaseDatabaseSingleton.initialize();
+      final database = await FirebaseDatabase.instance;
       final db = database.ref();
       final deviceRef = db.child('userDevices/$uid/primaryDeviceId');
       final snapshot = await deviceRef.get();
@@ -186,7 +190,7 @@ class SecurityService {
     if (user == null) return null;
 
     try {
-      final database = await FirebaseDatabaseSingleton.initialize();
+      final database = await FirebaseDatabase.instance;
       final snapshot = await database.ref('userDevices/${user.uid}').get();
       if (snapshot.exists) {
         return Map<String, dynamic>.from(snapshot.value as Map);
@@ -208,7 +212,7 @@ class SecurityService {
       }
       
       print('SecurityService: Resetting device binding for ${user.uid}');
-      final database = await FirebaseDatabaseSingleton.initialize();
+      final database = await FirebaseDatabase.instance;
       final db = database.ref();
       
       // Supprimer l'ancienne liaison

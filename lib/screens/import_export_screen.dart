@@ -1,19 +1,17 @@
-import 'dart:convert';
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
+import '../theme/app_theme.dart';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../theme/app_theme.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
-import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
-import '../models/variete.dart';
 import '../models/variete_surface.dart';
 
 class ImportExportScreen extends StatefulWidget {

@@ -1,9 +1,13 @@
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
-import '../models/parcelle.dart';
 import 'fermer_cellule_screen.dart';
 
 class CelluleDetailsScreen extends StatelessWidget {

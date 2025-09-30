@@ -1,11 +1,13 @@
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/firebase_provider_v4.dart';
 import '../services/security_service.dart';
-import '../theme/app_theme.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
 
 import 'parcelles_screen.dart';
 import 'cellules_screen.dart';
@@ -16,7 +18,6 @@ import 'traitements_screen.dart';
 import 'statistiques_screen.dart';
 import 'import_export_screen.dart';
 import 'exports_pdf_screen.dart';
-import '../main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -126,7 +127,11 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Éviter l'affichage "fantôme" si le provider n'est pas prêt
     if (!provider.ready) {
-      return const SplashScreen();
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
     }
 
     return Scaffold(

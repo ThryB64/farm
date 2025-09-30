@@ -1,5 +1,9 @@
-import 'package:flutter/material.dart';
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
+import 'package:flutter/material.dart';
 
 class ModernButton extends StatelessWidget {
   final String text;

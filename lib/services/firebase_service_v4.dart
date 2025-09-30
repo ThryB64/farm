@@ -1,3 +1,8 @@
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
+import '../theme/app_theme.dart';
 import 'dart:convert';
 import 'dart:html' as html;
 import 'package:firebase_database/firebase_database.dart';
@@ -6,15 +11,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/parcelle.dart';
+import '../models/variete.dart';
 import '../models/cellule.dart';
 import '../models/chargement.dart';
 import '../models/semis.dart';
-import '../models/variete.dart';
 import '../models/vente.dart';
 import '../models/traitement.dart';
 import '../models/produit.dart';
 import '../utils/firebase_normalize.dart';
-import 'firebase_database_singleton.dart';
 
 class FirebaseServiceV4 {
   static final FirebaseServiceV4 _instance = FirebaseServiceV4._internal();
@@ -49,7 +53,7 @@ class FirebaseServiceV4 {
       await _initializeAppCheck();
       
       // Utiliser le singleton Firebase Database
-      final database = await FirebaseDatabaseSingleton.initialize();
+      final database = await FirebaseDatabase.instance;
       print('FirebaseService V4: Using singleton database instance');
 
       // Vérifier l'authentification
@@ -104,7 +108,7 @@ class FirebaseServiceV4 {
   // Ajouter l'utilisateur comme membre de la ferme
   Future<void> _addUserToFarm(String uid) async {
     try {
-      final database = await FirebaseDatabaseSingleton.initialize();
+      final database = await FirebaseDatabase.instance;
       await database.ref('farmMembers/$_farmId/$uid').set(true);
       print('FirebaseService V4: User $uid added to farm $_farmId');
     } catch (e) {

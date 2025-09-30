@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../models/variete.dart';
+import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
-import 'export_screen.dart';
+import '../widgets/modern_buttons.dart';
+import '../theme/app_theme.dart';
+import 'package:flutter/material.dart';
 import 'export_ventes_screen.dart';
 import 'export_traitements_screen.dart';
 
@@ -27,7 +29,7 @@ class ExportsPdfScreen extends StatelessWidget {
               color: AppTheme.primary,
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ExportScreen()),
+                MaterialPageRoute(builder: (context) => const ExportTraitementsScreen()),
               ),
             ),
             const SizedBox(height: AppTheme.spacingM),

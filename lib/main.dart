@@ -1,3 +1,8 @@
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
+import '../theme/app_theme.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -8,7 +13,6 @@ import 'firebase_options.dart';
 
 // Services & providers
 import 'providers/firebase_provider_v4.dart';
-import 'services/security_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/secure_login_screen.dart';
 import 'theme/app_theme.dart';

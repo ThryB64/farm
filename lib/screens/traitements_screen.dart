@@ -1,11 +1,12 @@
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../models/traitement.dart';
-import '../models/parcelle.dart';
-import '../theme/app_theme.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
 import 'traitement_form_screen.dart';
 import 'produits_screen.dart';
 import 'traitement_raccourci_screen.dart';
