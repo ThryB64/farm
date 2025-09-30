@@ -13,6 +13,14 @@ analyzer:
     unused_local_variable: error
     dead_code: error
     
+    # Règles pour empêcher les styles inline
+    avoid_colors_outside_theme: error
+    avoid_inline_textstyle: error
+    avoid_inline_edgeinsets: error
+    avoid_inline_borderradius: error
+    avoid_inline_boxshadow: error
+    avoid_duration_literals: error
+    
     # Ignorer certains avertissements non critiques
     prefer_const_constructors: ignore
     prefer_const_literals_to_create_immutables: ignore

@@ -642,4 +642,139 @@ class AppTheme {
     borderRadius: BorderRadius.circular(radiusMedium),
     border: Border.all(color: error.withOpacity(0.3)),
   );
+  
+  // ========================================
+  // HELPERS POUR FACILITER L'USAGE
+  // ========================================
+  
+  /// Helper pour créer des EdgeInsets avec les espacements standard
+  static EdgeInsets padding({double? all, double? horizontal, double? vertical}) {
+    if (all != null) {
+      return EdgeInsets.all(all);
+    }
+    return EdgeInsets.symmetric(
+      horizontal: horizontal ?? 0,
+      vertical: vertical ?? 0,
+    );
+  }
+  
+  /// Helper pour créer des SizedBox avec les espacements standard
+  static Widget gap({double? height, double? width}) {
+    return SizedBox(height: height, width: width);
+  }
+  
+  /// Helper pour créer des BorderRadius avec les rayons standard
+  static BorderRadius radius(double radius) {
+    return BorderRadius.circular(radius);
+  }
+  
+  /// Helper pour créer des BoxDecoration avec les styles standard
+  static BoxDecoration createCardDecoration({
+    Color? color,
+    double? borderRadius,
+    List<BoxShadow>? shadow,
+    Color? borderColor,
+    double? borderWidth,
+  }) {
+    return BoxDecoration(
+      color: color ?? background,
+      borderRadius: BorderRadius.circular(borderRadius ?? radiusMedium),
+      boxShadow: shadow ?? cardShadow,
+      border: borderColor != null 
+        ? Border.all(color: borderColor, width: borderWidth ?? 1)
+        : null,
+    );
+  }
+  
+  /// Helper pour créer des ButtonStyle avec les styles standard
+  static ButtonStyle buttonStyle({
+    Color? backgroundColor,
+    Color? foregroundColor,
+    double? borderRadius,
+    EdgeInsets? padding,
+  }) {
+    return ElevatedButton.styleFrom(
+      backgroundColor: backgroundColor ?? primary,
+      foregroundColor: foregroundColor ?? Colors.white,
+      elevation: 2,
+      padding: padding ?? const EdgeInsets.symmetric(
+        horizontal: spacingL,
+        vertical: spacingM,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius ?? radiusMedium),
+      ),
+      textStyle: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+  
+  /// Helper pour créer des InputDecoration avec les styles standard
+  static InputDecoration createInputDecoration({
+    String? hintText,
+    String? labelText,
+    IconData? prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      filled: true,
+      fillColor: surface,
+      hintText: hintText,
+      labelText: labelText,
+      prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: primary) : null,
+      suffixIcon: suffixIcon,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusMedium),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusMedium),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusMedium),
+        borderSide: const BorderSide(color: primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radiusMedium),
+        borderSide: const BorderSide(color: error, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: spacingM,
+        vertical: spacingM,
+      ),
+      labelStyle: const TextStyle(
+        color: textSecondary,
+        fontSize: 16,
+      ),
+      hintStyle: const TextStyle(
+        color: textLight,
+        fontSize: 16,
+      ),
+    );
+  }
+}
+
+// ========================================
+// EXTENSIONS BUILD CONTEXT (OPTIONNEL)
+// ========================================
+
+extension AppThemeExtension on BuildContext {
+  /// Accès rapide aux couleurs du thème
+  ColorScheme get colors => Theme.of(this).colorScheme;
+  
+  /// Accès rapide aux textes du thème
+  TextTheme get text => Theme.of(this).textTheme;
+  
+  /// Helper pour créer des espacements
+  EdgeInsets get paddingM => const EdgeInsets.all(AppTheme.spacingM);
+  EdgeInsets get paddingL => const EdgeInsets.all(AppTheme.spacingL);
+  EdgeInsets get paddingS => const EdgeInsets.all(AppTheme.spacingS);
+  
+  /// Helper pour créer des SizedBox
+  Widget get gapM => const SizedBox(height: AppTheme.spacingM);
+  Widget get gapL => const SizedBox(height: AppTheme.spacingL);
+  Widget get gapS => const SizedBox(height: AppTheme.spacingS);
 }
