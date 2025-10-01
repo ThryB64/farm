@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../models/chargement.dart';
 import '../models/parcelle.dart';
-import '../models/cellule.dart';
 import '../models/semis.dart';
-import '../models/variete.dart';
 import '../theme/app_theme.dart';
 
 class ExportRecoltesScreen extends StatefulWidget {
@@ -26,6 +24,7 @@ class _ExportRecoltesScreenState extends State<ExportRecoltesScreen> {
       final db = Provider.of<FirebaseProviderV4>(context, listen: false);
       final chargements = db.chargements;
       final parcelles = db.parcelles;
+      final semis = db.semis;
       
       final chargementsAnnee = chargements
           .where((c) => c.dateChargement.year == _selectedYear)
@@ -646,7 +645,6 @@ class _ExportRecoltesScreenState extends State<ExportRecoltesScreen> {
     return AppThemePageBuilder.buildScrollablePage(
       context: context,
       title: 'Export PDF',
-      backgroundColor: Colors.orange,
       children: [
         Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -705,6 +703,7 @@ class _ExportRecoltesScreenState extends State<ExportRecoltesScreen> {
           );
         },
       ),
-    ];
+    ],
+    );
   }
 }

@@ -28,8 +28,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
     try {
       final db = Provider.of<FirebaseProviderV4>(context, listen: false);
       final ventes = db.ventes;
-      final parcelles = db.parcelles;
-      final semis = db.semis;
       
       final ventesAnnee = ventes
           .where((v) => v.annee == _selectedYear)
@@ -95,9 +93,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
         ),
       );
       // Variables pour le résumé final
-      double poidsNetTotalGlobal = 0;
-      double prixTotalGlobal = 0;
-      double ecartTotalGlobal = 0;
       int currentPage = 1;
       int totalPages = 1;
       // Calculer le nombre total de pages
@@ -527,8 +522,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
     return AppThemePageBuilder.buildScrollablePage(
       context: context,
       title: 'Export Ventes PDF',
-      backgroundColor: AppTheme.warning,
-      foregroundColor: AppTheme.onPrimary(context),
       children: [
         Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -584,6 +577,7 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
           );
         },
       ),
-    ];
+    ],
+    );
   }
 }
