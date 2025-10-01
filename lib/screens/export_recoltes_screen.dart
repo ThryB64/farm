@@ -9,6 +9,7 @@ import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
+import '../theme/app_theme.dart';
 
 class ExportRecoltesScreen extends StatefulWidget {
   const ExportRecoltesScreen({Key? key}) : super(key: key);
@@ -25,9 +26,6 @@ class _ExportRecoltesScreenState extends State<ExportRecoltesScreen> {
       final db = Provider.of<FirebaseProviderV4>(context, listen: false);
       final chargements = db.chargements;
       final parcelles = db.parcelles;
-      final cellules = db.cellules;
-      final semis = db.semis;
-      final varietes = db.varietes;
       
       final chargementsAnnee = chargements
           .where((c) => c.dateChargement.year == _selectedYear)

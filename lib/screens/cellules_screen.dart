@@ -1,12 +1,8 @@
 import '../models/cellule.dart';
-import '../models/chargement.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
-import '../providers/theme_provider.dart';
 import 'cellule_form_screen.dart';
 import 'cellule_details_screen.dart';
 import 'fermer_cellule_screen.dart';
@@ -211,14 +207,15 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
     final poidsActuel = chargementsCellule.fold<double>(0, (sum, c) => sum + c.poidsNet);
     final tauxRemplissage = (poidsActuel / capaciteMax * 100).clamp(0, 100);
 
-    return ModernCard(
+    return InkWell(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => CelluleDetailsScreen(cellule: cellule),
         ),
       ),
-      child: Column(
+      child: Card(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -241,7 +238,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      cellule.nom,
+                      cellule.nom ?? 'Sans nom',
                       style: AppTheme.textTheme(context).titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary(context),
@@ -318,6 +315,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
             ),
           ],
         ],
+        ),
       ),
     );
   }

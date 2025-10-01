@@ -1,15 +1,6 @@
-import '../models/variete_surface.dart';
-import '../models/produit_traitement.dart';
-import '../models/produit.dart';
-import '../models/traitement.dart';
-import '../models/vente.dart';
-import '../models/semis.dart';
 import '../models/chargement.dart';
 import '../models/cellule.dart';
-import '../models/variete.dart';
 import '../models/parcelle.dart';
-import '../widgets/modern_card.dart';
-import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -69,6 +60,7 @@ class CelluleDetailsScreen extends StatelessWidget {
           );
         },
       ),
+    ],
     );
   }
   Widget _buildInfoCard(BuildContext context) {
@@ -319,7 +311,7 @@ class CelluleDetailsScreen extends StatelessWidget {
             }).toList(),
           ],
         ),
-      ],
+      ),
     );
   }
   Widget _buildInfoRow(String label, String value) {

@@ -50,10 +50,11 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: 'Chargements',
-      actions: [
+    return Scaffold(
+      body: AppThemePageBuilder.buildScrollablePage(
+        context: context,
+        title: 'Chargements',
+        actions: [
         Consumer<FirebaseProviderV4>(
           builder: (context, provider, child) => IconButton(
             onPressed: () => _debugJoins(context, provider),
