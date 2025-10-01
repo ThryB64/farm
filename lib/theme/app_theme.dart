@@ -1097,3 +1097,367 @@ extension AppThemeContext on BuildContext {
   Widget get gapXlW => const SizedBox(width: AppTheme.spaceXl);
   Widget get gapXxlW => const SizedBox(width: AppTheme.spaceXxl);
 }
+
+// ========================================
+// MÉTHODES CENTRALISÉES POUR DESIGN UNIFORME
+// ========================================
+
+/// Méthodes centralisées pour design uniforme
+class AppThemePageBuilder {
+  /// Structure standardisée pour toutes les pages
+  static Widget buildStandardPage({
+    required BuildContext context,
+    required String title,
+    required Widget body,
+    List<Widget>? actions,
+    Widget? floatingActionButton,
+    bool showBackButton = true,
+  }) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary(context),
+        elevation: 0,
+        automaticallyImplyLeading: showBackButton,
+        actions: actions,
+      ),
+      body: Container(
+        decoration: AppTheme.appBackground(context),
+        child: SafeArea(
+          child: body,
+        ),
+      ),
+      floatingActionButton: floatingActionButton,
+    );
+  }
+
+  /// Structure standardisée pour les pages avec contenu scrollable (style page d'accueil)
+  static Widget buildScrollablePage({
+    required BuildContext context,
+    required String title,
+    required List<Widget> children,
+    List<Widget>? actions,
+    Widget? floatingActionButton,
+    bool showBackButton = true,
+    EdgeInsets? padding,
+  }) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary(context),
+        elevation: 0,
+        automaticallyImplyLeading: showBackButton,
+        actions: actions,
+      ),
+      body: Container(
+        decoration: AppTheme.appBackground(context),
+        child: SafeArea(
+          child: ListView(
+            padding: padding ?? const EdgeInsets.fromLTRB(18, 18, 18, 100),
+            children: children,
+          ),
+        ),
+      ),
+      floatingActionButton: floatingActionButton,
+    );
+  }
+
+  /// Structure standardisée pour les pages avec contenu en colonne (style page d'accueil)
+  static Widget buildColumnPage({
+    required BuildContext context,
+    required String title,
+    required List<Widget> children,
+    List<Widget>? actions,
+    Widget? floatingActionButton,
+    bool showBackButton = true,
+    EdgeInsets? padding,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.stretch,
+  }) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary(context),
+        elevation: 0,
+        automaticallyImplyLeading: showBackButton,
+        actions: actions,
+      ),
+      body: Container(
+        decoration: AppTheme.appBackground(context),
+        child: SafeArea(
+          child: Padding(
+            padding: padding ?? const EdgeInsets.all(18),
+            child: Column(
+              mainAxisAlignment: mainAxisAlignment,
+              crossAxisAlignment: crossAxisAlignment,
+              children: children,
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: floatingActionButton,
+    );
+  }
+
+  /// Section d'en-tête standardisée
+  static Widget buildPageHeader({
+    required BuildContext context,
+    required String title,
+    String? subtitle,
+    IconData? icon,
+    Color? iconColor,
+    Widget? trailing,
+  }) {
+    return AppTheme.glass(
+      context,
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Container(
+              padding: AppTheme.padding(AppTheme.spacingS),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    (iconColor ?? AppTheme.cornGold).withOpacity(0.8),
+                    (iconColor ?? AppTheme.cornGold).withOpacity(0.6),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                boxShadow: [
+                  BoxShadow(
+                    color: (iconColor ?? AppTheme.cornGold).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spaceMd),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary(context),
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: AppTheme.spaceXs),
+                  Text(
+                    subtitle,
+                    style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                      color: AppTheme.textSecondary(context),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (trailing != null) trailing,
+        ],
+      ),
+    );
+  }
+
+  /// Section de contenu standardisée avec effet de verre
+  static Widget buildContentSection({
+    required BuildContext context,
+    required Widget child,
+    EdgeInsets? padding,
+    Color? gradientColor,
+  }) {
+    return AppTheme.glass(
+      context,
+      gradient: gradientColor != null
+          ? LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                gradientColor.withOpacity(0.2),
+                gradientColor.withOpacity(0.1),
+              ],
+            )
+          : null,
+      child: Padding(
+        padding: padding ?? AppTheme.padding(AppTheme.spacingM),
+        child: child,
+      ),
+    );
+  }
+
+  /// Bouton d'action standardisé
+  static Widget buildActionButton({
+    required BuildContext context,
+    required String text,
+    required VoidCallback onPressed,
+    IconData? icon,
+    Color? backgroundColor,
+    Color? textColor,
+    bool isOutlined = false,
+  }) {
+    if (isOutlined) {
+      return ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: icon != null ? Icon(icon) : const SizedBox.shrink(),
+        label: Text(text),
+        style: ElevatedButton.styleFrom(
+          foregroundColor: backgroundColor ?? AppTheme.primary(context),
+          side: BorderSide(color: backgroundColor ?? AppTheme.primary(context)),
+          backgroundColor: Colors.transparent,
+        ),
+      );
+    } else {
+      return ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: icon != null ? Icon(icon) : const SizedBox.shrink(),
+        label: Text(text),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor ?? AppTheme.primary(context),
+          foregroundColor: textColor ?? AppTheme.onPrimary(context),
+        ),
+      );
+    }
+  }
+
+  /// Liste d'éléments standardisée
+  static Widget buildItemList({
+    required BuildContext context,
+    required List<Widget> items,
+    EdgeInsets? padding,
+  }) {
+    return Column(
+      children: items.map((item) => Padding(
+        padding: const EdgeInsets.only(bottom: AppTheme.spaceSm),
+        child: item,
+      )).toList(),
+    );
+  }
+
+  /// Message d'état vide standardisé (style page d'accueil)
+  static Widget buildEmptyState({
+    required BuildContext context,
+    required String message,
+    IconData? icon,
+    String? actionText,
+    VoidCallback? onAction,
+  }) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (icon != null) ...[
+            Icon(
+              icon,
+              size: 64,
+              color: AppTheme.textSecondary(context),
+            ),
+            const SizedBox(height: AppTheme.spaceLg),
+          ],
+          Text(
+            message,
+            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
+              color: AppTheme.textSecondary(context),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (actionText != null && onAction != null) ...[
+            const SizedBox(height: AppTheme.spaceLg),
+            buildActionButton(
+              context: context,
+              text: actionText,
+              onPressed: onAction,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Section avec effet de verre (style page d'accueil)
+  static Widget buildGlassSection({
+    required BuildContext context,
+    required Widget child,
+    EdgeInsets? padding,
+    Color? gradientColor,
+  }) {
+    return AppTheme.glass(
+      context,
+      gradient: gradientColor != null
+          ? LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                gradientColor.withOpacity(0.2),
+                gradientColor.withOpacity(0.1),
+              ],
+            )
+          : null,
+      child: Padding(
+        padding: padding ?? AppTheme.padding(AppTheme.spacingM),
+        child: child,
+      ),
+    );
+  }
+
+  /// En-tête de section avec icône et titre (style page d'accueil)
+  static Widget buildSectionHeader({
+    required BuildContext context,
+    required String title,
+    String? subtitle,
+    IconData? icon,
+    Color? iconColor,
+    Widget? trailing,
+  }) {
+    return AppTheme.sectionHeader(
+      context,
+      title,
+      subtitle: subtitle,
+      trailing: trailing,
+    );
+  }
+
+  /// Carte de statistique (style page d'accueil)
+  static Widget buildStatCard({
+    required BuildContext context,
+    required String label,
+    required String value,
+    IconData? icon,
+    Color? color,
+  }) {
+    return AppTheme.statChip(
+      context,
+      '$label: $value',
+      icon: icon,
+      color: color,
+    );
+  }
+
+  /// Icône avec effet de halo (style page d'accueil)
+  static Widget buildGlowIcon({
+    required BuildContext context,
+    required IconData icon,
+    Color? color,
+    double? size,
+  }) {
+    return AppTheme.glowIcon(
+      context,
+      icon,
+      color: color,
+      size: size ?? 24.0,
+    );
+  }
+}

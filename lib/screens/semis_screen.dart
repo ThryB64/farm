@@ -25,32 +25,28 @@ class _SemisScreenState extends State<SemisScreen> {
   int? _selectedYear;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background(context),
-      appBar: AppBar(
-        title: const Text('Semis'),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.eco),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const VarietesScreen()),
-            ),
-            tooltip: 'Gérer les variétés',
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: 'Semis',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.eco),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VarietesScreen()),
           ),
-        ],
-      ),
-      body: Consumer<FirebaseProviderV4>(
-        builder: (context, provider, child) {
-          final semis = provider.semis;
-          final parcelles = provider.parcelles;
-          final varietes = provider.varietes;
-          if (semis.isEmpty) {
-            return _buildEmptyState();
-          }
+          tooltip: 'Gérer les variétés',
+        ),
+      ],
+      children: [
+        Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
+            final semis = provider.semis;
+            final parcelles = provider.parcelles;
+            final varietes = provider.varietes;
+            if (semis.isEmpty) {
+              return _buildEmptyState();
+            }
           // Grouper les semis par année
           final Map<int, List<Semis>> semisParAnnee = {};
           for (var s in semis) {

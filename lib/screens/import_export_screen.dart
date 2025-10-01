@@ -52,20 +52,13 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.surface(context),
-      appBar: AppBar(
-        title: const Text('Import/Export'),
-        backgroundColor: AppTheme.accent(context),
-        foregroundColor: AppTheme.onPrimary(context),
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          padding: AppTheme.padding(AppTheme.spacingM),
-        child: Column(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: 'Import/Export',
+      children: [
+        FadeTransition(
+          opacity: _fadeAnimation,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
           children: [
               _buildDataOverview(),

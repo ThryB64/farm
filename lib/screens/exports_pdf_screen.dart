@@ -21,15 +21,10 @@ class ExportsPdfScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Exports PDF'),
-        backgroundColor: AppTheme.primary(context),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingM),
-        child: Column(
-          children: [
+    return AppThemePageBuilder.buildColumnPage(
+      context: context,
+      title: 'Exports PDF',
+      children: [
             // Export PDF Récolte
             MenuCard(
               title: 'Export PDF Récolte',
