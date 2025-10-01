@@ -241,7 +241,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      cellule.nom ?? 'Cellule sans nom',
+                      cellule.nom,
                       style: AppTheme.textTheme(context).titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary(context),

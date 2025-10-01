@@ -122,7 +122,7 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              provider.supprimerProduit(produit.firebaseId ?? produit.id.toString());
+              provider.supprimerProduit(produit);
             },
             child: const Text('Supprimer'),
           ),

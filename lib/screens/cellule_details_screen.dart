@@ -20,36 +20,35 @@ class CelluleDetailsScreen extends StatelessWidget {
   const CelluleDetailsScreen({Key? key, required this.cellule}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(cellule.reference),
-        centerTitle: true,
-        actions: [
-          Consumer<FirebaseProviderV4>(
-            builder: (context, provider, child) {
-              return IconButton(
-                icon: Icon(cellule.fermee ? Icons.lock_open : Icons.lock),
-                onPressed: () {
-                  final key = cellule.firebaseId ?? cellule.id.toString();
-                  if (cellule.fermee) {
-                    provider.ouvrirCellule(key);
-                  } else {
-                    // Rediriger vers l'écran de fermeture pour saisir les données de gaz
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FermerCelluleScreen(cellule: cellule),
-                      ),
-                    );
-                  }
-                },
-                tooltip: cellule.fermee ? 'Ouvrir la cellule' : 'Fermer la cellule',
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer<FirebaseProviderV4>(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: cellule.reference,
+      actions: [
+        Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
+            return IconButton(
+              icon: Icon(cellule.fermee ? Icons.lock_open : Icons.lock),
+              onPressed: () {
+                final key = cellule.firebaseId ?? cellule.id.toString();
+                if (cellule.fermee) {
+                  provider.ouvrirCellule(key);
+                } else {
+                  // Rediriger vers l'écran de fermeture pour saisir les données de gaz
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FermerCelluleScreen(cellule: cellule),
+                    ),
+                  );
+                }
+              },
+              tooltip: cellule.fermee ? 'Ouvrir la cellule' : 'Fermer la cellule',
+            );
+          },
+        ),
+      ],
+      children: [
+        Consumer<FirebaseProviderV4>(
         builder: (context, db, child) {
           final chargements = db.chargements
               .where((c) => c.celluleId == (cellule.firebaseId ?? cellule.id.toString()))
@@ -320,7 +319,7 @@ class CelluleDetailsScreen extends StatelessWidget {
             }).toList(),
           ],
         ),
-      ),
+      ],
     );
   }
   Widget _buildInfoRow(String label, String value) {

@@ -524,13 +524,13 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Export Ventes PDF'),
-        backgroundColor: AppTheme.warning,
-        foregroundColor: AppTheme.onPrimary(context),
-      ),
-      body: Consumer<FirebaseProviderV4>(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: 'Export Ventes PDF',
+      backgroundColor: AppTheme.warning,
+      foregroundColor: AppTheme.onPrimary(context),
+      children: [
+        Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final years = provider.ventes
               .map((v) => v.annee)
@@ -584,6 +584,6 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
           );
         },
       ),
-    );
+    ];
   }
 }

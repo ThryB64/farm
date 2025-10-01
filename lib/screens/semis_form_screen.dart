@@ -463,17 +463,17 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.semis == null ? 'Nouveau semis' : 'Modifier le semis'),
-        actions: [
-          TextButton(
-            onPressed: _saveSemis,
-            child: const Text('Sauvegarder'),
-          ),
-        ],
-      ),
-      body: Form(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: widget.semis == null ? 'Nouveau semis' : 'Modifier le semis',
+      actions: [
+        TextButton(
+          onPressed: _saveSemis,
+          child: const Text('Sauvegarder'),
+        ),
+      ],
+      children: [
+        Form(
               key: _formKey,
         child: SingleChildScrollView(
           padding: AppTheme.padding(AppTheme.spacingM),
@@ -709,7 +709,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                 ],
               ),
             ),
-      ),
+      ],
     );
   }
   bool _canSave() {

@@ -134,12 +134,12 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.chargement == null ? 'Nouveau chargement' : 'Modifier le chargement'),
-        backgroundColor: AppTheme.primary(context),
-      ),
-      body: Consumer<FirebaseProviderV4>(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: widget.chargement == null ? 'Nouveau chargement' : 'Modifier le chargement',
+      backgroundColor: AppTheme.primary(context),
+      children: [
+        Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           // Créer la liste des années à partir des chargements existants
           Set<int> anneesSet = provider.chargements
@@ -408,7 +408,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
           );
         },
       ),
-    );
+    ];
   }
   void _calculerPoidsNet(String _) {
     if (_poidsPleinController.text.isNotEmpty && _poidsVideController.text.isNotEmpty) {

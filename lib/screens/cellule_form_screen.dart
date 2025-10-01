@@ -54,17 +54,13 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background(context),
-      appBar: AppBar(
-        title: Text(
-          widget.cellule == null ? 'Nouvelle cellule' : 'Modifier la cellule',
-          style: AppTheme.textTheme(context).headlineSmall?.copyWith(color: AppTheme.onPrimary(context)),
-        ),
-        backgroundColor: AppTheme.primary(context),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: widget.cellule == null ? 'Nouvelle cellule' : 'Modifier la cellule',
+      backgroundColor: AppTheme.primary(context),
+      foregroundColor: AppTheme.onPrimary(context),
+      children: [
+        SingleChildScrollView(
         padding: AppTheme.padding(AppTheme.spacingL),
         child: Form(
           key: _formKey,
@@ -239,7 +235,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 } 

@@ -95,17 +95,13 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background(context),
-      appBar: AppBar(
-        title: Text(
-          'Fermer la cellule',
-          style: AppTheme.textTheme(context).headlineSmall?.copyWith(color: AppTheme.onPrimary(context)),
-        ),
-        backgroundColor: AppTheme.primary(context),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: 'Fermer la cellule',
+      backgroundColor: AppTheme.primary(context),
+      foregroundColor: AppTheme.onPrimary(context),
+      children: [
+        SingleChildScrollView(
         padding: AppTheme.padding(AppTheme.spacingL),
         child: Form(
           key: _formKey,
@@ -257,7 +253,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

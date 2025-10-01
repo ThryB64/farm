@@ -36,18 +36,18 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Statistiques'),
-        backgroundColor: AppTheme.primary(context),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Vue générale'),
-            Tab(text: 'Détail par parcelle'),
-            Tab(text: 'Analyse variétés'),
-          ],
-          onTap: (index) {
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: 'Statistiques',
+      backgroundColor: AppTheme.primary(context),
+      bottom: TabBar(
+        controller: _tabController,
+        tabs: const [
+          Tab(text: 'Vue générale'),
+          Tab(text: 'Détail par parcelle'),
+          Tab(text: 'Analyse variétés'),
+        ],
+        onTap: (index) {
             if (index != 1) {
               setState(() {
                 _selectedParcelleId = null;
@@ -231,7 +231,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           );
         },
       ),
-    );
+    ];
   }
   Widget _buildEvolutionRendementChart(Map<int, Map<String, dynamic>> statsParAnnee) {
     final annees = statsParAnnee.keys.toList()..sort();

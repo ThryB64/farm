@@ -1,6 +1,13 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
 import '../models/semis.dart';
-import '../models/parcelle.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
 import '../models/variete.dart';
+import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
@@ -9,37 +16,13 @@ import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import 'semis_form_screen.dart';
 import 'varietes_screen.dart';
-
 class SemisScreen extends StatefulWidget {
   const SemisScreen({Key? key}) : super(key: key);
-
   @override
   State<SemisScreen> createState() => _SemisScreenState();
 }
-
-class _SemisScreenState extends State<SemisScreen> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
+class _SemisScreenState extends State<SemisScreen> {
+  int? _selectedYear;
   @override
   Widget build(BuildContext context) {
     return AppThemePageBuilder.buildScrollablePage(
@@ -64,251 +47,678 @@ class _SemisScreenState extends State<SemisScreen> with TickerProviderStateMixin
             if (semis.isEmpty) {
               return _buildEmptyState();
             }
-
-            // Utiliser les maps optimisées du provider
-            final parcellesById = provider.parcellesById;
-            final varietesById = provider.varietesById;
-
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: Column(
-                children: semis.map((semis) => _buildSemisCard(
-                  context,
-                  semis,
-                  parcellesById,
-                  varietesById,
-                )).toList(),
+          // Grouper les semis par année
+          final Map<int, List<Semis>> semisParAnnee = {};
+          for (var s in semis) {
+            final annee = s.date.year;
+            semisParAnnee.putIfAbsent(annee, () => []).add(s);
+          }
+          // Trier les années par ordre décroissant
+          final List<int> annees = semisParAnnee.keys.toList()..sort((a, b) => b.compareTo(a));
+          // Trier les semis par date décroissante dans chaque année
+          semisParAnnee.forEach((annee, semis) {
+            semis.sort((a, b) => b.date.compareTo(a.date));
+          });
+          // Si aucune année n'est sélectionnée, sélectionner la plus récente
+          if (_selectedYear == null && annees.isNotEmpty) {
+            _selectedYear = annees.first;
+          } else if (_selectedYear == null) {
+            _selectedYear = DateTime.now().year;
+          }
+          return Column(
+            children: [
+              // Sélecteur d'année
+              _buildYearSelector(annees),
+              
+              // Liste des semis avec résumé qui suit le scroll
+              Expanded(
+                child: _selectedYear == null
+                    ? _buildEmptyYearState()
+                    : _buildSemisListWithStats(semisParAnnee[_selectedYear]!, parcelles, varietes),
               ),
-            );
-          },
-        ),
-      ],
+            ],
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SemisFormScreen(),
-          ),
-        ),
+        onPressed: _addSemis,
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
         icon: const Icon(Icons.add),
         label: const Text('Nouveau semis'),
       ),
     );
   }
-
   Widget _buildEmptyState() {
-    return AppThemePageBuilder.buildEmptyState(
-      context: context,
-      message: 'Aucun semis enregistré\nCommencez par ajouter votre premier semis',
-      icon: Icons.agriculture,
-      actionText: 'Ajouter un semis',
-      onAction: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const SemisFormScreen(),
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: AppTheme.padding(AppTheme.spacingL),
+            decoration: BoxDecoration(
+              color: AppTheme.primary(context).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.grass,
+              size: 64,
+              color: AppTheme.primary(context),
+            ),
+          ),
+          SizedBox(height: AppTheme.spacingL),
+          Text(
+            'Aucun semis enregistré',
+            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+              color: AppTheme.textPrimary(context),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: AppTheme.spacingS),
+          Text(
+            'Commencez par ajouter votre premier semis',
+            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
+              color: AppTheme.textSecondary(context),
+            ),
+          ),
+          SizedBox(height: AppTheme.spacingXL),
+          ModernButton(
+            text: 'Ajouter un semis',
+            icon: Icons.add,
+            onPressed: _addSemis,
+            backgroundColor: AppTheme.primary(context),
+          ),
+        ],
       ),
     );
   }
-
-  Widget _buildSemisCard(
-    BuildContext context,
-    Semis semis,
-    Map<String, Parcelle> parcellesById,
-    Map<String, Variete> varietesById,
-  ) {
-    final parcelle = parcellesById[semis.parcelleId];
-    final variete = varietesById[semis.id.toString()];
-
+  Widget _buildEmptyYearState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.calendar_today,
+            size: 48,
+            color: AppTheme.textLight(context),
+          ),
+          SizedBox(height: AppTheme.spacingM),
+          Text(
+            'Sélectionnez une année',
+            style: AppTheme.textTheme(context).headlineSmall?.copyWith(
+              color: AppTheme.textSecondary(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildYearSelector(List<int> annees) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
-      child: ModernCard(
-        child: Padding(
-          padding: AppTheme.padding(AppTheme.spacingM),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Semis #${semis.id}',
-                          style: AppTheme.textTheme(context).titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary(context),
-                          ),
-                        ),
-                        const SizedBox(height: AppTheme.spaceXs),
-                        Text(
-                          '${semis.date.day}/${semis.date.month}/${semis.date.year}',
-                          style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                            color: AppTheme.textSecondary(context),
-                          ),
-                        ),
-                      ],
-                    ),
+      margin: AppTheme.padding(AppTheme.spacingM),
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
+      decoration: BoxDecoration(
+        color: AppTheme.surface(context),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        border: Border.all(color: AppTheme.border(context)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.calendar_today, color: AppTheme.primary(context)),
+          SizedBox(width: AppTheme.spacingS),
+          Text(
+            'Année:',
+            style: AppTheme.textTheme(context).titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(width: AppTheme.spacingM),
+          Expanded(
+            child: DropdownButton<int>(
+                  value: _selectedYear,
+              isExpanded: true,
+              underline: const SizedBox(),
+                  items: annees.map((annee) {
+                    return DropdownMenuItem(
+                      value: annee,
+                  child: Text(
+                    annee.toString(),
+                    style: AppTheme.textTheme(context).bodyLarge,
                   ),
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        // TODO: Implémenter l'édition
-                      } else if (value == 'delete') {
-                        _confirmDelete(context, semis);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit),
-                            SizedBox(width: AppTheme.spaceSm),
-                            Text('Modifier'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete),
-                            SizedBox(width: AppTheme.spaceSm),
-                            Text('Supprimer'),
-                          ],
-                        ),
-                      ),
-                    ],
-                    child: Icon(
-                      Icons.more_vert,
-                      color: AppTheme.textSecondary(context),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppTheme.spaceMd),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInfoRow(
-                      context,
-                      'Parcelle',
-                      parcelle?.nom ?? 'Inconnue',
-                      Icons.landscape,
-                    ),
-                  ),
-                  Expanded(
-                    child: _buildInfoRow(
-                      context,
-                      'Variété',
-                      variete?.nom ?? 'Inconnue',
-                      Icons.eco,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppTheme.spaceMd),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInfoRow(
-                      context,
-                      'Surface',
-                      '1.0 ha',
-                      Icons.area_chart,
-                    ),
-                  ),
-                  Expanded(
-                    child: _buildInfoRow(
-                      context,
-                      'Densité',
-                      '80000 graines/ha',
-                      Icons.grid_view,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppTheme.spaceMd),
-              Container(
-                padding: AppTheme.padding(AppTheme.spacingS),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary(context).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedYear = value;
+                    });
+                  },
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Observations',
-                      style: AppTheme.textTheme(context).titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary(context),
-                      ),
-                    ),
-                    const SizedBox(height: AppTheme.spaceXs),
-                    Text(
-                      'Semis effectué avec succès',
-                      style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                        color: AppTheme.textSecondary(context),
-                      ),
-                    ),
-                  ],
+              ),
+        ],
+      ),
+    );
+  }
+  Widget _buildStatistics(List<Semis> semisAnnee, List<Parcelle> parcelles) {
+    // Calculer le total des hectares semés
+    double totalHectaresSemes = 0;
+    double totalPrixSemis = 0;
+    
+    for (final semis in semisAnnee) {
+      final hectaresSemes = semis.varietesSurfaces.fold<double>(0, (sum, v) => sum + v.surface);
+      totalHectaresSemes += hectaresSemes;
+      totalPrixSemis += semis.prixSemis;
+    }
+    // Calculer le total des surfaces de toutes les parcelles
+    double totalSurfaceParcelles = 0;
+    for (final parcelle in parcelles) {
+      totalSurfaceParcelles += parcelle.surface;
+    }
+    final hectaresRestants = totalSurfaceParcelles - totalHectaresSemes;
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
+      padding: AppTheme.padding(AppTheme.spacingL),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primary(context).withOpacity(0.1), AppTheme.primary(context).withOpacity(0.05)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        border: Border.all(color: AppTheme.primary(context).withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.analytics, color: AppTheme.primary(context)),
+              SizedBox(width: AppTheme.spacingS),
+              Text(
+                'Résumé ${_selectedYear}',
+                style: AppTheme.textTheme(context).headlineSmall?.copyWith(
+                  color: AppTheme.primary(context),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: AppTheme.iconSizeS,
-          color: AppTheme.textSecondary(context),
-        ),
-        const SizedBox(width: AppTheme.spaceXs),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          SizedBox(height: AppTheme.spacingM),
+          Row(
             children: [
-              Text(
-                label,
-                style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                  color: AppTheme.textSecondary(context),
+              Expanded(
+                child: _buildStatCard(
+                  'Hectares semés',
+                  '${totalHectaresSemes.toStringAsFixed(2)} ha',
+                  Icons.grass,
+                  Colors.green,
                 ),
               ),
-              Text(
-                value,
-                style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textPrimary(context),
+              SizedBox(width: AppTheme.spacingS),
+              Expanded(
+                child: _buildStatCard(
+                  'Hectares restants',
+                  '${hectaresRestants.toStringAsFixed(2)} ha',
+                  Icons.timeline,
+                  hectaresRestants > 0 ? Colors.orange : Colors.red,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          _buildStatCard(
+            'Coût total semis',
+            '${totalPrixSemis.toStringAsFixed(2)} €',
+            Icons.euro,
+            AppTheme.primary(context),
+            fullWidth: true,
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildStatCard(String title, String value, IconData icon, Color color, {bool fullWidth = false}) {
+    return Container(
+      padding: AppTheme.padding(AppTheme.spacingM),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        border: Border.all(color: color.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: fullWidth 
+        ? Row(
+            children: [
+              Icon(icon, color: color, size: 20),
+              SizedBox(width: AppTheme.spacingS),
+              Text(
+                title,
+                style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                  color: AppTheme.textSecondary(context),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                value,
+                style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: color, size: 16),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                        color: AppTheme.textSecondary(context),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: AppTheme.spacingXS),
+              Text(
+                value,
+                style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+  Widget _buildSemisListWithStats(List<Semis> semisAnnee, List<Parcelle> parcelles, List<Variete> varietes) {
+    return ListView(
+      padding: AppTheme.padding(AppTheme.spacingM),
+      children: [
+        // Statistiques en haut de la liste (suivent le scroll)
+        _buildStatistics(semisAnnee, parcelles),
+          SizedBox(height: AppTheme.spacingM),
+        
+        // Liste des semis
+        ...semisAnnee.asMap().entries.map((entry) {
+          final index = entry.key;
+          final semis = entry.value;
+                          final parcelle = parcelles.firstWhere(
+            (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
+                            orElse: () => Parcelle(
+                              id: 0,
+              nom: 'Parcelle inconnue',
+                              surface: 0,
+                              dateCreation: DateTime.now(),
+                            ),
+                          );
+          return Container(
+            margin: EdgeInsets.only(bottom: AppTheme.spacingS),
+            decoration: BoxDecoration(
+              color: AppTheme.surface(context),
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              border: Border.all(color: AppTheme.border(context)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // En-tête de la carte
+                Container(
+                  padding: AppTheme.padding(AppTheme.spacingM),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary(context).withOpacity(0.1),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(AppTheme.radiusMedium),
+                      topRight: Radius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                  child: Row(
+                                children: [
+                      Icon(Icons.grass, color: AppTheme.primary(context)),
+                      SizedBox(width: AppTheme.spacingS),
+                      Expanded(
+                        child: Text(
+                          parcelle.nom,
+                          style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                            color: AppTheme.primary(context),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _editSemis(semis);
+                          } else if (value == 'delete') {
+                                      _showDeleteConfirmation(context, semis);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, size: 20),
+                                SizedBox(width: 8),
+                                Text('Modifier'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: AppTheme.error, size: 20),
+                                SizedBox(width: 8),
+                                Text('Supprimer', style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppTheme.error,
+                                )),
+                              ],
+                            ),
+                          ),
+                        ],
+                        child: Icon(Icons.more_vert, color: AppTheme.primary(context)),
+                                  ),
+                                ],
+                              ),
+                ),
+                
+                // Contenu de la carte
+                Padding(
+                  padding: AppTheme.padding(AppTheme.spacingM),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Date
+                      _buildInfoRow(Icons.calendar_today, 'Date', _formatDate(semis.date)),
+                      SizedBox(height: AppTheme.spacingS),
+                      
+                      // Variétés avec surfaces
+                      _buildVarietesInfo(semis, varietes),
+                      SizedBox(height: AppTheme.spacingS),
+                      
+                      // Surface totale
+                      _buildInfoRow(Icons.area_chart, 'Surface totale', '${_getTotalSurface(semis.varietesSurfaces).toStringAsFixed(2)} ha'),
+                      
+                      // Prix du semis si défini
+                      if (semis.prixSemis > 0) ...[
+                        SizedBox(height: AppTheme.spacingS),
+                        _buildInfoRow(Icons.euro, 'Prix semis', '${semis.prixSemis.toStringAsFixed(2)} €'),
+                      ],
+                      
+                      // Densité de maïs
+                      if (semis.densiteMais > 0) ...[
+                        SizedBox(height: AppTheme.spacingS),
+                        _buildInfoRow(Icons.grain, 'Densité maïs', '${semis.densiteMais.toStringAsFixed(0)} graines/ha'),
+                      ],
+                      
+                      // Notes si présentes
+                      if (semis.notes?.isNotEmpty ?? false) ...[
+                        SizedBox(height: AppTheme.spacingS),
+                        _buildInfoRow(Icons.note, 'Notes', semis.notes!),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+  Widget _buildSemisList(List<Semis> semisAnnee, List<Parcelle> parcelles, List<Variete> varietes) {
+    return ListView.builder(
+      padding: AppTheme.padding(AppTheme.spacingM),
+      itemCount: semisAnnee.length,
+      itemBuilder: (context, index) {
+        final semis = semisAnnee[index];
+        final parcelle = parcelles.firstWhere(
+          (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
+          orElse: () => Parcelle(
+            id: 0,
+            nom: 'Parcelle inconnue',
+            surface: 0,
+            dateCreation: DateTime.now(),
+          ),
+        );
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: AppTheme.surface(context),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            border: Border.all(color: AppTheme.border(context)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // En-tête de la carte
+              Container(
+                padding: AppTheme.padding(AppTheme.spacingM),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary(context).withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppTheme.radiusMedium),
+                    topRight: Radius.circular(AppTheme.radiusMedium),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.grass, color: AppTheme.primary(context)),
+                    SizedBox(width: AppTheme.spacingS),
+                    Expanded(
+                      child: Text(
+                        parcelle.nom,
+                        style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                          color: AppTheme.primary(context),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          _editSemis(semis);
+                        } else if (value == 'delete') {
+                          _showDeleteConfirmation(context, semis);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 20),
+                              SizedBox(width: 8),
+                              Text('Modifier'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: AppTheme.error, size: 20),
+                              SizedBox(width: 8),
+                              Text('Supprimer', style: const TextStyle(
+                                fontSize: 14,
+                                color: AppTheme.error,
+                              )),
+                            ],
+                          ),
+                        ),
+                      ],
+                      child: Icon(Icons.more_vert, color: AppTheme.primary(context)),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Contenu de la carte
+              Padding(
+                padding: AppTheme.padding(AppTheme.spacingM),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Date
+                    _buildInfoRow(Icons.calendar_today, 'Date', _formatDate(semis.date)),
+                    SizedBox(height: AppTheme.spacingS),
+                    
+                    // Variétés avec surfaces
+                    _buildVarietesInfo(semis, varietes),
+                    SizedBox(height: AppTheme.spacingS),
+                    
+                    // Surface totale
+                    _buildInfoRow(Icons.area_chart, 'Surface totale', '${_getTotalSurface(semis.varietesSurfaces).toStringAsFixed(2)} ha'),
+                    
+                    // Prix du semis si défini
+                    if (semis.prixSemis > 0) ...[
+                      SizedBox(height: AppTheme.spacingS),
+                      _buildInfoRow(Icons.euro, 'Prix semis', '${semis.prixSemis.toStringAsFixed(2)} €'),
+                    ],
+                    
+                    // Densité de maïs
+                    if (semis.densiteMais > 0) ...[
+                      SizedBox(height: AppTheme.spacingS),
+                      _buildInfoRow(Icons.grain, 'Densité maïs', '${semis.densiteMais.toStringAsFixed(0)} graines/ha'),
+                    ],
+                    
+                    // Notes si présentes
+                    if (semis.notes?.isNotEmpty ?? false) ...[
+                      SizedBox(height: AppTheme.spacingS),
+                      _buildInfoRow(Icons.note, 'Notes', semis.notes!),
+                    ],
+                  ],
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppTheme.textSecondary(context)),
+        SizedBox(width: AppTheme.spacingS),
+        Text(
+          '$label: ',
+          style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+            color: AppTheme.textSecondary(context),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+              color: AppTheme.textPrimary(context),
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
     );
   }
-
-  void _confirmDelete(BuildContext context, Semis semis) {
+  Widget _buildVarietesInfo(Semis semis, List<Variete> varietes) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.eco, size: 16, color: AppTheme.textSecondary(context)),
+            SizedBox(width: AppTheme.spacingS),
+            Text(
+              'Variétés: ',
+              style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                color: AppTheme.textSecondary(context),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: AppTheme.spacingXS),
+        ...semis.varietesSurfaces.map((varieteSurface) {
+          final variete = varietes.firstWhere(
+            (v) => v.firebaseId == varieteSurface.varieteId,
+            orElse: () => Variete(
+              id: 0,
+              nom: 'Variété inconnue',
+              dateCreation: DateTime.now(),
+              prixParAnnee: {},
+            ),
+          );
+          
+          return Padding(
+            padding: EdgeInsets.only(left: AppTheme.spacingL, bottom: AppTheme.spacingXS),
+            child: Text(
+              '• ${variete.nom}: ${varieteSurface.surface.toStringAsFixed(2)} ha',
+              style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                color: AppTheme.textPrimary(context),
+              ),
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+  double _getTotalSurface(List<dynamic> varietesSurfaces) {
+    return varietesSurfaces.fold<double>(0, (sum, v) => sum + v.surface);
+  }
+  void _addSemis() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SemisFormScreen()),
+    );
+  }
+  void _editSemis(Semis semis) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SemisFormScreen(semis: semis),
+      ),
+    );
+  }
+  void _showDeleteConfirmation(BuildContext context, Semis semis) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmer la suppression'),
-        content: Text('Êtes-vous sûr de vouloir supprimer le semis #${semis.id} ?'),
+        content: const Text('Êtes-vous sûr de vouloir supprimer ce semis ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -316,8 +726,9 @@ class _SemisScreenState extends State<SemisScreen> with TickerProviderStateMixin
           ),
           TextButton(
             onPressed: () {
+              final key = semis.firebaseId ?? semis.id.toString();
+              context.read<FirebaseProviderV4>().supprimerSemis(key);
               Navigator.pop(context);
-              // TODO: Implémenter la suppression
             },
             child: const Text('Supprimer'),
           ),
@@ -325,4 +736,4 @@ class _SemisScreenState extends State<SemisScreen> with TickerProviderStateMixin
       ),
     );
   }
-}
+} 

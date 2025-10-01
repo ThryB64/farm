@@ -1132,7 +1132,7 @@ class AppThemePageBuilder {
     );
   }
 
-  /// Structure standardisée pour les pages avec contenu scrollable (style page d'accueil)
+  /// Structure standardisée pour les pages avec contenu scrollable
   static Widget buildScrollablePage({
     required BuildContext context,
     required String title,
@@ -1142,29 +1142,20 @@ class AppThemePageBuilder {
     bool showBackButton = true,
     EdgeInsets? padding,
   }) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Colors.transparent,
-        foregroundColor: AppTheme.textPrimary(context),
-        elevation: 0,
-        automaticallyImplyLeading: showBackButton,
-        actions: actions,
-      ),
-      body: Container(
-        decoration: AppTheme.appBackground(context),
-        child: SafeArea(
-          child: ListView(
-            padding: padding ?? const EdgeInsets.fromLTRB(18, 18, 18, 100),
-            children: children,
-          ),
-        ),
-      ),
+    return buildStandardPage(
+      context: context,
+      title: title,
+      actions: actions,
       floatingActionButton: floatingActionButton,
+      showBackButton: showBackButton,
+      body: ListView(
+        padding: padding ?? const EdgeInsets.fromLTRB(18, 18, 18, 100),
+        children: children,
+      ),
     );
   }
 
-  /// Structure standardisée pour les pages avec contenu en colonne (style page d'accueil)
+  /// Structure standardisée pour les pages avec contenu en colonne
   static Widget buildColumnPage({
     required BuildContext context,
     required String title,
@@ -1176,29 +1167,20 @@ class AppThemePageBuilder {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.stretch,
   }) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Colors.transparent,
-        foregroundColor: AppTheme.textPrimary(context),
-        elevation: 0,
-        automaticallyImplyLeading: showBackButton,
-        actions: actions,
-      ),
-      body: Container(
-        decoration: AppTheme.appBackground(context),
-        child: SafeArea(
-          child: Padding(
-            padding: padding ?? const EdgeInsets.all(18),
-            child: Column(
-              mainAxisAlignment: mainAxisAlignment,
-              crossAxisAlignment: crossAxisAlignment,
-              children: children,
-            ),
-          ),
+    return buildStandardPage(
+      context: context,
+      title: title,
+      actions: actions,
+      floatingActionButton: floatingActionButton,
+      showBackButton: showBackButton,
+      body: Padding(
+        padding: padding ?? const EdgeInsets.all(18),
+        child: Column(
+          mainAxisAlignment: mainAxisAlignment,
+          crossAxisAlignment: crossAxisAlignment,
+          children: children,
         ),
       ),
-      floatingActionButton: floatingActionButton,
     );
   }
 
@@ -1347,7 +1329,7 @@ class AppThemePageBuilder {
     );
   }
 
-  /// Message d'état vide standardisé (style page d'accueil)
+  /// Message d'état vide standardisé
   static Widget buildEmptyState({
     required BuildContext context,
     required String message,
@@ -1384,80 +1366,6 @@ class AppThemePageBuilder {
           ],
         ],
       ),
-    );
-  }
-
-  /// Section avec effet de verre (style page d'accueil)
-  static Widget buildGlassSection({
-    required BuildContext context,
-    required Widget child,
-    EdgeInsets? padding,
-    Color? gradientColor,
-  }) {
-    return AppTheme.glass(
-      context,
-      gradient: gradientColor != null
-          ? LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                gradientColor.withOpacity(0.2),
-                gradientColor.withOpacity(0.1),
-              ],
-            )
-          : null,
-      child: Padding(
-        padding: padding ?? AppTheme.padding(AppTheme.spacingM),
-        child: child,
-      ),
-    );
-  }
-
-  /// En-tête de section avec icône et titre (style page d'accueil)
-  static Widget buildSectionHeader({
-    required BuildContext context,
-    required String title,
-    String? subtitle,
-    IconData? icon,
-    Color? iconColor,
-    Widget? trailing,
-  }) {
-    return AppTheme.sectionHeader(
-      context,
-      title,
-      subtitle: subtitle,
-      trailing: trailing,
-    );
-  }
-
-  /// Carte de statistique (style page d'accueil)
-  static Widget buildStatCard({
-    required BuildContext context,
-    required String label,
-    required String value,
-    IconData? icon,
-    Color? color,
-  }) {
-    return AppTheme.statChip(
-      context,
-      '$label: $value',
-      icon: icon,
-      color: color,
-    );
-  }
-
-  /// Icône avec effet de halo (style page d'accueil)
-  static Widget buildGlowIcon({
-    required BuildContext context,
-    required IconData icon,
-    Color? color,
-    double? size,
-  }) {
-    return AppTheme.glowIcon(
-      context,
-      icon,
-      color: color,
-      size: size ?? 24.0,
     );
   }
 }

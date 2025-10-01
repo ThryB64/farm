@@ -97,16 +97,13 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     
-    return Scaffold(
-      body: Container(
-        decoration: AppTheme.appBackground(context),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: AppTheme.padding(AppTheme.spacingL),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: 'Connexion',
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
                   // Logo et titre
                   Container(
                     padding: AppTheme.padding(AppTheme.spacingL),
@@ -258,9 +255,9 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                 ],
               ),
             ),
-          ),
+          ],
         ),
-      ),
+      ],
     );
   }
 }

@@ -54,13 +54,13 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.produit == null ? 'Nouveau produit' : 'Modifier le produit'),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
-      ),
-      body: Form(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: widget.produit == null ? 'Nouveau produit' : 'Modifier le produit',
+      backgroundColor: AppTheme.primary(context),
+      foregroundColor: AppTheme.onPrimary(context),
+      children: [
+        Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: AppTheme.padding(AppTheme.spacingM),
@@ -144,7 +144,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
   Widget _buildPrixSection() {

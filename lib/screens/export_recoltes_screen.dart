@@ -645,12 +645,12 @@ class _ExportRecoltesScreenState extends State<ExportRecoltesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Export PDF'),
-        backgroundColor: Colors.orange,
-      ),
-      body: Consumer<FirebaseProviderV4>(
+    return AppThemePageBuilder.buildScrollablePage(
+      context: context,
+      title: 'Export PDF',
+      backgroundColor: Colors.orange,
+      children: [
+        Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final years = provider.chargements
               .map((c) => c.dateChargement.year)
@@ -707,6 +707,6 @@ class _ExportRecoltesScreenState extends State<ExportRecoltesScreen> {
           );
         },
       ),
-    );
+    ];
   }
 }
