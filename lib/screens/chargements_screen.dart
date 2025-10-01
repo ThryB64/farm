@@ -55,7 +55,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
       appBar: AppBar(
         title: const Text('Chargements'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -130,7 +130,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           ),
         ),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
         child: const Icon(Icons.add),
       ),
     );
@@ -155,8 +155,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           const SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucun chargement enregistré',
-            style: TextStyle(
-              fontSize: 24,
+            style: AppTheme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
             ),
@@ -164,8 +163,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           const SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter votre premier chargement',
-            style: TextStyle(
-              fontSize: 16,
+            style: AppTheme.textTheme.bodyLarge?.copyWith(
               color: AppTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
@@ -194,10 +192,9 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                     Expanded(
                       child: DropdownButtonFormField<int>(
                         value: _selectedYear,
-                        decoration: const InputDecoration(
+                        decoration: AppTheme.createInputDecoration(
                           labelText: 'Année',
-                          border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.calendar_today),
+                          prefixIcon: Icons.calendar_today,
                         ),
               items: chargementsParAnnee.keys.map((year) {
                           return DropdownMenuItem<int>(
@@ -224,8 +221,8 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                       ),
                       child: Text(
                         '${chargementsParAnnee[_selectedYear]?.length ?? 0} chargements',
-              style: const TextStyle(
-                          color: Colors.white,
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -274,7 +271,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                 const SizedBox(width: AppTheme.spacingS),
                 const Text(
                   'Debug - Jointures',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.warning,
@@ -311,17 +308,15 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTheme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: AppTheme.spacingXS),
           Text(
             '$avec OK',
-            style: TextStyle(
-              fontSize: 14,
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppTheme.success,
             ),
@@ -329,8 +324,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           if (sans > 0)
             Text(
               '$sans KO',
-              style: TextStyle(
-                fontSize: 12,
+              style: AppTheme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.error,
               ),
@@ -386,17 +380,15 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                                 children: [
                           Text(
                             cellule?.label ?? 'Cellule inconnue',
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: AppTheme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: AppTheme.spacingXS),
                           Text(
                             '${_formatDate(chargement.dateChargement)} • ${chargement.remorque}',
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: AppTheme.textTheme.bodyMedium?.copyWith(
                               color: AppTheme.textSecondary,
                             ),
                                   ),
@@ -545,8 +537,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 12,
+              style: AppTheme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: color,
               ),
@@ -573,23 +564,30 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Total chargements: ${stats['total']}'),
-            const SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingS),
             Text('Jointures OK: ${stats['ok']}', 
-                 style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                 style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.success, fontWeight: FontWeight.bold)),
             Text('Cellules manquantes: ${stats['missCell']}', 
-                 style: TextStyle(color: stats['missCell']! > 0 ? Colors.red : Colors.green)),
+                 style: AppTheme.textTheme.bodyMedium?.copyWith(color: stats['missCell']! > 0 ? AppTheme.error : AppTheme.success)),
             Text('Parcelles manquantes: ${stats['missParc']}', 
-                 style: TextStyle(color: stats['missParc']! > 0 ? Colors.red : Colors.green)),
-            const SizedBox(height: 16),
+                 style: AppTheme.textTheme.bodyMedium?.copyWith(color: stats['missParc']! > 0 ? AppTheme.error : AppTheme.success)),
+            SizedBox(height: AppTheme.spacingM),
             if (stats['missCell']! > 0 || stats['missParc']! > 0)
               const Text(
                 '⚠️ Des jointures échouent. Vérifiez que les cellules et parcelles sont bien chargées.',
-                style: TextStyle(color: Colors.orange),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.warning,
+                ),
               )
             else
               const Text(
                 '✅ Toutes les jointures sont correctes !',
-                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.success,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
           ],
         ),
@@ -610,7 +608,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
-        content: Text('Voulez-vous vraiment supprimer ce chargement ?'),
+        content: const Text('Voulez-vous vraiment supprimer ce chargement ?'),
         actions: [
           ModernTextButton(
             text: 'Annuler',

@@ -56,14 +56,14 @@ class CelluleDetailsScreen extends StatelessWidget {
               .toList();
           final parcelles = db.parcelles.toList();
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildInfoCard(context),
-                SizedBox(height: 16),
+                SizedBox(height: AppTheme.spacingM),
                 _buildStatistiquesCard(context, chargements),
-                SizedBox(height: 16),
+                SizedBox(height: AppTheme.spacingM),
                 _buildChargementsCard(context, chargements, parcelles),
               ],
             ),
@@ -75,7 +75,7 @@ class CelluleDetailsScreen extends StatelessWidget {
   Widget _buildInfoCard(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -83,16 +83,16 @@ class CelluleDetailsScreen extends StatelessWidget {
               'Informations',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             _buildInfoRow('Capacité', '${(cellule.capacite / 1000).toStringAsFixed(2)} T'),
             _buildInfoRow('Date de création', _formatDate(cellule.dateCreation)),
             if (cellule.notes != null) ...[
-              SizedBox(height: 8),
+              SizedBox(height: AppTheme.spacingS),
               Text(
                 'Notes:',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              SizedBox(height: 4),
+              SizedBox(height: AppTheme.spacingXS),
               Text(cellule.notes!),
             ],
           ],
@@ -117,7 +117,7 @@ class CelluleDetailsScreen extends StatelessWidget {
     }
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -125,7 +125,7 @@ class CelluleDetailsScreen extends StatelessWidget {
               'Statistiques par année',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             ...chargementsParAnnee.entries.map((entry) {
               final annee = entry.key;
               final chargementsAnnee = entry.value;
@@ -149,13 +149,13 @@ class CelluleDetailsScreen extends StatelessWidget {
                     annee.toString(),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: AppTheme.spacingS),
                   _buildInfoRow('Poids total net', '${(poidsTotalNet / 1000).toStringAsFixed(2)} T'),
                   _buildInfoRow('Poids total normé', '${(poidsTotalNorme / 1000).toStringAsFixed(2)} T'),
                   _buildInfoRow('Taux de remplissage', '${tauxRemplissage.toStringAsFixed(1)}%'),
                   _buildInfoRow('Humidité moyenne', '${humiditeMoyenne.toStringAsFixed(1)}%'),
                   _buildInfoRow('Nombre de chargements', chargementsAnnee.length.toString()),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                 ],
               );
             }).toList(),
@@ -186,7 +186,7 @@ class CelluleDetailsScreen extends StatelessWidget {
     final annees = chargementsParAnnee.keys.toList()..sort((a, b) => b.compareTo(a));
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -194,7 +194,7 @@ class CelluleDetailsScreen extends StatelessWidget {
               'Historique des chargements',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             ...annees.map((annee) {
               final chargementsAnnee = chargementsParAnnee[annee]!;
               chargementsAnnee.sort((a, b) => b.dateChargement.compareTo(a.dateChargement));
@@ -215,17 +215,17 @@ class CelluleDetailsScreen extends StatelessWidget {
                 children: [
                   Text(
                     annee.toString(),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.blue,
+                    style: AppTheme.textTheme.titleMedium?.copyWith(
+                      color: AppTheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: AppTheme.spacingS),
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: AppTheme.padding(AppTheme.spacingS),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppTheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     ),
                     child: Column(
                       children: [
@@ -242,7 +242,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(height: 4),
+                        SizedBox(height: AppTheme.spacingXS),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -257,7 +257,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: AppTheme.spacingS),
                   ...chargementsAnnee.map((chargement) {
                     final parcelle = parcelles.firstWhere(
                       (p) => (p.firebaseId ?? p.id.toString()) == chargement.parcelleId,
@@ -314,7 +314,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                       ),
                     );
                   }).toList(),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                 ],
               );
             }).toList(),

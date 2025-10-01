@@ -57,25 +57,25 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       appBar: AppBar(
         title: const Text('Import/Export'),
         backgroundColor: AppTheme.accent,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
         elevation: 0,
         centerTitle: true,
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.spacingM),
+          padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
           children: [
               _buildDataOverview(),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               _buildExportSection(),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               _buildImportSection(),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               _buildActionsSection(),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               _buildDebugSection(),
             ],
           ),
@@ -91,29 +91,28 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
+                padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.analytics,
                   color: AppTheme.primary,
-                  size: 24,
+                  size: AppTheme.iconSizeM,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
-                    const Text(
+              SizedBox(width: AppTheme.spacingM),
+                    Text(
                 'État de la base de données',
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: AppTheme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingL),
+          SizedBox(height: AppTheme.spacingL),
                     Consumer<FirebaseProviderV4>(
                       builder: (context, provider, child) {
                         return Column(
@@ -162,40 +161,38 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   }
   Widget _buildDataSummary(String label, int count, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.spacingM),
+      padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: AppTheme.radius(AppTheme.radiusMedium),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(width: AppTheme.spacingM),
+          Icon(icon, color: color, size: AppTheme.iconSizeM),
+          SizedBox(width: AppTheme.spacingM),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 16,
+            style: AppTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
           ),
-          const Spacer(),
+          Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               horizontal: AppTheme.spacingM,
               vertical: AppTheme.spacingS,
             ),
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              borderRadius: AppTheme.radius(AppTheme.radiusSmall),
             ),
             child: Text(
               count.toString(),
-              style: const TextStyle(
-                fontSize: 16,
+              style: AppTheme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppTheme.onPrimary,
               ),
             ),
           ),
@@ -211,37 +208,35 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
+                padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
                   color: AppTheme.success.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.download,
                   color: AppTheme.success,
-                  size: 24,
+                  size: AppTheme.iconSizeM,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
-                    const Text(
+              SizedBox(width: AppTheme.spacingM),
+                    Text(
                 'Export des données',
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: AppTheme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
                   ],
                 ),
-          const SizedBox(height: AppTheme.spacingM),
-          const Text(
+          SizedBox(height: AppTheme.spacingM),
+          Text(
             'Téléchargez toutes vos données au format JSON pour sauvegarder ou partager.',
-            style: TextStyle(
-              fontSize: 14,
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               color: AppTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: AppTheme.spacingL),
+          SizedBox(height: AppTheme.spacingL),
           ModernButton(
             text: 'Exporter toutes les données',
             icon: Icons.file_download,
@@ -262,37 +257,35 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
+                padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
                   color: AppTheme.info.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.upload,
                   color: AppTheme.info,
-                  size: 24,
+                  size: AppTheme.iconSizeM,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
-                    const Text(
+              SizedBox(width: AppTheme.spacingM),
+                    Text(
                 'Import des données',
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: AppTheme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
                   ],
                 ),
-          const SizedBox(height: AppTheme.spacingM),
-          const Text(
+          SizedBox(height: AppTheme.spacingM),
+          Text(
             'Importez des données depuis un fichier JSON. Attention : cela remplacera toutes les données existantes.',
-            style: TextStyle(
-              fontSize: 14,
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               color: AppTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: AppTheme.spacingL),
+          SizedBox(height: AppTheme.spacingL),
           ModernButton(
             text: 'Importer depuis un fichier',
             icon: Icons.file_upload,
@@ -313,37 +306,35 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           Row(
       children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
+                padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
                   color: AppTheme.warning.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.refresh,
                   color: AppTheme.warning,
-                  size: 24,
+                  size: AppTheme.iconSizeM,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
-              const Text(
+              SizedBox(width: AppTheme.spacingM),
+              Text(
                 'Actions de maintenance',
-                style: TextStyle(
-                  fontSize: 20,
+                style: AppTheme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingM),
-          const Text(
+          SizedBox(height: AppTheme.spacingM),
+        Text(
             'Mettez à jour les calculs et synchronisez les données.',
-            style: TextStyle(
-              fontSize: 14,
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               color: AppTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: AppTheme.spacingL),
+          SizedBox(height: AppTheme.spacingL),
           ModernButton(
             text: 'Mettre à jour les poids aux normes',
             icon: Icons.calculate,
@@ -370,7 +361,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
           ),
         );
@@ -383,7 +374,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
           ),
         );
@@ -468,7 +459,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
           ),
         );
@@ -538,7 +529,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
           ),
         );
@@ -557,7 +548,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
         builder: (context) => AlertDialog(
         title: const Text('Confirmer l\'import'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          borderRadius: AppTheme.radius(AppTheme.radiusLarge),
         ),
         content: const Text(
           'Cette action va remplacer directement la base de données Firebase. Toutes les données existantes seront perdues. Êtes-vous sûr de vouloir continuer ?',
@@ -776,7 +767,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
           ),
         );
@@ -789,7 +780,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
           ),
         );
@@ -804,37 +795,35 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
+                padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
                   color: AppTheme.error.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.bug_report,
                   color: AppTheme.error,
-                  size: 24,
+                  size: AppTheme.iconSizeM,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
-              const Text(
+              SizedBox(width: AppTheme.spacingM),
+              Text(
                 'Diagnostic des données',
-                style: TextStyle(
-                  fontSize: 20,
+                style: AppTheme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingM),
-          const Text(
+          SizedBox(height: AppTheme.spacingM),
+          Text(
             'Analysez la cohérence des données et les problèmes de jointure.',
-            style: TextStyle(
-              fontSize: 14,
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               color: AppTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: AppTheme.spacingL),
+          SizedBox(height: AppTheme.spacingL),
         ],
       ),
     );

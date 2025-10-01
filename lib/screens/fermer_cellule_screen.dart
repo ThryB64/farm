@@ -73,7 +73,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
           ),
         );
@@ -86,7 +86,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
           ),
         );
@@ -100,13 +100,13 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
       appBar: AppBar(
         title: Text(
           'Fermer la cellule',
-          style: AppTheme.textTheme.headlineSmall?.copyWith(color: Colors.white),
+          style: AppTheme.textTheme.headlineSmall?.copyWith(color: AppTheme.onPrimary),
         ),
         backgroundColor: AppTheme.primary,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppTheme.spacingL),
+        padding: AppTheme.padding(AppTheme.spacingL),
         child: Form(
           key: _formKey,
           child: Column(
@@ -114,11 +114,11 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
             children: [
               // Informations de la cellule
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingM),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                  border: Border.all(color: Colors.blue.shade200),
+                  color: AppTheme.primary.withOpacity(0.1),
+                  borderRadius: AppTheme.radius(AppTheme.radiusMedium),
+                  border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,10 +127,10 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                       'Cellule à fermer',
                       style: AppTheme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade700,
+                        color: AppTheme.primary,
                       ),
                     ),
-                    const SizedBox(height: AppTheme.spacingS),
+                    SizedBox(height: AppTheme.spacingS),
                     Text('Référence: ${widget.cellule.reference}'),
                     if (widget.cellule.nom?.isNotEmpty == true)
                       Text('Nom: ${widget.cellule.nom}'),
@@ -138,7 +138,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: AppTheme.spacingXL),
+              SizedBox(height: AppTheme.spacingXL),
               
               // Section données de gaz
               Text(
@@ -148,19 +148,14 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               
               // Quantité de gaz
               TextFormField(
                 controller: _quantiteGazController,
-                decoration: InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Quantité de gaz utilisée (m³) *',
                   hintText: 'Ex: 150.5',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) => _calculerCoutTotalGaz(),
@@ -175,19 +170,14 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               
               // Prix du gaz
               TextFormField(
                 controller: _prixGazController,
-                decoration: InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Prix du gaz (€/kWh) *',
                   hintText: 'Ex: 0.15',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) => _calculerCoutTotalGaz(),
@@ -202,37 +192,36 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               
               // Coût total du gaz
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingM),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                  border: Border.all(color: Colors.green.shade200),
+                  color: AppTheme.success.withOpacity(0.1),
+                  borderRadius: AppTheme.radius(AppTheme.radiusMedium),
+                  border: Border.all(color: AppTheme.success.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calculate, color: Colors.green.shade700),
-                    const SizedBox(width: 12),
+                    Icon(Icons.calculate, color: AppTheme.success, size: AppTheme.iconSizeM),
+                    SizedBox(width: AppTheme.spacingS),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Coût total du gaz',
-                            style: TextStyle(
+                            style: AppTheme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.green.shade700,
+                              color: AppTheme.success,
                             ),
                           ),
                           Text(
                             '${_coutTotalGaz.toStringAsFixed(2)} €',
-                            style: TextStyle(
-                              fontSize: 18,
+                            style: AppTheme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.green.shade900,
+                              color: AppTheme.success,
                             ),
                           ),
                         ],
@@ -241,7 +230,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: AppTheme.spacingXL),
+              SizedBox(height: AppTheme.spacingXL),
               
               // Boutons d'action
               Row(
@@ -254,7 +243,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingM),
+                  SizedBox(width: AppTheme.spacingM),
                   Expanded(
                     child: ModernButton(
                       text: 'Fermer la cellule',

@@ -59,13 +59,13 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
       appBar: AppBar(
         title: Text(
           widget.cellule == null ? 'Nouvelle cellule' : 'Modifier la cellule',
-          style: AppTheme.textTheme.headlineSmall?.copyWith(color: Colors.white),
+          style: AppTheme.textTheme.headlineSmall?.copyWith(color: AppTheme.onPrimary),
         ),
         backgroundColor: AppTheme.primary,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppTheme.spacingL),
+        padding: AppTheme.padding(AppTheme.spacingL),
         child: Form(
           key: _formKey,
           child: Column(
@@ -74,13 +74,8 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
               // Année
               DropdownButtonFormField<int>(
                 value: _selectedYear,
-                decoration: InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Année',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
                 ),
                 items: List.generate(20, (index) {
                   final year = 2020 + index;
@@ -101,7 +96,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppTheme.spacingXL),
+              SizedBox(height: AppTheme.spacingXL),
               
               // Section Gaz (seulement si la cellule est fermée)
               if (widget.cellule?.fermee == true) ...[
@@ -112,19 +107,14 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 
                 // Quantité de gaz
                 TextFormField(
                   controller: _quantiteGazController,
-                  decoration: InputDecoration(
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Quantité de gaz utilisée (m³)',
                     hintText: 'Ex: 150.5',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (value) => _calculerCoutTotalGaz(),
@@ -138,19 +128,14 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: AppTheme.spacingL),
+                SizedBox(height: AppTheme.spacingL),
                 
                 // Prix du gaz
                 TextFormField(
                   controller: _prixGazController,
-                  decoration: InputDecoration(
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Prix du gaz (€/kWh)',
                     hintText: 'Ex: 0.15',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (value) => _calculerCoutTotalGaz(),
@@ -164,37 +149,36 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: AppTheme.spacingL),
+                SizedBox(height: AppTheme.spacingL),
                 
                 // Coût total du gaz
                 Container(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
+                  padding: AppTheme.padding(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: AppTheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    border: Border.all(color: Colors.blue.shade200),
+                    border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calculate, color: Colors.blue.shade700),
-                      const SizedBox(width: 12),
+                      Icon(Icons.calculate, color: AppTheme.primary),
+                      SizedBox(width: AppTheme.spacingS),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Coût total du gaz',
-                              style: TextStyle(
+                              style: AppTheme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue.shade700,
+                                color: AppTheme.primary,
                               ),
                             ),
                             Text(
                               '${_coutTotalGaz.toStringAsFixed(2)} €',
-                              style: TextStyle(
-                                fontSize: 18,
+                              style: AppTheme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue.shade900,
+                                color: AppTheme.primary,
                               ),
                             ),
                           ],
@@ -203,7 +187,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingXL),
+                SizedBox(height: AppTheme.spacingXL),
               ],
               
               // Bouton de validation

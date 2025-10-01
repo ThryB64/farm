@@ -14,8 +14,11 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'export_ventes_screen.dart';
 import 'export_traitements_screen.dart';
+import 'export_recoltes_screen.dart';
+
 class ExportsPdfScreen extends StatelessWidget {
   const ExportsPdfScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +38,7 @@ class ExportsPdfScreen extends StatelessWidget {
               color: AppTheme.primary,
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ExportTraitementsScreen()),
+                MaterialPageRoute(builder: (context) => const ExportRecoltesScreen()),
               ),
             ),
             const SizedBox(height: AppTheme.spacingM),

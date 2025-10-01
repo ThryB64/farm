@@ -14,6 +14,7 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
+import '../providers/theme_provider.dart';
 import 'cellule_form_screen.dart';
 import 'cellule_details_screen.dart';
 import 'fermer_cellule_screen.dart';
@@ -35,14 +36,22 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
   }
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
+    
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Cellules'),
-        backgroundColor: Colors.blue,
+        title: Text('Cellules'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: colors.textPrimary,
         elevation: 0,
         centerTitle: true,
       ),
-      body: Consumer<FirebaseProviderV4>(
+      body: Container(
+        decoration: BoxDecoration(gradient: gradients.appBg),
+        child: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final cellules = provider.cellules;
           final chargements = provider.chargements;
@@ -53,27 +62,27 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                 children: [
                   Icon(
                     Icons.warehouse,
-                    size: 64,
-                    color: Colors.grey[400],
+                    size: AppTheme.iconSizeXXL,
+                    color: AppTheme.textLight,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   Text(
                     'Aucune cellule enregistrée',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
+                    style: AppTheme.textTheme.titleLarge?.copyWith(
+                      color: AppTheme.textSecondary,
                     ),
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: AppTheme.spacingL),
                   ElevatedButton.icon(
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const CelluleFormScreen()),
                     ),
-                    icon: Icon(Icons.add),
-                    label: Text('Ajouter une cellule'),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    icon: Icon(Icons.add, color: AppTheme.onPrimary),
+                    label: Text('Ajouter une cellule', style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onPrimary)),
+                    style: AppTheme.buttonStyle(
+                      backgroundColor: AppTheme.primary,
+                      padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingL, vertical: AppTheme.spacingM),
                     ),
                   ),
                 ],
@@ -117,20 +126,15 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
           return Column(
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
-                color: Colors.blue.withOpacity(0.1),
+                padding: AppTheme.padding(AppTheme.spacingM),
+                color: AppTheme.primary.withOpacity(0.1),
                 child: Column(
                   children: [
                     DropdownButtonFormField<int>(
                       value: _selectedYear,
-                      decoration: InputDecoration(
+                      decoration: AppTheme.createInputDecoration(
                         labelText: 'Année',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        prefixIcon: Icon(Icons.calendar_today),
-                        filled: true,
-                        fillColor: Colors.white,
+                        prefixIcon: Icons.calendar_today,
                       ),
                       items: annees.map((annee) {
                         return DropdownMenuItem(
@@ -145,7 +149,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                       },
                     ),
                     if (_selectedYear != null) ...[
-                      SizedBox(height: 16),
+                      SizedBox(height: AppTheme.spacingM),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -153,21 +157,21 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                             'Poids total normé',
                             '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(2)} T',
                             Icons.scale,
-                            Colors.blue,
+                            AppTheme.primary,
                           ),
                           _buildStatCard(
                             'Poids total net',
                             '${(poidsTotalNetAnnee / 1000).toStringAsFixed(2)} T',
                             Icons.monitor_weight,
-                            Colors.green,
+                            AppTheme.success,
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: AppTheme.spacingS),
                       if (cellulesParAnnee[_selectedYear] != null) Text(
                         '${cellulesParAnnee[_selectedYear]!.length} cellules en $_selectedYear',
-                        style: TextStyle(
-                          color: Colors.blue,
+                        style: AppTheme.textTheme.titleMedium?.copyWith(
+                          color: AppTheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -177,11 +181,11 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
               ),
               Expanded(
                 child: _selectedYear == null
-                    ? const Center(child: Text('Sélectionnez une année'))
+                    ? Center(child: Text('Sélectionnez une année'))
                     : cellulesParAnnee[_selectedYear] == null
-                        ? const Center(child: Text('Aucune cellule pour cette année'))
+                        ? Center(child: Text('Aucune cellule pour cette année'))
                         : ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: AppTheme.padding(AppTheme.spacingM),
                             itemCount: cellulesParAnnee[_selectedYear]!.length,
                             itemBuilder: (context, index) {
                               final cellule = cellulesParAnnee[_selectedYear]![index];
@@ -203,10 +207,10 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                               final humiditeMoyenne = chargementsCellule.isEmpty ? 0.0 : 
                                 chargementsCellule.fold<double>(0, (sum, c) => sum + c.humidite) / chargementsCellule.length;
                               return Card(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                elevation: 2,
+                                margin: EdgeInsets.only(bottom: AppTheme.spacingM),
+                                elevation: AppTheme.elevationS,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: AppTheme.radius(AppTheme.radiusMedium),
                                 ),
                                 child: InkWell(
                                   onTap: () {
@@ -219,9 +223,9 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                       ),
                                     ).then((_) => setState(() {}));
                                   },
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: AppTheme.radius(AppTheme.radiusMedium),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(16),
+                                    padding: AppTheme.padding(AppTheme.spacingM),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
@@ -231,8 +235,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                             Expanded(
                                               child: Text(
                                                 'Cellule ${cellule.reference}',
-                                                style: TextStyle(
-                                                  fontSize: 18,
+                                                style: AppTheme.textTheme.titleLarge?.copyWith(
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -241,10 +244,9 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 _buildAnimatedLock(cellule),
-                                                SizedBox(width: 8),
+                                                SizedBox(width: AppTheme.spacingS),
                                                 IconButton(
-                                                  icon: Icon(Icons.info),
-                                                  color: Colors.blue,
+                                                  icon: Icon(Icons.info, color: AppTheme.primary, size: AppTheme.iconSizeM),
                                                   onPressed: () {
                                                     Navigator.push(
                                                       context,
@@ -257,87 +259,81 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                                   },
                                                 ),
                                                 IconButton(
-                                                  icon: Icon(Icons.delete),
-                                                  color: Colors.red,
+                                                  icon: Icon(Icons.delete, color: AppTheme.error, size: AppTheme.iconSizeM),
                                                   onPressed: () => _showDeleteConfirmation(context, cellule),
                                                 ),
                                               ],
                                             ),
                                           ],
                                         ),
-                                        SizedBox(height: 8),
+                                        SizedBox(height: AppTheme.spacingS),
                                         Row(
                                           children: [
                                             Icon(
                                               Icons.warehouse,
-                                              size: 16,
-                                              color: Colors.grey[600],
+                                              size: AppTheme.iconSizeS,
+                                              color: AppTheme.textSecondary,
                                             ),
-                                            SizedBox(width: 4),
+                                            SizedBox(width: AppTheme.spacingXS),
                                             Text(
                                               '${(cellule.capacite / 1000).toStringAsFixed(2)} T',
-                                              style: TextStyle(
-                                                color: Colors.grey[600],
-                                                fontSize: 14,
+                                              style: AppTheme.textTheme.bodySmall?.copyWith(
+                                                color: AppTheme.textSecondary,
                                               ),
                                             ),
-                                            SizedBox(width: 16),
+                                            SizedBox(width: AppTheme.spacingM),
                                             Icon(
                                               Icons.calendar_today,
-                                              size: 16,
-                                              color: Colors.grey[600],
+                                              size: AppTheme.iconSizeS,
+                                              color: AppTheme.textSecondary,
                                             ),
-                                            SizedBox(width: 4),
+                                            SizedBox(width: AppTheme.spacingXS),
                                             Text(
                                               'Créée le ${_formatDate(cellule.dateCreation)}',
-                                              style: TextStyle(
-                                                color: Colors.grey[600],
-                                                fontSize: 14,
+                                              style: AppTheme.textTheme.bodySmall?.copyWith(
+                                                color: AppTheme.textSecondary,
                                               ),
                                             ),
                                           ],
                                         ),
                                         if (chargementsCellule.isNotEmpty) ...[
-                                          SizedBox(height: 8),
+                                          SizedBox(height: AppTheme.spacingS),
                                           LinearProgressIndicator(
                                             value: tauxRemplissage / 100,
-                                            backgroundColor: Colors.blue.withOpacity(0.2),
+                                            backgroundColor: AppTheme.primary.withOpacity(0.2),
                                             valueColor: AlwaysStoppedAnimation<Color>(
                                               tauxRemplissage > 90
-                                                  ? Colors.red
+                                                  ? AppTheme.error
                                                   : tauxRemplissage > 70
-                                                      ? Colors.orange
-                                                      : Colors.blue,
+                                                      ? AppTheme.warning
+                                                      : AppTheme.primary,
                                             ),
-                                            minHeight: 8,
+                                            minHeight: AppTheme.spacingS,
                                           ),
-                                          SizedBox(height: 8),
+                                          SizedBox(height: AppTheme.spacingS),
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 'Taux de remplissage: ${tauxRemplissage.toStringAsFixed(1)}%',
-                                                style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 14,
+                                                style: AppTheme.textTheme.bodySmall?.copyWith(
+                                                  color: AppTheme.textSecondary,
                                                 ),
                                               ),
                                               Text(
                                                 'Net: ${(poidsTotal / 1000).toStringAsFixed(2)} T\nNormé: ${(poidsTotalNorme / 1000).toStringAsFixed(2)} T',
-                                                style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 14,
+                                                style: AppTheme.textTheme.bodySmall?.copyWith(
+                                                  color: AppTheme.textSecondary,
                                                 ),
                                                 textAlign: TextAlign.end,
                                               ),
                                             ],
                                           ),
-                                          SizedBox(height: 4),
+                                          SizedBox(height: AppTheme.spacingXS),
                                           Text(
                                             'Humidité moyenne: ${humiditeMoyenne.toStringAsFixed(1)}%',
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 14,
+                                            style: AppTheme.textTheme.bodySmall?.copyWith(
+                                              color: AppTheme.textSecondary,
                                             ),
                                           ),
                                         ],
@@ -352,6 +348,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
             ],
           );
         },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -362,8 +359,8 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
             ),
           );
         },
-        backgroundColor: Colors.blue,
-        child: Icon(Icons.add),
+        backgroundColor: AppTheme.primary,
+        child: Icon(Icons.add, color: AppTheme.onPrimary),
       ),
     );
   }
@@ -374,15 +371,15 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmer la suppression'),
+        title: Text('Confirmer la suppression'),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: AppTheme.radius(AppTheme.radiusMedium),
         ),
-        content: const Text('Êtes-vous sûr de vouloir supprimer cette cellule ?'),
+        content: Text('Êtes-vous sûr de vouloir supprimer cette cellule ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text('Annuler'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -390,11 +387,11 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
               context.read<FirebaseProviderV4>().supprimerCellule(key);
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+            style: AppTheme.buttonStyle(
+              backgroundColor: AppTheme.error,
+              foregroundColor: AppTheme.onPrimary,
             ),
-            child: const Text('Supprimer'),
+            child: Text('Supprimer'),
           ),
         ],
       ),
@@ -402,10 +399,10 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
   }
   Widget _buildStatCard(String label, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppTheme.radius(AppTheme.radiusSmall),
         border: Border.all(
           color: color.withOpacity(0.2),
           width: 1,
@@ -417,22 +414,20 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 16),
-              SizedBox(width: 4),
+              Icon(icon, color: color, size: AppTheme.iconSizeS),
+              SizedBox(width: AppTheme.spacingXS),
               Text(
                 label,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
+                style: AppTheme.textTheme.bodySmall?.copyWith(
+                  color: AppTheme.textSecondary,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 4),
+          SizedBox(height: AppTheme.spacingXS),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 14,
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -448,7 +443,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
     // Créer le contrôleur d'animation s'il n'existe pas
     if (!_animationControllers.containsKey(celluleId)) {
       _animationControllers[celluleId] = AnimationController(
-        duration: const Duration(milliseconds: 300),
+        duration: AppTheme.durationFast,
         vsync: this,
       );
       
@@ -466,19 +461,19 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
           return Transform.rotate(
             angle: animation.value * 0.1, // Légère rotation pour l'effet
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: AppTheme.padding(AppTheme.spacingS),
               decoration: BoxDecoration(
-                color: cellule.fermee ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: cellule.fermee ? AppTheme.error.withOpacity(0.1) : AppTheme.success.withOpacity(0.1),
+                borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 border: Border.all(
-                  color: cellule.fermee ? Colors.red : Colors.green,
+                  color: cellule.fermee ? AppTheme.error : AppTheme.success,
                   width: 1,
                 ),
               ),
               child: Icon(
                 cellule.fermee ? Icons.lock : Icons.lock_open,
-                color: cellule.fermee ? Colors.red : Colors.green,
-                size: 20,
+                color: cellule.fermee ? AppTheme.error : AppTheme.success,
+                size: AppTheme.iconSizeM,
               ),
             ),
           );

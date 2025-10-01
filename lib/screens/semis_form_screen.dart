@@ -150,45 +150,44 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   Widget _buildVarietesSection(FirebaseProviderV4 provider) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppTheme.border),
+        borderRadius: AppTheme.radius(AppTheme.radiusSmall),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(8.0),
+          Padding(
+            padding: AppTheme.padding(AppTheme.spacingS),
             child: Text(
               'Variétés',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
+              style: AppTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.textSecondary,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: AppTheme.padding(AppTheme.spacingS),
             child: Wrap(
-              spacing: 8,
-              children: provider.varietes.map((variete) {
+              spacing: AppTheme.spacingS,
+            children: provider.varietes.map((variete) {
                 final isSelected = _selectedVarietesSurfaces
                     .any((v) => v.nom == variete.nom);
-                return FilterChip(
-                  label: Text(variete.nom),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    setState(() {
-                      if (selected) {
+              return FilterChip(
+                label: Text(variete.nom),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
                         if (!isSelected) {
                           _selectedVarietesSurfaces.add(
                             VarieteSurface(
-                              nom: variete.nom, 
+                        nom: variete.nom,
                               surface: 0,
                               varieteId: variete.firebaseId ?? variete.id.toString(),
                             ),
                           );
                         }
-                      } else {
+                    } else {
                         _selectedVarietesSurfaces
                             .removeWhere((v) => v.nom == variete.nom);
                       }
@@ -200,26 +199,25 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                     });
                     // Recalculer le prix après changement de variétés
                     _calculerPrixSemis();
-                  },
-                );
-              }).toList(),
+                },
+              );
+            }).toList(),
             ),
           ),
           if (_selectedVarietesSurfaces.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
+            Padding(
+              padding: AppTheme.padding(AppTheme.spacingS),
               child: Text(
                 'Veuillez sélectionner au moins une variété',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 12,
+                style: AppTheme.textTheme.bodySmall?.copyWith(
+                  color: AppTheme.error,
                 ),
               ),
             ),
           
           // Section hectares pour les variétés sélectionnées
           if (_selectedVarietesSurfaces.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             _buildHectaresSection(),
           ],
         ],
@@ -229,49 +227,47 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   Widget _buildHectaresSection() {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppTheme.border),
+        borderRadius: AppTheme.radius(AppTheme.radiusSmall),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(8.0),
+          Padding(
+            padding: AppTheme.padding(AppTheme.spacingS),
             child: Text(
               'Surface par variété (hectares)',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
+              style: AppTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.textSecondary,
               ),
             ),
           ),
           // Aide pour l'auto-complétion
           if (_selectedVarietesSurfaces.length > 1)
             Container(
-              margin: const EdgeInsets.all(8),
-              padding: const EdgeInsets.all(8),
+              margin: AppTheme.padding(AppTheme.spacingS),
+              padding: AppTheme.padding(AppTheme.spacingS),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.blue.shade200),
+                color: AppTheme.primary.withOpacity(0.1),
+                borderRadius: AppTheme.radius(AppTheme.radiusSmall),
+                border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.lightbulb_outline, color: Colors.blue.shade700, size: 16),
-                  const SizedBox(width: 8),
+                  Icon(Icons.lightbulb_outline, color: AppTheme.primary, size: AppTheme.iconSizeS),
+                  SizedBox(width: AppTheme.spacingS),
                   Expanded(
                     child: Text(
                       _getAutoCompleteHint(),
-                      style: TextStyle(
-                        color: Colors.blue.shade700,
-                        fontSize: 12,
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ],
-              ),
             ),
+          ),
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -283,7 +279,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               return ListTile(
                 title: Text(varieteSurface.nom),
                 subtitle: isAutoCompleted 
-                    ? const Text('Auto-complété', style: TextStyle(color: Colors.green, fontSize: 10))
+                    ? Text('Auto-complété', style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.success))
                     : null,
                 trailing: SizedBox(
                   width: 100,
@@ -293,10 +289,10 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         : '',
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      suffix: const Text('ha'),
+                      suffix: Text('ha'),
                       isDense: true,
                       filled: isAutoCompleted,
-                      fillColor: isAutoCompleted ? Colors.green.shade50 : null,
+                      fillColor: isAutoCompleted ? AppTheme.success.withOpacity(0.1) : null,
                     ),
                     onChanged: (value) {
                       final hectares = double.tryParse(value) ?? 0;
@@ -478,18 +474,17 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
         ],
       ),
       body: Form(
-        key: _formKey,
+              key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+          padding: AppTheme.padding(AppTheme.spacingM),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+                children: [
               // Sélection de l'année
-              DropdownButtonFormField<int>(
+                  DropdownButtonFormField<int>(
                 value: _selectedYear,
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Année *',
-                  border: OutlineInputBorder(),
                 ),
                 items: List.generate(10, (index) {
                   final year = DateTime.now().year - index;
@@ -511,7 +506,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppTheme.spacingM),
               
               // Sélection de la parcelle (filtrée par année)
               Consumer<FirebaseProviderV4>(
@@ -525,63 +520,60 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       initialValue: parcelleActuelle != null 
                         ? '${parcelleActuelle.nom} (${parcelleActuelle.surface} ha)'
                         : 'Parcelle inconnue',
-                      decoration: const InputDecoration(
+                      decoration: AppTheme.createInputDecoration(
                         labelText: 'Parcelle *',
-                        border: OutlineInputBorder(),
                       ),
                       readOnly: true,
-                      style: const TextStyle(
-                        color: Colors.black87,
+                      style: AppTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     );
                   } else {
                     // Si on crée un nouveau semis, afficher le dropdown
                     return DropdownButtonFormField<String>(
-                      value: _selectedParcelleId,
-                      decoration: const InputDecoration(
+                    value: _selectedParcelleId,
+                      decoration: AppTheme.createInputDecoration(
                         labelText: 'Parcelle *',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: parcellesDisponibles.map((parcelle) {
+                    ),
+                    items: parcellesDisponibles.map((parcelle) {
                         final key = parcelle.firebaseId ?? parcelle.id.toString();
                         return DropdownMenuItem<String>(
                           value: key,
                           child: Text('${parcelle.nom} (${parcelle.surface} ha)'),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedParcelleId = value;
-                        });
-                      },
-                      validator: (value) {
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedParcelleId = value;
+                      });
+                    },
+                    validator: (value) {
                         if (value == null) return 'Veuillez sélectionner une parcelle';
-                        return null;
+                      return null;
                       },
                     );
                   }
                 },
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppTheme.spacingM),
               // Date
-              TextFormField(
-                controller: _dateController,
-                decoration: const InputDecoration(
+                  TextFormField(
+                    controller: _dateController,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Date *',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today),
-                ),
-                readOnly: true,
+                  suffixIcon: Icon(Icons.calendar_today, size: AppTheme.iconSizeM),
+                    ),
+                    readOnly: true,
                 onTap: () => _selectDate(context),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez sélectionner une date';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez sélectionner une date';
+                      }
+                      return null;
+                    },
+                  ),
+              SizedBox(height: AppTheme.spacingM),
               // Sélection des variétés
               Consumer<FirebaseProviderV4>(
                 builder: (context, provider, child) {
@@ -590,83 +582,81 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               ),
               // Résumé des surfaces
               if (_showHectares && _selectedParcelleId != null) ...[
-                const SizedBox(height: 16),
+                SizedBox(height: AppTheme.spacingM),
                 Card(
-                  color: _isTotalValid() ? Colors.green.shade50 : Colors.red.shade50,
+                  color: _isTotalValid() ? AppTheme.success.withOpacity(0.1) : AppTheme.error.withOpacity(0.1),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppTheme.padding(AppTheme.spacingM),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Résumé des surfaces:',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: AppTheme.spacingS),
                         Text('Surface de la parcelle: ${_getParcelleSurface().toStringAsFixed(2)} ha'),
                         Text('Total des variétés: ${_getTotalHectares().toStringAsFixed(2)} ha'),
                         if (!_isTotalValid())
-                          const Text(
+                          Text(
                             '⚠️ Le total des hectares doit correspondre à la surface de la parcelle',
-                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                            style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.error, fontWeight: FontWeight.bold),
                           ),
                       ],
                     ),
                   ),
                 ),
               ],
-              const SizedBox(height: 16),
+              SizedBox(height: AppTheme.spacingM),
               // Densité de maïs
               TextFormField(
                 controller: _densiteController,
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Densité de maïs (graines/ha)',
                   hintText: 'Ex: 83000',
-                  border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: _onDensiteChanged,
-                validator: (value) {
+                    validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer une densité';
                   }
                   final densite = double.tryParse(value);
                   if (densite == null || !CoutUtils.estDensiteValide(densite)) {
                     return 'Densité invalide (entre 50 000 et 150 000)';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                      }
+                      return null;
+                    },
+                  ),
+              SizedBox(height: AppTheme.spacingM),
               // Prix du semis (calculé automatiquement)
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
+                  color: AppTheme.primary.withOpacity(0.1),
+                  borderRadius: AppTheme.radius(AppTheme.radiusMedium),
+                  border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calculate, color: Colors.blue.shade700),
-                    const SizedBox(width: 12),
+                    Icon(Icons.calculate, color: AppTheme.primary, size: AppTheme.iconSizeM),
+                    SizedBox(width: AppTheme.spacingS),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Prix du semis calculé',
-                            style: TextStyle(
+                            style: AppTheme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue.shade700,
+                              color: AppTheme.primary,
                             ),
                           ),
                           Text(
                             '${_prixSemis.toStringAsFixed(2)} €',
-                            style: TextStyle(
-                              fontSize: 18,
+                            style: AppTheme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue.shade900,
+                              color: AppTheme.primary,
                             ),
                           ),
                         ],
@@ -675,17 +665,16 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppTheme.spacingM),
               // Notes
               TextFormField(
                 controller: _notesController,
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Notes',
-                  border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppTheme.spacingL),
               // Boutons de validation
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -695,31 +684,31 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.cancel),
                       label: const Text('Annuler'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      style: AppTheme.buttonStyle(
+                        backgroundColor: AppTheme.textSecondary,
+                        foregroundColor: AppTheme.onPrimary,
+                        padding: EdgeInsets.symmetric(vertical: AppTheme.spacingM),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: AppTheme.spacingM),
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _canSave() ? _saveSemis : null,
                       icon: const Icon(Icons.save),
                       label: const Text('Enregistrer'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      style: AppTheme.buttonStyle(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: AppTheme.onPrimary,
+                        padding: EdgeInsets.symmetric(vertical: AppTheme.spacingM),
                       ),
                     ),
                   ),
                 ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
       ),
     );
   }

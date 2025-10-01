@@ -57,12 +57,12 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
       appBar: AppBar(
         title: Text(widget.traitement == null ? 'Nouveau traitement' : 'Modifier le traitement'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.spacingM),
+          padding: AppTheme.padding(AppTheme.spacingM),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -88,9 +88,8 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                   
                   return DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Parcelle *',
-                      border: OutlineInputBorder(),
                     ),
                     items: parcellesDisponibles.map((p) {
                       return DropdownMenuItem(
@@ -112,7 +111,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                   );
                 },
               ),
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               
               // Informations de la parcelle sélectionnée
               if (_selectedParcelleId != null) _buildParcelleInfo(),
@@ -120,18 +119,17 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
               // Notes
               TextFormField(
                 controller: _notesController,
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Notes',
-                  border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               
               // Produits
               _buildProduitsSection(),
               
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               
               // Boutons
               Row(
@@ -142,7 +140,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingM),
+                  SizedBox(width: AppTheme.spacingM),
                   Expanded(
                     child: ModernButton(
                       text: widget.traitement == null ? 'Créer' : 'Modifier',
@@ -161,39 +159,38 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
   Widget _buildProduitsSection() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingM),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Produits utilisés',
-                  style: TextStyle(
-                    fontSize: 18,
+                  style: AppTheme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
                   ),
                 ),
                 ElevatedButton.icon(
                   onPressed: _addProduit,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Ajouter'),
-                  style: ElevatedButton.styleFrom(
+                  icon: Icon(Icons.add, size: AppTheme.iconSizeM),
+                  label: Text('Ajouter'),
+                  style: AppTheme.buttonStyle(
                     backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppTheme.onPrimary,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.spacingM),
+            SizedBox(height: AppTheme.spacingM),
             
             if (_produits.isEmpty)
-              const Center(
+              Center(
                 child: Text(
                   'Aucun produit ajouté',
-                  style: TextStyle(color: Colors.grey),
+                  style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                 ),
               )
             else
@@ -201,7 +198,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                 final index = entry.key;
                 final produit = entry.value;
                 return Card(
-                  margin: const EdgeInsets.only(bottom: AppTheme.spacingS),
+                  margin: EdgeInsets.only(bottom: AppTheme.spacingS),
                   child: ListTile(
                     title: Text(produit.nomProduit),
                     subtitle: Text('${produit.quantite} ${produit.mesure} - ${produit.prixUnitaire.toStringAsFixed(2)} €/${produit.mesure} - ${_formatDate(produit.date)}'),
@@ -210,18 +207,18 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                       children: [
                         Text(
                           '${produit.coutTotal.toStringAsFixed(2)} €',
-                          style: const TextStyle(
+                          style: AppTheme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primary,
                           ),
                         ),
-                        const SizedBox(width: AppTheme.spacingS),
+                        SizedBox(width: AppTheme.spacingS),
                         IconButton(
-                          icon: const Icon(Icons.edit, size: 20),
+                          icon: Icon(Icons.edit, size: AppTheme.iconSizeM),
                           onPressed: () => _editProduit(index),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                          icon: Icon(Icons.delete, size: AppTheme.iconSizeM, color: AppTheme.error),
                           onPressed: () => _removeProduit(index),
                         ),
                       ],
@@ -231,27 +228,25 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
               }).toList(),
             
             if (_produits.isNotEmpty) ...[
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingM),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Coût total (parcelle):',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: AppTheme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       '${_calculerCoutTotal().toStringAsFixed(2)} €',
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: AppTheme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primary,
                       ),
@@ -378,17 +373,17 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
         if (parcelle == null) return const SizedBox.shrink();
         
         return Container(
-          padding: const EdgeInsets.all(16),
-          margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
+          padding: AppTheme.padding(AppTheme.spacingM),
+          margin: EdgeInsets.only(bottom: AppTheme.spacingM),
           decoration: BoxDecoration(
             color: AppTheme.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
           ),
           child: Row(
             children: [
               Icon(Icons.landscape, color: AppTheme.primary),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingS),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +395,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: AppTheme.spacingXS),
                     Text(
                       parcelle.nom,
                       style: AppTheme.textTheme.titleMedium?.copyWith(
@@ -462,9 +457,9 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sélectionner un produit'),
+        title: Text('Sélectionner un produit'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -474,12 +469,11 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
             children: [
               // Sélection du produit
               Padding(
-                padding: const EdgeInsets.all(AppTheme.spacingM),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 child: DropdownButtonFormField<Produit>(
                   value: _selectedProduit,
-                  decoration: const InputDecoration(
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Produit *',
-                    border: OutlineInputBorder(),
                   ),
                   items: produits.map((p) {
                     return DropdownMenuItem(
@@ -501,12 +495,11 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
               if (_selectedProduit != null) ...[
                 // Quantité
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+                  padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
                   child: TextFormField(
                     controller: _quantiteController,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Quantité par hectare *',
-                      border: OutlineInputBorder(),
                       helperText: 'Quantité à appliquer par hectare de parcelle',
                     ),
                     keyboardType: TextInputType.number,
@@ -515,29 +508,27 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 
                 // Date
                 InkWell(
                   onTap: _selectDate,
                   child: InputDecorator(
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Date d\'application *',
-                      border: OutlineInputBorder(),
                     ),
                     child: Text(_formatDate(_selectedDate)),
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 
                 // Sélection de l'année pour le prix
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+                  padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
                   child: DropdownButtonFormField<int>(
                     value: _selectedAnnee,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Année du prix',
-                      border: OutlineInputBorder(),
                     ),
                     items: () {
                       final years = _selectedProduit!.prixParAnnee.keys.toList()
@@ -559,31 +550,29 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 
                 // Résumé
                 Card(
-                  margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+                  margin: EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
                   child: Padding(
-                    padding: const EdgeInsets.all(AppTheme.spacingM),
+                    padding: AppTheme.padding(AppTheme.spacingM),
                     child: Column(
                       children: [
                         Text(
                           _selectedProduit!.nom,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: AppTheme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: AppTheme.spacingS),
+                        SizedBox(height: AppTheme.spacingS),
                         Text('Quantité: ${_quantiteController.text} ${_selectedProduit!.mesure}'),
                         Text('Prix unitaire (${_selectedAnnee}): ${_prixUnitaire.toStringAsFixed(2)} €/${_selectedProduit!.mesure}'),
                         Text(
                           'Coût par hectare: ${_calculerCoutTotal().toStringAsFixed(2)} €/ha',
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: AppTheme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primary,
                           ),
@@ -594,11 +583,11 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 ),
               ],
               
-              const Spacer(),
+              Spacer(),
               
               // Boutons
               Padding(
-                padding: const EdgeInsets.all(AppTheme.spacingM),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 child: Row(
                   children: [
                     Expanded(
@@ -607,7 +596,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                    const SizedBox(width: AppTheme.spacingM),
+                    SizedBox(width: AppTheme.spacingM),
                     Expanded(
                       child: ModernButton(
                         text: 'Ajouter',

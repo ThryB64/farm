@@ -26,11 +26,11 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 8),
-        const Text('Variétés:', style: TextStyle(fontWeight: FontWeight.bold)),
+        SizedBox(height: AppTheme.spacingS),
+        Text('Variétés:', style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
         ...s.varietesSurfaces.map((vs) => 
           Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+            padding: EdgeInsets.only(left: AppTheme.spacingM),
             child: Text('${vs.nom}: ${vs.pourcentage}%'),
           ),
         ),
@@ -45,7 +45,8 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.parcelle.nom),
-        backgroundColor: Colors.green,
+        backgroundColor: AppTheme.success,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -95,21 +96,21 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
             _selectedYear = DateTime.now().year;
           }
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppTheme.padding(AppTheme.spacingM),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Informations',
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: AppTheme.textTheme.titleLarge,
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: AppTheme.spacingS),
                         Text('Surface: ${widget.parcelle.surface} ha'),
                         Text('Date de création: ${_formatDate(widget.parcelle.dateCreation)}'),
                         if (widget.parcelle.notes != null)
@@ -118,23 +119,22 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: AppTheme.spacingM),
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppTheme.padding(AppTheme.spacingM),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Statistiques par année',
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: AppTheme.textTheme.titleLarge,
                         ),
-                        SizedBox(height: 16),
+                        SizedBox(height: AppTheme.spacingM),
                         DropdownButtonFormField<int>(
                           value: _selectedYear,
-                          decoration: const InputDecoration(
+                          decoration: AppTheme.createInputDecoration(
                             labelText: 'Année',
-                            border: OutlineInputBorder(),
                           ),
                           items: annees.map((annee) {
                             return DropdownMenuItem<int>(
@@ -149,12 +149,12 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                           },
                         ),
                         if (_selectedYear != null) ...[
-                          SizedBox(height: 16),
+                          SizedBox(height: AppTheme.spacingM),
                           Text(
                             'Récolte de $_selectedYear',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: AppTheme.spacingS),
                           if (chargementsParAnnee[_selectedYear]?.isNotEmpty ?? false) ...[
                             Text(
                               'Poids total: ${(chargementsParAnnee[_selectedYear]!.fold<double>(0, (sum, c) => sum + c.poidsNet) / 1000).toStringAsFixed(2)} T',
@@ -169,34 +169,34 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                               'Humidité moyenne: ${(chargementsParAnnee[_selectedYear]!.fold<double>(0, (sum, c) => sum + c.humidite) / chargementsParAnnee[_selectedYear]!.length).toStringAsFixed(1)}%',
                             ),
                           ] else
-                            const Text('Aucune récolte cette année'),
-                          SizedBox(height: 16),
+                            Text('Aucune récolte cette année'),
+                          SizedBox(height: AppTheme.spacingM),
                           Text(
                             'Semis de $_selectedYear',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: AppTheme.spacingS),
                           if (semisParAnnee[_selectedYear]?.isNotEmpty ?? false) ...[
                             ...semisParAnnee[_selectedYear]!.map((s) => _buildSemisDetails(s)),
                           ] else
-                            const Text('Aucun semis cette année'),
+                            Text('Aucun semis cette année'),
                         ],
                       ],
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: AppTheme.spacingM),
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppTheme.padding(AppTheme.spacingM),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Chargements',
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: AppTheme.textTheme.titleLarge,
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: AppTheme.spacingS),
                         if (_selectedYear != null && (chargementsParAnnee[_selectedYear]?.isNotEmpty ?? false))
                           ListView.builder(
                             shrinkWrap: true,
@@ -217,7 +217,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                             },
                           )
                         else
-                          const Text('Aucun chargement enregistré'),
+                          Text('Aucun chargement enregistré'),
                       ],
                     ),
                   ),

@@ -27,7 +27,7 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
       appBar: AppBar(
         title: const Text('Produits'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -47,12 +47,12 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
                     backgroundColor: AppTheme.primary,
                     child: const Icon(
                       Icons.science,
-                      color: Colors.white,
+                      color: AppTheme.onPrimary,
                     ),
                   ),
                   title: Text(
                     produit.nom,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +76,7 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                        icon: Icon(Icons.delete, size: AppTheme.iconSizeM, color: AppTheme.error),
                         onPressed: () => _confirmDelete(provider, produit),
                       ),
                     ],
@@ -98,7 +98,7 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
         icon: const Icon(Icons.add),
         label: const Text('Nouveau produit'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
       ),
     );
   }
@@ -110,23 +110,21 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
           Icon(
             Icons.science_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: AppTheme.textLight,
           ),
           const SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucun produit',
-            style: TextStyle(
-              fontSize: 24,
+            style: AppTheme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
+              color: AppTheme.textSecondary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter un produit',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[500],
+            style: AppTheme.textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textLight,
             ),
           ),
           const SizedBox(height: AppTheme.spacingL),
@@ -141,8 +139,8 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
             label: const Text('Ajouter un produit'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
+              foregroundColor: AppTheme.onPrimary,
+              padding: EdgeInsets.symmetric(
                 horizontal: AppTheme.spacingL,
                 vertical: AppTheme.spacingM,
               ),
@@ -168,7 +166,7 @@ class _ProduitsScreenState extends State<ProduitsScreen> {
               Navigator.pop(context);
               provider.supprimerProduit(produit.firebaseId ?? produit.id.toString());
             },
-            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text('Supprimer', style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.error)),
           ),
         ],
       ),

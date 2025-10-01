@@ -14,6 +14,7 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
+import '../providers/theme_provider.dart';
 import 'parcelle_details_screen.dart';
 class ParcellesScreen extends StatefulWidget {
   const ParcellesScreen({Key? key}) : super(key: key);
@@ -48,12 +49,16 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
   }
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
+    
     return Scaffold(
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Parcelles'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        foregroundColor: colors.textPrimary,
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -64,17 +69,19 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           ),
         ],
       ),
-      body: Consumer<FirebaseProviderV4>(
-        builder: (context, provider, child) {
-          final parcelles = List<Parcelle>.from(provider.parcelles)
-            ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
-          if (parcelles.isEmpty) {
-            return _buildEmptyState();
-          }
-          return FadeTransition(
-            opacity: _fadeAnimation,
-            child: ListView.builder(
-              padding: const EdgeInsets.all(AppTheme.spacingM),
+      body: Container(
+        decoration: BoxDecoration(gradient: gradients.appBg),
+        child: Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
+            final parcelles = List<Parcelle>.from(provider.parcelles)
+              ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
+            if (parcelles.isEmpty) {
+              return _buildEmptyState();
+            }
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(AppTheme.spacingM),
               itemCount: parcelles.length,
               itemBuilder: (context, index) {
                 final parcelle = parcelles[index];
@@ -83,11 +90,12 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             ),
           );
         },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddParcelleDialog(),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
         child: const Icon(Icons.add),
       ),
     );
@@ -112,8 +120,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           const SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucune parcelle enregistrée',
-            style: TextStyle(
-              fontSize: 24,
+            style: AppTheme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
             ),
@@ -121,8 +128,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           const SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter votre première parcelle',
-            style: TextStyle(
-              fontSize: 16,
+            style: AppTheme.textTheme.bodyLarge?.copyWith(
               color: AppTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
@@ -172,17 +178,15 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     children: [
                       Text(
                         parcelle.nom,
-                        style: const TextStyle(
-                          fontSize: 20,
+                        style: AppTheme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: AppTheme.spacingXS),
                       Text(
                         'Créée le ${_formatDate(parcelle.dateCreation)}',
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: AppTheme.textTheme.bodyMedium?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -268,8 +272,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           const SizedBox(width: AppTheme.spacingS),
           Text(
             text,
-            style: TextStyle(
-              fontSize: 14,
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -298,10 +301,10 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom de la parcelle',
                   hintText: 'Ex: Parcelle Nord',
-                  prefixIcon: Icon(Icons.landscape),
+                  prefixIcon: Icons.landscape,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -311,12 +314,12 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 },
                 onSaved: (value) => nom = value!,
               ),
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               TextFormField(
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Surface (hectares)',
                   hintText: 'Ex: 2.5',
-                  prefixIcon: Icon(Icons.area_chart),
+                  prefixIcon: Icons.area_chart,
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -385,9 +388,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             children: [
               TextFormField(
                 initialValue: parcelle.nom,
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom de la parcelle',
-                  prefixIcon: Icon(Icons.landscape),
+                  prefixIcon: Icons.landscape,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -397,12 +400,12 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 },
                 onSaved: (value) => nom = value!,
               ),
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               TextFormField(
                 initialValue: parcelle.surface.toString(),
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Surface (hectares)',
-                  prefixIcon: Icon(Icons.area_chart),
+                  prefixIcon: Icons.area_chart,
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {

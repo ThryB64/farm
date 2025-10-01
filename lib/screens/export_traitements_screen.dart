@@ -566,8 +566,9 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export PDF Traitements'),
-        backgroundColor: Colors.orange,
+        title: Text('Export PDF Traitements'),
+        backgroundColor: AppTheme.warning,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -578,21 +579,20 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               .toList()
             ..sort((a, b) => b.compareTo(a));
           if (annees.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.science,
-                    size: 64,
-                    color: Colors.grey,
+                    size: AppTheme.iconSizeXXL,
+                    color: AppTheme.textLight,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   Text(
                     'Aucun traitement enregistré',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
+                    style: AppTheme.textTheme.titleLarge?.copyWith(
+                      color: AppTheme.textSecondary,
                     ),
                   ),
                 ],
@@ -600,29 +600,27 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
             );
           }
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: AppTheme.padding(AppTheme.spacingM),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Sélectionner l\'année',
-                          style: TextStyle(
-                            fontSize: 18,
+                          style: AppTheme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: AppTheme.spacingM),
                         DropdownButtonFormField<int>(
                           value: _selectedYear ?? annees.first,
-                          decoration: const InputDecoration(
+                          decoration: AppTheme.createInputDecoration(
                             labelText: 'Année',
-                            border: OutlineInputBorder(),
                           ),
                           items: annees.map((annee) {
                             return DropdownMenuItem<int>(
@@ -640,16 +638,15 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: AppTheme.spacingL),
                 ElevatedButton.icon(
                   onPressed: _generatePDF,
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('Générer le PDF'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: const TextStyle(fontSize: 16),
+                  icon: Icon(Icons.picture_as_pdf, color: AppTheme.onPrimary),
+                  label: Text('Générer le PDF', style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onPrimary)),
+                  style: AppTheme.buttonStyle(
+                    backgroundColor: AppTheme.warning,
+                    foregroundColor: AppTheme.onPrimary,
+                    padding: EdgeInsets.symmetric(vertical: AppTheme.spacingM),
                   ),
                 ),
               ],

@@ -38,7 +38,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ventes de Maïs'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppTheme.success,
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -54,14 +54,14 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error, size: 64, color: Colors.red),
-                  SizedBox(height: 16),
+                  Icon(Icons.error, size: AppTheme.iconSizeXXL, color: AppTheme.error),
+                  SizedBox(height: AppTheme.spacingM),
                   Text(
                     'Erreur: ${provider.error}',
-                    style: TextStyle(fontSize: 16, color: Colors.red),
+                    style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.error),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   ElevatedButton(
                     onPressed: () {
                       // L'initialisation est gérée par AuthGate
@@ -86,8 +86,8 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddVenteDialog(context),
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: AppTheme.success,
+        child: Icon(Icons.add, color: AppTheme.onPrimary),
       ),
     );
   }
@@ -103,22 +103,21 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     }
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       child: Row(
         children: [
-          Icon(Icons.calendar_today, color: Colors.green),
-          SizedBox(width: 8),
+          Icon(Icons.calendar_today, color: AppTheme.success),
+          SizedBox(width: AppTheme.spacingS),
           Text(
             'Année:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: AppTheme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
-          SizedBox(width: 16),
+          SizedBox(width: AppTheme.spacingM),
           Expanded(
             child: DropdownButtonFormField<int>(
               value: _selectedAnnee,
-              decoration: InputDecoration(
+              decoration: AppTheme.createInputDecoration(
                 labelText: 'Sélectionner une année',
-                border: OutlineInputBorder(),
               ),
               items: annees.map((year) {
                 return DropdownMenuItem<int>(
@@ -151,7 +150,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       children: [
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: AppTheme.padding(AppTheme.spacingM),
             itemCount: ventesEnCours.length,
             itemBuilder: (context, index) {
               final vente = ventesEnCours[index];
@@ -178,7 +177,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       return Center(
         child: Text(
           'Sélectionnez une année',
-          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+          style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondary),
         ),
       );
     }
@@ -190,22 +189,20 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline, size: 64, color: Colors.grey[400]),
-            SizedBox(height: 16),
+            Icon(Icons.check_circle_outline, size: AppTheme.iconSizeXXL, color: AppTheme.textLight),
+            SizedBox(height: AppTheme.spacingM),
             Text(
               'Aucune vente terminée',
-              style: TextStyle(
-                fontSize: 18,
+              style: AppTheme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
+                color: AppTheme.textSecondary,
               ),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingS),
             Text(
               'Les ventes terminées apparaîtront ici',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
+              style: AppTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.textLight,
               ),
             ),
           ],
@@ -216,7 +213,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       children: [
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: AppTheme.padding(AppTheme.spacingM),
             itemCount: ventesTerminees.length,
             itemBuilder: (context, index) {
               final vente = ventesTerminees[index];
@@ -236,51 +233,50 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     final totalVentesEnCours = ventesEnCours.fold<double>(0, (sum, v) => sum + (v.poidsNet ?? v.poidsNetCalcule));
     final chiffreAffaires = provider.getChiffreAffairesParAnnee(_selectedAnnee!);
     return ModernCard(
-      margin: const EdgeInsets.all(16),
+      margin: AppTheme.padding(AppTheme.spacingM),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Résumé du stock - $_selectedAnnee',
-              style: TextStyle(
-                fontSize: 18,
+              style: AppTheme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.green,
+                color: AppTheme.success,
               ),
             ),
-            SizedBox(height: 12),
+            SizedBox(height: AppTheme.spacingS),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Stock restant', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                    Text('Stock restant', style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                     Text(
                       '${stockRestant.toStringAsFixed(1)} kg',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: AppTheme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Ventes en cours', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                    Text('Ventes en cours', style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                     Text(
                       '${totalVentesEnCours.toStringAsFixed(1)} kg',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange),
+                      style: AppTheme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.warning),
                     ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Chiffre d\'affaires', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                    Text('Chiffre d\'affaires', style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                     Text(
                       '${chiffreAffaires.toStringAsFixed(2)} €',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+                      style: AppTheme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                     ),
                   ],
                 ),
@@ -293,18 +289,18 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
   }
   Widget _buildVenteCard(Vente vente, FirebaseProviderV4 provider, {required bool isEnCours}) {
     return ModernCard(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: AppTheme.spacingS),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: isEnCours ? Colors.orange : Colors.green,
+          backgroundColor: isEnCours ? AppTheme.warning : AppTheme.success,
           child: Icon(
             isEnCours ? Icons.shopping_cart : Icons.check_circle,
-            color: Colors.white,
+            color: AppTheme.onPrimary,
           ),
         ),
         title: Text(
           vente.numeroTicket,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,25 +311,25 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
             Text('Poids net final: ${(vente.poidsNet ?? vente.poidsNetCalcule).toStringAsFixed(1)} kg'),
             if (vente.ecartPoidsNet != null)
               Text('Écart client: ${vente.ecartPoidsNet!.toStringAsFixed(1)} kg', 
-                   style: TextStyle(
-                     color: vente.ecartPoidsNet! > 0 ? Colors.red : Colors.green,
+                   style: AppTheme.textTheme.bodyMedium?.copyWith(
+                     color: vente.ecartPoidsNet! > 0 ? AppTheme.error : AppTheme.success,
                      fontWeight: FontWeight.bold,
                    )),
             if (vente.prix != null)
               Text('Prix total: ${vente.prix!.toStringAsFixed(2)} €'),
             if (vente.payer) 
-              Text('✅ Payé - Vente terminée', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+              Text('✅ Payé - Vente terminée', style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.success, fontWeight: FontWeight.bold)),
         ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.edit, color: Colors.blue),
+              icon: Icon(Icons.edit, color: AppTheme.primary, size: AppTheme.iconSizeM),
               onPressed: () => _showEditVenteDialog(context, vente),
             ),
             IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
+              icon: Icon(Icons.delete, color: AppTheme.error, size: AppTheme.iconSizeM),
               onPressed: () => _showDeleteConfirmation(context, vente, provider),
             ),
           ],
@@ -353,48 +349,43 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: AppTheme.success.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon ?? Icons.shopping_cart_outlined,
-              size: 40,
-              color: Colors.green,
+              size: AppTheme.iconSizeXL,
+              color: AppTheme.success,
             ),
           ),
-          SizedBox(height: 24),
+          SizedBox(height: AppTheme.spacingL),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 20,
+            style: AppTheme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: AppTheme.textPrimary,
             ),
           ),
           if (subtitle != null) ...[
-            SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingS),
             Text(
               subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textSecondary,
               ),
             ),
           ],
-          SizedBox(height: 32),
+          SizedBox(height: AppTheme.spacingXL),
           ElevatedButton.icon(
             onPressed: () => _showAddVenteDialog(context),
-            icon: Icon(Icons.add, color: Colors.white),
+            icon: Icon(Icons.add, color: AppTheme.onPrimary),
             label: Text(
               'Ajouter une vente',
-              style: TextStyle(color: Colors.white),
+              style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onPrimary),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+            style: AppTheme.buttonStyle(
+              backgroundColor: AppTheme.success,
+              padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingL, vertical: AppTheme.spacingM),
             ),
           ),
         ],
@@ -434,7 +425,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
               final key = vente.firebaseId ?? vente.id.toString();
               provider.supprimerVente(key);
             },
-            child: Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text('Supprimer', style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.error)),
           ),
         ],
       ),
@@ -448,11 +439,11 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     final totalEcart = ventesEnCours.fold<double>(0, (sum, v) => sum + (v.ecartPoidsNet ?? 0));
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: Colors.orange[50],
+        color: AppTheme.warning.withOpacity(0.1),
         border: Border(
-          top: BorderSide(color: Colors.orange[200]!, width: 1),
+          top: BorderSide(color: AppTheme.warning.withOpacity(0.3), width: 1),
         ),
       ),
       child: Column(
@@ -460,19 +451,18 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
         children: [
           Text(
             'Totaux - Ventes en cours',
-            style: TextStyle(
-              fontSize: 16,
+            style: AppTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.orange[800],
+              color: AppTheme.warning,
             ),
           ),
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildTotalItem('Poids total', '${totalPoids.toStringAsFixed(1)} kg', Colors.orange[700]!),
-              _buildTotalItem('Prix total', '${totalPrix.toStringAsFixed(2)} €', Colors.green[700]!),
-              _buildTotalItem('Écart total', '${totalEcart.toStringAsFixed(1)} kg', Colors.blue[700]!),
+              _buildTotalItem('Poids total', '${totalPoids.toStringAsFixed(1)} kg', AppTheme.warning),
+              _buildTotalItem('Prix total', '${totalPrix.toStringAsFixed(2)} €', AppTheme.success),
+              _buildTotalItem('Écart total', '${totalEcart.toStringAsFixed(1)} kg', AppTheme.primary),
             ],
           ),
         ],
@@ -490,11 +480,11 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     final totalEcart = ventesTerminees.fold<double>(0, (sum, v) => sum + (v.ecartPoidsNet ?? 0));
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: Colors.green[50],
+        color: AppTheme.success.withOpacity(0.1),
         border: Border(
-          top: BorderSide(color: Colors.green[200]!, width: 1),
+          top: BorderSide(color: AppTheme.success.withOpacity(0.3), width: 1),
         ),
       ),
       child: Column(
@@ -502,39 +492,37 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
         children: [
           Text(
             'Totaux - Ventes terminées ($_selectedAnnee)',
-            style: TextStyle(
-              fontSize: 16,
+            style: AppTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.green[800],
+              color: AppTheme.success,
             ),
           ),
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildTotalItem('Poids total', '${totalPoids.toStringAsFixed(1)} kg', Colors.green[700]!),
-              _buildTotalItem('Prix total', '${totalPrix.toStringAsFixed(2)} €', Colors.green[700]!),
-              _buildTotalItem('Écart total', '${totalEcart.toStringAsFixed(1)} kg', Colors.blue[700]!),
+              _buildTotalItem('Poids total', '${totalPoids.toStringAsFixed(1)} kg', AppTheme.success),
+              _buildTotalItem('Prix total', '${totalPrix.toStringAsFixed(2)} €', AppTheme.success),
+              _buildTotalItem('Écart total', '${totalEcart.toStringAsFixed(1)} kg', AppTheme.primary),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: AppTheme.spacingS),
           Container(
-            padding: EdgeInsets.all(8),
+            padding: AppTheme.padding(AppTheme.spacingS),
             decoration: BoxDecoration(
-              color: Colors.blue[100],
-              borderRadius: BorderRadius.circular(8),
+              color: AppTheme.primary.withOpacity(0.1),
+              borderRadius: AppTheme.radius(AppTheme.radiusSmall),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.inventory, color: Colors.blue[700], size: 20),
-                SizedBox(width: 8),
+                Icon(Icons.inventory, color: AppTheme.primary, size: AppTheme.iconSizeM),
+                SizedBox(width: AppTheme.spacingS),
                 Text(
                   'Stock restant: ${stockRestant.toStringAsFixed(1)} kg',
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: AppTheme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue[700],
+                    color: AppTheme.primary,
                   ),
                 ),
               ],
@@ -550,15 +538,13 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
+          style: AppTheme.textTheme.bodySmall?.copyWith(
+            color: AppTheme.textSecondary,
           ),
         ),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 14,
+          style: AppTheme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: color,
           ),

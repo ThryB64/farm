@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 
 // Services & providers
 import 'providers/firebase_provider_v4.dart';
+import 'providers/theme_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/secure_login_screen.dart';
 import 'theme/app_theme.dart';
@@ -16,20 +17,20 @@ Future<void> main() async {
   // Si un widget crashe, on affiche une carte rouge au lieu d'un écran blanc
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return MaterialApp(
+      theme: AppTheme.lightThemeCompat,
       home: Scaffold(
-        backgroundColor: const Color(0xFF101010),
+        backgroundColor: AppTheme.background,
         body: Center(
           child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.red.withOpacity(0.4)),
+            padding: AppTheme.padding(AppTheme.spacingM),
+            decoration: AppTheme.createCardDecoration(
+              color: AppTheme.error.withOpacity(0.1),
+              borderColor: AppTheme.error.withOpacity(0.4),
             ),
             child: SingleChildScrollView(
               child: Text(
                 'Flutter UI error:\n\n${details.exceptionAsString()}',
-                style: const TextStyle(color: Colors.white),
+                style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onBackground),
               ),
             ),
           ),
@@ -65,6 +66,9 @@ Future<void> main() async {
               ChangeNotifierProvider<FirebaseProviderV4>(
                 create: (context) => FirebaseProviderV4(),
               ),
+              ChangeNotifierProvider<ThemeProvider>(
+                create: (context) => ThemeProvider(),
+              ),
             ],
             child: const MyApp(),
           ),
@@ -79,10 +83,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Maïs Tracker',
-      theme: AppTheme.lightTheme,
-      home: const AuthGate(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'Maïs Tracker',
+          theme: AppTheme.getTheme(themeProvider.isDarkMode),
+          home: const AuthGate(),
+        );
+      },
     );
   }
 }
@@ -95,31 +103,37 @@ class PlaceholderHome extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Farm (Web test)'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppTheme.primary,
       ),
-      body: const Center(
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.agriculture,
-              size: 100,
-              color: Colors.green,
+              size: AppTheme.iconSizeXXL,
+              color: AppTheme.primary,
             ),
-            SizedBox(height: 20),
+            SizedBox(height: AppTheme.spacingL),
             Text(
               'Hello Web 👋',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: AppTheme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: AppTheme.spacingS),
             Text(
               'Maïs Tracker - Version Web',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: AppTheme.textTheme.bodyLarge?.copyWith(
+                color: AppTheme.onSurface.withOpacity(0.7),
+              ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: AppTheme.spacingL),
             Text(
               'L\'application fonctionne !',
-              style: TextStyle(fontSize: 18, color: Colors.green),
+              style: AppTheme.textTheme.titleLarge?.copyWith(
+                color: AppTheme.primary,
+              ),
             ),
           ],
         ),
@@ -136,32 +150,28 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.green.shade700,
-              Colors.green.shade500,
-            ],
-          ),
+          gradient: AppTheme.primaryGradient,
         ),
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.agriculture, color: Colors.white, size: 64),
-              SizedBox(height: 16),
+              Icon(
+                Icons.agriculture, 
+                color: AppTheme.onPrimary, 
+                size: AppTheme.iconSizeXL,
+              ),
+              SizedBox(height: AppTheme.spacingM),
               Text(
                 'Chargement...',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
+                style: AppTheme.textTheme.titleLarge?.copyWith(
+                  color: AppTheme.onPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: AppTheme.spacingL),
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.onPrimary),
               ),
             ],
           ),

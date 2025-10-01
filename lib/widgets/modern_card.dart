@@ -34,12 +34,12 @@ class ModernCard extends StatelessWidget {
         gradient: gradient,
       ),
       child: Material(
-        color: Colors.transparent,
+        color: AppTheme.transparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
           child: Padding(
-            padding: padding ?? const EdgeInsets.all(AppTheme.spacingM),
+            padding: padding ?? AppTheme.padding(AppTheme.spacingM),
             child: child,
           ),
         ),
@@ -107,7 +107,7 @@ class StatCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
+                padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
@@ -115,28 +115,26 @@ class StatCard extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: color,
-                  size: 24,
+                  size: AppTheme.iconSizeM,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
+              SizedBox(width: AppTheme.spacingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
                         color: AppTheme.textSecondary,
                       ),
                     ),
                     if (subtitle != null) ...[
-                      const SizedBox(height: 2),
+                      SizedBox(height: AppTheme.spacingXS),
                       Text(
                         subtitle!,
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: AppTheme.textTheme.bodySmall?.copyWith(
                           color: AppTheme.textLight,
                         ),
                       ),
@@ -146,11 +144,10 @@ class StatCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingM),
+          SizedBox(height: AppTheme.spacingM),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 24,
+            style: AppTheme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -189,33 +186,31 @@ class MenuCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(AppTheme.spacingM),
+              padding: AppTheme.padding(AppTheme.spacingM),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
               ),
               child: Icon(
                 icon,
-                size: 32,
+                size: AppTheme.iconSizeXL,
                 color: color,
               ),
             ),
-            const SizedBox(height: AppTheme.spacingM),
+            SizedBox(height: AppTheme.spacingM),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 16,
+              style: AppTheme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: AppTheme.spacingXS),
               Text(
                 subtitle!,
-                style: const TextStyle(
-                  fontSize: 12,
+                style: AppTheme.textTheme.bodySmall?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,

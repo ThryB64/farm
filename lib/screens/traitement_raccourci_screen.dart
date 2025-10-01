@@ -36,7 +36,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       appBar: AppBar(
         title: const Text('Raccourci Traitements'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -44,33 +44,32 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
           final produits = provider.produits;
           final annees = _getAvailableYears(provider);
           return Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Sélecteur d'année
                 _buildYearSelector(annees),
-                const SizedBox(height: AppTheme.spacingL),
+                SizedBox(height: AppTheme.spacingL),
                 
                 // Sélection des parcelles
                 _buildParcellesSection(parcelles),
-                const SizedBox(height: AppTheme.spacingL),
+                SizedBox(height: AppTheme.spacingL),
                 
                 // Produits
                 _buildProduitsSection(produits),
-                const SizedBox(height: AppTheme.spacingL),
+                SizedBox(height: AppTheme.spacingL),
                 
                 // Notes
                 TextFormField(
                   controller: _notesController,
-                  decoration: const InputDecoration(
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Notes communes',
-                    border: OutlineInputBorder(),
                     hintText: 'Notes qui seront ajoutées à tous les traitements',
                   ),
                   maxLines: 3,
                 ),
-                const SizedBox(height: AppTheme.spacingL),
+                SizedBox(height: AppTheme.spacingL),
                 
                 // Boutons
                 Row(
@@ -81,7 +80,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                    const SizedBox(width: AppTheme.spacingM),
+                    SizedBox(width: AppTheme.spacingM),
                     Expanded(
                       child: ModernButton(
                         text: 'Appliquer à ${_selectedParcelleIds.length} parcelles',
@@ -100,10 +99,10 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
   }
   Widget _buildYearSelector(List<int> annees) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
         color: AppTheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: AppTheme.radius(AppTheme.radiusMedium),
         border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
       ),
       child: Column(
@@ -116,12 +115,11 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppTheme.spacingS),
           DropdownButtonFormField<int>(
             value: _selectedAnnee,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: AppTheme.createInputDecoration(
+              contentPadding: EdgeInsets.symmetric(horizontal: AppTheme.spacingS, vertical: AppTheme.spacingS),
             ),
             items: annees.map((annee) {
               return DropdownMenuItem(
@@ -141,10 +139,10 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
   }
   Widget _buildParcellesSection(List<Parcelle> parcelles) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
         color: AppTheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: AppTheme.radius(AppTheme.radiusMedium),
         border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
       ),
       child: Column(
@@ -166,7 +164,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                     text: 'Tout sélectionner',
                     onPressed: _selectAllParcelles,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: AppTheme.spacingS),
                   ModernOutlinedButton(
                     text: 'Tout désélectionner',
                     onPressed: _deselectAllParcelles,
@@ -175,7 +173,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppTheme.spacingS),
           if (_selectedParcelleIds.isEmpty)
             Text(
               'Aucune parcelle sélectionnée',
@@ -185,8 +183,8 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
             )
           else
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: AppTheme.spacingS,
+              runSpacing: AppTheme.spacingS,
               children: _selectedParcelleIds.map((parcelleId) {
                 final parcelle = parcelles.firstWhere((p) => p.firebaseId == parcelleId);
                 return Chip(
@@ -196,11 +194,11 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                       _selectedParcelleIds.remove(parcelleId);
                     });
                   },
-                  deleteIcon: const Icon(Icons.close, size: 18),
+                  deleteIcon: Icon(Icons.close, size: AppTheme.iconSizeS),
                 );
               }).toList(),
             ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppTheme.spacingS),
           SizedBox(
             height: 200,
             child: ListView.builder(
@@ -232,10 +230,10 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
   }
   Widget _buildProduitsSection(List<Produit> produits) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
         color: AppTheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: AppTheme.radius(AppTheme.radiusMedium),
         border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
       ),
       child: Column(
@@ -257,7 +255,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppTheme.spacingS),
           if (_produits.isEmpty)
             Text(
               'Aucun produit ajouté',
@@ -270,11 +268,11 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
               final index = entry.key;
               final produit = entry.value;
               return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
+                margin: EdgeInsets.only(bottom: AppTheme.spacingS),
+                padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  color: AppTheme.surface,
+                  borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                   border: Border.all(color: AppTheme.border),
                 ),
                 child: Row(
@@ -300,7 +298,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                     ),
                     IconButton(
                       onPressed: () => _removeProduit(index),
-                      icon: const Icon(Icons.delete, color: Colors.red),
+                      icon: Icon(Icons.delete, color: AppTheme.error, size: AppTheme.iconSizeM),
                     ),
                   ],
                 ),
@@ -466,22 +464,21 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       appBar: AppBar(
         title: const Text('Ajouter un produit'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final produits = provider.produits;
           return Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Sélection du produit
                 DropdownButtonFormField<Produit>(
                   value: _selectedProduit,
-                  decoration: const InputDecoration(
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Produit',
-                    border: OutlineInputBorder(),
                   ),
                   items: produits.map((produit) {
                     return DropdownMenuItem(
@@ -500,25 +497,23 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 // Quantité
                 TextFormField(
                   controller: _quantiteController,
-                  decoration: const InputDecoration(
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Quantité par hectare *',
-                    border: OutlineInputBorder(),
                     helperText: 'Quantité appliquée par hectare',
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (_) => _calculerCoutTotal(),
                 ),
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 // Prix unitaire
                 TextFormField(
                   controller: _prixController,
-                  decoration: const InputDecoration(
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Prix unitaire',
-                    border: OutlineInputBorder(),
                     helperText: 'Prix par unité du produit',
                   ),
                   keyboardType: TextInputType.number,
@@ -527,12 +522,12 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     _calculerCoutTotal();
                   },
                 ),
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 // Date
                 ListTile(
-                  title: const Text('Date'),
+                  title: Text('Date'),
                   subtitle: Text('${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
-                  trailing: const Icon(Icons.calendar_today),
+                  trailing: Icon(Icons.calendar_today, color: AppTheme.textSecondary),
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -547,13 +542,13 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     }
                   },
                 ),
-                const SizedBox(height: AppTheme.spacingM),
+                SizedBox(height: AppTheme.spacingM),
                 // Coût total
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppTheme.padding(AppTheme.spacingM),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    borderRadius: AppTheme.radius(AppTheme.radiusMedium),
                     border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
                   ),
                   child: Text(
@@ -564,7 +559,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingL),
+                SizedBox(height: AppTheme.spacingL),
                 // Boutons
                 Row(
                   children: [
@@ -574,7 +569,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                    const SizedBox(width: AppTheme.spacingM),
+                    SizedBox(width: AppTheme.spacingM),
                     Expanded(
                       child: ModernButton(
                         text: 'Ajouter',

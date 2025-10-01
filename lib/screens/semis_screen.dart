@@ -30,7 +30,7 @@ class _SemisScreenState extends State<SemisScreen> {
       appBar: AppBar(
         title: const Text('Semis'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
         elevation: 0,
         actions: [
           IconButton(
@@ -87,7 +87,7 @@ class _SemisScreenState extends State<SemisScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addSemis,
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
         icon: const Icon(Icons.add),
         label: const Text('Nouveau semis'),
       ),
@@ -99,7 +99,7 @@ class _SemisScreenState extends State<SemisScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: AppTheme.padding(AppTheme.spacingL),
             decoration: BoxDecoration(
               color: AppTheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
@@ -110,7 +110,7 @@ class _SemisScreenState extends State<SemisScreen> {
               color: AppTheme.primary,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucun semis enregistré',
             style: AppTheme.textTheme.headlineMedium?.copyWith(
@@ -118,14 +118,14 @@ class _SemisScreenState extends State<SemisScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter votre premier semis',
             style: AppTheme.textTheme.bodyLarge?.copyWith(
               color: AppTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: AppTheme.spacingXL),
           ModernButton(
             text: 'Ajouter un semis',
             icon: Icons.add,
@@ -144,13 +144,13 @@ class _SemisScreenState extends State<SemisScreen> {
           Icon(
             Icons.calendar_today,
             size: 48,
-            color: Colors.grey[400],
+            color: AppTheme.textLight,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingM),
           Text(
             'Sélectionnez une année',
             style: AppTheme.textTheme.headlineSmall?.copyWith(
-              color: Colors.grey[600],
+              color: AppTheme.textSecondary,
             ),
           ),
         ],
@@ -159,10 +159,10 @@ class _SemisScreenState extends State<SemisScreen> {
   }
   Widget _buildYearSelector(List<int> annees) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: AppTheme.padding(AppTheme.spacingM),
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: Border.all(color: AppTheme.border),
         boxShadow: [
@@ -176,14 +176,14 @@ class _SemisScreenState extends State<SemisScreen> {
       child: Row(
         children: [
           Icon(Icons.calendar_today, color: AppTheme.primary),
-          const SizedBox(width: 12),
+          SizedBox(width: AppTheme.spacingS),
           Text(
             'Année:',
             style: AppTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: AppTheme.spacingM),
           Expanded(
             child: DropdownButton<int>(
                   value: _selectedYear,
@@ -226,8 +226,8 @@ class _SemisScreenState extends State<SemisScreen> {
     }
     final hectaresRestants = totalSurfaceParcelles - totalHectaresSemes;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
+      padding: AppTheme.padding(AppTheme.spacingL),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppTheme.primary.withOpacity(0.1), AppTheme.primary.withOpacity(0.05)],
@@ -243,7 +243,7 @@ class _SemisScreenState extends State<SemisScreen> {
           Row(
             children: [
               Icon(Icons.analytics, color: AppTheme.primary),
-              const SizedBox(width: 8),
+              SizedBox(width: AppTheme.spacingS),
               Text(
                 'Résumé ${_selectedYear}',
                 style: AppTheme.textTheme.headlineSmall?.copyWith(
@@ -253,7 +253,7 @@ class _SemisScreenState extends State<SemisScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingM),
           Row(
             children: [
               Expanded(
@@ -264,7 +264,7 @@ class _SemisScreenState extends State<SemisScreen> {
                   Colors.green,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingS),
               Expanded(
                 child: _buildStatCard(
                   'Hectares restants',
@@ -289,7 +289,7 @@ class _SemisScreenState extends State<SemisScreen> {
   }
   Widget _buildStatCard(String title, String value, IconData icon, Color color, {bool fullWidth = false}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
@@ -306,7 +306,7 @@ class _SemisScreenState extends State<SemisScreen> {
         ? Row(
             children: [
               Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
+              SizedBox(width: AppTheme.spacingS),
               Text(
                 title,
                 style: AppTheme.textTheme.bodyMedium?.copyWith(
@@ -340,7 +340,7 @@ class _SemisScreenState extends State<SemisScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: AppTheme.spacingXS),
               Text(
                 value,
                 style: AppTheme.textTheme.titleMedium?.copyWith(
@@ -354,11 +354,11 @@ class _SemisScreenState extends State<SemisScreen> {
   }
   Widget _buildSemisListWithStats(List<Semis> semisAnnee, List<Parcelle> parcelles, List<Variete> varietes) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       children: [
         // Statistiques en haut de la liste (suivent le scroll)
         _buildStatistics(semisAnnee, parcelles),
-        const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingM),
         
         // Liste des semis
         ...semisAnnee.asMap().entries.map((entry) {
@@ -374,9 +374,9 @@ class _SemisScreenState extends State<SemisScreen> {
                             ),
                           );
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: EdgeInsets.only(bottom: AppTheme.spacingS),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.surface,
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               border: Border.all(color: AppTheme.border),
               boxShadow: [
@@ -391,7 +391,7 @@ class _SemisScreenState extends State<SemisScreen> {
               children: [
                 // En-tête de la carte
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppTheme.padding(AppTheme.spacingM),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withOpacity(0.1),
                     borderRadius: const BorderRadius.only(
@@ -402,7 +402,7 @@ class _SemisScreenState extends State<SemisScreen> {
                   child: Row(
                                 children: [
                       Icon(Icons.grass, color: AppTheme.primary),
-                      const SizedBox(width: 8),
+                      SizedBox(width: AppTheme.spacingS),
                       Expanded(
                         child: Text(
                           parcelle.nom,
@@ -435,9 +435,12 @@ class _SemisScreenState extends State<SemisScreen> {
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete, color: Colors.red, size: 20),
+                                Icon(Icons.delete, color: AppTheme.error, size: 20),
                                 SizedBox(width: 8),
-                                Text('Supprimer', style: TextStyle(color: Colors.red)),
+                                Text('Supprimer', style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppTheme.error,
+                                )),
                               ],
                             ),
                           ),
@@ -450,36 +453,36 @@ class _SemisScreenState extends State<SemisScreen> {
                 
                 // Contenu de la carte
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppTheme.padding(AppTheme.spacingM),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Date
                       _buildInfoRow(Icons.calendar_today, 'Date', _formatDate(semis.date)),
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppTheme.spacingS),
                       
                       // Variétés avec surfaces
                       _buildVarietesInfo(semis, varietes),
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppTheme.spacingS),
                       
                       // Surface totale
                       _buildInfoRow(Icons.area_chart, 'Surface totale', '${_getTotalSurface(semis.varietesSurfaces).toStringAsFixed(2)} ha'),
                       
                       // Prix du semis si défini
                       if (semis.prixSemis > 0) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: AppTheme.spacingS),
                         _buildInfoRow(Icons.euro, 'Prix semis', '${semis.prixSemis.toStringAsFixed(2)} €'),
                       ],
                       
                       // Densité de maïs
                       if (semis.densiteMais > 0) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: AppTheme.spacingS),
                         _buildInfoRow(Icons.grain, 'Densité maïs', '${semis.densiteMais.toStringAsFixed(0)} graines/ha'),
                       ],
                       
                       // Notes si présentes
                       if (semis.notes?.isNotEmpty ?? false) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: AppTheme.spacingS),
                         _buildInfoRow(Icons.note, 'Notes', semis.notes!),
                       ],
                     ],
@@ -494,7 +497,7 @@ class _SemisScreenState extends State<SemisScreen> {
   }
   Widget _buildSemisList(List<Semis> semisAnnee, List<Parcelle> parcelles, List<Variete> varietes) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: AppTheme.padding(AppTheme.spacingM),
       itemCount: semisAnnee.length,
       itemBuilder: (context, index) {
         final semis = semisAnnee[index];
@@ -510,7 +513,7 @@ class _SemisScreenState extends State<SemisScreen> {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surface,
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(color: AppTheme.border),
             boxShadow: [
@@ -525,7 +528,7 @@ class _SemisScreenState extends State<SemisScreen> {
             children: [
               // En-tête de la carte
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withOpacity(0.1),
                   borderRadius: const BorderRadius.only(
@@ -536,7 +539,7 @@ class _SemisScreenState extends State<SemisScreen> {
                 child: Row(
                   children: [
                     Icon(Icons.grass, color: AppTheme.primary),
-                    const SizedBox(width: 8),
+                    SizedBox(width: AppTheme.spacingS),
                     Expanded(
                       child: Text(
                         parcelle.nom,
@@ -569,9 +572,12 @@ class _SemisScreenState extends State<SemisScreen> {
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.delete, color: Colors.red, size: 20),
+                              Icon(Icons.delete, color: AppTheme.error, size: 20),
                               SizedBox(width: 8),
-                              Text('Supprimer', style: TextStyle(color: Colors.red)),
+                              Text('Supprimer', style: const TextStyle(
+                                fontSize: 14,
+                                color: AppTheme.error,
+                              )),
                             ],
                           ),
                         ),
@@ -584,36 +590,36 @@ class _SemisScreenState extends State<SemisScreen> {
               
               // Contenu de la carte
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Date
                     _buildInfoRow(Icons.calendar_today, 'Date', _formatDate(semis.date)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppTheme.spacingS),
                     
                     // Variétés avec surfaces
                     _buildVarietesInfo(semis, varietes),
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppTheme.spacingS),
                     
                     // Surface totale
                     _buildInfoRow(Icons.area_chart, 'Surface totale', '${_getTotalSurface(semis.varietesSurfaces).toStringAsFixed(2)} ha'),
                     
                     // Prix du semis si défini
                     if (semis.prixSemis > 0) ...[
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppTheme.spacingS),
                       _buildInfoRow(Icons.euro, 'Prix semis', '${semis.prixSemis.toStringAsFixed(2)} €'),
                     ],
                     
                     // Densité de maïs
                     if (semis.densiteMais > 0) ...[
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppTheme.spacingS),
                       _buildInfoRow(Icons.grain, 'Densité maïs', '${semis.densiteMais.toStringAsFixed(0)} graines/ha'),
                     ],
                     
                     // Notes si présentes
                     if (semis.notes?.isNotEmpty ?? false) ...[
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppTheme.spacingS),
                       _buildInfoRow(Icons.note, 'Notes', semis.notes!),
                     ],
                   ],
@@ -629,7 +635,7 @@ class _SemisScreenState extends State<SemisScreen> {
     return Row(
       children: [
         Icon(icon, size: 16, color: AppTheme.textSecondary),
-        const SizedBox(width: 8),
+        SizedBox(width: AppTheme.spacingS),
         Text(
           '$label: ',
           style: AppTheme.textTheme.bodyMedium?.copyWith(
@@ -656,7 +662,7 @@ class _SemisScreenState extends State<SemisScreen> {
         Row(
           children: [
             Icon(Icons.eco, size: 16, color: AppTheme.textSecondary),
-            const SizedBox(width: 8),
+            SizedBox(width: AppTheme.spacingS),
             Text(
               'Variétés: ',
               style: AppTheme.textTheme.bodyMedium?.copyWith(
@@ -666,7 +672,7 @@ class _SemisScreenState extends State<SemisScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: AppTheme.spacingXS),
         ...semis.varietesSurfaces.map((varieteSurface) {
           final variete = varietes.firstWhere(
             (v) => v.firebaseId == varieteSurface.varieteId,
@@ -679,7 +685,7 @@ class _SemisScreenState extends State<SemisScreen> {
           );
           
           return Padding(
-            padding: const EdgeInsets.only(left: 24, bottom: 2),
+            padding: EdgeInsets.only(left: AppTheme.spacingL, bottom: AppTheme.spacingXS),
             child: Text(
               '• ${variete.nom}: ${varieteSurface.surface.toStringAsFixed(2)} ha',
               style: AppTheme.textTheme.bodySmall?.copyWith(

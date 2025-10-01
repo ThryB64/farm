@@ -526,8 +526,9 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export Ventes PDF'),
-        backgroundColor: Colors.orange,
+        title: Text('Export Ventes PDF'),
+        backgroundColor: AppTheme.warning,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -537,20 +538,19 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
               .toList()
             ..sort((a, b) => b.compareTo(a));
           if (years.isEmpty) {
-            return const Center(
+            return Center(
               child: Text('Aucune donnée de vente disponible pour l\'export'),
             );
           }
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 DropdownButtonFormField<int>(
                   value: _selectedYear,
-                  decoration: const InputDecoration(
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Année',
-                    border: OutlineInputBorder(),
                   ),
                   items: years.map((year) {
                     return DropdownMenuItem(
@@ -564,20 +564,20 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
                     });
                   },
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: AppTheme.spacingL),
                 ElevatedButton.icon(
                   onPressed: _selectedYear == null
                       ? null
                       : () => _generatePDF(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
+                  style: AppTheme.buttonStyle(
+                    backgroundColor: AppTheme.warning,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppTheme.spacingXL,
+                      vertical: AppTheme.spacingM,
                     ),
                   ),
-                  icon: Icon(Icons.picture_as_pdf),
-                  label: const Text('Générer PDF des Ventes'),
+                  icon: Icon(Icons.picture_as_pdf, color: AppTheme.onPrimary),
+                  label: Text('Générer PDF des Ventes', style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onPrimary)),
                 ),
               ],
             ),

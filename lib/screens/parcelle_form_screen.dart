@@ -65,7 +65,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        padding: EdgeInsets.fromLTRB(AppTheme.spacingL, AppTheme.spacingS, AppTheme.spacingL, AppTheme.spacingL),
         child: Form(
           key: _formKey,
           child: Column(
@@ -73,18 +73,18 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
             children: [
               // En-tête
               Glass(
-                padding: const EdgeInsets.all(20),
+                padding: AppTheme.padding(AppTheme.spacingL),
                 radius: 24,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.landscape, color: AppColors.coral, size: 24),
+                        Icon(Icons.landscape, color: AppTheme.primary, size: AppTheme.iconSizeM),
                         const SizedBox(width: 12),
                         Text(
                           isEditing ? 'Modifier la parcelle' : 'Créer une nouvelle parcelle',
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.navy),
+                          style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                         ),
                       ],
                     ),
@@ -93,7 +93,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                       isEditing
                           ? 'Modifiez les informations de votre parcelle'
                           : 'Remplissez les informations de votre nouvelle parcelle',
-                      style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
                     ),
                   ],
                 ),
@@ -101,14 +101,14 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
               const SizedBox(height: 24),
               // Formulaire
               Glass(
-                padding: const EdgeInsets.all(20),
+                padding: AppTheme.padding(AppTheme.spacingL),
                 radius: 24,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Informations de base',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.navy),
+                      style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                     ),
                     const SizedBox(height: 20),
                     // Nom de la parcelle
@@ -203,14 +203,14 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Glass(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingL, vertical: AppTheme.spacingM),
                         radius: 16,
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.close, color: AppColors.navy, size: 18),
-                            SizedBox(width: 8),
-                            Text('Annuler', style: TextStyle(color: AppColors.navy, fontWeight: FontWeight.w600)),
+                            Icon(Icons.close, color: AppTheme.textPrimary, size: AppTheme.iconSizeS),
+                            SizedBox(width: AppTheme.spacingS),
+                            Text('Annuler', style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
@@ -247,7 +247,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, color: AppColors.navy, fontWeight: FontWeight.w600),
+          style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -257,27 +257,27 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
           validator: validator,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.textSecondary),
-            prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
+            hintStyle: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+            prefixIcon: Icon(icon, color: AppTheme.textSecondary, size: AppTheme.iconSizeM),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.1),
+            fillColor: AppTheme.surface.withOpacity(0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Colors.white, width: 1),
+              borderSide: BorderSide(color: AppTheme.surface, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Colors.white, width: 1),
+              borderSide: BorderSide(color: AppTheme.surface, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.coral, width: 2),
+              borderSide: BorderSide(color: AppTheme.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
+              borderSide: BorderSide(color: AppTheme.error, width: 1),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingM),
           ),
         ),
       ],

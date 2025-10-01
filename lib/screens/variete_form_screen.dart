@@ -64,13 +64,13 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
       appBar: AppBar(
         title: Text(
           widget.variete == null ? 'Nouvelle variété' : 'Modifier la variété',
-          style: AppTheme.textTheme.headlineSmall?.copyWith(color: Colors.white),
+          style: AppTheme.textTheme.headlineSmall?.copyWith(color: AppTheme.onPrimary),
         ),
         backgroundColor: AppTheme.primary,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppTheme.spacingL),
+        padding: AppTheme.padding(AppTheme.spacingL),
         child: Form(
           key: _formKey,
           child: Column(
@@ -79,14 +79,9 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
               // Nom de la variété
               TextFormField(
                 controller: _nomController,
-                decoration: InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom de la variété',
                   hintText: 'Ex: Pioneer P1234',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -101,19 +96,14 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               
               // Description
               TextFormField(
                 controller: _descriptionController,
-                decoration: InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Description (optionnel)',
                   hintText: 'Caractéristiques de la variété...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
                 ),
                 maxLines: 3,
                 validator: (value) {
@@ -123,7 +113,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppTheme.spacingXL),
+              SizedBox(height: AppTheme.spacingXL),
               
               // Section Prix par année
               Text(
@@ -133,14 +123,14 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               
               // Ajout d'un nouveau prix
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingM),
+                padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  color: AppTheme.surface,
+                  borderRadius: AppTheme.radius(AppTheme.radiusMedium),
                   border: Border.all(color: AppTheme.border),
                 ),
                 child: Column(
@@ -151,9 +141,8 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                           flex: 2,
                           child: DropdownButtonFormField<int>(
                             value: _anneeSelectionnee,
-                            decoration: const InputDecoration(
+                            decoration: AppTheme.createInputDecoration(
                               labelText: 'Année',
-                              border: OutlineInputBorder(),
                             ),
                             items: List.generate(5, (index) {
                               final annee = DateTime.now().year - 2 + index;
@@ -172,43 +161,42 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: AppTheme.spacingM),
+                        SizedBox(width: AppTheme.spacingM),
                         Expanded(
                           flex: 3,
                           child: TextFormField(
                             controller: _prixController,
-                            decoration: const InputDecoration(
+                            decoration: AppTheme.createInputDecoration(
                               labelText: 'Prix de la dose (€)',
-                              border: OutlineInputBorder(),
                             ),
                             keyboardType: TextInputType.number,
                           ),
                         ),
-                        const SizedBox(width: AppTheme.spacingM),
+                        SizedBox(width: AppTheme.spacingM),
                         ElevatedButton(
                           onPressed: _ajouterPrix,
-                          style: ElevatedButton.styleFrom(
+                          style: AppTheme.buttonStyle(
                             backgroundColor: AppTheme.primary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
                             ),
                           ),
-                          child: const Icon(Icons.add, color: Colors.white),
+                          child: Icon(Icons.add, color: AppTheme.onPrimary),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               
               // Liste des prix existants
               if (_prixParAnnee.isNotEmpty) ...[
                 Container(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
+                  padding: AppTheme.padding(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    color: AppTheme.surface,
+                    borderRadius: AppTheme.radius(AppTheme.radiusMedium),
                     border: Border.all(color: AppTheme.border),
                   ),
                   child: Column(
@@ -220,10 +208,10 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: AppTheme.spacingS),
+                      SizedBox(height: AppTheme.spacingS),
                       ..._prixParAnnee.entries.map((entry) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingXS),
+                          padding: EdgeInsets.symmetric(vertical: AppTheme.spacingXS),
                           child: Row(
                             children: [
                               Expanded(
@@ -231,7 +219,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                               ),
                               IconButton(
                                 onPressed: () => _supprimerPrix(entry.key),
-                                icon: const Icon(Icons.delete, color: Colors.red),
+                                icon: Icon(Icons.delete, color: AppTheme.error, size: AppTheme.iconSizeM),
                               ),
                             ],
                           ),
@@ -240,7 +228,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingL),
+                SizedBox(height: AppTheme.spacingL),
               ],
               
               // Bouton de validation
@@ -278,7 +266,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                             backgroundColor: AppTheme.error,
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
                             ),
                           ),
                         );

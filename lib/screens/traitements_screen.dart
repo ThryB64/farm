@@ -59,7 +59,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       appBar: AppBar(
         title: const Text('Traitements'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
         actions: [
           IconButton(
             icon: const Icon(Icons.science),
@@ -80,7 +80,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               // Filtres
               Container(
                 padding: const EdgeInsets.all(AppTheme.spacingM),
-                color: Colors.grey[50],
+                color: AppTheme.surface,
                 child: Column(
                   children: [
                     // Sélecteur d'année
@@ -88,10 +88,9 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                       children: [
                         const Icon(Icons.calendar_today, color: AppTheme.primary),
                         const SizedBox(width: AppTheme.spacingS),
-                        const Text(
+                        Text(
                           'Année:',
-                          style: TextStyle(
-                            fontSize: 16,
+                          style: AppTheme.textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.textPrimary,
                           ),
@@ -100,9 +99,8 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                         Expanded(
                           child: DropdownButtonFormField<int>(
                             value: _selectedYear,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: AppTheme.createInputDecoration(
+                              contentPadding: EdgeInsets.symmetric(horizontal: AppTheme.spacingS, vertical: AppTheme.spacingXS),
                             ),
                             items: () {
                               final annees = traitements
@@ -133,10 +131,9 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                       children: [
                         const Icon(Icons.landscape, color: AppTheme.primary),
                         const SizedBox(width: AppTheme.spacingS),
-                        const Text(
+                        Text(
                           'Parcelle:',
-                          style: TextStyle(
-                            fontSize: 16,
+                          style: AppTheme.textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.textPrimary,
                           ),
@@ -145,9 +142,8 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             value: _selectedParcelleId,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: AppTheme.createInputDecoration(
+                              contentPadding: EdgeInsets.symmetric(horizontal: AppTheme.spacingS, vertical: AppTheme.spacingXS),
                               hintText: 'Toutes les parcelles',
                             ),
                             items: [
@@ -197,7 +193,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
             icon: const Icon(Icons.speed),
             label: const Text('Raccourci'),
             backgroundColor: AppTheme.secondary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppTheme.onPrimary,
             heroTag: "raccourci",
           ),
           const SizedBox(height: 16),
@@ -214,7 +210,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
             icon: const Icon(Icons.add),
             label: const Text('Nouveau traitement'),
             backgroundColor: AppTheme.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppTheme.onPrimary,
             heroTag: "nouveau",
           ),
         ],
@@ -258,12 +254,12 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               backgroundColor: AppTheme.primary,
               child: const Icon(
                 Icons.science,
-                color: Colors.white,
+                color: AppTheme.onPrimary,
               ),
             ),
             title: Text(
               parcelle.nom,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,7 +277,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               children: [
                 Text(
                   '${traitement.coutTotal.toStringAsFixed(2)} €',
-                  style: const TextStyle(
+                  style: AppTheme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
                   ),
@@ -303,7 +299,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                      icon: Icon(Icons.delete, size: AppTheme.iconSizeM, color: AppTheme.error),
                       onPressed: () => _confirmDelete(provider, traitement),
                     ),
                   ],
@@ -324,23 +320,21 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
           Icon(
             Icons.science_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: AppTheme.textLight,
           ),
           const SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucun traitement',
-            style: TextStyle(
-              fontSize: 24,
+            style: AppTheme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
+              color: AppTheme.textSecondary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter un traitement',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[500],
+            style: AppTheme.textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textLight,
             ),
           ),
           const SizedBox(height: AppTheme.spacingL),
@@ -357,8 +351,8 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
             label: const Text('Ajouter un traitement'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
+              foregroundColor: AppTheme.onPrimary,
+              padding: EdgeInsets.symmetric(
                 horizontal: AppTheme.spacingL,
                 vertical: AppTheme.spacingM,
               ),
@@ -387,7 +381,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               Navigator.pop(context);
               provider.supprimerTraitement(traitement.firebaseId ?? traitement.id.toString());
             },
-            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text('Supprimer', style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.error)),
           ),
         ],
       ),

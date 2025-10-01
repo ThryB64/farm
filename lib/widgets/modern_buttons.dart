@@ -36,9 +36,9 @@ class ModernButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppTheme.primary,
-          foregroundColor: textColor ?? Colors.white,
+          foregroundColor: textColor ?? AppTheme.onPrimary,
           elevation: 0,
-          padding: padding ?? const EdgeInsets.symmetric(
+          padding: padding ?? EdgeInsets.symmetric(
             horizontal: AppTheme.spacingL,
             vertical: AppTheme.spacingM,
           ),
@@ -47,25 +47,24 @@ class ModernButton extends StatelessWidget {
           ),
         ),
         child: isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
+            ? SizedBox(
+                width: AppTheme.iconSizeM,
+                height: AppTheme.iconSizeM,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.onPrimary),
                 ),
               )
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 20),
-                    const SizedBox(width: AppTheme.spacingS),
+                    Icon(icon, size: AppTheme.iconSizeM),
+                    SizedBox(width: AppTheme.spacingS),
                   ],
                   Text(
                     text,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: AppTheme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -113,7 +112,7 @@ class ModernOutlinedButton extends StatelessWidget {
             color: borderColor ?? AppTheme.primary,
             width: 2,
           ),
-          padding: padding ?? const EdgeInsets.symmetric(
+          padding: padding ?? EdgeInsets.symmetric(
             horizontal: AppTheme.spacingL,
             vertical: AppTheme.spacingM,
           ),
@@ -136,13 +135,12 @@ class ModernOutlinedButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 20),
-                    const SizedBox(width: AppTheme.spacingS),
+                    Icon(icon, size: AppTheme.iconSizeM),
+                    SizedBox(width: AppTheme.spacingS),
                   ],
                   Text(
                     text,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: AppTheme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -179,10 +177,10 @@ class ModernTextButton extends StatelessWidget {
       onPressed: onPressed,
       style: TextButton.styleFrom(
         foregroundColor: textColor ?? AppTheme.primary,
-        padding: padding ?? const EdgeInsets.symmetric(
-          horizontal: AppTheme.spacingM,
-          vertical: AppTheme.spacingS,
-        ),
+          padding: padding ?? EdgeInsets.symmetric(
+            horizontal: AppTheme.spacingM,
+            vertical: AppTheme.spacingS,
+          ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
         ),
@@ -191,12 +189,12 @@ class ModernTextButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 20),
-            const SizedBox(width: AppTheme.spacingS),
+            Icon(icon, size: AppTheme.iconSizeM),
+            SizedBox(width: AppTheme.spacingS),
           ],
           Text(
             text,
-            style: TextStyle(
+            style: AppTheme.textTheme.bodyLarge?.copyWith(
               fontSize: fontSize ?? 16,
               fontWeight: fontWeight ?? FontWeight.w600,
             ),
@@ -228,7 +226,7 @@ class ModernFloatingActionButton extends StatelessWidget {
     return FloatingActionButton(
       onPressed: onPressed,
       backgroundColor: backgroundColor ?? AppTheme.primary,
-      foregroundColor: foregroundColor ?? Colors.white,
+      foregroundColor: foregroundColor ?? AppTheme.onPrimary,
       tooltip: tooltip,
       child: Icon(icon),
     );

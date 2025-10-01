@@ -137,7 +137,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.chargement == null ? 'Nouveau chargement' : 'Modifier le chargement'),
-        backgroundColor: Colors.orange,
+        backgroundColor: AppTheme.primary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -163,7 +163,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
               .toList();
           final varietesDisponibles = _getVarietesDisponibles(provider);
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: AppTheme.padding(AppTheme.spacingM),
             child: Form(
               key: _formKey,
               child: Column(
@@ -171,9 +171,8 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                 children: [
                   DropdownButtonFormField<int>(
                     value: _selectedYear,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Année',
-                      border: OutlineInputBorder(),
                     ),
                     items: annees.map((annee) {
                       return DropdownMenuItem(
@@ -195,12 +194,11 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Parcelle',
-                      border: OutlineInputBorder(),
                     ),
                     items: provider.parcelles.map((parcelle) {
                       return DropdownMenuItem(
@@ -221,12 +219,11 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   DropdownButtonFormField<String>(
                     value: _selectedVariete,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Variété',
-                      border: OutlineInputBorder(),
                     ),
                     items: varietesDisponibles.map((variete) {
                       return DropdownMenuItem(
@@ -246,12 +243,11 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   DropdownButtonFormField<String>(
                     value: _selectedCelluleId,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Cellule',
-                      border: OutlineInputBorder(),
                     ),
                     items: cellulesAnnee.map((cellule) {
                       return DropdownMenuItem(
@@ -271,12 +267,11 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   DropdownButtonFormField<String>(
                     value: _selectedRemorque,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Remorque',
-                      border: OutlineInputBorder(),
                     ),
                     items: _remorques.map((remorque) {
                       return DropdownMenuItem(
@@ -296,12 +291,11 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   TextFormField(
                     controller: _poidsPleinController,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Poids plein (kg)',
-                      border: OutlineInputBorder(),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
@@ -316,12 +310,11 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     },
                     onChanged: _calculerPoidsNet,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   TextFormField(
                     controller: _poidsVideController,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Poids vide (kg)',
-                      border: OutlineInputBorder(),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
@@ -336,12 +329,11 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     },
                     onChanged: _calculerPoidsNet,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   TextFormField(
                     controller: _humiditeController,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Humidité (%)',
-                      border: OutlineInputBorder(),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
@@ -356,7 +348,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                     },
                     onChanged: _calculerPoidsNet,
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: AppTheme.spacingL),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
@@ -394,7 +386,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Erreur: ${e.toString()}'),
-                                backgroundColor: Colors.red,
+                                backgroundColor: AppTheme.error,
                               ),
                             );
                           }
@@ -402,12 +394,12 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: AppTheme.primary,
+                      padding: EdgeInsets.symmetric(vertical: AppTheme.spacingM),
                     ),
                     child: Text(
                       widget.chargement == null ? 'Ajouter' : 'Modifier',
-                      style: TextStyle(fontSize: 16),
+                      style: AppTheme.textTheme.bodyLarge,
                     ),
                   ),
                 ],

@@ -14,6 +14,7 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
+import '../providers/theme_provider.dart';
 import '../services/security_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/modern_card.dart';
@@ -115,6 +116,9 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<FirebaseProviderV4>(context);
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
     // Éviter l'affichage "fantôme" si le provider n'est pas prêt
     if (!provider.ready) {
       return const Scaffold(
@@ -126,8 +130,9 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('GAEC de la BARADE'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -138,16 +143,7 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primary,
-              AppTheme.primaryLight,
-            ],
-          ),
-        ),
+        decoration: AppTheme.appBackground(context),
         child: SafeArea(
           child: Consumer<FirebaseProviderV4>(
             builder: (context, provider, child) {
@@ -155,20 +151,17 @@ class _HomeScreenState extends State<HomeScreen>
                 opacity: _fadeAnimation,
                 child: SlideTransition(
                   position: _slideAnimation,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppTheme.spacingM),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeader(),
-                        const SizedBox(height: AppTheme.spacingL),
-                        _buildStatsSection(provider),
-                        const SizedBox(height: AppTheme.spacingL),
-                        _buildMenuSection(),
-                        const SizedBox(height: AppTheme.spacingL),
-                        _buildQuickActions(provider),
-                      ],
-                    ),
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 100),
+                    children: [
+                      _buildHeader(context),
+                      const SizedBox(height: AppTheme.spaceLg),
+                      _buildStatsSection(context, provider),
+                      const SizedBox(height: AppTheme.spaceLg),
+                      _buildMenuSection(context),
+                      const SizedBox(height: AppTheme.spaceLg),
+                      _buildQuickActions(context, provider),
+                    ],
                   ),
                 ),
               );
@@ -178,81 +171,49 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-  Widget _buildHeader() {
-    return Stack(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
-                  decoration: AppTheme.cardDecorationWithAccent(Colors.white),
-                  child: const Icon(
-                    Icons.agriculture,
-                    color: AppTheme.primary,
-                    size: 32,
-                  ),
+  Widget _buildHeader(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    
+    return AppTheme.sectionHeader(
+      "Bonsoir Thierry",
+      subtitle: "Prêt pour une saison parfaite ?",
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Toggle dark/light mode
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return GestureDetector(
+                onTap: () {
+                  themeProvider.toggleTheme();
+                },
+                child: AppTheme.glowIcon(
+                  themeProvider.isDarkMode ? Icons.brightness_6 : Icons.brightness_4,
+                  color: AppTheme.cornGold,
                 ),
-                const SizedBox(width: AppTheme.spacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'GAEC de la BARADE',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Gestion des récoltes de maïs',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        // Logo/accès Stats en haut à droite
-        Positioned(
-          top: 0,
-          right: 0,
-          child: GestureDetector(
+              );
+            },
+          ),
+          const SizedBox(width: 12),
+          // Logo lumineux
+          GestureDetector(
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => const StatistiquesScreen(),
               ),
             ),
-            child: Container(
-              padding: const EdgeInsets.all(AppTheme.spacingM),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius:
-                    BorderRadius.circular(AppTheme.radiusLarge),
-              ),
-              child: const Icon(
-                Icons.analytics,
-                color: Colors.white,
-                size: 32,
-              ),
-            ),
+            child: AppTheme.glowIcon(Icons.agriculture, color: AppTheme.leafLight),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
-  Widget _buildStatsSection(FirebaseProviderV4 provider) {
+  Widget _buildStatsSection(BuildContext context, FirebaseProviderV4 provider) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
     final parcelles = provider.parcelles;
     final chargements = provider.chargements;
     // Initialiser l'année sélectionnée si pas encore fait
@@ -290,11 +251,14 @@ class _HomeScreenState extends State<HomeScreen>
     final rendementMoyenNorme = surfaceRecoltee > 0
         ? poidsTotalNormeAnnee / (surfaceRecoltee * 1000)
         : 0.0;
-    return GradientCard(
+    return AppTheme.glass(
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Colors.white, Color(0xFFF8F9FA)],
+        colors: [
+          Color(0x22F6C65B), // Or maïs transparent
+          Color(0x112E7D32), // Vert feuille transparent
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,58 +266,59 @@ class _HomeScreenState extends State<HomeScreen>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacingS),
+                padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.1),
-                  borderRadius:
-                      BorderRadius.circular(AppTheme.radiusSmall),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFFFFE082), // Or maïs clair
+                      Color(0xFFF6C65B), // Or maïs
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.cornGold.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.analytics,
-                  color: AppTheme.primary,
+                  color: Colors.white,
                   size: 24,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
-              const Text(
+              const SizedBox(width: AppTheme.spaceMd),
+              Text(
                 'Aperçu général',
-                style: TextStyle(
-                  fontSize: 20,
+                style: AppTheme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingL),
+          const SizedBox(height: AppTheme.spaceLg),
           // Sélecteur d'année
           Row(
             children: [
-              const Icon(
-                Icons.calendar_today,
-                color: AppTheme.primary,
-                size: 20,
-              ),
-              const SizedBox(width: AppTheme.spacingS),
-              const Text(
+              AppTheme.glowIcon(Icons.calendar_today, color: AppTheme.primary),
+              const SizedBox(width: AppTheme.spaceSm),
+              Text(
                 'Année:',
-                style: TextStyle(
-                  fontSize: 16,
+                style: AppTheme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
+              const SizedBox(width: AppTheme.spaceMd),
               Expanded(
                 child: DropdownButtonFormField<int>(
                   value: _selectedYear,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
+                  decoration: AppTheme.inputDecoration(),
                   items: () {
                     final annees = chargements
                         .map((c) => c.dateChargement.year)
@@ -378,20 +343,20 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingL),
+          const SizedBox(height: AppTheme.spaceLg),
           Row(
             children: [
               Expanded(
-                child: StatCard(
+                child: _StatCard(
                   title: 'Surface récoltée',
                   value: '${surfaceRecoltee.toStringAsFixed(1)} ha',
                   icon: Icons.landscape,
                   color: AppTheme.primary,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
+              const SizedBox(width: AppTheme.spaceMd),
               Expanded(
-                child: StatCard(
+                child: _StatCard(
                   title: 'Rendement $_selectedYear',
                   value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
                   icon: Icons.trending_up,
@@ -400,21 +365,20 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingM),
+          const SizedBox(height: AppTheme.spaceMd),
           Row(
             children: [
               Expanded(
-                child: StatCard(
+                child: _StatCard(
                   title: 'Poids total $_selectedYear',
-                  value:
-                      '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
+                  value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
                   icon: Icons.scale,
                   color: AppTheme.accent,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingM),
+              const SizedBox(width: AppTheme.spaceMd),
               Expanded(
-                child: StatCard(
+                child: _StatCard(
                   title: 'Parcelles',
                   value: '${parcelles.length}',
                   icon: Icons.grid_view,
@@ -427,46 +391,46 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-  Widget _buildMenuSection() {
+  Widget _buildMenuSection(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(AppTheme.spacingS),
+              padding: AppTheme.padding(AppTheme.spacingS),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius:
-                    BorderRadius.circular(AppTheme.radiusSmall),
+                color: colors.textPrimary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.menu,
-                color: Colors.white,
-                size: 24,
+                color: colors.textPrimary,
+                size: AppTheme.iconSizeM,
               ),
             ),
-            const SizedBox(width: AppTheme.spacingM),
-            const Text(
+            const SizedBox(width: AppTheme.spaceMd),
+            Text(
               'Menu principal',
-              style: TextStyle(
-                fontSize: 20,
+              style: AppTheme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: colors.textPrimary,
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppTheme.spacingL),
+        const SizedBox(height: AppTheme.spaceLg),
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 2,
-          crossAxisSpacing: AppTheme.spacingM,
-          mainAxisSpacing: AppTheme.spacingM,
+          crossAxisSpacing: AppTheme.spaceMd,
+          mainAxisSpacing: AppTheme.spaceMd,
           childAspectRatio: 1.2,
           children: [
-            MenuCard(
+            _MenuCard(
               title: 'Parcelles',
               subtitle: 'Gestion des parcelles',
               icon: Icons.landscape,
@@ -478,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            MenuCard(
+            _MenuCard(
               title: 'Cellules',
               subtitle: 'Stockage des grains',
               icon: Icons.grid_view,
@@ -490,7 +454,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            MenuCard(
+            _MenuCard(
               title: 'Chargements',
               subtitle: 'Récoltes et transport',
               icon: Icons.local_shipping,
@@ -502,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            MenuCard(
+            _MenuCard(
               title: 'Semis',
               subtitle: 'Plantations',
               icon: Icons.grass,
@@ -514,7 +478,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            MenuCard(
+            _MenuCard(
               title: 'Ventes',
               subtitle: 'Suivi des ventes',
               icon: Icons.shopping_cart,
@@ -526,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            MenuCard(
+            _MenuCard(
               title: 'Traitements',
               subtitle: 'Produits phytosanitaires',
               icon: Icons.science,
@@ -543,45 +507,46 @@ class _HomeScreenState extends State<HomeScreen>
       ],
     );
   }
-  Widget _buildQuickActions(FirebaseProviderV4 provider) {
+  Widget _buildQuickActions(BuildContext context, FirebaseProviderV4 provider) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(AppTheme.spacingS),
+              padding: AppTheme.padding(AppTheme.spacingS),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius:
-                    BorderRadius.circular(AppTheme.radiusSmall),
+                color: colors.textPrimary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.flash_on,
-                color: Colors.white,
-                size: 24,
+                color: colors.textPrimary,
+                size: AppTheme.iconSizeM,
               ),
             ),
-            const SizedBox(width: AppTheme.spacingM),
-            const Text(
+            const SizedBox(width: AppTheme.spaceMd),
+            Text(
               'Actions rapides',
-              style: TextStyle(
-                fontSize: 20,
+              style: AppTheme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: colors.textPrimary,
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppTheme.spacingL),
+        const SizedBox(height: AppTheme.spaceLg),
         Row(
           children: [
             Expanded(
-              child: ModernButton(
+              child: _ModernButton(
                 text: 'Import/Export',
                 icon: Icons.import_export,
-                backgroundColor: Colors.white,
-                textColor: AppTheme.primary,
+                backgroundColor: colors.surface,
+                textColor: AppTheme.cornGold,
+                borderColor: AppTheme.cornGold,
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -590,13 +555,14 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            const SizedBox(width: AppTheme.spacingM),
+            const SizedBox(width: AppTheme.spaceMd),
             Expanded(
-              child: ModernOutlinedButton(
+              child: _ModernButton(
                 text: 'Exports PDF',
                 icon: Icons.picture_as_pdf,
-                borderColor: Colors.white,
-                textColor: Colors.white,
+                backgroundColor: colors.surface,
+                textColor: AppTheme.cornGold,
+                borderColor: AppTheme.cornGold,
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -608,6 +574,181 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         ),
       ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppTheme.glass(
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.spaceMd),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: color, size: AppTheme.iconSizeM),
+                const SizedBox(width: AppTheme.spaceSm),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: AppTheme.textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppTheme.spaceSm),
+            Text(
+              value,
+              style: AppTheme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _MenuCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AppTheme.glass(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spaceMd),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: color, size: AppTheme.iconSizeL),
+              const SizedBox(height: AppTheme.spaceSm),
+              Text(
+                title,
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spaceXs),
+              Text(
+                subtitle,
+                style: AppTheme.textTheme.bodySmall?.copyWith(
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ModernButton extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final Color backgroundColor;
+  final Color textColor;
+  final Color? borderColor;
+  final VoidCallback onPressed;
+
+  const _ModernButton({
+    required this.text,
+    required this.icon,
+    required this.backgroundColor,
+    required this.textColor,
+    this.borderColor,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: textColor),
+      label: Text(text, style: TextStyle(color: textColor)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spaceLg,
+          vertical: AppTheme.spaceMd,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          side: borderColor != null ? BorderSide(color: borderColor!, width: 1) : BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
+
+class _ModernOutlinedButton extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final Color borderColor;
+  final Color textColor;
+  final VoidCallback onPressed;
+
+  const _ModernOutlinedButton({
+    required this.text,
+    required this.icon,
+    required this.borderColor,
+    required this.textColor,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: textColor),
+      label: Text(text, style: TextStyle(color: textColor)),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: textColor,
+        side: BorderSide(color: borderColor),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spaceLg,
+          vertical: AppTheme.spaceMd,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        ),
+      ),
     );
   }
 }

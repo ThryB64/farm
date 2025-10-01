@@ -14,6 +14,8 @@ import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/security_service.dart';
+import '../providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 class SecureLoginScreen extends StatefulWidget {
   const SecureLoginScreen({Key? key}) : super(key: key);
   @override
@@ -93,55 +95,47 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF2E7D32),
-              Color(0xFF4CAF50),
-            ],
-          ),
-        ),
+        decoration: AppTheme.appBackground(context),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: AppTheme.padding(AppTheme.spacingL),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Logo et titre
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: AppTheme.padding(AppTheme.spacingL),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
+                      color: colors.textPrimary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                     ),
                     child: Column(
                       children: [
                         Icon(
                           Icons.agriculture,
-                          size: 64,
-                          color: Colors.white,
+                          size: AppTheme.iconSizeXXL,
+                          color: colors.textPrimary,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
+                        SizedBox(height: AppTheme.spacingM),
+                        Text(
                           'GAEC de la BARADE',
-                          style: TextStyle(
-                            fontSize: 24,
+                          style: AppTheme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: colors.textPrimary,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: AppTheme.spacingS),
                         Text(
                           'Gestion des récoltes de maïs',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white.withOpacity(0.9),
+                          style: AppTheme.textTheme.bodyLarge?.copyWith(
+                            color: colors.textSecondary,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -149,57 +143,48 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                     ),
                   ),
                   
-                  const SizedBox(height: 32),
+                  SizedBox(height: AppTheme.spacingXL),
                   
                   // Formulaire de connexion
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: AppTheme.padding(AppTheme.spacingL),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
+                      color: AppTheme.surface,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                      boxShadow: AppTheme.cardShadow,
                     ),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text(
+                          Text(
                             'Connexion sécurisée',
-                            style: TextStyle(
-                              fontSize: 24,
+                            style: AppTheme.textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           
-                          const SizedBox(height: 8),
+                          SizedBox(height: AppTheme.spacingS),
                           
                           Text(
                             'Accès restreint aux membres autorisés',
-                            style: TextStyle(
-                              fontSize: 14,
+                            style: AppTheme.textTheme.bodySmall?.copyWith(
                               color: AppTheme.textSecondary,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           
-                          const SizedBox(height: 24),
+                          SizedBox(height: AppTheme.spacingL),
                           
                           // Email
                           TextFormField(
                             controller: _emailController,
-                            decoration: const InputDecoration(
+                            decoration: AppTheme.createInputDecoration(
                               labelText: 'Email',
-                              prefixIcon: Icon(Icons.email),
-                              border: OutlineInputBorder(),
+                              prefixIcon: Icons.email,
                             ),
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
@@ -213,15 +198,14 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                             },
                           ),
                           
-                          const SizedBox(height: 16),
+                          SizedBox(height: AppTheme.spacingM),
                           
                           // Mot de passe
                           TextFormField(
                             controller: _passwordController,
-                            decoration: const InputDecoration(
+                            decoration: AppTheme.createInputDecoration(
                               labelText: 'Mot de passe',
-                              prefixIcon: Icon(Icons.lock),
-                              border: OutlineInputBorder(),
+                              prefixIcon: Icons.lock,
                             ),
                             obscureText: true,
                             validator: (value) {
@@ -232,31 +216,31 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                             },
                           ),
                           
-                          const SizedBox(height: 24),
+                          SizedBox(height: AppTheme.spacingL),
                           
                           // Message d'erreur
                           if (_errorMessage != null) ...[
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: AppTheme.padding(AppTheme.spacingS),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                color: AppTheme.error.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                                border: Border.all(color: AppTheme.error.withOpacity(0.3)),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.error, color: Colors.red, size: 20),
-                                  const SizedBox(width: 8),
+                                  Icon(Icons.error, color: AppTheme.error, size: AppTheme.iconSizeM),
+                                  SizedBox(width: AppTheme.spacingS),
                                   Expanded(
                                     child: Text(
                                       _errorMessage!,
-                                      style: const TextStyle(color: Colors.red),
+                                      style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.error),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: AppTheme.spacingM),
                           ],
                           
                           // Bouton de connexion

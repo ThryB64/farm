@@ -58,21 +58,20 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
       appBar: AppBar(
         title: Text(widget.produit == null ? 'Nouveau produit' : 'Modifier le produit'),
         backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.spacingM),
+          padding: AppTheme.padding(AppTheme.spacingM),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Nom du produit
               TextFormField(
                 controller: _nomController,
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom du produit *',
-                  border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -81,14 +80,13 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               
               // Mesure
               DropdownButtonFormField<String>(
                 value: _selectedMesure,
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Mesure *',
-                  border: OutlineInputBorder(),
                 ),
                 items: const [
                   DropdownMenuItem(value: 'kg', child: Text('kg')),
@@ -107,23 +105,22 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppTheme.spacingM),
+              SizedBox(height: AppTheme.spacingM),
               
               // Notes
               TextFormField(
                 controller: _notesController,
-                decoration: const InputDecoration(
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Notes',
-                  border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               
               // Prix par année
               _buildPrixSection(),
               
-              const SizedBox(height: AppTheme.spacingL),
+              SizedBox(height: AppTheme.spacingL),
               
               // Boutons
               Row(
@@ -134,7 +131,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingM),
+                  SizedBox(width: AppTheme.spacingM),
                   Expanded(
                     child: ModernButton(
                       text: widget.produit == null ? 'Créer' : 'Modifier',
@@ -153,19 +150,18 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
   Widget _buildPrixSection() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingM),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Prix par année',
-              style: TextStyle(
-                fontSize: 18,
+              style: AppTheme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: AppTheme.spacingM),
+            SizedBox(height: AppTheme.spacingM),
             
             // Ajouter un prix
             Row(
@@ -173,9 +169,8 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                 Expanded(
                   child: DropdownButtonFormField<int>(
                     value: _selectedAnnee,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Année',
-                      border: OutlineInputBorder(),
                     ),
                     items: List.generate(10, (index) {
                       final year = DateTime.now().year - 5 + index;
@@ -192,44 +187,43 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                     },
                   ),
                 ),
-                const SizedBox(width: AppTheme.spacingM),
+                SizedBox(width: AppTheme.spacingM),
                 Expanded(
                   child: TextFormField(
                     controller: _prixController,
-                    decoration: const InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Prix (€)',
-                      border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                   ),
                 ),
-                const SizedBox(width: AppTheme.spacingM),
+                SizedBox(width: AppTheme.spacingM),
                 IconButton(
                   onPressed: _addPrix,
-                  icon: const Icon(Icons.add),
+                  icon: Icon(Icons.add, size: AppTheme.iconSizeM),
                   style: IconButton.styleFrom(
                     backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppTheme.onPrimary,
                   ),
                 ),
               ],
             ),
             
-            const SizedBox(height: AppTheme.spacingM),
+            SizedBox(height: AppTheme.spacingM),
             
             // Liste des prix
             if (_prixParAnnee.isNotEmpty) ...[
-              const Text(
+              Text(
                 'Prix configurés:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: AppTheme.spacingS),
+              SizedBox(height: AppTheme.spacingS),
               ..._prixParAnnee.entries.map((entry) {
                 return Card(
                   child: ListTile(
                     title: Text('${entry.key}: ${entry.value.toStringAsFixed(2)} €'),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
+                      icon: Icon(Icons.delete, color: AppTheme.error, size: AppTheme.iconSizeM),
                       onPressed: () {
                         setState(() {
                           _prixParAnnee.remove(entry.key);

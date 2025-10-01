@@ -22,7 +22,7 @@ class VarietesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Variétés'),
-        backgroundColor: Colors.orange,
+        backgroundColor: AppTheme.primary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -35,17 +35,16 @@ class VarietesScreen extends StatelessWidget {
                   Icon(
                     Icons.eco,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: AppTheme.textLight,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppTheme.spacingM),
                   Text(
                     'Aucune variété enregistrée',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
+                    style: AppTheme.textTheme.titleLarge?.copyWith(
+                      color: AppTheme.textSecondary,
                     ),
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: AppTheme.spacingL),
                   ElevatedButton.icon(
                     onPressed: () => Navigator.push(
                       context,
@@ -54,7 +53,7 @@ class VarietesScreen extends StatelessWidget {
                     icon: Icon(Icons.add),
                     label: Text('Ajouter une variété'),
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingL, vertical: AppTheme.spacingM),
                     ),
                   ),
                 ],
@@ -66,7 +65,7 @@ class VarietesScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final variete = varietes[index];
               return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                margin: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
                 child: ListTile(
                   title: Text(variete.nom),
                   subtitle: Text(variete.description ?? ''),
@@ -129,7 +128,7 @@ class VarietesScreen extends StatelessWidget {
             ),
           );
         },
-        backgroundColor: Colors.orange,
+        backgroundColor: AppTheme.primary,
         child: Icon(Icons.add),
       ),
     );

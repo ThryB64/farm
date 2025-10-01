@@ -87,21 +87,21 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.vente == null ? 'Nouvelle vente' : 'Modifier la vente'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppTheme.success,
       ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: AppTheme.padding(AppTheme.spacingM),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildBasicInfoCard(),
-              SizedBox(height: 16),
+              SizedBox(height: AppTheme.spacingM),
               _buildWeightCard(),
-              SizedBox(height: 16),
+              SizedBox(height: AppTheme.spacingM),
               _buildStatusCard(),
-              SizedBox(height: 24),
+              SizedBox(height: AppTheme.spacingL),
               _buildActionButtons(),
             ],
           ),
@@ -112,23 +112,22 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
   Widget _buildBasicInfoCard() {
     return ModernCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Informations de base',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _numeroTicketController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Numéro de ticket *',
-                      border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -138,13 +137,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                     },
                   ),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: AppTheme.spacingM),
                 Expanded(
                   child: TextFormField(
                     controller: _clientController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Client *',
-                      border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -156,15 +154,14 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _immatriculationController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Immatriculation remorque *',
-                      border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -174,13 +171,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                     },
                   ),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: AppTheme.spacingM),
                 Expanded(
                   child: TextFormField(
                     controller: _cmrController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'CMR *',
-                      border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -192,28 +188,26 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             Row(
               children: [
                 Expanded(
                   child: InkWell(
                     onTap: _selectDate,
                     child: InputDecorator(
-                      decoration: InputDecoration(
+                      decoration: AppTheme.createInputDecoration(
                         labelText: 'Date de la vente *',
-                        border: OutlineInputBorder(),
                       ),
                       child: Text(_formatDate(_selectedDate)),
                     ),
                   ),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: AppTheme.spacingM),
                 Expanded(
                   child: DropdownButtonFormField<int>(
                     value: _selectedAnnee,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Année de la récolte *',
-                      border: OutlineInputBorder(),
                     ),
                     items: _getAnneeOptions().map((year) {
                       return DropdownMenuItem<int>(
@@ -244,23 +238,22 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
   Widget _buildWeightCard() {
     return ModernCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Poids',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _poidsVideController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Poids vide (kg) *',
-                      border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                     validator: (value) {
@@ -275,13 +268,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                     onChanged: _calculatePoidsNet,
                   ),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: AppTheme.spacingM),
                 Expanded(
                   child: TextFormField(
                     controller: _poidsPleinController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Poids plein (kg) *',
-                      border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                     validator: (value) {
@@ -298,28 +290,26 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _poidsNetController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Poids net (kg)',
-                      border: OutlineInputBorder(),
                       helperText: 'Calculé automatiquement',
                     ),
                     keyboardType: TextInputType.number,
                     readOnly: true,
                   ),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: AppTheme.spacingM),
                 Expanded(
                   child: TextFormField(
                     controller: _ecartPoidsNetController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Écart client (kg)',
-                      border: OutlineInputBorder(),
                       helperText: 'Différence pesée par le client (+/-)',
                     ),
                     keyboardType: TextInputType.number,
@@ -328,13 +318,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingS),
             Text(
               'Poids net final: ${_getPoidsNetFinal().toStringAsFixed(1)} kg',
-              style: TextStyle(
-                fontSize: 14,
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: AppTheme.primary,
               ),
             ),
           ],
@@ -345,42 +334,40 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
   Widget _buildStatusCard() {
     return ModernCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppTheme.padding(AppTheme.spacingM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Statut de la vente',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingM),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _prixController,
-                    decoration: InputDecoration(
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Prix (€/tonne)',
-                      border: OutlineInputBorder(),
                       helperText: 'Prix par tonne de maïs',
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: _calculatePrixTotal,
                   ),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: AppTheme.spacingM),
                 Expanded(
                   child: Column(
                     children: [
                       Text(
                         'Prix total: ${_getPrixTotal().toStringAsFixed(2)} €',
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: AppTheme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: AppTheme.success,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: AppTheme.spacingS),
                       CheckboxListTile(
                         title: Text('Payé'),
                         value: _payer,
@@ -398,9 +385,8 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                       if (_payer)
                         Text(
                           'Vente terminée (payée)',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.green,
+                          style: AppTheme.textTheme.bodySmall?.copyWith(
+                            color: AppTheme.success,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -423,7 +409,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
             text: 'Annuler',
           ),
         ),
-        SizedBox(width: 16),
+        SizedBox(width: AppTheme.spacingM),
         Expanded(
           child: ModernButton(
             onPressed: _isLoading ? null : _saveVente,
@@ -534,7 +520,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppTheme.error,
         ),
       );
     } finally {
