@@ -50,13 +50,15 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
     
     return Scaffold(
-      backgroundColor: AppTheme.background(context),
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Parcelles'),
         backgroundColor: Colors.transparent,
-        foregroundColor: AppTheme.textPrimary(context),
+        foregroundColor: colors.textPrimary,
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -68,7 +70,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(gradient: AppTheme.appBgGradient(context)),
+        decoration: BoxDecoration(gradient: gradients.appBg),
         child: Consumer<FirebaseProviderV4>(
           builder: (context, provider, child) {
             final parcelles = List<Parcelle>.from(provider.parcelles)
@@ -78,26 +80,22 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             }
             return FadeTransition(
               opacity: _fadeAnimation,
-              child: Padding(
-                padding: AppTheme.padding(AppTheme.spacingM),
-                child: Column(
-                  children: [
-                    _buildHeader(),
-                    SizedBox(height: AppTheme.spacingL),
-                    Expanded(
-                      child: _buildParcellesList(parcelles, provider),
-                    ),
-                  ],
-                ),
-              ),
-            );
+              child: ListView.builder(
+                padding: const EdgeInsets.all(AppTheme.spacingM),
+              itemCount: parcelles.length,
+              itemBuilder: (context, index) {
+                final parcelle = parcelles[index];
+                return _buildParcelleCard(parcelle, provider);
+              },
+            ),
+          );
         },
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddParcelleDialog(),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: AppTheme.onPrimary,
         child: const Icon(Icons.add),
       ),
     );
@@ -110,28 +108,28 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           Container(
             padding: const EdgeInsets.all(AppTheme.spacingXL),
             decoration: BoxDecoration(
-              color: AppTheme.primary(context).withOpacity(0.1),
+              color: AppTheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.landscape,
               size: 64,
-              color: AppTheme.primary(context).withOpacity(0.6),
+              color: AppTheme.primary.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucune parcelle enregistrée',
-            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+            style: AppTheme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary(context),
+              color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter votre première parcelle',
-            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
-              color: AppTheme.textSecondary(context),
+            style: AppTheme.textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -146,67 +144,16 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
   }
-  Widget _buildHeader() {
-    return AppTheme.glass(
-      context,
-      child: Row(
-        children: [
-          AppTheme.glowIcon(
-            context,
-            Icons.landscape,
-            size: 32,
-            color: AppTheme.primary(context),
-          ),
-          SizedBox(width: AppTheme.spacingM),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Gestion des Parcelles',
-                  style: AppTheme.textTheme(context).headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary(context),
-                  ),
-                ),
-                SizedBox(height: AppTheme.spacingS),
-                Text(
-                  'Gérez vos parcelles agricoles',
-                  style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildParcellesList(List<Parcelle> parcelles, FirebaseProviderV4 provider) {
-    return ListView.builder(
-      itemCount: parcelles.length,
-      itemBuilder: (context, index) {
-        final parcelle = parcelles[index];
-        return _buildParcelleCard(parcelle, provider);
-      },
-    );
-  }
-
   Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV4 provider) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
-      child: AppTheme.glass(
-        context,
-        child: InkWell(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
-            ),
+      child: ModernCard(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
           ),
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -215,12 +162,12 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary(context).withOpacity(0.1),
+                    color: AppTheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.landscape,
-                    color: AppTheme.primary(context),
+                    color: AppTheme.primary,
                     size: 32,
                   ),
                 ),
@@ -231,16 +178,16 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     children: [
                       Text(
                         parcelle.nom,
-                        style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                        style: AppTheme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary(context),
+                          color: AppTheme.textPrimary,
                         ),
                       ),
                       SizedBox(height: AppTheme.spacingXS),
                       Text(
                         'Créée le ${_formatDate(parcelle.dateCreation)}',
-                        style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary(context),
+                        style: AppTheme.textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.textSecondary,
                         ),
                       ),
                     ],
@@ -255,11 +202,11 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     }
                   },
                   itemBuilder: (context) => [
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, color: AppTheme.primary(context)),
+                          Icon(Icons.edit, color: AppTheme.primary),
                           SizedBox(width: AppTheme.spacingS),
                           Text('Modifier'),
                         ],
@@ -286,7 +233,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   child: _buildInfoChip(
                     '${parcelle.surface} ha',
                     Icons.area_chart,
-                    AppTheme.primary(context),
+                    AppTheme.primary,
                   ),
                 ),
                 const SizedBox(width: AppTheme.spacingS),
@@ -294,13 +241,12 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   child: _buildInfoChip(
                     'Surface',
                     Icons.info_outline,
-                    AppTheme.textSecondary(context),
+                    AppTheme.textSecondary,
                   ),
                 ),
               ],
             ),
           ],
-        ),
         ),
       ),
     );
@@ -326,7 +272,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           const SizedBox(width: AppTheme.spacingS),
           Text(
             text,
-            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -355,7 +301,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom de la parcelle',
                   hintText: 'Ex: Parcelle Nord',
                   prefixIcon: Icons.landscape,
@@ -370,7 +316,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
               ),
               SizedBox(height: AppTheme.spacingM),
               TextFormField(
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Surface (hectares)',
                   hintText: 'Ex: 2.5',
                   prefixIcon: Icons.area_chart,
@@ -442,7 +388,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             children: [
               TextFormField(
                 initialValue: parcelle.nom,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom de la parcelle',
                   prefixIcon: Icons.landscape,
                 ),
@@ -457,7 +403,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
               SizedBox(height: AppTheme.spacingM),
               TextFormField(
                 initialValue: parcelle.surface.toString(),
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Surface (hectares)',
                   prefixIcon: Icons.area_chart,
                 ),

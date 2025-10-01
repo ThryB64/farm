@@ -27,7 +27,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: AppTheme.spacingS),
-        Text('Variétés:', style: AppTheme.textTheme(context).titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        Text('Variétés:', style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
         ...s.varietesSurfaces.map((vs) => 
           Padding(
             padding: EdgeInsets.only(left: AppTheme.spacingM),
@@ -46,7 +46,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
       appBar: AppBar(
         title: Text(widget.parcelle.nom),
         backgroundColor: AppTheme.success,
-        foregroundColor: AppTheme.onPrimary(context),
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -108,7 +108,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                       children: [
                         Text(
                           'Informations',
-                          style: AppTheme.textTheme(context).titleLarge,
+                          style: AppTheme.textTheme.titleLarge,
                         ),
                         SizedBox(height: AppTheme.spacingS),
                         Text('Surface: ${widget.parcelle.surface} ha'),
@@ -128,12 +128,12 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                       children: [
                         Text(
                           'Statistiques par année',
-                          style: AppTheme.textTheme(context).titleLarge,
+                          style: AppTheme.textTheme.titleLarge,
                         ),
                         SizedBox(height: AppTheme.spacingM),
                         DropdownButtonFormField<int>(
                           value: _selectedYear,
-                          decoration: AppTheme.createInputDecoration(context,
+                          decoration: AppTheme.createInputDecoration(
                             labelText: 'Année',
                           ),
                           items: annees.map((annee) {
@@ -152,7 +152,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                           SizedBox(height: AppTheme.spacingM),
                           Text(
                             'Récolte de $_selectedYear',
-                            style: AppTheme.textTheme(context).titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: AppTheme.spacingS),
                           if (chargementsParAnnee[_selectedYear]?.isNotEmpty ?? false) ...[
@@ -173,7 +173,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                           SizedBox(height: AppTheme.spacingM),
                           Text(
                             'Semis de $_selectedYear',
-                            style: AppTheme.textTheme(context).titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: AppTheme.spacingS),
                           if (semisParAnnee[_selectedYear]?.isNotEmpty ?? false) ...[
@@ -194,7 +194,7 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                       children: [
                         Text(
                           'Chargements',
-                          style: AppTheme.textTheme(context).titleLarge,
+                          style: AppTheme.textTheme.titleLarge,
                         ),
                         SizedBox(height: AppTheme.spacingS),
                         if (_selectedYear != null && (chargementsParAnnee[_selectedYear]?.isNotEmpty ?? false))

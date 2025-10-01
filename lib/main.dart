@@ -18,22 +18,19 @@ Future<void> main() async {
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return MaterialApp(
       theme: AppTheme.lightThemeCompat,
-      home: Builder(
-        builder: (context) => Scaffold(
-          backgroundColor: AppTheme.background(context),
-          body: Center(
-            child: Container(
-              padding: AppTheme.padding(AppTheme.spacingM),
-              decoration: AppTheme.createCardDecoration(
-                context,
-                color: AppTheme.error.withOpacity(0.1),
-                borderColor: AppTheme.error.withOpacity(0.4),
-              ),
-              child: SingleChildScrollView(
-                child: Text(
-                  'Flutter UI error:\n\n${details.exceptionAsString()}',
-                  style: AppTheme.textTheme(context).bodyLarge?.copyWith(color: AppTheme.onBackground(context)),
-                ),
+      home: Scaffold(
+        backgroundColor: AppTheme.background,
+        body: Center(
+          child: Container(
+            padding: AppTheme.padding(AppTheme.spacingM),
+            decoration: AppTheme.createCardDecoration(
+              color: AppTheme.error.withOpacity(0.1),
+              borderColor: AppTheme.error.withOpacity(0.4),
+            ),
+            child: SingleChildScrollView(
+              child: Text(
+                'Flutter UI error:\n\n${details.exceptionAsString()}',
+                style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onBackground),
               ),
             ),
           ),
@@ -106,7 +103,7 @@ class PlaceholderHome extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Farm (Web test)'),
-        backgroundColor: AppTheme.primary(context),
+        backgroundColor: AppTheme.primary,
       ),
       body: Center(
         child: Column(
@@ -115,27 +112,27 @@ class PlaceholderHome extends StatelessWidget {
             Icon(
               Icons.agriculture,
               size: AppTheme.iconSizeXXL,
-              color: AppTheme.primary(context),
+              color: AppTheme.primary,
             ),
             SizedBox(height: AppTheme.spacingL),
             Text(
               'Hello Web 👋',
-              style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+              style: AppTheme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: AppTheme.spacingS),
             Text(
               'Maïs Tracker - Version Web',
-              style: AppTheme.textTheme(context).bodyLarge?.copyWith(
-                color: AppTheme.onSurface(context).withOpacity(0.7),
+              style: AppTheme.textTheme.bodyLarge?.copyWith(
+                color: AppTheme.onSurface.withOpacity(0.7),
               ),
             ),
             SizedBox(height: AppTheme.spacingL),
             Text(
               'L\'application fonctionne !',
-              style: AppTheme.textTheme(context).titleLarge?.copyWith(
-                color: AppTheme.primary(context),
+              style: AppTheme.textTheme.titleLarge?.copyWith(
+                color: AppTheme.primary,
               ),
             ),
           ],
@@ -153,7 +150,7 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: AppTheme.primaryGradient(context),
+          gradient: AppTheme.primaryGradient,
         ),
         child: Center(
           child: Column(
@@ -161,20 +158,20 @@ class SplashScreen extends StatelessWidget {
             children: [
               Icon(
                 Icons.agriculture, 
-                color: AppTheme.onPrimary(context), 
+                color: AppTheme.onPrimary, 
                 size: AppTheme.iconSizeXL,
               ),
               SizedBox(height: AppTheme.spacingM),
               Text(
                 'Chargement...',
-                style: AppTheme.textTheme(context).titleLarge?.copyWith(
-                  color: AppTheme.onPrimary(context),
+                style: AppTheme.textTheme.titleLarge?.copyWith(
+                  color: AppTheme.onPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: AppTheme.spacingL),
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.onPrimary(context)),
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.onPrimary),
               ),
             ],
           ),

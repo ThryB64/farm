@@ -150,7 +150,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   Widget _buildVarietesSection(FirebaseProviderV4 provider) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.border(context)),
+        border: Border.all(color: AppTheme.border),
         borderRadius: AppTheme.radius(AppTheme.radiusSmall),
       ),
       child: Column(
@@ -160,8 +160,8 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
             padding: AppTheme.padding(AppTheme.spacingS),
             child: Text(
               'Variétés',
-              style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                color: AppTheme.textSecondary(context),
+              style: AppTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.textSecondary,
               ),
             ),
           ),
@@ -209,7 +209,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               padding: AppTheme.padding(AppTheme.spacingS),
               child: Text(
                 'Veuillez sélectionner au moins une variété',
-                style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                style: AppTheme.textTheme.bodySmall?.copyWith(
                   color: AppTheme.error,
                 ),
               ),
@@ -227,7 +227,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
   Widget _buildHectaresSection() {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.border(context)),
+        border: Border.all(color: AppTheme.border),
         borderRadius: AppTheme.radius(AppTheme.radiusSmall),
       ),
       child: Column(
@@ -237,8 +237,8 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
             padding: AppTheme.padding(AppTheme.spacingS),
             child: Text(
               'Surface par variété (hectares)',
-              style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                color: AppTheme.textSecondary(context),
+              style: AppTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.textSecondary,
               ),
             ),
           ),
@@ -248,19 +248,19 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               margin: AppTheme.padding(AppTheme.spacingS),
               padding: AppTheme.padding(AppTheme.spacingS),
               decoration: BoxDecoration(
-                color: AppTheme.primary(context).withOpacity(0.1),
+                color: AppTheme.primary.withOpacity(0.1),
                 borderRadius: AppTheme.radius(AppTheme.radiusSmall),
-                border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
+                border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.lightbulb_outline, color: AppTheme.primary(context), size: AppTheme.iconSizeS),
+                  Icon(Icons.lightbulb_outline, color: AppTheme.primary, size: AppTheme.iconSizeS),
                   SizedBox(width: AppTheme.spacingS),
                   Expanded(
                     child: Text(
                       _getAutoCompleteHint(),
-                      style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                        color: AppTheme.primary(context),
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -279,7 +279,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               return ListTile(
                 title: Text(varieteSurface.nom),
                 subtitle: isAutoCompleted 
-                    ? Text('Auto-complété', style: AppTheme.textTheme(context).bodySmall?.copyWith(color: AppTheme.success))
+                    ? Text('Auto-complété', style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.success))
                     : null,
                 trailing: SizedBox(
                   width: 100,
@@ -483,7 +483,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               // Sélection de l'année
                   DropdownButtonFormField<int>(
                 value: _selectedYear,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Année *',
                 ),
                 items: List.generate(10, (index) {
@@ -520,12 +520,12 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       initialValue: parcelleActuelle != null 
                         ? '${parcelleActuelle.nom} (${parcelleActuelle.surface} ha)'
                         : 'Parcelle inconnue',
-                      decoration: AppTheme.createInputDecoration(context,
+                      decoration: AppTheme.createInputDecoration(
                         labelText: 'Parcelle *',
                       ),
                       readOnly: true,
-                      style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                        color: AppTheme.textPrimary(context),
+                      style: AppTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     );
@@ -533,7 +533,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                     // Si on crée un nouveau semis, afficher le dropdown
                     return DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
-                      decoration: AppTheme.createInputDecoration(context,
+                      decoration: AppTheme.createInputDecoration(
                         labelText: 'Parcelle *',
                     ),
                     items: parcellesDisponibles.map((parcelle) {
@@ -560,7 +560,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               // Date
                   TextFormField(
                     controller: _dateController,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Date *',
                   suffixIcon: Icon(Icons.calendar_today, size: AppTheme.iconSizeM),
                     ),
@@ -592,7 +592,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       children: [
                         Text(
                           'Résumé des surfaces:',
-                          style: AppTheme.textTheme(context).titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: AppTheme.spacingS),
                         Text('Surface de la parcelle: ${_getParcelleSurface().toStringAsFixed(2)} ha'),
@@ -600,7 +600,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         if (!_isTotalValid())
                           Text(
                             '⚠️ Le total des hectares doit correspondre à la surface de la parcelle',
-                            style: AppTheme.textTheme(context).bodyMedium?.copyWith(color: AppTheme.error, fontWeight: FontWeight.bold),
+                            style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.error, fontWeight: FontWeight.bold),
                           ),
                       ],
                     ),
@@ -611,7 +611,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               // Densité de maïs
               TextFormField(
                 controller: _densiteController,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Densité de maïs (graines/ha)',
                   hintText: 'Ex: 83000',
                 ),
@@ -633,13 +633,13 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               Container(
                 padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary(context).withOpacity(0.1),
+                  color: AppTheme.primary.withOpacity(0.1),
                   borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-                  border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
+                  border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calculate, color: AppTheme.primary(context), size: AppTheme.iconSizeM),
+                    Icon(Icons.calculate, color: AppTheme.primary, size: AppTheme.iconSizeM),
                     SizedBox(width: AppTheme.spacingS),
                     Expanded(
                       child: Column(
@@ -647,16 +647,16 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         children: [
                           Text(
                             'Prix du semis calculé',
-                            style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                            style: AppTheme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.primary(context),
+                              color: AppTheme.primary,
                             ),
                           ),
                           Text(
                             '${_prixSemis.toStringAsFixed(2)} €',
-                            style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                            style: AppTheme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.primary(context),
+                              color: AppTheme.primary,
                             ),
                           ),
                         ],
@@ -669,7 +669,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               // Notes
               TextFormField(
                 controller: _notesController,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Notes',
                 ),
                 maxLines: 3,
@@ -684,9 +684,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.cancel),
                       label: const Text('Annuler'),
-                      style: AppTheme.buttonStyle(context,
-                        backgroundColor: AppTheme.textSecondary(context),
-                        foregroundColor: AppTheme.onPrimary(context),
+                      style: AppTheme.buttonStyle(
+                        backgroundColor: AppTheme.textSecondary,
+                        foregroundColor: AppTheme.onPrimary,
                         padding: EdgeInsets.symmetric(vertical: AppTheme.spacingM),
                       ),
                     ),
@@ -697,9 +697,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                       onPressed: _canSave() ? _saveSemis : null,
                       icon: const Icon(Icons.save),
                       label: const Text('Enregistrer'),
-                      style: AppTheme.buttonStyle(context,
-                        backgroundColor: AppTheme.primary(context),
-                        foregroundColor: AppTheme.onPrimary(context),
+                      style: AppTheme.buttonStyle(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: AppTheme.onPrimary,
                         padding: EdgeInsets.symmetric(vertical: AppTheme.spacingM),
                       ),
                     ),

@@ -55,13 +55,13 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background(context),
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: Text(
           widget.cellule == null ? 'Nouvelle cellule' : 'Modifier la cellule',
-          style: AppTheme.textTheme(context).headlineSmall?.copyWith(color: AppTheme.onPrimary(context)),
+          style: AppTheme.textTheme.headlineSmall?.copyWith(color: AppTheme.onPrimary),
         ),
-        backgroundColor: AppTheme.primary(context),
+        backgroundColor: AppTheme.primary,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -74,7 +74,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
               // Année
               DropdownButtonFormField<int>(
                 value: _selectedYear,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Année',
                 ),
                 items: List.generate(20, (index) {
@@ -102,8 +102,8 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
               if (widget.cellule?.fermee == true) ...[
                 Text(
                   'Données de gaz (enregistrées à la fermeture)',
-                  style: AppTheme.textTheme(context).titleMedium?.copyWith(
-                    color: AppTheme.textPrimary(context),
+                  style: AppTheme.textTheme.titleMedium?.copyWith(
+                    color: AppTheme.textPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -112,7 +112,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                 // Quantité de gaz
                 TextFormField(
                   controller: _quantiteGazController,
-                  decoration: AppTheme.createInputDecoration(context,
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Quantité de gaz utilisée (m³)',
                     hintText: 'Ex: 150.5',
                   ),
@@ -133,7 +133,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                 // Prix du gaz
                 TextFormField(
                   controller: _prixGazController,
-                  decoration: AppTheme.createInputDecoration(context,
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Prix du gaz (€/kWh)',
                     hintText: 'Ex: 0.15',
                   ),
@@ -155,13 +155,13 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                 Container(
                   padding: AppTheme.padding(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary(context).withOpacity(0.1),
+                    color: AppTheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
+                    border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calculate, color: AppTheme.primary(context)),
+                      Icon(Icons.calculate, color: AppTheme.primary),
                       SizedBox(width: AppTheme.spacingS),
                       Expanded(
                         child: Column(
@@ -169,16 +169,16 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                           children: [
                             Text(
                               'Coût total du gaz',
-                              style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                              style: AppTheme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppTheme.primary(context),
+                                color: AppTheme.primary,
                               ),
                             ),
                             Text(
                               '${_coutTotalGaz.toStringAsFixed(2)} €',
-                              style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                              style: AppTheme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppTheme.primary(context),
+                                color: AppTheme.primary,
                               ),
                             ),
                           ],
@@ -194,7 +194,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
               ModernButton(
                 text: widget.cellule == null ? 'Ajouter la cellule' : 'Modifier la cellule',
                 icon: Icons.save,
-                backgroundColor: AppTheme.primary(context),
+                backgroundColor: AppTheme.primary,
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {

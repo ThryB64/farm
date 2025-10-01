@@ -56,8 +56,8 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.traitement == null ? 'Nouveau traitement' : 'Modifier le traitement'),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Form(
         key: _formKey,
@@ -88,7 +88,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                   
                   return DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
-                    decoration: AppTheme.createInputDecoration(context,
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Parcelle *',
                     ),
                     items: parcellesDisponibles.map((p) {
@@ -119,7 +119,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
               // Notes
               TextFormField(
                 controller: _notesController,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Notes',
                 ),
                 maxLines: 3,
@@ -168,18 +168,18 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
               children: [
                 Text(
                   'Produits utilisés',
-                  style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                  style: AppTheme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary(context),
+                    color: AppTheme.textPrimary,
                   ),
                 ),
                 ElevatedButton.icon(
                   onPressed: _addProduit,
                   icon: Icon(Icons.add, size: AppTheme.iconSizeM),
                   label: Text('Ajouter'),
-                  style: AppTheme.buttonStyle(context,
-                    backgroundColor: AppTheme.primary(context),
-                    foregroundColor: AppTheme.onPrimary(context),
+                  style: AppTheme.buttonStyle(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: AppTheme.onPrimary,
                   ),
                 ),
               ],
@@ -190,7 +190,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
               Center(
                 child: Text(
                   'Aucun produit ajouté',
-                  style: AppTheme.textTheme(context).bodyMedium?.copyWith(color: AppTheme.textSecondary(context)),
+                  style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                 ),
               )
             else
@@ -207,9 +207,9 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                       children: [
                         Text(
                           '${produit.coutTotal.toStringAsFixed(2)} €',
-                          style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                          style: AppTheme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.primary(context),
+                            color: AppTheme.primary,
                           ),
                         ),
                         SizedBox(width: AppTheme.spacingS),
@@ -232,7 +232,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
               Container(
                 padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary(context).withOpacity(0.1),
+                  color: AppTheme.primary.withOpacity(0.1),
                   borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 ),
                 child: Row(
@@ -240,15 +240,15 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                   children: [
                     Text(
                       'Coût total (parcelle):',
-                      style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                      style: AppTheme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       '${_calculerCoutTotal().toStringAsFixed(2)} €',
-                      style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                      style: AppTheme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.primary(context),
+                        color: AppTheme.primary,
                       ),
                     ),
                   ],
@@ -376,13 +376,13 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
           padding: AppTheme.padding(AppTheme.spacingM),
           margin: EdgeInsets.only(bottom: AppTheme.spacingM),
           decoration: BoxDecoration(
-            color: AppTheme.primary(context).withOpacity(0.1),
+            color: AppTheme.primary.withOpacity(0.1),
             borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-            border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
+            border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
           ),
           child: Row(
             children: [
-              Icon(Icons.landscape, color: AppTheme.primary(context)),
+              Icon(Icons.landscape, color: AppTheme.primary),
               SizedBox(width: AppTheme.spacingS),
               Expanded(
                 child: Column(
@@ -390,23 +390,23 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                   children: [
                     Text(
                       'Parcelle sélectionnée',
-                      style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                        color: AppTheme.primary(context),
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(height: AppTheme.spacingXS),
                     Text(
                       parcelle.nom,
-                      style: AppTheme.textTheme(context).titleMedium?.copyWith(
-                        color: AppTheme.primary(context),
+                      style: AppTheme.textTheme.titleMedium?.copyWith(
+                        color: AppTheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       '${parcelle.surface.toStringAsFixed(2)} hectares',
-                      style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                        color: AppTheme.textSecondary(context),
+                      style: AppTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
                       ),
                     ),
                   ],
@@ -458,8 +458,8 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Sélectionner un produit'),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -472,7 +472,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 padding: AppTheme.padding(AppTheme.spacingM),
                 child: DropdownButtonFormField<Produit>(
                   value: _selectedProduit,
-                  decoration: AppTheme.createInputDecoration(context,
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Produit *',
                   ),
                   items: produits.map((p) {
@@ -498,7 +498,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
                   child: TextFormField(
                     controller: _quantiteController,
-                    decoration: AppTheme.createInputDecoration(context,
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Quantité par hectare *',
                       helperText: 'Quantité à appliquer par hectare de parcelle',
                     ),
@@ -514,7 +514,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 InkWell(
                   onTap: _selectDate,
                   child: InputDecorator(
-                    decoration: AppTheme.createInputDecoration(context,
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Date d\'application *',
                     ),
                     child: Text(_formatDate(_selectedDate)),
@@ -527,7 +527,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
                   child: DropdownButtonFormField<int>(
                     value: _selectedAnnee,
-                    decoration: AppTheme.createInputDecoration(context,
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Année du prix',
                     ),
                     items: () {
@@ -563,7 +563,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                       children: [
                         Text(
                           _selectedProduit!.nom,
-                          style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                          style: AppTheme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -572,9 +572,9 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                         Text('Prix unitaire (${_selectedAnnee}): ${_prixUnitaire.toStringAsFixed(2)} €/${_selectedProduit!.mesure}'),
                         Text(
                           'Coût par hectare: ${_calculerCoutTotal().toStringAsFixed(2)} €/ha',
-                          style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                          style: AppTheme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.primary(context),
+                            color: AppTheme.primary,
                           ),
                         ),
                       ],

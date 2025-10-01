@@ -51,11 +51,11 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.surface(context),
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
         title: const Text('Chargements'),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: AppTheme.onPrimary,
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -129,8 +129,8 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
             builder: (context) => const ChargementFormScreen(),
           ),
         ),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: AppTheme.onPrimary,
         child: const Icon(Icons.add),
       ),
     );
@@ -143,28 +143,28 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           Container(
             padding: const EdgeInsets.all(AppTheme.spacingXL),
             decoration: BoxDecoration(
-              color: AppTheme.primary(context).withOpacity(0.1),
+              color: AppTheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.local_shipping,
               size: 64,
-              color: AppTheme.primary(context).withOpacity(0.6),
+              color: AppTheme.primary.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucun chargement enregistré',
-            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+            style: AppTheme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary(context),
+              color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter votre premier chargement',
-            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
-              color: AppTheme.textSecondary(context),
+            style: AppTheme.textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -192,7 +192,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                     Expanded(
                       child: DropdownButtonFormField<int>(
                         value: _selectedYear,
-                        decoration: AppTheme.createInputDecoration(context,
+                        decoration: AppTheme.createInputDecoration(
                           labelText: 'Année',
                           prefixIcon: Icons.calendar_today,
                         ),
@@ -216,13 +216,13 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
               vertical: AppTheme.spacingS,
             ),
                       decoration: BoxDecoration(
-              color: AppTheme.primary(context),
+              color: AppTheme.primary,
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                       ),
                       child: Text(
                         '${chargementsParAnnee[_selectedYear]?.length ?? 0} chargements',
-              style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                          color: AppTheme.onPrimary(context),
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -283,7 +283,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
             Row(
               children: [
                 Expanded(
-                  child: _buildDebugStat('Cellules', chargementsAvecCellule, chargementsSansCellule, AppTheme.secondary(context)),
+                  child: _buildDebugStat('Cellules', chargementsAvecCellule, chargementsSansCellule, AppTheme.secondary),
                 ),
                 const SizedBox(width: AppTheme.spacingM),
                 Expanded(
@@ -308,7 +308,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
         children: [
           Text(
             label,
-            style: AppTheme.textTheme(context).bodySmall?.copyWith(
+            style: AppTheme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -316,7 +316,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           SizedBox(height: AppTheme.spacingXS),
           Text(
             '$avec OK',
-            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppTheme.success,
             ),
@@ -324,7 +324,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           if (sans > 0)
             Text(
               '$sans KO',
-              style: AppTheme.textTheme(context).bodySmall?.copyWith(
+              style: AppTheme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.error,
               ),
@@ -364,12 +364,12 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                     Container(
                       padding: const EdgeInsets.all(AppTheme.spacingM),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary(context).withOpacity(0.1),
+                        color: AppTheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.local_shipping,
-                        color: AppTheme.primary(context),
+                        color: AppTheme.primary,
                         size: 32,
                       ),
                     ),
@@ -380,16 +380,16 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                                 children: [
                           Text(
                             cellule?.label ?? 'Cellule inconnue',
-                            style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                            style: AppTheme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.textPrimary(context),
+                              color: AppTheme.textPrimary,
                             ),
                           ),
                           SizedBox(height: AppTheme.spacingXS),
                           Text(
                             '${_formatDate(chargement.dateChargement)} • ${chargement.remorque}',
-                            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                              color: AppTheme.textSecondary(context),
+                            style: AppTheme.textTheme.bodyMedium?.copyWith(
+                              color: AppTheme.textSecondary,
                             ),
                                   ),
                                 ],
@@ -409,11 +409,11 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                         }
                       },
                       itemBuilder: (context) => [
-                        PopupMenuItem(
+                        const PopupMenuItem(
                           value: 'edit',
                           child: Row(
                             children: [
-                              Icon(Icons.edit, color: AppTheme.primary(context)),
+                              Icon(Icons.edit, color: AppTheme.primary),
                               SizedBox(width: AppTheme.spacingS),
                               Text('Modifier'),
                             ],
@@ -440,7 +440,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                       child: _buildInfoChip(
                         '${(chargement.poidsNet / 1000).toStringAsFixed(2)} T',
                         Icons.scale,
-                        AppTheme.primary(context),
+                        AppTheme.primary,
                       ),
                     ),
                     const SizedBox(width: AppTheme.spacingS),
@@ -448,7 +448,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
                       child: _buildInfoChip(
                         '${(chargement.poidsNormes / 1000).toStringAsFixed(2)} T normé',
                         Icons.trending_up,
-                        AppTheme.secondary(context),
+                        AppTheme.secondary,
                       ),
                     ),
                   ],
@@ -537,7 +537,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           Expanded(
             child: Text(
               text,
-              style: AppTheme.textTheme(context).bodySmall?.copyWith(
+              style: AppTheme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: color,
               ),
@@ -566,11 +566,11 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
             Text('Total chargements: ${stats['total']}'),
             SizedBox(height: AppTheme.spacingS),
             Text('Jointures OK: ${stats['ok']}', 
-                 style: AppTheme.textTheme(context).bodyMedium?.copyWith(color: AppTheme.success, fontWeight: FontWeight.bold)),
+                 style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.success, fontWeight: FontWeight.bold)),
             Text('Cellules manquantes: ${stats['missCell']}', 
-                 style: AppTheme.textTheme(context).bodyMedium?.copyWith(color: stats['missCell']! > 0 ? AppTheme.error : AppTheme.success)),
+                 style: AppTheme.textTheme.bodyMedium?.copyWith(color: stats['missCell']! > 0 ? AppTheme.error : AppTheme.success)),
             Text('Parcelles manquantes: ${stats['missParc']}', 
-                 style: AppTheme.textTheme(context).bodyMedium?.copyWith(color: stats['missParc']! > 0 ? AppTheme.error : AppTheme.success)),
+                 style: AppTheme.textTheme.bodyMedium?.copyWith(color: stats['missParc']! > 0 ? AppTheme.error : AppTheme.success)),
             SizedBox(height: AppTheme.spacingM),
             if (stats['missCell']! > 0 || stats['missParc']! > 0)
               const Text(

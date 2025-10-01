@@ -24,7 +24,7 @@ class ExportsPdfScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Exports PDF'),
-        backgroundColor: AppTheme.primary(context),
+        backgroundColor: AppTheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -35,7 +35,7 @@ class ExportsPdfScreen extends StatelessWidget {
               title: 'Export PDF Récolte',
               subtitle: 'Générer un PDF des données de récolte',
               icon: Icons.picture_as_pdf,
-              color: AppTheme.primary(context),
+              color: AppTheme.primary,
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExportRecoltesScreen()),

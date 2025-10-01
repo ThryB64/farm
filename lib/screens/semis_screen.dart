@@ -26,11 +26,11 @@ class _SemisScreenState extends State<SemisScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background(context),
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Semis'),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: AppTheme.onPrimary,
         elevation: 0,
         actions: [
           IconButton(
@@ -86,8 +86,8 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addSemis,
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: AppTheme.onPrimary,
         icon: const Icon(Icons.add),
         label: const Text('Nouveau semis'),
       ),
@@ -101,28 +101,28 @@ class _SemisScreenState extends State<SemisScreen> {
           Container(
             padding: AppTheme.padding(AppTheme.spacingL),
             decoration: BoxDecoration(
-              color: AppTheme.primary(context).withOpacity(0.1),
+              color: AppTheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.grass,
               size: 64,
-              color: AppTheme.primary(context),
+              color: AppTheme.primary,
             ),
           ),
           SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucun semis enregistré',
-            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
-              color: AppTheme.textPrimary(context),
+            style: AppTheme.textTheme.headlineMedium?.copyWith(
+              color: AppTheme.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
           SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter votre premier semis',
-            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
-              color: AppTheme.textSecondary(context),
+            style: AppTheme.textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textSecondary,
             ),
           ),
           SizedBox(height: AppTheme.spacingXL),
@@ -130,7 +130,7 @@ class _SemisScreenState extends State<SemisScreen> {
             text: 'Ajouter un semis',
             icon: Icons.add,
             onPressed: _addSemis,
-            backgroundColor: AppTheme.primary(context),
+            backgroundColor: AppTheme.primary,
           ),
         ],
       ),
@@ -144,13 +144,13 @@ class _SemisScreenState extends State<SemisScreen> {
           Icon(
             Icons.calendar_today,
             size: 48,
-            color: AppTheme.textLight(context),
+            color: AppTheme.textLight,
           ),
           SizedBox(height: AppTheme.spacingM),
           Text(
             'Sélectionnez une année',
-            style: AppTheme.textTheme(context).headlineSmall?.copyWith(
-              color: AppTheme.textSecondary(context),
+            style: AppTheme.textTheme.headlineSmall?.copyWith(
+              color: AppTheme.textSecondary,
             ),
           ),
         ],
@@ -162,9 +162,9 @@ class _SemisScreenState extends State<SemisScreen> {
       margin: AppTheme.padding(AppTheme.spacingM),
       padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
       decoration: BoxDecoration(
-        color: AppTheme.surface(context),
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.border(context)),
+        border: Border.all(color: AppTheme.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -175,11 +175,11 @@ class _SemisScreenState extends State<SemisScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.calendar_today, color: AppTheme.primary(context)),
+          Icon(Icons.calendar_today, color: AppTheme.primary),
           SizedBox(width: AppTheme.spacingS),
           Text(
             'Année:',
-            style: AppTheme.textTheme(context).titleMedium?.copyWith(
+            style: AppTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -194,7 +194,7 @@ class _SemisScreenState extends State<SemisScreen> {
                       value: annee,
                   child: Text(
                     annee.toString(),
-                    style: AppTheme.textTheme(context).bodyLarge,
+                    style: AppTheme.textTheme.bodyLarge,
                   ),
                     );
                   }).toList(),
@@ -230,24 +230,24 @@ class _SemisScreenState extends State<SemisScreen> {
       padding: AppTheme.padding(AppTheme.spacingL),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppTheme.primary(context).withOpacity(0.1), AppTheme.primary(context).withOpacity(0.05)],
+          colors: [AppTheme.primary.withOpacity(0.1), AppTheme.primary.withOpacity(0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-        border: Border.all(color: AppTheme.primary(context).withOpacity(0.2)),
+        border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.analytics, color: AppTheme.primary(context)),
+              Icon(Icons.analytics, color: AppTheme.primary),
               SizedBox(width: AppTheme.spacingS),
               Text(
                 'Résumé ${_selectedYear}',
-                style: AppTheme.textTheme(context).headlineSmall?.copyWith(
-                  color: AppTheme.primary(context),
+                style: AppTheme.textTheme.headlineSmall?.copyWith(
+                  color: AppTheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -280,7 +280,7 @@ class _SemisScreenState extends State<SemisScreen> {
             'Coût total semis',
             '${totalPrixSemis.toStringAsFixed(2)} €',
             Icons.euro,
-            AppTheme.primary(context),
+            AppTheme.primary,
             fullWidth: true,
           ),
         ],
@@ -309,14 +309,14 @@ class _SemisScreenState extends State<SemisScreen> {
               SizedBox(width: AppTheme.spacingS),
               Text(
                 title,
-                style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                  color: AppTheme.textSecondary(context),
+                style: AppTheme.textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textSecondary,
                 ),
               ),
               const Spacer(),
               Text(
                 value,
-                style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                style: AppTheme.textTheme.titleMedium?.copyWith(
                   color: color,
                   fontWeight: FontWeight.bold,
                 ),
@@ -333,8 +333,8 @@ class _SemisScreenState extends State<SemisScreen> {
                   Expanded(
                     child: Text(
                       title,
-                      style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                        color: AppTheme.textSecondary(context),
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
                       ),
                     ),
                   ),
@@ -343,7 +343,7 @@ class _SemisScreenState extends State<SemisScreen> {
               SizedBox(height: AppTheme.spacingXS),
               Text(
                 value,
-                style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                style: AppTheme.textTheme.titleMedium?.copyWith(
                   color: color,
                   fontWeight: FontWeight.bold,
                 ),
@@ -376,9 +376,9 @@ class _SemisScreenState extends State<SemisScreen> {
           return Container(
             margin: EdgeInsets.only(bottom: AppTheme.spacingS),
             decoration: BoxDecoration(
-              color: AppTheme.surface(context),
+              color: AppTheme.surface,
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-              border: Border.all(color: AppTheme.border(context)),
+              border: Border.all(color: AppTheme.border),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -393,7 +393,7 @@ class _SemisScreenState extends State<SemisScreen> {
                 Container(
                   padding: AppTheme.padding(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary(context).withOpacity(0.1),
+                    color: AppTheme.primary.withOpacity(0.1),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(AppTheme.radiusMedium),
                       topRight: Radius.circular(AppTheme.radiusMedium),
@@ -401,13 +401,13 @@ class _SemisScreenState extends State<SemisScreen> {
                   ),
                   child: Row(
                                 children: [
-                      Icon(Icons.grass, color: AppTheme.primary(context)),
+                      Icon(Icons.grass, color: AppTheme.primary),
                       SizedBox(width: AppTheme.spacingS),
                       Expanded(
                         child: Text(
                           parcelle.nom,
-                          style: AppTheme.textTheme(context).titleLarge?.copyWith(
-                            color: AppTheme.primary(context),
+                          style: AppTheme.textTheme.titleLarge?.copyWith(
+                            color: AppTheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -445,7 +445,7 @@ class _SemisScreenState extends State<SemisScreen> {
                             ),
                           ),
                         ],
-                        child: Icon(Icons.more_vert, color: AppTheme.primary(context)),
+                        child: Icon(Icons.more_vert, color: AppTheme.primary),
                                   ),
                                 ],
                               ),
@@ -513,9 +513,9 @@ class _SemisScreenState extends State<SemisScreen> {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: AppTheme.surface(context),
+            color: AppTheme.surface,
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            border: Border.all(color: AppTheme.border(context)),
+            border: Border.all(color: AppTheme.border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -530,7 +530,7 @@ class _SemisScreenState extends State<SemisScreen> {
               Container(
                 padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary(context).withOpacity(0.1),
+                  color: AppTheme.primary.withOpacity(0.1),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(AppTheme.radiusMedium),
                     topRight: Radius.circular(AppTheme.radiusMedium),
@@ -538,13 +538,13 @@ class _SemisScreenState extends State<SemisScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.grass, color: AppTheme.primary(context)),
+                    Icon(Icons.grass, color: AppTheme.primary),
                     SizedBox(width: AppTheme.spacingS),
                     Expanded(
                       child: Text(
                         parcelle.nom,
-                        style: AppTheme.textTheme(context).titleLarge?.copyWith(
-                          color: AppTheme.primary(context),
+                        style: AppTheme.textTheme.titleLarge?.copyWith(
+                          color: AppTheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -582,7 +582,7 @@ class _SemisScreenState extends State<SemisScreen> {
                           ),
                         ),
                       ],
-                      child: Icon(Icons.more_vert, color: AppTheme.primary(context)),
+                      child: Icon(Icons.more_vert, color: AppTheme.primary),
                     ),
                   ],
                 ),
@@ -634,20 +634,20 @@ class _SemisScreenState extends State<SemisScreen> {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppTheme.textSecondary(context)),
+        Icon(icon, size: 16, color: AppTheme.textSecondary),
         SizedBox(width: AppTheme.spacingS),
         Text(
           '$label: ',
-          style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-            color: AppTheme.textSecondary(context),
+          style: AppTheme.textTheme.bodyMedium?.copyWith(
+            color: AppTheme.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-              color: AppTheme.textPrimary(context),
+            style: AppTheme.textTheme.bodyMedium?.copyWith(
+              color: AppTheme.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -661,12 +661,12 @@ class _SemisScreenState extends State<SemisScreen> {
       children: [
         Row(
           children: [
-            Icon(Icons.eco, size: 16, color: AppTheme.textSecondary(context)),
+            Icon(Icons.eco, size: 16, color: AppTheme.textSecondary),
             SizedBox(width: AppTheme.spacingS),
             Text(
               'Variétés: ',
-              style: AppTheme.textTheme(context).bodyMedium?.copyWith(
-                color: AppTheme.textSecondary(context),
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -688,8 +688,8 @@ class _SemisScreenState extends State<SemisScreen> {
             padding: EdgeInsets.only(left: AppTheme.spacingL, bottom: AppTheme.spacingXS),
             child: Text(
               '• ${variete.nom}: ${varieteSurface.surface.toStringAsFixed(2)} ha',
-              style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                color: AppTheme.textPrimary(context),
+              style: AppTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.textPrimary,
               ),
             ),
           );

@@ -57,8 +57,8 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.produit == null ? 'Nouveau produit' : 'Modifier le produit'),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
+        backgroundColor: AppTheme.primary,
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Form(
         key: _formKey,
@@ -70,7 +70,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
               // Nom du produit
               TextFormField(
                 controller: _nomController,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom du produit *',
                 ),
                 validator: (value) {
@@ -85,7 +85,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
               // Mesure
               DropdownButtonFormField<String>(
                 value: _selectedMesure,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Mesure *',
                 ),
                 items: const [
@@ -110,7 +110,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
               // Notes
               TextFormField(
                 controller: _notesController,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Notes',
                 ),
                 maxLines: 3,
@@ -156,9 +156,9 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
           children: [
             Text(
               'Prix par année',
-              style: AppTheme.textTheme(context).titleLarge?.copyWith(
+              style: AppTheme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary(context),
+                color: AppTheme.textPrimary,
               ),
             ),
             SizedBox(height: AppTheme.spacingM),
@@ -169,7 +169,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                 Expanded(
                   child: DropdownButtonFormField<int>(
                     value: _selectedAnnee,
-                    decoration: AppTheme.createInputDecoration(context,
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Année',
                     ),
                     items: List.generate(10, (index) {
@@ -191,7 +191,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _prixController,
-                    decoration: AppTheme.createInputDecoration(context,
+                    decoration: AppTheme.createInputDecoration(
                       labelText: 'Prix (€)',
                     ),
                     keyboardType: TextInputType.number,
@@ -202,8 +202,8 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                   onPressed: _addPrix,
                   icon: Icon(Icons.add, size: AppTheme.iconSizeM),
                   style: IconButton.styleFrom(
-                    backgroundColor: AppTheme.primary(context),
-                    foregroundColor: AppTheme.onPrimary(context),
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: AppTheme.onPrimary,
                   ),
                 ),
               ],
@@ -215,7 +215,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
             if (_prixParAnnee.isNotEmpty) ...[
               Text(
                 'Prix configurés:',
-                style: AppTheme.textTheme(context).titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(height: AppTheme.spacingS),
               ..._prixParAnnee.entries.map((entry) {

@@ -39,7 +39,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistiques'),
-        backgroundColor: AppTheme.primary(context),
+        backgroundColor: AppTheme.primary,
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -97,7 +97,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                     Expanded(
                       child: DropdownButtonFormField<int>(
                         value: _selectedYear,
-                        decoration: AppTheme.createInputDecoration(context,
+                        decoration: AppTheme.createInputDecoration(
                           labelText: 'Année',
                           border: OutlineInputBorder(),
                         ),
@@ -119,7 +119,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedParcelleId,
-                          decoration: AppTheme.createInputDecoration(context,
+                          decoration: AppTheme.createInputDecoration(
                             labelText: 'Parcelle',
                             border: OutlineInputBorder(),
                           ),
@@ -171,18 +171,18 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Sélectionnez une parcelle pour voir ses statistiques détaillées',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      color: AppTheme.textPrimary(context),
+                                      color: AppTheme.textPrimary,
                                     ),
                                   ),
                                   SizedBox(height: 16),
                                   DropdownButtonFormField<String>(
                                     value: _selectedParcelleId,
-                                    decoration: AppTheme.createInputDecoration(context,
+                                    decoration: AppTheme.createInputDecoration(
                                       labelText: 'Parcelle',
                                       border: OutlineInputBorder(),
                                     ),
@@ -242,19 +242,19 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Évolution du rendement total par an (T/ha)',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary(context),
+                  color: AppTheme.textPrimary,
                 ),
               ),
               SizedBox(height: 16),
-              Center(
+              const Center(
                 child: Text(
                   'Aucune donnée disponible',
-                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary(context)),
+                  style: const TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                 ),
               ),
             ],
@@ -268,12 +268,12 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Évolution du rendement total par an (T/ha)',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary(context),
+                color: AppTheme.textPrimary,
               ),
             ),
             SizedBox(height: 16),
@@ -290,7 +290,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             annees[value.toInt()].toString(),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -302,7 +302,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -320,7 +320,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         );
                       }).toList(),
                       isCurved: true,
-                      color: AppTheme.primary(context),
+                      color: AppTheme.primary,
                       barWidth: 3,
                       dotData: FlDotData(show: true),
                     ),
@@ -342,19 +342,19 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Évolution de l\'humidité moyenne annuelle (%)',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary(context),
+                  color: AppTheme.textPrimary,
                 ),
               ),
               SizedBox(height: 16),
-              Center(
+              const Center(
                 child: Text(
                   'Aucune donnée disponible',
-                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary(context)),
+                  style: const TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                 ),
               ),
             ],
@@ -368,12 +368,12 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Évolution de l\'humidité moyenne annuelle (%)',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary(context),
+                color: AppTheme.textPrimary,
               ),
             ),
             SizedBox(height: 16),
@@ -390,7 +390,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             annees[value.toInt()].toString(),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -402,7 +402,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -420,7 +420,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         );
                       }).toList(),
                       isCurved: true,
-                      color: AppTheme.secondary(context),
+                      color: AppTheme.secondary,
                       barWidth: 3,
                       dotData: FlDotData(show: true),
                     ),
@@ -457,17 +457,17 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             children: [
               Text(
                 'Comparaison du rendement (T/ha) entre toutes les parcelles pour $_selectedYear',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary(context),
+                  color: AppTheme.textPrimary,
                 ),
               ),
               SizedBox(height: 16),
-              Center(
+              const Center(
                 child: Text(
                   'Aucune donnée disponible',
-                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary(context)),
+                  style: const TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                 ),
               ),
             ],
@@ -483,10 +483,10 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           children: [
             Text(
               'Comparaison du rendement (T/ha) entre toutes les parcelles pour $_selectedYear',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary(context),
+                color: AppTheme.textPrimary,
               ),
             ),
             SizedBox(height: 16),
@@ -511,7 +511,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                             padding: EdgeInsets.only(top: AppTheme.spacingS),
                             child: Text(
                               parcelle.nom,
-                              style: AppTheme.textTheme(context).bodySmall,
+                              style: AppTheme.textTheme.bodySmall,
                             ),
                           );
                         },
@@ -524,7 +524,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -540,7 +540,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                       barRods: [
                         BarChartRodData(
                           toY: entry.value,
-                          color: AppTheme.primary(context),
+                          color: AppTheme.primary,
                         ),
                       ],
                     );
@@ -578,17 +578,17 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             children: [
               Text(
                 'Évolution du rendement par an pour ${parcelle.nom} (T/ha)',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary(context),
+                  color: AppTheme.textPrimary,
                 ),
               ),
               SizedBox(height: 16),
-              Center(
+              const Center(
                 child: Text(
                   'Aucune donnée disponible',
-                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary(context)),
+                  style: const TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                 ),
               ),
             ],
@@ -605,10 +605,10 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           children: [
             Text(
               'Évolution du rendement par an pour ${parcelle.nom} (T/ha)',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary(context),
+                color: AppTheme.textPrimary,
               ),
             ),
             SizedBox(height: 16),
@@ -625,7 +625,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             annees[value.toInt()].toString(),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -637,7 +637,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -703,17 +703,17 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             children: [
               Text(
                 'Évolution de l\'humidité moyenne par an pour ${parcelle.nom} (%)',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary(context),
+                  color: AppTheme.textPrimary,
                 ),
               ),
               SizedBox(height: 16),
-              Center(
+              const Center(
                 child: Text(
                   'Aucune donnée disponible',
-                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary(context)),
+                  style: const TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                 ),
               ),
             ],
@@ -730,10 +730,10 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           children: [
             Text(
               'Évolution de l\'humidité moyenne par an pour ${parcelle.nom} (%)',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary(context),
+                color: AppTheme.textPrimary,
               ),
             ),
             SizedBox(height: 16),
@@ -750,7 +750,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             annees[value.toInt()].toString(),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -762,7 +762,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         getTitlesWidget: (value, meta) {
                           return Text(
                             value.toStringAsFixed(1),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                           );
                         },
                       ),
@@ -780,7 +780,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         );
                       }).toList(),
                       isCurved: true,
-                      color: AppTheme.secondary(context),
+                      color: AppTheme.secondary,
                       barWidth: 3,
                       dotData: FlDotData(show: true),
                       belowBarData: BarAreaData(show: false),
@@ -858,7 +858,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                   barRods: [
                     BarChartRodData(
                       toY: entry.value,
-                      color: AppTheme.primary(context),
+                      color: AppTheme.primary,
                       width: 20,
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(4),
@@ -878,7 +878,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             rendementsMoyens.keys.elementAt(value.toInt()),
-                            style: AppTheme.textTheme(context).bodySmall,
+                            style: AppTheme.textTheme.bodySmall,
                             textAlign: TextAlign.center,
                           ),
                         );

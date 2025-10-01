@@ -60,13 +60,13 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background(context),
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: Text(
           widget.variete == null ? 'Nouvelle variété' : 'Modifier la variété',
-          style: AppTheme.textTheme(context).headlineSmall?.copyWith(color: AppTheme.onPrimary(context)),
+          style: AppTheme.textTheme.headlineSmall?.copyWith(color: AppTheme.onPrimary),
         ),
-        backgroundColor: AppTheme.primary(context),
+        backgroundColor: AppTheme.primary,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -79,7 +79,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
               // Nom de la variété
               TextFormField(
                 controller: _nomController,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom de la variété',
                   hintText: 'Ex: Pioneer P1234',
                 ),
@@ -101,7 +101,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
               // Description
               TextFormField(
                 controller: _descriptionController,
-                decoration: AppTheme.createInputDecoration(context,
+                decoration: AppTheme.createInputDecoration(
                   labelText: 'Description (optionnel)',
                   hintText: 'Caractéristiques de la variété...',
                 ),
@@ -118,8 +118,8 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
               // Section Prix par année
               Text(
                 'Prix de la dose par année',
-                style: AppTheme.textTheme(context).titleMedium?.copyWith(
-                  color: AppTheme.textPrimary(context),
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -129,9 +129,9 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
               Container(
                 padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: AppTheme.surface(context),
+                  color: AppTheme.surface,
                   borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-                  border: Border.all(color: AppTheme.border(context)),
+                  border: Border.all(color: AppTheme.border),
                 ),
                 child: Column(
                   children: [
@@ -141,7 +141,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                           flex: 2,
                           child: DropdownButtonFormField<int>(
                             value: _anneeSelectionnee,
-                            decoration: AppTheme.createInputDecoration(context,
+                            decoration: AppTheme.createInputDecoration(
                               labelText: 'Année',
                             ),
                             items: List.generate(5, (index) {
@@ -166,7 +166,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                           flex: 3,
                           child: TextFormField(
                             controller: _prixController,
-                            decoration: AppTheme.createInputDecoration(context,
+                            decoration: AppTheme.createInputDecoration(
                               labelText: 'Prix de la dose (€)',
                             ),
                             keyboardType: TextInputType.number,
@@ -175,13 +175,13 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                         SizedBox(width: AppTheme.spacingM),
                         ElevatedButton(
                           onPressed: _ajouterPrix,
-                          style: AppTheme.buttonStyle(context,
-                            backgroundColor: AppTheme.primary(context),
+                          style: AppTheme.buttonStyle(
+                            backgroundColor: AppTheme.primary,
                             shape: RoundedRectangleBorder(
                               borderRadius: AppTheme.radius(AppTheme.radiusMedium),
                             ),
                           ),
-                          child: Icon(Icons.add, color: AppTheme.onPrimary(context)),
+                          child: Icon(Icons.add, color: AppTheme.onPrimary),
                         ),
                       ],
                     ),
@@ -195,16 +195,16 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                 Container(
                   padding: AppTheme.padding(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface(context),
+                    color: AppTheme.surface,
                     borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-                    border: Border.all(color: AppTheme.border(context)),
+                    border: Border.all(color: AppTheme.border),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Prix configurés',
-                        style: AppTheme.textTheme(context).titleSmall?.copyWith(
+                        style: AppTheme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -235,7 +235,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
               ModernButton(
                 text: widget.variete == null ? 'Ajouter la variété' : 'Modifier la variété',
                 icon: Icons.save,
-                backgroundColor: AppTheme.primary(context),
+                backgroundColor: AppTheme.primary,
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {

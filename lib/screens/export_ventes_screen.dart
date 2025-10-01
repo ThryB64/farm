@@ -528,7 +528,7 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
       appBar: AppBar(
         title: Text('Export Ventes PDF'),
         backgroundColor: AppTheme.warning,
-        foregroundColor: AppTheme.onPrimary(context),
+        foregroundColor: AppTheme.onPrimary,
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -549,7 +549,7 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
               children: [
                 DropdownButtonFormField<int>(
                   value: _selectedYear,
-                  decoration: AppTheme.createInputDecoration(context,
+                  decoration: AppTheme.createInputDecoration(
                     labelText: 'Année',
                   ),
                   items: years.map((year) {
@@ -569,15 +569,15 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
                   onPressed: _selectedYear == null
                       ? null
                       : () => _generatePDF(),
-                  style: AppTheme.buttonStyle(context,
+                  style: AppTheme.buttonStyle(
                     backgroundColor: AppTheme.warning,
                     padding: EdgeInsets.symmetric(
                       horizontal: AppTheme.spacingXL,
                       vertical: AppTheme.spacingM,
                     ),
                   ),
-                  icon: Icon(Icons.picture_as_pdf, color: AppTheme.onPrimary(context)),
-                  label: Text('Générer PDF des Ventes', style: AppTheme.textTheme(context).bodyLarge?.copyWith(color: AppTheme.onPrimary(context))),
+                  icon: Icon(Icons.picture_as_pdf, color: AppTheme.onPrimary),
+                  label: Text('Générer PDF des Ventes', style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onPrimary)),
                 ),
               ],
             ),

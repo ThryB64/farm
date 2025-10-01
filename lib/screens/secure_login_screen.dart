@@ -96,6 +96,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
     
     return Scaffold(
       body: Container(
@@ -111,7 +112,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                   Container(
                     padding: AppTheme.padding(AppTheme.spacingL),
                     decoration: BoxDecoration(
-                      color: AppTheme.textPrimary(context).withOpacity(0.1),
+                      color: colors.textPrimary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                     ),
                     child: Column(
@@ -119,22 +120,22 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                         Icon(
                           Icons.agriculture,
                           size: AppTheme.iconSizeXXL,
-                          color: AppTheme.textPrimary(context),
+                          color: colors.textPrimary,
                         ),
                         SizedBox(height: AppTheme.spacingM),
                         Text(
                           'GAEC de la BARADE',
-                          style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+                          style: AppTheme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary(context),
+                            color: colors.textPrimary,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: AppTheme.spacingS),
                         Text(
                           'Gestion des récoltes de maïs',
-                          style: AppTheme.textTheme(context).bodyLarge?.copyWith(
-                            color: AppTheme.textSecondary(context),
+                          style: AppTheme.textTheme.bodyLarge?.copyWith(
+                            color: colors.textSecondary,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -148,9 +149,9 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                   Container(
                     padding: AppTheme.padding(AppTheme.spacingL),
                     decoration: BoxDecoration(
-                      color: AppTheme.surface(context),
+                      color: AppTheme.surface,
                       borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-                      boxShadow: AppTheme.cardShadows(context),
+                      boxShadow: AppTheme.cardShadow,
                     ),
                     child: Form(
                       key: _formKey,
@@ -159,9 +160,9 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                         children: [
                           Text(
                             'Connexion sécurisée',
-                            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+                            style: AppTheme.textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.textPrimary(context),
+                              color: AppTheme.textPrimary,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -170,8 +171,8 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                           
                           Text(
                             'Accès restreint aux membres autorisés',
-                              style: AppTheme.textTheme(context).bodySmall?.copyWith(
-                              color: AppTheme.textSecondary(context),
+                            style: AppTheme.textTheme.bodySmall?.copyWith(
+                              color: AppTheme.textSecondary,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -181,7 +182,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                           // Email
                           TextFormField(
                             controller: _emailController,
-                            decoration: AppTheme.createInputDecoration(context,
+                            decoration: AppTheme.createInputDecoration(
                               labelText: 'Email',
                               prefixIcon: Icons.email,
                             ),
@@ -202,7 +203,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                           // Mot de passe
                           TextFormField(
                             controller: _passwordController,
-                            decoration: AppTheme.createInputDecoration(context,
+                            decoration: AppTheme.createInputDecoration(
                               labelText: 'Mot de passe',
                               prefixIcon: Icons.lock,
                             ),
@@ -233,7 +234,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                                   Expanded(
                                     child: Text(
                                       _errorMessage!,
-                                      style: AppTheme.textTheme(context).bodyMedium?.copyWith(color: AppTheme.error),
+                                      style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.error),
                                     ),
                                   ),
                                 ],
@@ -248,7 +249,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                             onPressed: _isLoading ? null : _signIn,
                             isLoading: _isLoading,
                             isFullWidth: true,
-                            backgroundColor: AppTheme.primary(context),
+                            backgroundColor: AppTheme.primary,
                           ),
                           
                         ],
