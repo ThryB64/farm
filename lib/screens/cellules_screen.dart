@@ -37,20 +37,18 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final colors = AppTheme.getColors(themeProvider.isDarkMode);
-    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
     
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         title: Text('Cellules'),
         backgroundColor: Colors.transparent,
-        foregroundColor: colors.textPrimary,
+        foregroundColor: AppTheme.textPrimary(context),
         elevation: 0,
         centerTitle: true,
       ),
       body: Container(
-        decoration: BoxDecoration(gradient: gradients.appBg),
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient(context)),
         child: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final cellules = provider.cellules;
@@ -63,13 +61,13 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                   Icon(
                     Icons.warehouse,
                     size: AppTheme.iconSizeXXL,
-                    color: AppTheme.textLight,
+                    color: AppTheme.textLight(context),
                   ),
                   SizedBox(height: AppTheme.spacingM),
                   Text(
                     'Aucune cellule enregistrée',
-                    style: AppTheme.textTheme.titleLarge?.copyWith(
-                      color: AppTheme.textSecondary,
+                    style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                      color: AppTheme.textSecondary(context),
                     ),
                   ),
                   SizedBox(height: AppTheme.spacingL),
@@ -78,10 +76,10 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                       context,
                       MaterialPageRoute(builder: (context) => const CelluleFormScreen()),
                     ),
-                    icon: Icon(Icons.add, color: AppTheme.onPrimary),
-                    label: Text('Ajouter une cellule', style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onPrimary)),
-                    style: AppTheme.buttonStyle(
-                      backgroundColor: AppTheme.primary,
+                    icon: Icon(Icons.add, color: AppTheme.onPrimary(context)),
+                    label: Text('Ajouter une cellule', style: AppTheme.textTheme(context).bodyLarge?.copyWith(color: AppTheme.onPrimary(context))),
+                    style: AppTheme.buttonStyle(context,
+                      backgroundColor: AppTheme.primary(context),
                       padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingL, vertical: AppTheme.spacingM),
                     ),
                   ),
@@ -127,12 +125,12 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
             children: [
               Container(
                 padding: AppTheme.padding(AppTheme.spacingM),
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary(context).withOpacity(0.1),
                 child: Column(
                   children: [
                     DropdownButtonFormField<int>(
                       value: _selectedYear,
-                      decoration: AppTheme.createInputDecoration(
+                      decoration: AppTheme.createInputDecoration(context,
                         labelText: 'Année',
                         prefixIcon: Icons.calendar_today,
                       ),
@@ -157,7 +155,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                             'Poids total normé',
                             '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(2)} T',
                             Icons.scale,
-                            AppTheme.primary,
+                            AppTheme.primary(context),
                           ),
                           _buildStatCard(
                             'Poids total net',
@@ -170,8 +168,8 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                       SizedBox(height: AppTheme.spacingS),
                       if (cellulesParAnnee[_selectedYear] != null) Text(
                         '${cellulesParAnnee[_selectedYear]!.length} cellules en $_selectedYear',
-                        style: AppTheme.textTheme.titleMedium?.copyWith(
-                          color: AppTheme.primary,
+                        style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                          color: AppTheme.primary(context),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -235,7 +233,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                             Expanded(
                                               child: Text(
                                                 'Cellule ${cellule.reference}',
-                                                style: AppTheme.textTheme.titleLarge?.copyWith(
+                                                style: AppTheme.textTheme(context).titleLarge?.copyWith(
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -246,7 +244,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                                 _buildAnimatedLock(cellule),
                                                 SizedBox(width: AppTheme.spacingS),
                                                 IconButton(
-                                                  icon: Icon(Icons.info, color: AppTheme.primary, size: AppTheme.iconSizeM),
+                                                  icon: Icon(Icons.info, color: AppTheme.primary(context), size: AppTheme.iconSizeM),
                                                   onPressed: () {
                                                     Navigator.push(
                                                       context,
@@ -272,26 +270,26 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                             Icon(
                                               Icons.warehouse,
                                               size: AppTheme.iconSizeS,
-                                              color: AppTheme.textSecondary,
+                                              color: AppTheme.textSecondary(context),
                                             ),
                                             SizedBox(width: AppTheme.spacingXS),
                                             Text(
                                               '${(cellule.capacite / 1000).toStringAsFixed(2)} T',
-                                              style: AppTheme.textTheme.bodySmall?.copyWith(
-                                                color: AppTheme.textSecondary,
+                                              style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                                                color: AppTheme.textSecondary(context),
                                               ),
                                             ),
                                             SizedBox(width: AppTheme.spacingM),
                                             Icon(
                                               Icons.calendar_today,
                                               size: AppTheme.iconSizeS,
-                                              color: AppTheme.textSecondary,
+                                              color: AppTheme.textSecondary(context),
                                             ),
                                             SizedBox(width: AppTheme.spacingXS),
                                             Text(
                                               'Créée le ${_formatDate(cellule.dateCreation)}',
-                                              style: AppTheme.textTheme.bodySmall?.copyWith(
-                                                color: AppTheme.textSecondary,
+                                              style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                                                color: AppTheme.textSecondary(context),
                                               ),
                                             ),
                                           ],
@@ -300,13 +298,13 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                           SizedBox(height: AppTheme.spacingS),
                                           LinearProgressIndicator(
                                             value: tauxRemplissage / 100,
-                                            backgroundColor: AppTheme.primary.withOpacity(0.2),
+                                            backgroundColor: AppTheme.primary(context).withOpacity(0.2),
                                             valueColor: AlwaysStoppedAnimation<Color>(
                                               tauxRemplissage > 90
                                                   ? AppTheme.error
                                                   : tauxRemplissage > 70
                                                       ? AppTheme.warning
-                                                      : AppTheme.primary,
+                                                      : AppTheme.success,
                                             ),
                                             minHeight: AppTheme.spacingS,
                                           ),
@@ -316,14 +314,14 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                             children: [
                                               Text(
                                                 'Taux de remplissage: ${tauxRemplissage.toStringAsFixed(1)}%',
-                                                style: AppTheme.textTheme.bodySmall?.copyWith(
-                                                  color: AppTheme.textSecondary,
+                                                style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                                                  color: AppTheme.textSecondary(context),
                                                 ),
                                               ),
                                               Text(
                                                 'Net: ${(poidsTotal / 1000).toStringAsFixed(2)} T\nNormé: ${(poidsTotalNorme / 1000).toStringAsFixed(2)} T',
-                                                style: AppTheme.textTheme.bodySmall?.copyWith(
-                                                  color: AppTheme.textSecondary,
+                                                style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                                                  color: AppTheme.textSecondary(context),
                                                 ),
                                                 textAlign: TextAlign.end,
                                               ),
@@ -332,8 +330,8 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                                           SizedBox(height: AppTheme.spacingXS),
                                           Text(
                                             'Humidité moyenne: ${humiditeMoyenne.toStringAsFixed(1)}%',
-                                            style: AppTheme.textTheme.bodySmall?.copyWith(
-                                              color: AppTheme.textSecondary,
+                                              style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                                              color: AppTheme.textSecondary(context),
                                             ),
                                           ),
                                         ],
@@ -359,8 +357,8 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
             ),
           );
         },
-        backgroundColor: AppTheme.primary,
-        child: Icon(Icons.add, color: AppTheme.onPrimary),
+        backgroundColor: AppTheme.primary(context),
+        child: Icon(Icons.add, color: AppTheme.onPrimary(context)),
       ),
     );
   }
@@ -387,9 +385,9 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
               context.read<FirebaseProviderV4>().supprimerCellule(key);
               Navigator.pop(context);
             },
-            style: AppTheme.buttonStyle(
+            style: AppTheme.buttonStyle(context,
               backgroundColor: AppTheme.error,
-              foregroundColor: AppTheme.onPrimary,
+              foregroundColor: AppTheme.onPrimary(context),
             ),
             child: Text('Supprimer'),
           ),
@@ -418,8 +416,8 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
               SizedBox(width: AppTheme.spacingXS),
               Text(
                 label,
-                style: AppTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                                              style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                  color: AppTheme.textSecondary(context),
                 ),
               ),
             ],
@@ -427,7 +425,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
           SizedBox(height: AppTheme.spacingXS),
           Text(
             value,
-            style: AppTheme.textTheme.bodyMedium?.copyWith(
+            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
             ),

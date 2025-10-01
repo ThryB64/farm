@@ -22,7 +22,7 @@ class VarietesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Variétés'),
-        backgroundColor: AppTheme.primary,
+        backgroundColor: AppTheme.primary(context),
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -35,13 +35,13 @@ class VarietesScreen extends StatelessWidget {
                   Icon(
                     Icons.eco,
                     size: 64,
-                    color: AppTheme.textLight,
+                    color: AppTheme.textLight(context),
                   ),
                   SizedBox(height: AppTheme.spacingM),
                   Text(
                     'Aucune variété enregistrée',
-                    style: AppTheme.textTheme.titleLarge?.copyWith(
-                      color: AppTheme.textSecondary,
+                    style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                      color: AppTheme.textSecondary(context),
                     ),
                   ),
                   SizedBox(height: AppTheme.spacingL),
@@ -128,7 +128,7 @@ class VarietesScreen extends StatelessWidget {
             ),
           );
         },
-        backgroundColor: AppTheme.primary,
+        backgroundColor: AppTheme.primary(context),
         child: Icon(Icons.add),
       ),
     );

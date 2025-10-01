@@ -35,8 +35,8 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Raccourci Traitements'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -63,7 +63,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                 // Notes
                 TextFormField(
                   controller: _notesController,
-                  decoration: AppTheme.createInputDecoration(
+                  decoration: AppTheme.createInputDecoration(context,
                     labelText: 'Notes communes',
                     hintText: 'Notes qui seront ajoutées à tous les traitements',
                   ),
@@ -101,24 +101,24 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
     return Container(
       padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.1),
+        color: AppTheme.primary(context).withOpacity(0.1),
         borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Année des traitements',
-            style: AppTheme.textTheme.titleMedium?.copyWith(
-              color: AppTheme.primary,
+            style: AppTheme.textTheme(context).titleMedium?.copyWith(
+              color: AppTheme.primary(context),
               fontWeight: FontWeight.bold,
             ),
           ),
           SizedBox(height: AppTheme.spacingS),
           DropdownButtonFormField<int>(
             value: _selectedAnnee,
-            decoration: AppTheme.createInputDecoration(
+            decoration: AppTheme.createInputDecoration(context,
               contentPadding: EdgeInsets.symmetric(horizontal: AppTheme.spacingS, vertical: AppTheme.spacingS),
             ),
             items: annees.map((annee) {
@@ -141,9 +141,9 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
     return Container(
       padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.1),
+        color: AppTheme.primary(context).withOpacity(0.1),
         borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,8 +153,8 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
             children: [
               Text(
                 'Parcelles sélectionnées (${_selectedParcelleIds.length})',
-                style: AppTheme.textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primary,
+                style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                  color: AppTheme.primary(context),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -177,8 +177,8 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
           if (_selectedParcelleIds.isEmpty)
             Text(
               'Aucune parcelle sélectionnée',
-              style: AppTheme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
+              style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                color: AppTheme.textSecondary(context),
               ),
             )
           else
@@ -232,9 +232,9 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
     return Container(
       padding: AppTheme.padding(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.1),
+        color: AppTheme.primary(context).withOpacity(0.1),
         borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,8 +244,8 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
             children: [
               Text(
                 'Produits (${_produits.length})',
-                style: AppTheme.textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primary,
+                style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                  color: AppTheme.primary(context),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -259,8 +259,8 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
           if (_produits.isEmpty)
             Text(
               'Aucun produit ajouté',
-              style: AppTheme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
+              style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                color: AppTheme.textSecondary(context),
               ),
             )
           else
@@ -271,9 +271,9 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                 margin: EdgeInsets.only(bottom: AppTheme.spacingS),
                 padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
-                  color: AppTheme.surface,
+                  color: AppTheme.surface(context),
                   borderRadius: AppTheme.radius(AppTheme.radiusSmall),
-                  border: Border.all(color: AppTheme.border),
+                  border: Border.all(color: AppTheme.border(context)),
                 ),
                 child: Row(
                   children: [
@@ -283,14 +283,14 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                         children: [
                           Text(
                             produit.nomProduit,
-                            style: AppTheme.textTheme.titleSmall?.copyWith(
+                            style: AppTheme.textTheme(context).titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             '${produit.quantite} ${produit.mesure} - ${produit.prixUnitaire.toStringAsFixed(2)} €/unité',
-                            style: AppTheme.textTheme.bodySmall?.copyWith(
-                              color: AppTheme.textSecondary,
+                            style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                              color: AppTheme.textSecondary(context),
                             ),
                           ),
                         ],
@@ -463,8 +463,8 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ajouter un produit'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -477,7 +477,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 // Sélection du produit
                 DropdownButtonFormField<Produit>(
                   value: _selectedProduit,
-                  decoration: AppTheme.createInputDecoration(
+                  decoration: AppTheme.createInputDecoration(context,
                     labelText: 'Produit',
                   ),
                   items: produits.map((produit) {
@@ -501,7 +501,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 // Quantité
                 TextFormField(
                   controller: _quantiteController,
-                  decoration: AppTheme.createInputDecoration(
+                  decoration: AppTheme.createInputDecoration(context,
                     labelText: 'Quantité par hectare *',
                     helperText: 'Quantité appliquée par hectare',
                   ),
@@ -512,7 +512,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 // Prix unitaire
                 TextFormField(
                   controller: _prixController,
-                  decoration: AppTheme.createInputDecoration(
+                  decoration: AppTheme.createInputDecoration(context,
                     labelText: 'Prix unitaire',
                     helperText: 'Prix par unité du produit',
                   ),
@@ -527,7 +527,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 ListTile(
                   title: Text('Date'),
                   subtitle: Text('${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
-                  trailing: Icon(Icons.calendar_today, color: AppTheme.textSecondary),
+                  trailing: Icon(Icons.calendar_today, color: AppTheme.textSecondary(context)),
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -547,14 +547,14 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 Container(
                   padding: AppTheme.padding(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.1),
+                    color: AppTheme.primary(context).withOpacity(0.1),
                     borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-                    border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                    border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
                   ),
                   child: Text(
                     'Coût par hectare: ${_calculerCoutTotal().toStringAsFixed(2)} €/ha',
-                    style: AppTheme.textTheme.titleMedium?.copyWith(
-                      color: AppTheme.primary,
+                    style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                      color: AppTheme.primary(context),
                       fontWeight: FontWeight.bold,
                     ),
                   ),

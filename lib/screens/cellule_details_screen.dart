@@ -215,8 +215,8 @@ class CelluleDetailsScreen extends StatelessWidget {
                 children: [
                   Text(
                     annee.toString(),
-                    style: AppTheme.textTheme.titleMedium?.copyWith(
-                      color: AppTheme.primary,
+                    style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                      color: AppTheme.primary(context),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -224,7 +224,7 @@ class CelluleDetailsScreen extends StatelessWidget {
                   Container(
                     padding: AppTheme.padding(AppTheme.spacingS),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withOpacity(0.1),
+                      color: AppTheme.primary(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     ),
                     child: Column(

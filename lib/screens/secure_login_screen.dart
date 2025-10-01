@@ -181,8 +181,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                           // Email
                           TextFormField(
                             controller: _emailController,
-                            decoration: AppTheme.createInputDecoration(
-                              context,
+                            decoration: AppTheme.createInputDecoration(context,
                               labelText: 'Email',
                               prefixIcon: Icons.email,
                             ),
@@ -203,8 +202,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                           // Mot de passe
                           TextFormField(
                             controller: _passwordController,
-                            decoration: AppTheme.createInputDecoration(
-                              context,
+                            decoration: AppTheme.createInputDecoration(context,
                               labelText: 'Mot de passe',
                               prefixIcon: Icons.lock,
                             ),

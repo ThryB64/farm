@@ -568,7 +568,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       appBar: AppBar(
         title: Text('Export PDF Traitements'),
         backgroundColor: AppTheme.warning,
-        foregroundColor: AppTheme.onPrimary,
+        foregroundColor: AppTheme.onPrimary(context),
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -586,13 +586,13 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                   Icon(
                     Icons.science,
                     size: AppTheme.iconSizeXXL,
-                    color: AppTheme.textLight,
+                    color: AppTheme.textLight(context),
                   ),
                   SizedBox(height: AppTheme.spacingM),
                   Text(
                     'Aucun traitement enregistré',
-                    style: AppTheme.textTheme.titleLarge?.copyWith(
-                      color: AppTheme.textSecondary,
+                    style: AppTheme.textTheme(context).titleLarge?.copyWith(
+                      color: AppTheme.textSecondary(context),
                     ),
                   ),
                 ],
@@ -612,14 +612,14 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                       children: [
                         Text(
                           'Sélectionner l\'année',
-                          style: AppTheme.textTheme.titleLarge?.copyWith(
+                          style: AppTheme.textTheme(context).titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         SizedBox(height: AppTheme.spacingM),
                         DropdownButtonFormField<int>(
                           value: _selectedYear ?? annees.first,
-                          decoration: AppTheme.createInputDecoration(
+                          decoration: AppTheme.createInputDecoration(context,
                             labelText: 'Année',
                           ),
                           items: annees.map((annee) {
@@ -641,11 +641,11 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                 SizedBox(height: AppTheme.spacingL),
                 ElevatedButton.icon(
                   onPressed: _generatePDF,
-                  icon: Icon(Icons.picture_as_pdf, color: AppTheme.onPrimary),
-                  label: Text('Générer le PDF', style: AppTheme.textTheme.bodyLarge?.copyWith(color: AppTheme.onPrimary)),
-                  style: AppTheme.buttonStyle(
+                  icon: Icon(Icons.picture_as_pdf, color: AppTheme.onPrimary(context)),
+                  label: Text('Générer le PDF', style: AppTheme.textTheme(context).bodyLarge?.copyWith(color: AppTheme.onPrimary(context))),
+                  style: AppTheme.buttonStyle(context,
                     backgroundColor: AppTheme.warning,
-                    foregroundColor: AppTheme.onPrimary,
+                    foregroundColor: AppTheme.onPrimary(context),
                     padding: EdgeInsets.symmetric(vertical: AppTheme.spacingM),
                   ),
                 ),

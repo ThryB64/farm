@@ -53,11 +53,11 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.surface,
+      backgroundColor: AppTheme.surface(context),
       appBar: AppBar(
         title: const Text('Import/Export'),
-        backgroundColor: AppTheme.accent,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: AppTheme.accent(context),
+        foregroundColor: AppTheme.onPrimary(context),
         elevation: 0,
         centerTitle: true,
       ),
@@ -93,21 +93,21 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               Container(
                 padding: AppTheme.padding(AppTheme.spacingS),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.1),
+                  color: AppTheme.primary(context).withOpacity(0.1),
                   borderRadius: AppTheme.radius(AppTheme.radiusSmall),
                 ),
                 child: Icon(
                   Icons.analytics,
-                  color: AppTheme.primary,
+                  color: AppTheme.primary(context),
                   size: AppTheme.iconSizeM,
                 ),
               ),
               SizedBox(width: AppTheme.spacingM),
                     Text(
                 'État de la base de données',
-                      style: AppTheme.textTheme.titleLarge?.copyWith(
+                      style: AppTheme.textTheme(context).titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
+                        color: AppTheme.textPrimary(context),
                       ),
                     ),
             ],
@@ -121,21 +121,21 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                               'Parcelles',
                               provider.parcelles.length,
                               Icons.landscape,
-                    AppTheme.primary,
+                    AppTheme.primary(context),
                             ),
                   const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Cellules',
                               provider.cellules.length,
                     Icons.grid_view,
-                    AppTheme.secondary,
+                    AppTheme.secondary(context),
                             ),
                   const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Chargements',
                               provider.chargements.length,
                               Icons.local_shipping,
-                    AppTheme.accent,
+                    AppTheme.accent(context),
                             ),
                   const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
@@ -173,7 +173,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           SizedBox(width: AppTheme.spacingM),
           Text(
             label,
-            style: AppTheme.textTheme.titleMedium?.copyWith(
+            style: AppTheme.textTheme(context).titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -190,9 +190,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             ),
             child: Text(
               count.toString(),
-              style: AppTheme.textTheme.titleMedium?.copyWith(
+              style: AppTheme.textTheme(context).titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppTheme.onPrimary,
+                color: AppTheme.onPrimary(context),
               ),
             ),
           ),
@@ -222,9 +222,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               SizedBox(width: AppTheme.spacingM),
                     Text(
                 'Export des données',
-                      style: AppTheme.textTheme.titleLarge?.copyWith(
+                      style: AppTheme.textTheme(context).titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
+                        color: AppTheme.textPrimary(context),
                       ),
                     ),
                   ],
@@ -232,8 +232,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           SizedBox(height: AppTheme.spacingM),
           Text(
             'Téléchargez toutes vos données au format JSON pour sauvegarder ou partager.',
-            style: AppTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textSecondary,
+            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+              color: AppTheme.textSecondary(context),
             ),
           ),
           SizedBox(height: AppTheme.spacingL),
@@ -271,9 +271,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               SizedBox(width: AppTheme.spacingM),
                     Text(
                 'Import des données',
-                      style: AppTheme.textTheme.titleLarge?.copyWith(
+                      style: AppTheme.textTheme(context).titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
+                        color: AppTheme.textPrimary(context),
                       ),
                     ),
                   ],
@@ -281,8 +281,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           SizedBox(height: AppTheme.spacingM),
           Text(
             'Importez des données depuis un fichier JSON. Attention : cela remplacera toutes les données existantes.',
-            style: AppTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textSecondary,
+            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+              color: AppTheme.textSecondary(context),
             ),
           ),
           SizedBox(height: AppTheme.spacingL),
@@ -320,9 +320,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               SizedBox(width: AppTheme.spacingM),
               Text(
                 'Actions de maintenance',
-                style: AppTheme.textTheme.titleLarge?.copyWith(
+                style: AppTheme.textTheme(context).titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: AppTheme.textPrimary(context),
                 ),
               ),
             ],
@@ -330,8 +330,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           SizedBox(height: AppTheme.spacingM),
         Text(
             'Mettez à jour les calculs et synchronisez les données.',
-            style: AppTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textSecondary,
+            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+              color: AppTheme.textSecondary(context),
             ),
           ),
           SizedBox(height: AppTheme.spacingL),
@@ -809,9 +809,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               SizedBox(width: AppTheme.spacingM),
               Text(
                 'Diagnostic des données',
-                style: AppTheme.textTheme.titleLarge?.copyWith(
+                style: AppTheme.textTheme(context).titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: AppTheme.textPrimary(context),
                 ),
               ),
             ],
@@ -819,8 +819,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           SizedBox(height: AppTheme.spacingM),
           Text(
             'Analysez la cohérence des données et les problèmes de jointure.',
-            style: AppTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textSecondary,
+            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+              color: AppTheme.textSecondary(context),
             ),
           ),
           SizedBox(height: AppTheme.spacingL),

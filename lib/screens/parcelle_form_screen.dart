@@ -80,11 +80,11 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.landscape, color: AppTheme.primary, size: AppTheme.iconSizeM),
+                        Icon(Icons.landscape, color: AppTheme.primary(context), size: AppTheme.iconSizeM),
                         const SizedBox(width: 12),
                         Text(
                           isEditing ? 'Modifier la parcelle' : 'Créer une nouvelle parcelle',
-                          style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                          style: AppTheme.textTheme(context).titleLarge?.copyWith(fontWeight: FontWeight.w700, color: AppTheme.textPrimary(context)),
                         ),
                       ],
                     ),
@@ -93,7 +93,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                       isEditing
                           ? 'Modifiez les informations de votre parcelle'
                           : 'Remplissez les informations de votre nouvelle parcelle',
-                      style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                      style: AppTheme.textTheme(context).bodySmall?.copyWith(color: AppTheme.textSecondary),
                     ),
                   ],
                 ),
@@ -108,7 +108,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                   children: [
                     Text(
                       'Informations de base',
-                      style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                      style: AppTheme.textTheme(context).titleMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary(context)),
                     ),
                     const SizedBox(height: 20),
                     // Nom de la parcelle
@@ -208,9 +208,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.close, color: AppTheme.textPrimary, size: AppTheme.iconSizeS),
+                            Icon(Icons.close, color: AppTheme.textPrimary(context), size: AppTheme.iconSizeS),
                             SizedBox(width: AppTheme.spacingS),
-                            Text('Annuler', style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+                            Text('Annuler', style: AppTheme.textTheme(context).bodyMedium?.copyWith(color: AppTheme.textPrimary(context), fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
@@ -247,7 +247,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       children: [
         Text(
           label,
-          style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
+          style: AppTheme.textTheme(context).bodySmall?.copyWith(color: AppTheme.textPrimary(context), fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -257,10 +257,10 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
           validator: validator,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
-            prefixIcon: Icon(icon, color: AppTheme.textSecondary, size: AppTheme.iconSizeM),
+            hintStyle: AppTheme.textTheme(context).bodyMedium?.copyWith(color: AppTheme.textSecondary),
+            prefixIcon: Icon(icon, color: AppTheme.textSecondary(context), size: AppTheme.iconSizeM),
             filled: true,
-            fillColor: AppTheme.surface.withOpacity(0.1),
+            fillColor: AppTheme.surface(context).withOpacity(0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: AppTheme.surface, width: 1),
@@ -271,7 +271,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppTheme.primary, width: 2),
+              borderSide: BorderSide(color: AppTheme.primary(context), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),

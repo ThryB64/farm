@@ -96,13 +96,13 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         title: Text(
           'Fermer la cellule',
-          style: AppTheme.textTheme.headlineSmall?.copyWith(color: AppTheme.onPrimary),
+          style: AppTheme.textTheme(context).headlineSmall?.copyWith(color: AppTheme.onPrimary(context)),
         ),
-        backgroundColor: AppTheme.primary,
+        backgroundColor: AppTheme.primary(context),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -116,18 +116,18 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
               Container(
                 padding: AppTheme.padding(AppTheme.spacingM),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.1),
+                  color: AppTheme.primary(context).withOpacity(0.1),
                   borderRadius: AppTheme.radius(AppTheme.radiusMedium),
-                  border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                  border: Border.all(color: AppTheme.primary(context).withOpacity(0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Cellule à fermer',
-                      style: AppTheme.textTheme.titleMedium?.copyWith(
+                      style: AppTheme.textTheme(context).titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
+                        color: AppTheme.primary(context),
                       ),
                     ),
                     SizedBox(height: AppTheme.spacingS),
@@ -143,8 +143,8 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
               // Section données de gaz
               Text(
                 'Données de gaz (obligatoires pour la fermeture)',
-                style: AppTheme.textTheme.titleMedium?.copyWith(
-                  color: AppTheme.textPrimary,
+                style: AppTheme.textTheme(context).titleMedium?.copyWith(
+                  color: AppTheme.textPrimary(context),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -153,7 +153,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
               // Quantité de gaz
               TextFormField(
                 controller: _quantiteGazController,
-                decoration: AppTheme.createInputDecoration(
+                decoration: AppTheme.createInputDecoration(context,
                   labelText: 'Quantité de gaz utilisée (m³) *',
                   hintText: 'Ex: 150.5',
                 ),
@@ -175,7 +175,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
               // Prix du gaz
               TextFormField(
                 controller: _prixGazController,
-                decoration: AppTheme.createInputDecoration(
+                decoration: AppTheme.createInputDecoration(context,
                   labelText: 'Prix du gaz (€/kWh) *',
                   hintText: 'Ex: 0.15',
                 ),
@@ -212,14 +212,14 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                         children: [
                           Text(
                             'Coût total du gaz',
-                            style: AppTheme.textTheme.titleMedium?.copyWith(
+                            style: AppTheme.textTheme(context).titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.success,
                             ),
                           ),
                           Text(
                             '${_coutTotalGaz.toStringAsFixed(2)} €',
-                            style: AppTheme.textTheme.titleLarge?.copyWith(
+                            style: AppTheme.textTheme(context).titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.success,
                             ),
@@ -239,7 +239,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                     child: ModernButton(
                       text: 'Annuler',
                       icon: Icons.cancel,
-                      backgroundColor: AppTheme.textSecondary,
+                      backgroundColor: AppTheme.textSecondary(context),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -248,7 +248,7 @@ class _FermerCelluleScreenState extends State<FermerCelluleScreen> {
                     child: ModernButton(
                       text: 'Fermer la cellule',
                       icon: Icons.lock,
-                      backgroundColor: AppTheme.primary,
+                      backgroundColor: AppTheme.primary(context),
                       onPressed: _fermerCellule,
                     ),
                   ),

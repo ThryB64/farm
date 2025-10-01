@@ -137,7 +137,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.chargement == null ? 'Nouveau chargement' : 'Modifier le chargement'),
-        backgroundColor: AppTheme.primary,
+        backgroundColor: AppTheme.primary(context),
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
@@ -171,7 +171,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                 children: [
                   DropdownButtonFormField<int>(
                     value: _selectedYear,
-                    decoration: AppTheme.createInputDecoration(
+                    decoration: AppTheme.createInputDecoration(context,
                       labelText: 'Année',
                     ),
                     items: annees.map((annee) {
@@ -197,7 +197,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                   SizedBox(height: AppTheme.spacingM),
                   DropdownButtonFormField<String>(
                     value: _selectedParcelleId,
-                    decoration: AppTheme.createInputDecoration(
+                    decoration: AppTheme.createInputDecoration(context,
                       labelText: 'Parcelle',
                     ),
                     items: provider.parcelles.map((parcelle) {
@@ -222,7 +222,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                   SizedBox(height: AppTheme.spacingM),
                   DropdownButtonFormField<String>(
                     value: _selectedVariete,
-                    decoration: AppTheme.createInputDecoration(
+                    decoration: AppTheme.createInputDecoration(context,
                       labelText: 'Variété',
                     ),
                     items: varietesDisponibles.map((variete) {
@@ -246,7 +246,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                   SizedBox(height: AppTheme.spacingM),
                   DropdownButtonFormField<String>(
                     value: _selectedCelluleId,
-                    decoration: AppTheme.createInputDecoration(
+                    decoration: AppTheme.createInputDecoration(context,
                       labelText: 'Cellule',
                     ),
                     items: cellulesAnnee.map((cellule) {
@@ -270,7 +270,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                   SizedBox(height: AppTheme.spacingM),
                   DropdownButtonFormField<String>(
                     value: _selectedRemorque,
-                    decoration: AppTheme.createInputDecoration(
+                    decoration: AppTheme.createInputDecoration(context,
                       labelText: 'Remorque',
                     ),
                     items: _remorques.map((remorque) {
@@ -294,7 +294,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                   SizedBox(height: AppTheme.spacingM),
                   TextFormField(
                     controller: _poidsPleinController,
-                    decoration: AppTheme.createInputDecoration(
+                    decoration: AppTheme.createInputDecoration(context,
                       labelText: 'Poids plein (kg)',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -313,7 +313,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                   SizedBox(height: AppTheme.spacingM),
                   TextFormField(
                     controller: _poidsVideController,
-                    decoration: AppTheme.createInputDecoration(
+                    decoration: AppTheme.createInputDecoration(context,
                       labelText: 'Poids vide (kg)',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -332,7 +332,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                   SizedBox(height: AppTheme.spacingM),
                   TextFormField(
                     controller: _humiditeController,
-                    decoration: AppTheme.createInputDecoration(
+                    decoration: AppTheme.createInputDecoration(context,
                       labelText: 'Humidité (%)',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -394,12 +394,12 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
+                      backgroundColor: AppTheme.primary(context),
                       padding: EdgeInsets.symmetric(vertical: AppTheme.spacingM),
                     ),
                     child: Text(
                       widget.chargement == null ? 'Ajouter' : 'Modifier',
-                      style: AppTheme.textTheme.bodyLarge,
+                      style: AppTheme.textTheme(context).bodyLarge,
                     ),
                   ),
                 ],

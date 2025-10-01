@@ -127,7 +127,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           Text(
             'Commencez par ajouter votre première parcelle',
             style: AppTheme.textTheme(context).bodyLarge?.copyWith(
-              color: AppTheme.textSecondary,
+              color: AppTheme.textSecondary(context),
             ),
             textAlign: TextAlign.center,
           ),
@@ -163,9 +163,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     color: AppTheme.primary(context).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.landscape,
-                    color: AppTheme.primary,
+                    color: AppTheme.primary(context),
                     size: 32,
                   ),
                 ),
@@ -176,7 +176,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     children: [
                       Text(
                         parcelle.nom,
-                        style: AppTheme.textTheme.titleLarge?.copyWith(
+                        style: AppTheme.textTheme(context).titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary(context),
                         ),
@@ -184,8 +184,8 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                       SizedBox(height: AppTheme.spacingXS),
                       Text(
                         'Créée le ${_formatDate(parcelle.dateCreation)}',
-                        style: AppTheme.textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
+                        style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                          color: AppTheme.textSecondary(context),
                         ),
                       ),
                     ],
@@ -200,11 +200,11 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, color: AppTheme.primary),
+                          Icon(Icons.edit, color: AppTheme.primary(context)),
                           SizedBox(width: AppTheme.spacingS),
                           Text('Modifier'),
                         ],
@@ -231,7 +231,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   child: _buildInfoChip(
                     '${parcelle.surface} ha',
                     Icons.area_chart,
-                    AppTheme.primary,
+                    AppTheme.primary(context),
                   ),
                 ),
                 const SizedBox(width: AppTheme.spacingS),
@@ -239,7 +239,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   child: _buildInfoChip(
                     'Surface',
                     Icons.info_outline,
-                    AppTheme.textSecondary,
+                    AppTheme.textSecondary(context),
                   ),
                 ),
               ],
@@ -270,7 +270,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           const SizedBox(width: AppTheme.spacingS),
           Text(
             text,
-            style: AppTheme.textTheme.bodyMedium?.copyWith(
+            style: AppTheme.textTheme(context).bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -299,7 +299,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                decoration: AppTheme.createInputDecoration(
+                decoration: AppTheme.createInputDecoration(context,
                   labelText: 'Nom de la parcelle',
                   hintText: 'Ex: Parcelle Nord',
                   prefixIcon: Icons.landscape,
@@ -314,7 +314,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
               ),
               SizedBox(height: AppTheme.spacingM),
               TextFormField(
-                decoration: AppTheme.createInputDecoration(
+                decoration: AppTheme.createInputDecoration(context,
                   labelText: 'Surface (hectares)',
                   hintText: 'Ex: 2.5',
                   prefixIcon: Icons.area_chart,
@@ -386,7 +386,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             children: [
               TextFormField(
                 initialValue: parcelle.nom,
-                decoration: AppTheme.createInputDecoration(
+                decoration: AppTheme.createInputDecoration(context,
                   labelText: 'Nom de la parcelle',
                   prefixIcon: Icons.landscape,
                 ),
@@ -401,7 +401,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
               SizedBox(height: AppTheme.spacingM),
               TextFormField(
                 initialValue: parcelle.surface.toString(),
-                decoration: AppTheme.createInputDecoration(
+                decoration: AppTheme.createInputDecoration(context,
                   labelText: 'Surface (hectares)',
                   prefixIcon: Icons.area_chart,
                 ),
