@@ -96,7 +96,6 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final colors = AppTheme.getColors(themeProvider.isDarkMode);
     
     return Scaffold(
       body: Container(
@@ -112,7 +111,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                   Container(
                     padding: AppTheme.padding(AppTheme.spacingL),
                     decoration: BoxDecoration(
-                      color: colors.textPrimary.withOpacity(0.1),
+                      color: AppTheme.textPrimary(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                     ),
                     child: Column(
@@ -120,22 +119,22 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                         Icon(
                           Icons.agriculture,
                           size: AppTheme.iconSizeXXL,
-                          color: colors.textPrimary,
+                          color: AppTheme.textPrimary(context),
                         ),
                         SizedBox(height: AppTheme.spacingM),
                         Text(
                           'GAEC de la BARADE',
-                          style: AppTheme.textTheme.headlineMedium?.copyWith(
+                          style: AppTheme.textTheme(context).headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: colors.textPrimary,
+                            color: AppTheme.textPrimary(context),
                           ),
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: AppTheme.spacingS),
                         Text(
                           'Gestion des récoltes de maïs',
-                          style: AppTheme.textTheme.bodyLarge?.copyWith(
-                            color: colors.textSecondary,
+                          style: AppTheme.textTheme(context).bodyLarge?.copyWith(
+                            color: AppTheme.textSecondary(context),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -149,9 +148,9 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                   Container(
                     padding: AppTheme.padding(AppTheme.spacingL),
                     decoration: BoxDecoration(
-                      color: AppTheme.surface,
+                      color: AppTheme.surface(context),
                       borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-                      boxShadow: AppTheme.cardShadow,
+                      boxShadow: AppTheme.cardShadows(context),
                     ),
                     child: Form(
                       key: _formKey,
@@ -160,9 +159,9 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                         children: [
                           Text(
                             'Connexion sécurisée',
-                            style: AppTheme.textTheme.headlineMedium?.copyWith(
+                            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.textPrimary,
+                              color: AppTheme.textPrimary(context),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -171,8 +170,8 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                           
                           Text(
                             'Accès restreint aux membres autorisés',
-                            style: AppTheme.textTheme.bodySmall?.copyWith(
-                              color: AppTheme.textSecondary,
+                              style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                              color: AppTheme.textSecondary(context),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -183,6 +182,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                           TextFormField(
                             controller: _emailController,
                             decoration: AppTheme.createInputDecoration(
+                              context,
                               labelText: 'Email',
                               prefixIcon: Icons.email,
                             ),
@@ -204,6 +204,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                           TextFormField(
                             controller: _passwordController,
                             decoration: AppTheme.createInputDecoration(
+                              context,
                               labelText: 'Mot de passe',
                               prefixIcon: Icons.lock,
                             ),
@@ -234,7 +235,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                                   Expanded(
                                     child: Text(
                                       _errorMessage!,
-                                      style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.error),
+                                      style: AppTheme.textTheme(context).bodyMedium?.copyWith(color: AppTheme.error),
                                     ),
                                   ),
                                 ],
@@ -249,7 +250,7 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                             onPressed: _isLoading ? null : _signIn,
                             isLoading: _isLoading,
                             isFullWidth: true,
-                            backgroundColor: AppTheme.primary,
+                            backgroundColor: AppTheme.primary(context),
                           ),
                           
                         ],

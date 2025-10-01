@@ -117,8 +117,6 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     final provider = Provider.of<FirebaseProviderV4>(context);
     final themeProvider = context.watch<ThemeProvider>();
-    final colors = AppTheme.getColors(themeProvider.isDarkMode);
-    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
     // Éviter l'affichage "fantôme" si le provider n'est pas prêt
     if (!provider.ready) {
       return const Scaffold(
@@ -131,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         title: const Text('GAEC de la BARADE'),
         backgroundColor: Colors.transparent,
-        foregroundColor: colors.textPrimary,
+        foregroundColor: AppTheme.textPrimary(context),
         elevation: 0,
         actions: [
           IconButton(
@@ -173,9 +171,9 @@ class _HomeScreenState extends State<HomeScreen>
   }
   Widget _buildHeader(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final colors = AppTheme.getColors(themeProvider.isDarkMode);
     
     return AppTheme.sectionHeader(
+      context,
       "Bonsoir Thierry",
       subtitle: "Prêt pour une saison parfaite ?",
       trailing: Row(
@@ -189,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen>
                   themeProvider.toggleTheme();
                 },
                 child: AppTheme.glowIcon(
+                  context,
                   themeProvider.isDarkMode ? Icons.brightness_6 : Icons.brightness_4,
                   color: AppTheme.cornGold,
                 ),
@@ -204,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen>
                 builder: (context) => const StatistiquesScreen(),
               ),
             ),
-            child: AppTheme.glowIcon(Icons.agriculture, color: AppTheme.leafLight),
+            child: AppTheme.glowIcon(context, Icons.agriculture, color: AppTheme.leafLight),
           ),
         ],
       ),
@@ -212,8 +211,6 @@ class _HomeScreenState extends State<HomeScreen>
   }
   Widget _buildStatsSection(BuildContext context, FirebaseProviderV4 provider) {
     final themeProvider = context.watch<ThemeProvider>();
-    final colors = AppTheme.getColors(themeProvider.isDarkMode);
-    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
     final parcelles = provider.parcelles;
     final chargements = provider.chargements;
     // Initialiser l'année sélectionnée si pas encore fait
@@ -252,6 +249,7 @@ class _HomeScreenState extends State<HomeScreen>
         ? poidsTotalNormeAnnee / (surfaceRecoltee * 1000)
         : 0.0;
     return AppTheme.glass(
+      context,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -294,9 +292,9 @@ class _HomeScreenState extends State<HomeScreen>
               const SizedBox(width: AppTheme.spaceMd),
               Text(
                 'Aperçu général',
-                style: AppTheme.textTheme.titleLarge?.copyWith(
+                style: AppTheme.textTheme(context).titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: colors.textPrimary,
+                  color: AppTheme.textPrimary(context),
                 ),
               ),
             ],
@@ -305,20 +303,20 @@ class _HomeScreenState extends State<HomeScreen>
           // Sélecteur d'année
           Row(
             children: [
-              AppTheme.glowIcon(Icons.calendar_today, color: AppTheme.primary),
+              AppTheme.glowIcon(context, Icons.calendar_today, color: AppTheme.primary(context)),
               const SizedBox(width: AppTheme.spaceSm),
               Text(
                 'Année:',
-                style: AppTheme.textTheme.bodyLarge?.copyWith(
+                style: AppTheme.textTheme(context).bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: AppTheme.textPrimary(context),
                 ),
               ),
               const SizedBox(width: AppTheme.spaceMd),
               Expanded(
                 child: DropdownButtonFormField<int>(
                   value: _selectedYear,
-                  decoration: AppTheme.inputDecoration(),
+                  decoration: AppTheme.inputDecoration(context),
                   items: () {
                     final annees = chargements
                         .map((c) => c.dateChargement.year)
@@ -351,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen>
                   title: 'Surface récoltée',
                   value: '${surfaceRecoltee.toStringAsFixed(1)} ha',
                   icon: Icons.landscape,
-                  color: AppTheme.primary,
+                  color: AppTheme.primary(context),
                 ),
               ),
               const SizedBox(width: AppTheme.spaceMd),
@@ -360,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen>
                   title: 'Rendement $_selectedYear',
                   value: '${rendementMoyenNorme.toStringAsFixed(1)} T/ha',
                   icon: Icons.trending_up,
-                  color: AppTheme.secondary,
+                  color: AppTheme.secondary(context),
                 ),
               ),
             ],
@@ -373,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen>
                   title: 'Poids total $_selectedYear',
                   value: '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(1)} T',
                   icon: Icons.scale,
-                  color: AppTheme.accent,
+                  color: AppTheme.accent(context),
                 ),
               ),
               const SizedBox(width: AppTheme.spaceMd),
@@ -393,7 +391,6 @@ class _HomeScreenState extends State<HomeScreen>
   }
   Widget _buildMenuSection(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final colors = AppTheme.getColors(themeProvider.isDarkMode);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -402,21 +399,21 @@ class _HomeScreenState extends State<HomeScreen>
             Container(
               padding: AppTheme.padding(AppTheme.spacingS),
               decoration: BoxDecoration(
-                color: colors.textPrimary.withOpacity(0.1),
+                color: AppTheme.textPrimary(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               ),
               child: Icon(
                 Icons.menu,
-                color: colors.textPrimary,
+                color: AppTheme.textPrimary(context),
                 size: AppTheme.iconSizeM,
               ),
             ),
             const SizedBox(width: AppTheme.spaceMd),
             Text(
               'Menu principal',
-              style: AppTheme.textTheme.titleLarge?.copyWith(
+              style: AppTheme.textTheme(context).titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: colors.textPrimary,
+                color: AppTheme.textPrimary(context),
               ),
             ),
           ],
@@ -434,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen>
               title: 'Parcelles',
               subtitle: 'Gestion des parcelles',
               icon: Icons.landscape,
-              color: AppTheme.primary,
+              color: AppTheme.primary(context),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -446,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen>
               title: 'Cellules',
               subtitle: 'Stockage des grains',
               icon: Icons.grid_view,
-              color: AppTheme.secondary,
+              color: AppTheme.secondary(context),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -458,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen>
               title: 'Chargements',
               subtitle: 'Récoltes et transport',
               icon: Icons.local_shipping,
-              color: AppTheme.accent,
+              color: AppTheme.accent(context),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -509,7 +506,6 @@ class _HomeScreenState extends State<HomeScreen>
   }
   Widget _buildQuickActions(BuildContext context, FirebaseProviderV4 provider) {
     final themeProvider = context.watch<ThemeProvider>();
-    final colors = AppTheme.getColors(themeProvider.isDarkMode);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -518,21 +514,21 @@ class _HomeScreenState extends State<HomeScreen>
             Container(
               padding: AppTheme.padding(AppTheme.spacingS),
               decoration: BoxDecoration(
-                color: colors.textPrimary.withOpacity(0.1),
+                color: AppTheme.textPrimary(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               ),
               child: Icon(
                 Icons.flash_on,
-                color: colors.textPrimary,
+                color: AppTheme.textPrimary(context),
                 size: AppTheme.iconSizeM,
               ),
             ),
             const SizedBox(width: AppTheme.spaceMd),
             Text(
               'Actions rapides',
-              style: AppTheme.textTheme.titleLarge?.copyWith(
+              style: AppTheme.textTheme(context).titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: colors.textPrimary,
+                color: AppTheme.textPrimary(context),
               ),
             ),
           ],
@@ -544,7 +540,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: _ModernButton(
                 text: 'Import/Export',
                 icon: Icons.import_export,
-                backgroundColor: colors.surface,
+                backgroundColor: AppTheme.surface(context),
                 textColor: AppTheme.cornGold,
                 borderColor: AppTheme.cornGold,
                 onPressed: () => Navigator.push(
@@ -560,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: _ModernButton(
                 text: 'Exports PDF',
                 icon: Icons.picture_as_pdf,
-                backgroundColor: colors.surface,
+                backgroundColor: AppTheme.surface(context),
                 textColor: AppTheme.cornGold,
                 borderColor: AppTheme.cornGold,
                 onPressed: () => Navigator.push(
@@ -594,6 +590,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppTheme.glass(
+      context,
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.spaceMd),
         child: Column(
@@ -606,8 +603,8 @@ class _StatCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: AppTheme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
+                    style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                      color: AppTheme.textSecondary(context),
                     ),
                   ),
                 ),
@@ -616,9 +613,9 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: AppTheme.spaceSm),
             Text(
               value,
-              style: AppTheme.textTheme.titleLarge?.copyWith(
+              style: AppTheme.textTheme(context).titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+                color: AppTheme.textPrimary(context),
               ),
             ),
           ],
@@ -648,6 +645,7 @@ class _MenuCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AppTheme.glass(
+        context,
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spaceMd),
           child: Column(
@@ -657,16 +655,16 @@ class _MenuCard extends StatelessWidget {
               const SizedBox(height: AppTheme.spaceSm),
               Text(
                 title,
-                style: AppTheme.textTheme.titleMedium?.copyWith(
+                style: AppTheme.textTheme(context).titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: AppTheme.textPrimary(context),
                 ),
               ),
               const SizedBox(height: AppTheme.spaceXs),
               Text(
                 subtitle,
-                style: AppTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                  color: AppTheme.textSecondary(context),
                 ),
               ),
             ],

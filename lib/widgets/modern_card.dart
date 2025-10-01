@@ -28,9 +28,9 @@ class ModernCard extends StatelessWidget {
     return Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppTheme.background,
+        color: backgroundColor ?? AppTheme.background(context),
         borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
-        boxShadow: shadow ?? AppTheme.cardShadow,
+        boxShadow: shadow ?? AppTheme.cardShadows(context),
         gradient: gradient,
       ),
       child: Material(
@@ -125,17 +125,17 @@ class StatCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                      style: AppTheme.textTheme(context).bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
-                        color: AppTheme.textSecondary,
+                        color: AppTheme.textSecondary(context),
                       ),
                     ),
                     if (subtitle != null) ...[
                       SizedBox(height: AppTheme.spacingXS),
                       Text(
                         subtitle!,
-                        style: AppTheme.textTheme.bodySmall?.copyWith(
-                          color: AppTheme.textLight,
+                        style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                          color: AppTheme.textLight(context),
                         ),
                       ),
                     ],
@@ -147,7 +147,7 @@ class StatCard extends StatelessWidget {
           SizedBox(height: AppTheme.spacingM),
           Text(
             value,
-            style: AppTheme.textTheme.headlineSmall?.copyWith(
+                          style: AppTheme.textTheme(context).headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -200,9 +200,9 @@ class MenuCard extends StatelessWidget {
             SizedBox(height: AppTheme.spacingM),
             Text(
               title,
-              style: AppTheme.textTheme.bodyLarge?.copyWith(
+              style: AppTheme.textTheme(context).bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
+                color: AppTheme.textPrimary(context),
               ),
               textAlign: TextAlign.center,
             ),
@@ -210,8 +210,8 @@ class MenuCard extends StatelessWidget {
               SizedBox(height: AppTheme.spacingXS),
               Text(
                 subtitle!,
-                style: AppTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                style: AppTheme.textTheme(context).bodySmall?.copyWith(
+                  color: AppTheme.textSecondary(context),
                 ),
                 textAlign: TextAlign.center,
               ),

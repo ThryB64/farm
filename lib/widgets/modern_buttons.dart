@@ -35,8 +35,8 @@ class ModernButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? AppTheme.primary,
-          foregroundColor: textColor ?? AppTheme.onPrimary,
+          backgroundColor: backgroundColor ?? AppTheme.primary(context),
+          foregroundColor: textColor ?? AppTheme.onPrimary(context),
           elevation: 0,
           padding: padding ?? EdgeInsets.symmetric(
             horizontal: AppTheme.spacingL,
@@ -52,7 +52,7 @@ class ModernButton extends StatelessWidget {
                 height: AppTheme.iconSizeM,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.onPrimary),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.onPrimary(context)),
                 ),
               )
             : Row(
@@ -64,7 +64,7 @@ class ModernButton extends StatelessWidget {
                   ],
                   Text(
                     text,
-                    style: AppTheme.textTheme.bodyLarge?.copyWith(
+                    style: AppTheme.textTheme(context).bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -107,9 +107,9 @@ class ModernOutlinedButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: textColor ?? AppTheme.primary,
+          foregroundColor: textColor ?? AppTheme.primary(context),
           side: BorderSide(
-            color: borderColor ?? AppTheme.primary,
+            color: borderColor ?? AppTheme.primary(context),
             width: 2,
           ),
           padding: padding ?? EdgeInsets.symmetric(
@@ -127,7 +127,7 @@ class ModernOutlinedButton extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    textColor ?? AppTheme.primary,
+                    textColor ?? AppTheme.primary(context),
                   ),
                 ),
               )
@@ -140,7 +140,7 @@ class ModernOutlinedButton extends StatelessWidget {
                   ],
                   Text(
                     text,
-                    style: AppTheme.textTheme.bodyLarge?.copyWith(
+                    style: AppTheme.textTheme(context).bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -176,7 +176,7 @@ class ModernTextButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        foregroundColor: textColor ?? AppTheme.primary,
+        foregroundColor: textColor ?? AppTheme.primary(context),
           padding: padding ?? EdgeInsets.symmetric(
             horizontal: AppTheme.spacingM,
             vertical: AppTheme.spacingS,
@@ -194,7 +194,7 @@ class ModernTextButton extends StatelessWidget {
           ],
           Text(
             text,
-            style: AppTheme.textTheme.bodyLarge?.copyWith(
+            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
               fontSize: fontSize ?? 16,
               fontWeight: fontWeight ?? FontWeight.w600,
             ),
@@ -225,8 +225,8 @@ class ModernFloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: onPressed,
-      backgroundColor: backgroundColor ?? AppTheme.primary,
-      foregroundColor: foregroundColor ?? AppTheme.onPrimary,
+      backgroundColor: backgroundColor ?? AppTheme.primary(context),
+      foregroundColor: foregroundColor ?? AppTheme.onPrimary(context),
       tooltip: tooltip,
       child: Icon(icon),
     );

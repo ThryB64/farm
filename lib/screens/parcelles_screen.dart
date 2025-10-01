@@ -50,15 +50,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final colors = AppTheme.getColors(themeProvider.isDarkMode);
-    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
     
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         title: const Text('Parcelles'),
         backgroundColor: Colors.transparent,
-        foregroundColor: colors.textPrimary,
+        foregroundColor: AppTheme.textPrimary(context),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -70,7 +68,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(gradient: gradients.appBg),
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient(context)),
         child: Consumer<FirebaseProviderV4>(
           builder: (context, provider, child) {
             final parcelles = List<Parcelle>.from(provider.parcelles)
@@ -94,8 +92,8 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddParcelleDialog(),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
         child: const Icon(Icons.add),
       ),
     );
@@ -108,27 +106,27 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           Container(
             padding: const EdgeInsets.all(AppTheme.spacingXL),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
+              color: AppTheme.primary(context).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.landscape,
               size: 64,
-              color: AppTheme.primary.withOpacity(0.6),
+              color: AppTheme.primary(context).withOpacity(0.6),
             ),
           ),
           const SizedBox(height: AppTheme.spacingL),
           Text(
             'Aucune parcelle enregistrée',
-            style: AppTheme.textTheme.headlineMedium?.copyWith(
+            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+              color: AppTheme.textPrimary(context),
             ),
           ),
           const SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter votre première parcelle',
-            style: AppTheme.textTheme.bodyLarge?.copyWith(
+            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
               color: AppTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
@@ -162,7 +160,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.1),
+                    color: AppTheme.primary(context).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                   ),
                   child: const Icon(
@@ -180,7 +178,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                         parcelle.nom,
                         style: AppTheme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
+                          color: AppTheme.textPrimary(context),
                         ),
                       ),
                       SizedBox(height: AppTheme.spacingXS),
