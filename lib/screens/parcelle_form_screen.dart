@@ -53,15 +53,26 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.parcelle != null;
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: isEditing ? 'Modifier la parcelle' : 'Nouvelle parcelle',
-      children: [
-        Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          isEditing ? 'Modifier la parcelle' : 'Nouvelle parcelle',
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient(context)),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(AppTheme.spacingL, AppTheme.spacingS, AppTheme.spacingL, AppTheme.spacingL),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // En-tête
               Glass(
                 padding: AppTheme.padding(AppTheme.spacingL),
@@ -221,7 +232,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
             ],
           ),
         ),
-      ],
+          ),
+        ),
+      ),
     );
   }
   Widget _buildTextField({

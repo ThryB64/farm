@@ -51,32 +51,36 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AppThemePageBuilder.buildScrollablePage(
-        context: context,
-        title: 'Chargements',
+      backgroundColor: AppTheme.surface(context),
+      appBar: AppBar(
+        title: const Text('Chargements'),
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
+        elevation: 0,
+        centerTitle: true,
         actions: [
-        Consumer<FirebaseProviderV4>(
-          builder: (context, provider, child) => IconButton(
-            onPressed: () => _debugJoins(context, provider),
-            icon: const Icon(Icons.analytics),
-            tooltip: 'Diagnostic des jointures',
+          Consumer<FirebaseProviderV4>(
+            builder: (context, provider, child) => IconButton(
+              onPressed: () => _debugJoins(context, provider),
+              icon: const Icon(Icons.analytics),
+              tooltip: 'Diagnostic des jointures',
+            ),
           ),
-        ),
-        IconButton(
-          onPressed: () => setState(() => _showDebugInfo = !_showDebugInfo),
-          icon: Icon(_showDebugInfo ? Icons.visibility_off : Icons.bug_report),
-          tooltip: _showDebugInfo ? 'Masquer debug' : 'Afficher debug',
-        ),
-      ],
-      children: [
-        Consumer<FirebaseProviderV4>(
-          builder: (context, provider, child) {
-            final chargements = provider.chargements;
-            final cellules = provider.cellules;
-            final parcelles = provider.parcelles;
-            if (chargements.isEmpty) {
-              return _buildEmptyState();
-            }
+          IconButton(
+            onPressed: () => setState(() => _showDebugInfo = !_showDebugInfo),
+            icon: Icon(_showDebugInfo ? Icons.visibility_off : Icons.bug_report),
+            tooltip: _showDebugInfo ? 'Masquer debug' : 'Afficher debug',
+          ),
+        ],
+      ),
+      body: Consumer<FirebaseProviderV4>(
+        builder: (context, provider, child) {
+          final chargements = provider.chargements;
+          final cellules = provider.cellules;
+          final parcelles = provider.parcelles;
+          if (chargements.isEmpty) {
+            return _buildEmptyState();
+          }
           // Utiliser les maps optimisées du provider
           final cellulesById = provider.cellulesById;
           final parcellesById = provider.parcellesById;
@@ -132,16 +136,51 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
     );
   }
   Widget _buildEmptyState() {
-    return AppThemePageBuilder.buildEmptyState(
-      context: context,
-      message: 'Aucun chargement enregistré\nCommencez par ajouter votre premier chargement',
-      icon: Icons.local_shipping,
-      actionText: 'Ajouter un chargement',
-      onAction: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ChargementFormScreen(),
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+          Container(
+            padding: const EdgeInsets.all(AppTheme.spacingXL),
+            decoration: BoxDecoration(
+              color: AppTheme.primary(context).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.local_shipping,
+              size: 64,
+              color: AppTheme.primary(context).withOpacity(0.6),
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          Text(
+            'Aucun chargement enregistré',
+            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary(context),
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingS),
+          Text(
+            'Commencez par ajouter votre premier chargement',
+            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
+              color: AppTheme.textSecondary(context),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppTheme.spacingXL),
+          ModernButton(
+            text: 'Ajouter un chargement',
+            icon: Icons.add,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ChargementFormScreen(),
+              ),
+            ),
+            isFullWidth: false,
+          ),
+        ],
       ),
     );
   }

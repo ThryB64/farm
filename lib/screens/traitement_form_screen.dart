@@ -53,13 +53,13 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: widget.traitement == null ? 'Nouveau traitement' : 'Modifier le traitement',
-      backgroundColor: AppTheme.primary(context),
-      foregroundColor: AppTheme.onPrimary(context),
-      children: [
-        Form(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.traitement == null ? 'Nouveau traitement' : 'Modifier le traitement'),
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
+      ),
+      body: Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: AppTheme.padding(AppTheme.spacingM),
@@ -153,7 +153,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
             ],
           ),
         ),
-      ],
+      ),
     );
   }
   Widget _buildProduitsSection() {

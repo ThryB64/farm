@@ -1,4 +1,15 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
 import '../models/cellule.dart';
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -43,11 +54,17 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: widget.cellule == null ? 'Nouvelle cellule' : 'Modifier la cellule',
-      children: [
-        SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: AppTheme.background(context),
+      appBar: AppBar(
+        title: Text(
+          widget.cellule == null ? 'Nouvelle cellule' : 'Modifier la cellule',
+          style: AppTheme.textTheme(context).headlineSmall?.copyWith(color: AppTheme.onPrimary(context)),
+        ),
+        backgroundColor: AppTheme.primary(context),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
         padding: AppTheme.padding(AppTheme.spacingL),
         child: Form(
           key: _formKey,
@@ -174,7 +191,10 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
               ],
               
               // Bouton de validation
-              ElevatedButton.icon(
+              ModernButton(
+                text: widget.cellule == null ? 'Ajouter la cellule' : 'Modifier la cellule',
+                icon: Icons.save,
+                backgroundColor: AppTheme.primary(context),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {
@@ -182,10 +202,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                       final cellule = Cellule(
                         id: widget.cellule?.id,
                         firebaseId: widget.cellule?.firebaseId,
-                        reference: widget.cellule?.reference,
                         dateCreation: dateCreation,
-                        notes: widget.cellule?.notes,
-                        nom: widget.cellule?.nom,
                         quantiteGaz: _quantiteGazController.text.isNotEmpty 
                             ? double.tryParse(_quantiteGazController.text) 
                             : null,
@@ -217,13 +234,12 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     }
                   }
                 },
-                icon: const Icon(Icons.save),
-                label: Text(widget.cellule == null ? 'Ajouter la cellule' : 'Modifier la cellule'),
+                isFullWidth: true,
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 } 

@@ -29,6 +29,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       final db = Provider.of<FirebaseProviderV4>(context, listen: false);
       final traitements = db.traitements;
       final parcelles = db.parcelles;
+      final produits = db.produits;
       final semis = db.semis;
       
       final traitementsAnnee = traitements
@@ -563,11 +564,13 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: 'Export PDF Traitements',
-      children: [
-        Consumer<FirebaseProviderV4>(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Export PDF Traitements'),
+        backgroundColor: AppTheme.warning,
+        foregroundColor: AppTheme.onPrimary(context),
+      ),
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final traitements = provider.traitements;
           final annees = traitements
@@ -651,7 +654,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           );
         },
       ),
-    ],
     );
   }
   String _getPrixSemisParcelle(Parcelle parcelle, List<dynamic> semis, int annee) {

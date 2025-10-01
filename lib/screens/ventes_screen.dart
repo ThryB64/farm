@@ -35,19 +35,19 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: 'Ventes de Maïs',
-      backgroundColor: AppTheme.success,
-      bottom: TabBar(
-        controller: _tabController,
-        tabs: const [
-          Tab(text: 'Ventes en cours'),
-          Tab(text: 'Ventes terminées'),
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ventes de Maïs'),
+        backgroundColor: AppTheme.success,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Ventes en cours'),
+            Tab(text: 'Ventes terminées'),
+          ],
+        ),
       ),
-      children: [
-        Consumer<FirebaseProviderV4>(
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           if (provider.error != null) {
             return Center(
@@ -530,7 +530,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
           ),
         ],
       ),
-    ];
+    );
   }
   Widget _buildTotalItem(String label, String value, Color color) {
     return Column(

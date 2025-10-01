@@ -1,10 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../models/variete_surface.dart';
 import '../models/produit_traitement.dart';
 import '../models/produit.dart';
 import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
+import '../models/chargement.dart';
+import '../models/cellule.dart';
+import '../models/variete.dart';
 import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 class TraitementRaccourciScreen extends StatefulWidget {
   const TraitementRaccourciScreen({Key? key}) : super(key: key);
@@ -24,11 +32,13 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: 'Raccourci Traitements',
-      children: [
-        Consumer<FirebaseProviderV4>(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Raccourci Traitements'),
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
+      ),
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final parcelles = provider.parcelles;
           final produits = provider.produits;
@@ -65,22 +75,17 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
+                      child: ModernOutlinedButton(
+                        text: 'Annuler',
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Annuler'),
                       ),
                     ),
                     SizedBox(width: AppTheme.spacingM),
                     Expanded(
-                      child: ElevatedButton(
+                      child: ModernButton(
+                        text: 'Appliquer à ${_selectedParcelleIds.length} parcelles',
+                        isLoading: _isLoading,
                         onPressed: _canSave() ? _saveTraitements : null,
-                        child: _isLoading 
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text('Appliquer à ${_selectedParcelleIds.length} parcelles'),
                       ),
                     ),
                   ],
@@ -90,7 +95,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
           );
         },
       ),
-    ],
     );
   }
   Widget _buildYearSelector(List<int> annees) {
@@ -156,14 +160,14 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
               ),
               Row(
                 children: [
-                  OutlinedButton(
+                  ModernOutlinedButton(
+                    text: 'Tout sélectionner',
                     onPressed: _selectAllParcelles,
-                    child: const Text('Tout sélectionner'),
                   ),
                   SizedBox(width: AppTheme.spacingS),
-                  OutlinedButton(
+                  ModernOutlinedButton(
+                    text: 'Tout désélectionner',
                     onPressed: _deselectAllParcelles,
-                    child: const Text('Tout désélectionner'),
                   ),
                 ],
               ),
@@ -245,9 +249,9 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              OutlinedButton(
+              ModernOutlinedButton(
+                text: 'Ajouter produit',
                 onPressed: _addProduit,
-                child: const Text('Ajouter produit'),
               ),
             ],
           ),
@@ -560,9 +564,9 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
+                      child: ModernOutlinedButton(
+                        text: 'Annuler',
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Annuler'),
                       ),
                     ),
                     SizedBox(width: AppTheme.spacingM),
@@ -579,7 +583,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
           );
         },
       ),
-    ];
+    );
   }
   bool _canSave() {
     return _selectedProduit != null &&

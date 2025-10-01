@@ -42,60 +42,62 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: widget.parcelle.nom,
-      backgroundColor: AppTheme.success,
-      foregroundColor: AppTheme.onPrimary(context),
-      children: [
-        Consumer<FirebaseProviderV4>(
-          builder: (context, provider, child) {
-            // Utiliser firebaseId pour les liens
-            final parcelleId = widget.parcelle.firebaseId ?? widget.parcelle.id.toString();
-            
-            // Debug logs
-            print('ParcelleDetailsScreen: Parcelle ID: $parcelleId');
-            print('ParcelleDetailsScreen: Total chargements: ${provider.chargements.length}');
-            print('ParcelleDetailsScreen: Total semis: ${provider.semis.length}');
-            
-            final chargements = provider.chargements
-                .where((c) => c.parcelleId == parcelleId)
-                .toList();
-            final semis = provider.semis
-                .where((s) => s.parcelleId == parcelleId)
-                .toList();
-                
-            print('ParcelleDetailsScreen: Chargements trouvés: ${chargements.length}');
-            print('ParcelleDetailsScreen: Semis trouvés: ${semis.length}');
-            
-            // Debug: afficher les IDs des chargements et semis trouvés
-            for (var c in chargements) {
-              print('  - Chargement: ${c.id} -> ParcelleId: ${c.parcelleId}');
-            }
-            for (var s in semis) {
-              print('  - Semis: ${s.id} -> ParcelleId: ${s.parcelleId}');
-            }
-            // Grouper les chargements par année
-            final Map<int, List<Chargement>> chargementsParAnnee = {};
-            for (var chargement in chargements) {
-              final annee = chargement.dateChargement.year;
-              chargementsParAnnee.putIfAbsent(annee, () => []).add(chargement);
-            }
-            // Grouper les semis par année
-            final Map<int, List<Semis>> semisParAnnee = {};
-            for (var s in semis) {
-              final annee = s.date.year;
-              semisParAnnee.putIfAbsent(annee, () => []).add(s);
-            }
-            // Trier les années par ordre décroissant
-            final List<int> annees = [...chargementsParAnnee.keys, ...semisParAnnee.keys].toSet().toList()..sort((a, b) => b.compareTo(a));
-            // Si aucune année n'est sélectionnée, sélectionner la plus récente
-            if (_selectedYear == null && annees.isNotEmpty) {
-              _selectedYear = annees.first;
-            } else if (_selectedYear == null) {
-              _selectedYear = DateTime.now().year;
-            }
-            return Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.parcelle.nom),
+        backgroundColor: AppTheme.success,
+        foregroundColor: AppTheme.onPrimary(context),
+      ),
+      body: Consumer<FirebaseProviderV4>(
+        builder: (context, provider, child) {
+          // Utiliser firebaseId pour les liens
+          final parcelleId = widget.parcelle.firebaseId ?? widget.parcelle.id.toString();
+          
+          // Debug logs
+          print('ParcelleDetailsScreen: Parcelle ID: $parcelleId');
+          print('ParcelleDetailsScreen: Total chargements: ${provider.chargements.length}');
+          print('ParcelleDetailsScreen: Total semis: ${provider.semis.length}');
+          
+          final chargements = provider.chargements
+              .where((c) => c.parcelleId == parcelleId)
+              .toList();
+          final semis = provider.semis
+              .where((s) => s.parcelleId == parcelleId)
+              .toList();
+              
+          print('ParcelleDetailsScreen: Chargements trouvés: ${chargements.length}');
+          print('ParcelleDetailsScreen: Semis trouvés: ${semis.length}');
+          
+          // Debug: afficher les IDs des chargements et semis trouvés
+          for (var c in chargements) {
+            print('  - Chargement: ${c.id} -> ParcelleId: ${c.parcelleId}');
+          }
+          for (var s in semis) {
+            print('  - Semis: ${s.id} -> ParcelleId: ${s.parcelleId}');
+          }
+          // Grouper les chargements par année
+          final Map<int, List<Chargement>> chargementsParAnnee = {};
+          for (var chargement in chargements) {
+            final annee = chargement.dateChargement.year;
+            chargementsParAnnee.putIfAbsent(annee, () => []).add(chargement);
+          }
+          // Grouper les semis par année
+          final Map<int, List<Semis>> semisParAnnee = {};
+          for (var s in semis) {
+            final annee = s.date.year;
+            semisParAnnee.putIfAbsent(annee, () => []).add(s);
+          }
+          // Trier les années par ordre décroissant
+          final List<int> annees = [...chargementsParAnnee.keys, ...semisParAnnee.keys].toSet().toList()..sort((a, b) => b.compareTo(a));
+          // Si aucune année n'est sélectionnée, sélectionner la plus récente
+          if (_selectedYear == null && annees.isNotEmpty) {
+            _selectedYear = annees.first;
+          } else if (_selectedYear == null) {
+            _selectedYear = DateTime.now().year;
+          }
+          return SingleChildScrollView(
+            padding: AppTheme.padding(AppTheme.spacingM),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Card(
@@ -221,10 +223,10 @@ class _ParcelleDetailsScreenState extends State<ParcelleDetailsScreen> {
                   ),
                 ),
               ],
-            );
-          },
-        ),
-      ],
+            ),
+          );
+        },
+      ),
     );
   }
   String _formatDate(DateTime date) {

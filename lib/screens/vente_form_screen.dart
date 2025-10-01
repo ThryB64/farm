@@ -84,12 +84,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: widget.vente == null ? 'Nouvelle vente' : 'Modifier la vente',
-      backgroundColor: AppTheme.success,
-      children: [
-        Form(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.vente == null ? 'Nouvelle vente' : 'Modifier la vente'),
+        backgroundColor: AppTheme.success,
+      ),
+      body: Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: AppTheme.padding(AppTheme.spacingM),
@@ -106,7 +106,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
             ],
           ),
         ),
-      ],
+      ),
     );
   }
   Widget _buildBasicInfoCard() {

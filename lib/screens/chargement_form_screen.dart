@@ -1,4 +1,15 @@
+import '../models/variete_surface.dart';
+import '../models/produit_traitement.dart';
+import '../models/produit.dart';
+import '../models/traitement.dart';
+import '../models/vente.dart';
+import '../models/semis.dart';
 import '../models/chargement.dart';
+import '../models/cellule.dart';
+import '../models/variete.dart';
+import '../models/parcelle.dart';
+import '../widgets/modern_card.dart';
+import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -123,11 +134,12 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: widget.chargement == null ? 'Nouveau chargement' : 'Modifier le chargement',
-      children: [
-        Consumer<FirebaseProviderV4>(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.chargement == null ? 'Nouveau chargement' : 'Modifier le chargement'),
+        backgroundColor: AppTheme.primary(context),
+      ),
+      body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           // Créer la liste des années à partir des chargements existants
           Set<int> anneesSet = provider.chargements
@@ -396,7 +408,6 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
           );
         },
       ),
-    ],
     );
   }
   void _calculerPoidsNet(String _) {

@@ -49,24 +49,27 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: 'Parcelles',
-      actions: [
-        IconButton(
-          onPressed: () => _showAddParcelleDialog(),
-          icon: const Icon(Icons.add),
-          tooltip: 'Ajouter une parcelle',
-        ),
-      ],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddParcelleDialog(),
-        backgroundColor: AppTheme.primary(context),
-        foregroundColor: AppTheme.onPrimary(context),
-        child: const Icon(Icons.add),
+    final themeProvider = context.watch<ThemeProvider>();
+    
+    return Scaffold(
+      backgroundColor: AppTheme.background(context),
+      appBar: AppBar(
+        title: const Text('Parcelles'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary(context),
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () => _showAddParcelleDialog(),
+            icon: const Icon(Icons.add),
+            tooltip: 'Ajouter une parcelle',
+          ),
+        ],
       ),
-      children: [
-        Consumer<FirebaseProviderV4>(
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient(context)),
+        child: Consumer<FirebaseProviderV4>(
           builder: (context, provider, child) {
             final parcelles = List<Parcelle>.from(provider.parcelles)
               ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
@@ -75,35 +78,135 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             }
             return FadeTransition(
               opacity: _fadeAnimation,
-              child: AppThemePageBuilder.buildItemList(
-                context: context,
-                items: parcelles.map((parcelle) => _buildParcelleCard(parcelle, provider)).toList(),
+              child: Padding(
+                padding: AppTheme.padding(AppTheme.spacingM),
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    SizedBox(height: AppTheme.spacingL),
+                    Expanded(
+                      child: _buildParcellesList(parcelles, provider),
+                    ),
+                  ],
+                ),
               ),
             );
-          },
+        },
         ),
-      ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddParcelleDialog(),
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
+        child: const Icon(Icons.add),
+      ),
     );
   }
   Widget _buildEmptyState() {
-    return AppThemePageBuilder.buildEmptyState(
-      context: context,
-      message: 'Aucune parcelle enregistrée\nCommencez par ajouter votre première parcelle',
-      icon: Icons.landscape,
-      actionText: 'Ajouter une parcelle',
-      onAction: () => _showAddParcelleDialog(),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppTheme.spacingXL),
+            decoration: BoxDecoration(
+              color: AppTheme.primary(context).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.landscape,
+              size: 64,
+              color: AppTheme.primary(context).withOpacity(0.6),
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          Text(
+            'Aucune parcelle enregistrée',
+            style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary(context),
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingS),
+          Text(
+            'Commencez par ajouter votre première parcelle',
+            style: AppTheme.textTheme(context).bodyLarge?.copyWith(
+              color: AppTheme.textSecondary(context),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppTheme.spacingXL),
+          ModernButton(
+            text: 'Ajouter une parcelle',
+            icon: Icons.add,
+            onPressed: () => _showAddParcelleDialog(),
+            isFullWidth: false,
+          ),
+        ],
+      ),
     );
   }
+  Widget _buildHeader() {
+    return AppTheme.glass(
+      context,
+      child: Row(
+        children: [
+          AppTheme.glowIcon(
+            context,
+            Icons.landscape,
+            size: 32,
+            color: AppTheme.primary(context),
+          ),
+          SizedBox(width: AppTheme.spacingM),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Gestion des Parcelles',
+                  style: AppTheme.textTheme(context).headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary(context),
+                  ),
+                ),
+                SizedBox(height: AppTheme.spacingS),
+                Text(
+                  'Gérez vos parcelles agricoles',
+                  style: AppTheme.textTheme(context).bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildParcellesList(List<Parcelle> parcelles, FirebaseProviderV4 provider) {
+    return ListView.builder(
+      itemCount: parcelles.length,
+      itemBuilder: (context, index) {
+        final parcelle = parcelles[index];
+        return _buildParcelleCard(parcelle, provider);
+      },
+    );
+  }
+
   Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV4 provider) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
-      child: ModernCard(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
+      child: AppTheme.glass(
+        context,
+        child: InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
+            ),
           ),
-        ),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -197,6 +300,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
               ],
             ),
           ],
+        ),
         ),
       ),
     );

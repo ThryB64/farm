@@ -55,30 +55,32 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return AppThemePageBuilder.buildScrollablePage(
-      context: context,
-      title: 'Traitements',
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.science),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ProduitsScreen()),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Traitements'),
+        backgroundColor: AppTheme.primary(context),
+        foregroundColor: AppTheme.onPrimary(context),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.science),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProduitsScreen()),
+            ),
+            tooltip: 'Gérer les produits',
           ),
-          tooltip: 'Gérer les produits',
-        ),
-      ],
-      children: [
-        Consumer<FirebaseProviderV4>(
-          builder: (context, provider, child) {
-            final traitements = provider.traitements;
-            final parcelles = provider.parcelles;
-            return Column(
-              children: [
-                // Filtres
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
-                  color: AppTheme.surface(context),
+        ],
+      ),
+      body: Consumer<FirebaseProviderV4>(
+        builder: (context, provider, child) {
+          final traitements = provider.traitements;
+          final parcelles = provider.parcelles;
+          return Column(
+            children: [
+              // Filtres
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingM),
+                color: AppTheme.surface(context),
                 child: Column(
                   children: [
                     // Sélecteur d'année
@@ -169,15 +171,14 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                 ),
               ),
               
-                // Liste des traitements
-                Expanded(
-                  child: _buildTraitementsList(provider, traitements, parcelles),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
+              // Liste des traitements
+              Expanded(
+                child: _buildTraitementsList(provider, traitements, parcelles),
+              ),
+            ],
+          );
+        },
+      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
