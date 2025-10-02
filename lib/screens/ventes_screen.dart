@@ -100,6 +100,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
         backgroundColor: AppTheme.success,
         child: Icon(Icons.add, color: AppTheme.onPrimary),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
   Widget _buildAnneeSelector(FirebaseProviderV4 provider) {
@@ -161,7 +162,12 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       children: [
         Expanded(
           child: ListView.builder(
-            padding: AppTheme.padding(AppTheme.spacingM),
+            padding: EdgeInsets.fromLTRB(
+              AppTheme.spacingM, 
+              AppTheme.spacingM, 
+              AppTheme.spacingM, 
+              AppTheme.spacingXXL + 80, // Espace pour le FAB
+            ),
             itemCount: ventesEnCours.length,
             itemBuilder: (context, index) {
               final vente = ventesEnCours[index];
@@ -224,7 +230,12 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
       children: [
         Expanded(
           child: ListView.builder(
-            padding: AppTheme.padding(AppTheme.spacingM),
+            padding: EdgeInsets.fromLTRB(
+              AppTheme.spacingM, 
+              AppTheme.spacingM, 
+              AppTheme.spacingM, 
+              AppTheme.spacingXXL + 80, // Espace pour le FAB
+            ),
             itemCount: ventesTerminees.length,
             itemBuilder: (context, index) {
               final vente = ventesTerminees[index];
