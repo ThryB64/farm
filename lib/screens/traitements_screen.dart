@@ -257,9 +257,10 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
             dateCreation: DateTime.now(),
           ),
         );
-        return Card(
+        return Container(
           margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
-          child: ListTile(
+          child: AppTheme.glass(
+            child: ListTile(
             leading: CircleAvatar(
               backgroundColor: AppTheme.primary,
               child: const Icon(
@@ -317,6 +318,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               ],
             ),
             isThreeLine: true,
+          ),
           ),
         );
       },

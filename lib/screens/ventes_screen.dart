@@ -299,9 +299,10 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
     );
   }
   Widget _buildVenteCard(Vente vente, FirebaseProviderV4 provider, {required bool isEnCours}) {
-    return ModernCard(
+    return Container(
       margin: EdgeInsets.only(bottom: AppTheme.spacingS),
-      child: ListTile(
+      child: AppTheme.glass(
+        child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isEnCours ? AppTheme.warning : AppTheme.success,
           child: Icon(
@@ -345,6 +346,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
             ),
           ],
         ),
+      ),
       ),
     );
   }

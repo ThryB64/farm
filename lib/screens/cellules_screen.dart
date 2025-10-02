@@ -424,7 +424,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
               Text(
                 label,
                 style: AppTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                  color: color,
                 ),
               ),
             ],

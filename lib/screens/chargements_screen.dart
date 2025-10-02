@@ -269,7 +269,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
     }
     return Container(
       margin: const EdgeInsets.all(AppTheme.spacingM),
-      child: ModernCard(
+      child: AppTheme.glass(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
