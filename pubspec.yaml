@@ -1,5 +1,5 @@
-name: mais_tracker
-description: Application de gestion des récoltes de maïs.
+name: agricorn
+description: AgriCorn - Application de gestion agricole intelligente.
 publish_to: 'none'
 version: 1.0.0+1
 

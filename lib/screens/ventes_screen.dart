@@ -37,7 +37,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ventes de Maïs'),
+        title: const Text('Ventes AgriCorn'),
         backgroundColor: AppTheme.success,
         bottom: TabBar(
           controller: _tabController,

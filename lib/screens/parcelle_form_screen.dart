@@ -11,6 +11,7 @@ import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
+import '../providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
@@ -53,54 +54,66 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.parcelle != null;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
+    
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(
-          isEditing ? 'Modifier la parcelle' : 'Nouvelle parcelle',
-          style: const TextStyle(fontWeight: FontWeight.w700),
+          isEditing ? 'Modifier la parcelle AgriCorn' : 'Nouvelle parcelle AgriCorn',
+          style: TextStyle(fontWeight: FontWeight.w700, color: colors.textPrimary),
         ),
+        backgroundColor: Colors.transparent,
+        foregroundColor: colors.textPrimary,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(AppTheme.spacingL, AppTheme.spacingS, AppTheme.spacingL, AppTheme.spacingL),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // En-tête
-              Glass(
-                padding: AppTheme.padding(AppTheme.spacingL),
-                radius: 24,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.landscape, color: AppTheme.primary, size: AppTheme.iconSizeM),
-                        const SizedBox(width: 12),
-                        Text(
-                          isEditing ? 'Modifier la parcelle' : 'Créer une nouvelle parcelle',
-                          style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      isEditing
-                          ? 'Modifiez les informations de votre parcelle'
-                          : 'Remplissez les informations de votre nouvelle parcelle',
-                      style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
-                    ),
-                  ],
+      body: Container(
+        decoration: BoxDecoration(gradient: gradients.appBg),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(AppTheme.spacingL, AppTheme.spacingS, AppTheme.spacingL, AppTheme.spacingL),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // En-tête
+                AppTheme.glassAdapted(
+                  context: context,
+                  padding: AppTheme.padding(AppTheme.spacingL),
+                  radius: 24,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.landscape_rounded, color: colors.primary, size: AppTheme.iconSizeM),
+                          const SizedBox(width: 12),
+                          Text(
+                            isEditing ? 'Modifier la parcelle' : 'Créer une nouvelle parcelle',
+                            style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: colors.textPrimary),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        isEditing
+                            ? 'Modifiez les informations de votre parcelle'
+                            : 'Remplissez les informations de votre nouvelle parcelle',
+                        style: AppTheme.textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               const SizedBox(height: 24),
               // Formulaire
-              Glass(
+              AppTheme.glassAdapted(
+                context: context,
                 padding: AppTheme.padding(AppTheme.spacingL),
                 radius: 24,
                 child: Column(
@@ -108,7 +121,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                   children: [
                     Text(
                       'Informations de base',
-                      style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                      style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: colors.textPrimary),
                     ),
                     const SizedBox(height: 20),
                     // Nom de la parcelle
@@ -116,7 +129,8 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                       controller: _nomController,
                       label: 'Nom de la parcelle',
                       hint: 'Ex: Parcelle Nord',
-                      icon: Icons.landscape,
+                      icon: Icons.landscape_rounded,
+                      colors: colors,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Le nom est obligatoire';
@@ -130,7 +144,8 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                       controller: _codeController,
                       label: 'Code de la parcelle',
                       hint: 'Ex: PN001',
-                      icon: Icons.tag,
+                      icon: Icons.tag_rounded,
+                      colors: colors,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Le code est obligatoire';
@@ -147,8 +162,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                             controller: _surfaceController,
                             label: 'Surface (ha)',
                             hint: 'Ex: 2.5',
-                            icon: Icons.area_chart,
+                            icon: Icons.area_chart_rounded,
                             keyboardType: TextInputType.number,
+                            colors: colors,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'La surface est obligatoire';
@@ -167,8 +183,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                             controller: _anneeController,
                             label: 'Année',
                             hint: 'Ex: 2024',
-                            icon: Icons.calendar_today,
+                            icon: Icons.calendar_today_rounded,
                             keyboardType: TextInputType.number,
+                            colors: colors,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'L\'année est obligatoire';
@@ -189,8 +206,9 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                       controller: _descriptionController,
                       label: 'Description (optionnel)',
                       hint: 'Ajoutez des détails sur cette parcelle...',
-                      icon: Icons.description,
+                      icon: Icons.description_rounded,
                       maxLines: 3,
+                      colors: colors,
                     ),
                   ],
                 ),
@@ -238,6 +256,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
     required String label,
     required String hint,
     required IconData icon,
+    required AppThemeColors colors,
     TextInputType? keyboardType,
     int maxLines = 1,
     String? Function(String?)? validator,
@@ -247,7 +266,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       children: [
         Text(
           label,
-          style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
+          style: AppTheme.textTheme.bodySmall?.copyWith(color: colors.textPrimary, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -255,27 +274,28 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
           keyboardType: keyboardType,
           maxLines: maxLines,
           validator: validator,
+          style: TextStyle(color: colors.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
-            prefixIcon: Icon(icon, color: AppTheme.textSecondary, size: AppTheme.iconSizeM),
+            hintStyle: AppTheme.textTheme.bodyMedium?.copyWith(color: colors.textSecondary),
+            prefixIcon: Icon(icon, color: colors.textSecondary, size: AppTheme.iconSizeM),
             filled: true,
-            fillColor: AppTheme.surface.withOpacity(0.1),
+            fillColor: colors.surface.withOpacity(0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppTheme.surface, width: 1),
+              borderSide: BorderSide(color: colors.surface, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppTheme.surface, width: 1),
+              borderSide: BorderSide(color: colors.surface, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppTheme.primary, width: 2),
+              borderSide: BorderSide(color: colors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppTheme.error, width: 1),
+              borderSide: BorderSide(color: colors.error, width: 1),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingM),
           ),
@@ -308,20 +328,32 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       if (widget.parcelle != null) {
         await provider.modifierParcelle(parcelle);
         if (mounted) {
+          final themeProvider = context.watch<ThemeProvider>();
+          final colors = AppTheme.getColors(themeProvider.isDarkMode);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Parcelle "${parcelle.nom}" modifiée avec succès'),
-              backgroundColor: AppColors.coral,
+              backgroundColor: colors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              ),
             ),
           );
         }
       } else {
         await provider.ajouterParcelle(parcelle);
         if (mounted) {
+          final themeProvider = context.watch<ThemeProvider>();
+          final colors = AppTheme.getColors(themeProvider.isDarkMode);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Parcelle "${parcelle.nom}" créée avec succès'),
-              backgroundColor: AppColors.coral,
+              backgroundColor: colors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              ),
             ),
           );
         }
@@ -331,10 +363,16 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final themeProvider = context.watch<ThemeProvider>();
+        final colors = AppTheme.getColors(themeProvider.isDarkMode);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: colors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
           ),
         );
       }

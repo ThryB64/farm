@@ -56,7 +56,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Parcelles'),
+        title: const Text('Parcelles AgriCorn'),
         backgroundColor: Colors.transparent,
         foregroundColor: colors.textPrimary,
         elevation: 0,
@@ -64,7 +64,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
         actions: [
           IconButton(
             onPressed: () => _showAddParcelleDialog(),
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_rounded),
             tooltip: 'Ajouter une parcelle',
           ),
         ],
@@ -76,7 +76,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             final parcelles = List<Parcelle>.from(provider.parcelles)
               ..sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
             if (parcelles.isEmpty) {
-              return _buildEmptyState();
+              return _buildEmptyState(colors);
             }
             return FadeTransition(
               opacity: _fadeAnimation,
@@ -85,7 +85,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
               itemCount: parcelles.length,
               itemBuilder: (context, index) {
                 final parcelle = parcelles[index];
-                return _buildParcelleCard(parcelle, provider);
+                return _buildParcelleCard(parcelle, provider, colors);
               },
             ),
           );
@@ -94,13 +94,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddParcelleDialog(),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
-        child: const Icon(Icons.add),
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppThemeColors colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -108,13 +108,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           Container(
             padding: const EdgeInsets.all(AppTheme.spacingXL),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
+              color: colors.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.landscape,
+              Icons.landscape_rounded,
               size: 64,
-              color: AppTheme.primary.withOpacity(0.6),
+              color: colors.primary.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: AppTheme.spacingL),
@@ -122,21 +122,21 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             'Aucune parcelle enregistrée',
             style: AppTheme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: AppTheme.spacingS),
           Text(
             'Commencez par ajouter votre première parcelle',
             style: AppTheme.textTheme.bodyLarge?.copyWith(
-              color: AppTheme.textSecondary,
+              color: colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppTheme.spacingXL),
           ModernButton(
             text: 'Ajouter une parcelle',
-            icon: Icons.add,
+            icon: Icons.add_rounded,
             onPressed: () => _showAddParcelleDialog(),
             isFullWidth: false,
           ),
@@ -144,7 +144,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ),
     );
   }
-  Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV4 provider) {
+  Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV4 provider, AppThemeColors colors) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
       child: ModernCard(
@@ -162,12 +162,12 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spacingM),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.1),
+                    color: colors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                   ),
-                  child: const Icon(
-                    Icons.landscape,
-                    color: AppTheme.primary,
+                  child: Icon(
+                    Icons.landscape_rounded,
+                    color: colors.primary,
                     size: 32,
                   ),
                 ),
@@ -180,14 +180,14 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                         parcelle.nom,
                         style: AppTheme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       SizedBox(height: AppTheme.spacingXS),
                       Text(
                         'Créée le ${_formatDate(parcelle.dateCreation)}',
                         style: AppTheme.textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -202,23 +202,23 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, color: AppTheme.primary),
+                          Icon(Icons.edit_rounded, color: colors.primary),
                           SizedBox(width: AppTheme.spacingS),
-                          Text('Modifier'),
+                          Text('Modifier', style: TextStyle(color: colors.textPrimary)),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete, color: AppTheme.error),
+                          Icon(Icons.delete_rounded, color: colors.error),
                           SizedBox(width: AppTheme.spacingS),
-                          Text('Supprimer'),
+                          Text('Supprimer', style: TextStyle(color: colors.textPrimary)),
                         ],
                       ),
                     ),
@@ -232,16 +232,16 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 Expanded(
                   child: _buildInfoChip(
                     '${parcelle.surface} ha',
-                    Icons.area_chart,
-                    AppTheme.primary,
+                    Icons.area_chart_rounded,
+                    colors.primary,
                   ),
                 ),
                 const SizedBox(width: AppTheme.spacingS),
                 Expanded(
                   child: _buildInfoChip(
                     'Surface',
-                    Icons.info_outline,
-                    AppTheme.textSecondary,
+                    Icons.info_outline_rounded,
+                    colors.textSecondary,
                   ),
                 ),
               ],
@@ -288,10 +288,17 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
     final formKey = GlobalKey<FormState>();
     String nom = '';
     double surface = 0;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Nouvelle Parcelle'),
+        backgroundColor: colors.surface,
+        title: Text(
+          'Nouvelle Parcelle',
+          style: TextStyle(color: colors.textPrimary),
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
@@ -304,8 +311,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom de la parcelle',
                   hintText: 'Ex: Parcelle Nord',
-                  prefixIcon: Icons.landscape,
+                  prefixIcon: Icons.landscape_rounded,
                 ),
+                style: TextStyle(color: colors.textPrimary),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer un nom';
@@ -319,8 +327,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 decoration: AppTheme.createInputDecoration(
                   labelText: 'Surface (hectares)',
                   hintText: 'Ex: 2.5',
-                  prefixIcon: Icons.area_chart,
+                  prefixIcon: Icons.area_chart_rounded,
                 ),
+                style: TextStyle(color: colors.textPrimary),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -356,7 +365,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Text('Parcelle ajoutée avec succès'),
-                    backgroundColor: AppTheme.success,
+                    backgroundColor: colors.success,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
@@ -374,10 +383,17 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
     final formKey = GlobalKey<FormState>();
     String nom = parcelle.nom;
     double surface = parcelle.surface;
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Modifier la Parcelle'),
+        backgroundColor: colors.surface,
+        title: Text(
+          'Modifier la Parcelle',
+          style: TextStyle(color: colors.textPrimary),
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
@@ -390,8 +406,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 initialValue: parcelle.nom,
                 decoration: AppTheme.createInputDecoration(
                   labelText: 'Nom de la parcelle',
-                  prefixIcon: Icons.landscape,
+                  prefixIcon: Icons.landscape_rounded,
                 ),
+                style: TextStyle(color: colors.textPrimary),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer un nom';
@@ -405,8 +422,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 initialValue: parcelle.surface.toString(),
                 decoration: AppTheme.createInputDecoration(
                   labelText: 'Surface (hectares)',
-                  prefixIcon: Icons.area_chart,
+                  prefixIcon: Icons.area_chart_rounded,
                 ),
+                style: TextStyle(color: colors.textPrimary),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -445,7 +463,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Text('Parcelle modifiée avec succès'),
-                    backgroundColor: AppTheme.success,
+                    backgroundColor: colors.success,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
@@ -460,14 +478,24 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
     );
   }
   Future<void> _showDeleteConfirmation(Parcelle parcelle) async {
+    final themeProvider = context.watch<ThemeProvider>();
+    final colors = AppTheme.getColors(themeProvider.isDarkMode);
+    
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmer la suppression'),
+        backgroundColor: colors.surface,
+        title: Text(
+          'Confirmer la suppression',
+          style: TextStyle(color: colors.textPrimary),
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
-        content: Text('Voulez-vous vraiment supprimer la parcelle "${parcelle.nom}" ?'),
+        content: Text(
+          'Voulez-vous vraiment supprimer la parcelle "${parcelle.nom}" ?',
+          style: TextStyle(color: colors.textPrimary),
+        ),
         actions: [
           ModernTextButton(
             text: 'Annuler',
@@ -475,7 +503,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           ),
           ModernButton(
             text: 'Supprimer',
-            backgroundColor: AppTheme.error,
+            backgroundColor: colors.error,
             onPressed: () => Navigator.pop(context, true),
           ),
         ],
@@ -487,7 +515,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Parcelle supprimée'),
-          backgroundColor: AppTheme.error,
+          backgroundColor: colors.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),

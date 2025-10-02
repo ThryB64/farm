@@ -1272,6 +1272,10 @@ class AppThemeColors {
   final Color textPrimary;
   final Color textSecondary;
   final Color textLow;
+  final Color primary;
+  final Color onPrimary;
+  final Color success;
+  final Color error;
   
   const AppThemeColors({
     required this.background,
@@ -1281,6 +1285,10 @@ class AppThemeColors {
     required this.textPrimary,
     required this.textSecondary,
     required this.textLow,
+    required this.primary,
+    required this.onPrimary,
+    required this.success,
+    required this.error,
   });
   
   factory AppThemeColors.dark() {
@@ -1292,6 +1300,10 @@ class AppThemeColors {
       textPrimary: AppTheme.textPrimaryDark,
       textSecondary: AppTheme.textSecondaryDark,
       textLow: AppTheme.textLowDark,
+      primary: AppTheme.primary,
+      onPrimary: AppTheme.onPrimary,
+      success: AppTheme.success,
+      error: AppTheme.error,
     );
   }
   
@@ -1304,6 +1316,10 @@ class AppThemeColors {
       textPrimary: AppTheme.textPrimaryLight,
       textSecondary: AppTheme.textSecondaryLight,
       textLow: AppTheme.textLowLight,
+      primary: AppTheme.primary,
+      onPrimary: AppTheme.onPrimary,
+      success: AppTheme.success,
+      error: AppTheme.error,
     );
   }
 }

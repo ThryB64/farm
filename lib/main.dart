@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
-          title: 'Maïs Tracker',
+          title: 'AgriCorn',
           theme: AppTheme.getTheme(themeProvider.isDarkMode),
           home: const AuthGate(),
         );
