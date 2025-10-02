@@ -56,7 +56,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Parcelles AgriCorn'),
+        title: const Text('Parcelles'),
         backgroundColor: Colors.transparent,
         foregroundColor: colors.textPrimary,
         elevation: 0,
@@ -88,7 +88,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(gradient: gradients.appBg),
+        decoration: AppTheme.appBackground(context),
         child: Consumer<FirebaseProviderV4>(
           builder: (context, provider, child) {
             final parcelles = List<Parcelle>.from(provider.parcelles)
@@ -155,16 +155,16 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    colors.primary.withOpacity(0.2),
-                    colors.primary.withOpacity(0.1),
+                    colors.primary.withOpacity(0.15),
+                    colors.primary.withOpacity(0.08),
                   ],
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: colors.primary.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
+                    color: colors.primary.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -226,16 +226,16 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          colors.primary.withOpacity(0.2),
-                          colors.primary.withOpacity(0.1),
+                          colors.primary.withOpacity(0.15),
+                          colors.primary.withOpacity(0.08),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                       boxShadow: [
                         BoxShadow(
-                          color: colors.primary.withOpacity(0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                          color: colors.primary.withOpacity(0.15),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -337,20 +337,20 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withOpacity(0.15),
-            color.withOpacity(0.05),
+            color.withOpacity(0.12),
+            color.withOpacity(0.04),
           ],
         ),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withOpacity(0.25),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: color.withOpacity(0.08),
+            blurRadius: 3,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
