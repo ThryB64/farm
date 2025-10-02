@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -9,6 +10,7 @@ import '../models/parcelle.dart';
 import '../models/cellule.dart';
 import '../models/semis.dart';
 import '../models/variete.dart';
+import '../theme/app_theme.dart';
 
 class ExportRecoltesScreen extends StatefulWidget {
   const ExportRecoltesScreen({Key? key}) : super(key: key);
@@ -647,10 +649,19 @@ class _ExportRecoltesScreenState extends State<ExportRecoltesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export PDF'),
-        backgroundColor: Colors.orange,
+        title: const Text('Export PDF Récoltes'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: Consumer<FirebaseProviderV4>(
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final years = provider.chargements
               .map((c) => c.dateChargement.year)
@@ -707,6 +718,7 @@ class _ExportRecoltesScreenState extends State<ExportRecoltesScreen> {
           );
         },
       ),
+    ),
     );
   }
 }

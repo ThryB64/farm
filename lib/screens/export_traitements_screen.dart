@@ -12,6 +12,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -566,11 +567,19 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Export PDF Traitements'),
-        backgroundColor: AppTheme.warning,
-        foregroundColor: AppTheme.onPrimary,
+        title: const Text('Export PDF Traitements'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: Consumer<FirebaseProviderV4>(
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
           final traitements = provider.traitements;
           final annees = traitements
@@ -654,6 +663,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           );
         },
       ),
+    ),
     );
   }
   String _getPrixSemisParcelle(Parcelle parcelle, List<dynamic> semis, int annee) {

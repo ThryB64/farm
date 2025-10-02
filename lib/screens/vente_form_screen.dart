@@ -12,6 +12,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 class VenteFormScreen extends StatefulWidget {
@@ -87,11 +88,20 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.vente == null ? 'Nouvelle vente' : 'Modifier la vente'),
-        backgroundColor: AppTheme.success,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
           padding: AppTheme.padding(AppTheme.spacingM),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,6 +117,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
           ),
         ),
       ),
+    ),
     );
   }
   Widget _buildBasicInfoCard() {

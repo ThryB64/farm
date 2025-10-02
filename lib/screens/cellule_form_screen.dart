@@ -12,6 +12,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../utils/cout_utils.dart';
@@ -55,16 +56,23 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: Text(
           widget.cellule == null ? 'Nouvelle cellule' : 'Modifier la cellule',
-          style: AppTheme.textTheme.headlineSmall?.copyWith(color: AppTheme.onPrimary),
+          style: AppTheme.textTheme.headlineSmall?.copyWith(color: AppTheme.textPrimary),
         ),
-        backgroundColor: AppTheme.primary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: SingleChildScrollView(
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: SingleChildScrollView(
         padding: AppTheme.padding(AppTheme.spacingL),
         child: Form(
           key: _formKey,
@@ -240,6 +248,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 } 
