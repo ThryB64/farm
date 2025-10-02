@@ -232,6 +232,8 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<FirebaseProviderV4>();
+    
+    // Toujours afficher le SplashScreen en premier pour éviter l'écran blanc
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
