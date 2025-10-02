@@ -12,6 +12,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 class ProduitFormScreen extends StatefulWidget {
@@ -57,14 +58,22 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.produit == null ? 'Nouveau produit' : 'Modifier le produit'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: AppTheme.padding(AppTheme.spacingM),
-          child: Column(
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: AppTheme.padding(AppTheme.spacingM),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Nom du produit
@@ -145,6 +154,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
           ),
         ),
       ),
+    ),
     );
   }
   Widget _buildPrixSection() {

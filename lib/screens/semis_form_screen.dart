@@ -12,6 +12,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../utils/cout_utils.dart';
@@ -466,6 +467,14 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.semis == null ? 'Nouveau semis' : 'Modifier le semis'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
         actions: [
           TextButton(
             onPressed: _saveSemis,
@@ -473,7 +482,9 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
           ),
         ],
       ),
-      body: Form(
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Form(
               key: _formKey,
         child: SingleChildScrollView(
           padding: AppTheme.padding(AppTheme.spacingM),
@@ -710,6 +721,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
               ),
             ),
       ),
+    ),
     );
   }
   bool _canSave() {

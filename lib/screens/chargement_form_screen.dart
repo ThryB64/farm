@@ -12,6 +12,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import '../utils/poids_utils.dart';
@@ -137,10 +138,19 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.chargement == null ? 'Nouveau chargement' : 'Modifier le chargement'),
-        backgroundColor: AppTheme.primary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: Consumer<FirebaseProviderV4>(
-        builder: (context, provider, child) {
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
           // Créer la liste des années à partir des chargements existants
           Set<int> anneesSet = provider.chargements
               .map((c) => c.dateChargement.year)
@@ -408,6 +418,7 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
           );
         },
       ),
+    ),
     );
   }
   void _calculerPoidsNet(String _) {
