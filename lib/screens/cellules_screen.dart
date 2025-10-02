@@ -162,7 +162,7 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
                             'Poids total normé',
                             '${(poidsTotalNormeAnnee / 1000).toStringAsFixed(2)} T',
                             Icons.scale,
-                            AppTheme.primary,
+                            AppTheme.success,
                           ),
                           _buildStatCard(
                             'Poids total net',

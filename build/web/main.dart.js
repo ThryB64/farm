@@ -48574,7 +48574,7 @@ q=c.d
 p=A.M(j).h("U<1,c4<l>>")
 o=t.p
 b=A.a([A.dO(A.bD(d,d,d,d,"Ann\xe9e",B.d2,d),A.q(new A.U(j,new A.az7(),p),!0,p.h("af.E")),new A.az8(c),d,q,b)],o)
-if(c.d!=null){q=A.a([A.F(d,16,d),A.aH(A.a([c.RO("Poids total norm\xe9",B.n.I(h/1000,2)+" T",B.oZ,B.D),c.RO("Poids total net",B.n.I(g/1000,2)+" T",B.Uk,B.X)],o),B.J,B.q6,B.B),A.F(d,8,d)],o)
+if(c.d!=null){q=A.a([A.F(d,16,d),A.aH(A.a([c.RO("Poids total norm\xe9",B.n.I(h/1000,2)+" T",B.oZ,B.X),c.RO("Poids total net",B.n.I(g/1000,2)+" T",B.Uk,B.X)],o),B.J,B.q6,B.B),A.F(d,8,d)],o)
 if(n.i(0,c.d)!=null){p=n.i(0,c.d).length
 f=c.d
 e=B.aX.aU(B.D,B.U)
