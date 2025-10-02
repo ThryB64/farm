@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import 'vente_form_screen.dart';
+import 'package:flutter/services.dart';
 class VentesScreen extends StatefulWidget {
   const VentesScreen({Key? key}) : super(key: key);
   @override
@@ -36,9 +37,16 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Ventes AgriCorn'),
-        backgroundColor: AppTheme.success,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -47,8 +55,10 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
           ],
         ),
       ),
-      body: Consumer<FirebaseProviderV4>(
-        builder: (context, provider, child) {
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
           if (provider.error != null) {
             return Center(
               child: Column(
@@ -83,6 +93,7 @@ class _VentesScreenState extends State<VentesScreen> with SingleTickerProviderSt
             ],
           );
         },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddVenteDialog(context),

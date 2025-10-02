@@ -17,6 +17,7 @@ import '../providers/firebase_provider_v4.dart';
 import 'traitement_form_screen.dart';
 import 'produits_screen.dart';
 import 'traitement_raccourci_screen.dart';
+import 'package:flutter/services.dart';
 class TraitementsScreen extends StatefulWidget {
   const TraitementsScreen({Key? key}) : super(key: key);
   @override
@@ -56,10 +57,16 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Traitements'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.science),
@@ -71,8 +78,10 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
           ),
         ],
       ),
-      body: Consumer<FirebaseProviderV4>(
-        builder: (context, provider, child) {
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
           final traitements = provider.traitements;
           final parcelles = provider.parcelles;
           return Column(
@@ -178,6 +187,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
             ],
           );
         },
+        ),
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,

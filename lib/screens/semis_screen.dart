@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import 'semis_form_screen.dart';
 import 'varietes_screen.dart';
+import 'package:flutter/services.dart';
 class SemisScreen extends StatefulWidget {
   const SemisScreen({Key? key}) : super(key: key);
   @override
@@ -29,9 +30,13 @@ class _SemisScreenState extends State<SemisScreen> {
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Semis'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.eco),
@@ -43,8 +48,10 @@ class _SemisScreenState extends State<SemisScreen> {
           ),
         ],
       ),
-      body: Consumer<FirebaseProviderV4>(
-        builder: (context, provider, child) {
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
           final semis = provider.semis;
           final parcelles = provider.parcelles;
           final varietes = provider.varietes;
@@ -83,6 +90,7 @@ class _SemisScreenState extends State<SemisScreen> {
             ],
           );
         },
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addSemis,
@@ -225,18 +233,9 @@ class _SemisScreenState extends State<SemisScreen> {
       totalSurfaceParcelles += parcelle.surface;
     }
     final hectaresRestants = totalSurfaceParcelles - totalHectaresSemes;
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
-      padding: AppTheme.padding(AppTheme.spacingL),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppTheme.primary.withOpacity(0.1), AppTheme.primary.withOpacity(0.05)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
-      ),
+    return AppTheme.glass(
+      child: Padding(
+        padding: AppTheme.padding(AppTheme.spacingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -284,6 +283,7 @@ class _SemisScreenState extends State<SemisScreen> {
             fullWidth: true,
           ),
         ],
+      ),
       ),
     );
   }

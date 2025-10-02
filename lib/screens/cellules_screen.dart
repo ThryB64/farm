@@ -18,6 +18,7 @@ import '../providers/theme_provider.dart';
 import 'cellule_form_screen.dart';
 import 'cellule_details_screen.dart';
 import 'fermer_cellule_screen.dart';
+import 'package:flutter/services.dart';
 class CellulesScreen extends StatefulWidget {
   const CellulesScreen({Key? key}) : super(key: key);
   @override
@@ -48,6 +49,10 @@ class _CellulesScreenState extends State<CellulesScreen> with TickerProviderStat
         foregroundColor: colors.textPrimary,
         elevation: 0,
         centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: themeProvider.isDarkMode ? Brightness.light : Brightness.light,
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(gradient: gradients.appBg),

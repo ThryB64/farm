@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 import 'chargement_form_screen.dart';
+import 'package:flutter/services.dart';
 class ChargementsScreen extends StatefulWidget {
   const ChargementsScreen({Key? key}) : super(key: key);
   @override
@@ -51,13 +52,17 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.surface,
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Chargements'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
         centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
         actions: [
           Consumer<FirebaseProviderV4>(
             builder: (context, provider, child) => IconButton(
@@ -73,8 +78,10 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
           ),
         ],
       ),
-      body: Consumer<FirebaseProviderV4>(
-        builder: (context, provider, child) {
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Consumer<FirebaseProviderV4>(
+          builder: (context, provider, child) {
           final chargements = provider.chargements;
           final cellules = provider.cellules;
           final parcelles = provider.parcelles;
@@ -121,6 +128,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
             ),
           );
         },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
@@ -355,7 +363,7 @@ class _ChargementsScreenState extends State<ChargementsScreen> with TickerProvid
         }
         return Container(
           margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
-          child: ModernCard(
+          child: AppTheme.glass(
             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
