@@ -593,11 +593,11 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 120, // Hauteur fixe pour toutes les cartes
-      child: AppTheme.glass(
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spaceMd),
+    return AppTheme.glass(
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.spaceMd),
+        child: SizedBox(
+          height: 100, // Hauteur fixe pour toutes les cartes
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -611,16 +611,23 @@ class _StatCard extends StatelessWidget {
                       style: AppTheme.textTheme.bodyMedium?.copyWith(
                         color: AppTheme.textSecondary,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppTheme.spaceSm),
-              Text(
-                value,
-                style: AppTheme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: AppTheme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -650,40 +657,35 @@ class _MenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: SizedBox(
-        height: 140, // Hauteur fixe pour toutes les cartes du menu
-        child: AppTheme.glass(
-          child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spaceMd),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(icon, color: color, size: AppTheme.iconSizeL),
-                const SizedBox(height: AppTheme.spaceSm),
-                Text(
-                  title,
-                  style: AppTheme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
-                    fontSize: 14, // Taille réduite pour éviter le débordement
+      child: AppTheme.glass(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spaceMd),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: color, size: AppTheme.iconSizeL),
+              const SizedBox(height: AppTheme.spaceSm),
+              Text(
+                title,
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppTheme.spaceXs),
+              Expanded(
+                child: Text(
+                  subtitle,
+                  style: AppTheme.textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textSecondary,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: AppTheme.spaceXs),
-                Expanded(
-                  child: Text(
-                    subtitle,
-                    style: AppTheme.textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                      fontSize: 11, // Taille réduite
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

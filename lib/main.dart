@@ -86,17 +86,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.light,
-            statusBarBrightness: Brightness.dark,
-          ),
-          child: MaterialApp(
-            title: 'AgriCorn',
-            theme: AppTheme.getTheme(themeProvider.isDarkMode),
-            home: const AuthGate(),
-          ),
+        return MaterialApp(
+          title: 'AgriCorn',
+          theme: AppTheme.getTheme(themeProvider.isDarkMode),
+          home: const AuthGate(),
+          builder: (context, child) {
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: const SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: Brightness.light,
+                systemNavigationBarColor: Colors.transparent,
+                systemNavigationBarIconBrightness: Brightness.light,
+              ),
+              child: child!,
+            );
+          },
         );
       },
     );
@@ -159,65 +163,52 @@ class SplashScreen extends StatelessWidget {
       backgroundColor: AppTheme.background,
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.cornGold.withOpacity(0.8),
-              AppTheme.cornGold,
-              AppTheme.leafLight,
-            ],
-          ),
+          gradient: AppTheme.appBgGradient,
         ),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: EdgeInsets.all(AppTheme.spacingL),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppTheme.cornGold.withOpacity(0.2),
+                  color: AppTheme.cornGold.withOpacity(0.1),
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.cornGold.withOpacity(0.3),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    ),
-                  ],
+                  border: Border.all(
+                    color: AppTheme.cornGold.withOpacity(0.3),
+                    width: 2,
+                  ),
                 ),
                 child: Icon(
                   Icons.agriculture, 
                   color: AppTheme.cornGold, 
-                  size: AppTheme.iconSizeXXL,
+                  size: 64,
                 ),
               ),
-              SizedBox(height: AppTheme.spacingL),
+              const SizedBox(height: 24),
               Text(
                 'AgriCorn',
                 style: AppTheme.textTheme.headlineLarge?.copyWith(
                   color: AppTheme.cornGold,
                   fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      color: AppTheme.cornGold.withOpacity(0.5),
-                      blurRadius: 10,
-                    ),
-                  ],
                 ),
               ),
-              SizedBox(height: AppTheme.spacingM),
+              const SizedBox(height: 8),
               Text(
                 'Chargement...',
-                style: AppTheme.textTheme.titleLarge?.copyWith(
-                  color: AppTheme.cornGold,
-                  fontWeight: FontWeight.w600,
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.textSecondary,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: AppTheme.spacingL),
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.cornGold),
-                strokeWidth: 3,
+              const SizedBox(height: 32),
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.cornGold),
+                  strokeWidth: 3,
+                ),
               ),
             ],
           ),
