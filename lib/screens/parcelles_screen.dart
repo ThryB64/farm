@@ -80,16 +80,32 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
             }
             return FadeTransition(
               opacity: _fadeAnimation,
-              child: ListView.builder(
+              child: ListView(
                 padding: const EdgeInsets.all(AppTheme.spacingM),
-              itemCount: parcelles.length,
-              itemBuilder: (context, index) {
-                final parcelle = parcelles[index];
-                return _buildParcelleCard(parcelle, provider, colors);
-              },
-            ),
-          );
-        },
+                children: [
+                  // Section header
+                  _buildSectionHeader(colors),
+                  const SizedBox(height: AppTheme.spacingL),
+                  // Grid des parcelles
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: AppTheme.spacingM,
+                      mainAxisSpacing: AppTheme.spacingM,
+                      childAspectRatio: 1.1,
+                    ),
+                    itemCount: parcelles.length,
+                    itemBuilder: (context, index) {
+                      final parcelle = parcelles[index];
+                      return _buildParcelleCard(parcelle, provider, colors);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -105,148 +121,188 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppTheme.spacingXL),
-            decoration: BoxDecoration(
-              color: colors.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
+          AppTheme.glass(
+            child: Padding(
+              padding: const EdgeInsets.all(AppTheme.spacingXL),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppTheme.spacingL),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.landscape_rounded,
+                      size: 48,
+                      color: colors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingL),
+                  Text(
+                    'Aucune parcelle enregistrée',
+                    style: AppTheme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppTheme.spacingS),
+                  Text(
+                    'Commencez par ajouter votre première parcelle',
+                    style: AppTheme.textTheme.bodyLarge?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppTheme.spacingXL),
+                  ModernButton(
+                    text: 'Ajouter une parcelle',
+                    icon: Icons.add_rounded,
+                    onPressed: () => _showAddParcelleDialog(),
+                    isFullWidth: false,
+                  ),
+                ],
+              ),
             ),
-            child: Icon(
-              Icons.landscape_rounded,
-              size: 64,
-              color: colors.primary.withOpacity(0.6),
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacingL),
-          Text(
-            'Aucune parcelle enregistrée',
-            style: AppTheme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacingS),
-          Text(
-            'Commencez par ajouter votre première parcelle',
-            style: AppTheme.textTheme.bodyLarge?.copyWith(
-              color: colors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppTheme.spacingXL),
-          ModernButton(
-            text: 'Ajouter une parcelle',
-            icon: Icons.add_rounded,
-            onPressed: () => _showAddParcelleDialog(),
-            isFullWidth: false,
           ),
         ],
       ),
     );
   }
-  Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV4 provider, AppThemeColors colors) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
-      child: ModernCard(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildSectionHeader(AppThemeColors colors) {
+    return AppTheme.glass(
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.spacingL),
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.spacingM),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-                  ),
-                  child: Icon(
+            Container(
+              padding: AppTheme.padding(AppTheme.spacingS),
+              decoration: BoxDecoration(
+                color: colors.textPrimary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
+              child: Icon(
+                Icons.landscape_rounded,
+                color: colors.textPrimary,
+                size: AppTheme.iconSizeM,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spaceMd),
+            Text(
+              'Mes Parcelles',
+              style: AppTheme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildParcelleCard(Parcelle parcelle, FirebaseProviderV4 provider, AppThemeColors colors) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ParcelleDetailsScreen(parcelle: parcelle),
+        ),
+      ),
+      child: AppTheme.glass(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spacingM),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
                     Icons.landscape_rounded,
                     color: colors.primary,
-                    size: 32,
+                    size: AppTheme.iconSizeL,
                   ),
-                ),
-                const SizedBox(width: AppTheme.spacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        parcelle.nom,
-                        style: AppTheme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colors.textPrimary,
+                  const Spacer(),
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        _showEditParcelleDialog(parcelle);
+                      } else if (value == 'delete') {
+                        _showDeleteConfirmation(parcelle);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_rounded, color: colors.primary),
+                            SizedBox(width: AppTheme.spacingS),
+                            Text('Modifier', style: TextStyle(color: colors.textPrimary)),
+                          ],
                         ),
                       ),
-                      SizedBox(height: AppTheme.spacingXS),
-                      Text(
-                        'Créée le ${_formatDate(parcelle.dateCreation)}',
-                        style: AppTheme.textTheme.bodyMedium?.copyWith(
-                          color: colors.textSecondary,
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_rounded, color: colors.error),
+                            SizedBox(width: AppTheme.spacingS),
+                            Text('Supprimer', style: TextStyle(color: colors.textPrimary)),
+                          ],
                         ),
                       ),
                     ],
                   ),
+                ],
+              ),
+              const SizedBox(height: AppTheme.spaceSm),
+              Text(
+                parcelle.nom,
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colors.textPrimary,
                 ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      _showEditParcelleDialog(parcelle);
-                    } else if (value == 'delete') {
-                      _showDeleteConfirmation(parcelle);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit_rounded, color: colors.primary),
-                          SizedBox(width: AppTheme.spacingS),
-                          Text('Modifier', style: TextStyle(color: colors.textPrimary)),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete_rounded, color: colors.error),
-                          SizedBox(width: AppTheme.spacingS),
-                          Text('Supprimer', style: TextStyle(color: colors.textPrimary)),
-                        ],
+              ),
+              const SizedBox(height: AppTheme.spaceXs),
+              Text(
+                'Créée le ${_formatDate(parcelle.dateCreation)}',
+                style: AppTheme.textTheme.bodySmall?.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spaceSm),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingS,
+                  vertical: AppTheme.spacingXS,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  border: Border.all(
+                    color: colors.primary.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.area_chart_rounded, size: 16, color: colors.primary),
+                    const SizedBox(width: AppTheme.spacingXS),
+                    Text(
+                      '${parcelle.surface} ha',
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors.primary,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: AppTheme.spacingM),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildInfoChip(
-                    '${parcelle.surface} ha',
-                    Icons.area_chart_rounded,
-                    colors.primary,
-                  ),
-                ),
-                const SizedBox(width: AppTheme.spacingS),
-                Expanded(
-                  child: _buildInfoChip(
-                    'Surface',
-                    Icons.info_outline_rounded,
-                    colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
