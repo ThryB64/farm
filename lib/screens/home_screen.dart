@@ -593,35 +593,38 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppTheme.glass(
-      child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spaceMd),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: AppTheme.iconSizeM),
-                const SizedBox(width: AppTheme.spaceSm),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: AppTheme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
+    return SizedBox(
+      height: 120, // Hauteur fixe pour toutes les cartes
+      child: AppTheme.glass(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spaceMd),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: color, size: AppTheme.iconSizeM),
+                  const SizedBox(width: AppTheme.spaceSm),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: AppTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppTheme.spaceSm),
-            Text(
-              value,
-              style: AppTheme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: AppTheme.spaceSm),
+              Text(
+                value,
+                style: AppTheme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -647,29 +650,40 @@ class _MenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: AppTheme.glass(
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spaceMd),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: color, size: AppTheme.iconSizeL),
-              const SizedBox(height: AppTheme.spaceSm),
-              Text(
-                title,
-                style: AppTheme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+      child: SizedBox(
+        height: 140, // Hauteur fixe pour toutes les cartes du menu
+        child: AppTheme.glass(
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spaceMd),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: color, size: AppTheme.iconSizeL),
+                const SizedBox(height: AppTheme.spaceSm),
+                Text(
+                  title,
+                  style: AppTheme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                    fontSize: 14, // Taille réduite pour éviter le débordement
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(height: AppTheme.spaceXs),
-              Text(
-                subtitle,
-                style: AppTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                const SizedBox(height: AppTheme.spaceXs),
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    style: AppTheme.textTheme.bodySmall?.copyWith(
+                      color: AppTheme.textSecondary,
+                      fontSize: 11, // Taille réduite
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

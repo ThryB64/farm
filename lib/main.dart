@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -85,10 +86,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        return MaterialApp(
-          title: 'AgriCorn',
-          theme: AppTheme.getTheme(themeProvider.isDarkMode),
-          home: const AuthGate(),
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
+          child: MaterialApp(
+            title: 'AgriCorn',
+            theme: AppTheme.getTheme(themeProvider.isDarkMode),
+            home: const AuthGate(),
+          ),
         );
       },
     );
@@ -148,30 +156,68 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.background,
       body: Container(
         decoration: BoxDecoration(
-          gradient: AppTheme.primaryGradient,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppTheme.cornGold.withOpacity(0.8),
+              AppTheme.cornGold,
+              AppTheme.leafLight,
+            ],
+          ),
         ),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.agriculture, 
-                color: AppTheme.onPrimary, 
-                size: AppTheme.iconSizeXL,
+              Container(
+                padding: EdgeInsets.all(AppTheme.spacingL),
+                decoration: BoxDecoration(
+                  color: AppTheme.cornGold.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.cornGold.withOpacity(0.3),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.agriculture, 
+                  color: AppTheme.cornGold, 
+                  size: AppTheme.iconSizeXXL,
+                ),
+              ),
+              SizedBox(height: AppTheme.spacingL),
+              Text(
+                'AgriCorn',
+                style: AppTheme.textTheme.headlineLarge?.copyWith(
+                  color: AppTheme.cornGold,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      color: AppTheme.cornGold.withOpacity(0.5),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: AppTheme.spacingM),
               Text(
                 'Chargement...',
                 style: AppTheme.textTheme.titleLarge?.copyWith(
-                  color: AppTheme.onPrimary,
-                  fontWeight: FontWeight.bold,
+                  color: AppTheme.cornGold,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               SizedBox(height: AppTheme.spacingL),
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.onPrimary),
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.cornGold),
+                strokeWidth: 3,
               ),
             ],
           ),
