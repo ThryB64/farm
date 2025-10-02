@@ -12,6 +12,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 class TraitementFormScreen extends StatefulWidget {
@@ -56,14 +57,22 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.traitement == null ? 'Nouveau traitement' : 'Modifier le traitement'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: AppTheme.padding(AppTheme.spacingM),
-          child: Column(
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: AppTheme.padding(AppTheme.spacingM),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Parcelle
@@ -154,6 +163,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
           ),
         ),
       ),
+    ),
     );
   }
   Widget _buildProduitsSection() {

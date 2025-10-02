@@ -13,6 +13,7 @@ import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import '../providers/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/firebase_provider_v4.dart';
 class ParcelleFormScreen extends StatefulWidget {
@@ -59,22 +60,26 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
     final gradients = AppTheme.getGradients(themeProvider.isDarkMode);
     
     return Scaffold(
-      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(
           isEditing ? 'Modifier la parcelle AgriCorn' : 'Nouvelle parcelle AgriCorn',
-          style: TextStyle(fontWeight: FontWeight.w700, color: colors.textPrimary),
+          style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
         ),
         backgroundColor: Colors.transparent,
-        foregroundColor: colors.textPrimary,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(gradient: gradients.appBg),
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(AppTheme.spacingL, AppTheme.spacingS, AppTheme.spacingL, AppTheme.spacingL),
           child: Form(
@@ -249,6 +254,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
           ),
         ),
       ),
+    ),
     );
   }
   Widget _buildTextField({
