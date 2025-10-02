@@ -12,6 +12,7 @@ import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'export_ventes_screen.dart';
 import 'export_traitements_screen.dart';
 import 'export_recoltes_screen.dart';
@@ -24,19 +25,29 @@ class ExportsPdfScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Exports PDF'),
-        backgroundColor: AppTheme.primary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingM),
-        child: Column(
-          children: [
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spacingM),
+          child: Column(
+            children: [
             // Export PDF Récolte
-            MenuCard(
-              title: 'Export PDF Récolte',
-              subtitle: 'Générer un PDF des données de récolte',
-              icon: Icons.picture_as_pdf,
-              color: AppTheme.primary,
-              onTap: () => Navigator.push(
+            _buildExportCard(
+              context,
+              'Export PDF Récolte',
+              'Générer un PDF des données de récolte',
+              Icons.picture_as_pdf,
+              AppTheme.primary,
+              () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExportRecoltesScreen()),
               ),
@@ -44,12 +55,13 @@ class ExportsPdfScreen extends StatelessWidget {
             const SizedBox(height: AppTheme.spacingM),
             
             // Export PDF Ventes
-            MenuCard(
-              title: 'Export PDF Ventes',
-              subtitle: 'Générer un PDF des données de ventes',
-              icon: Icons.sell,
-              color: AppTheme.success,
-              onTap: () => Navigator.push(
+            _buildExportCard(
+              context,
+              'Export PDF Ventes',
+              'Générer un PDF des données de ventes',
+              Icons.sell,
+              AppTheme.success,
+              () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExportVentesScreen()),
               ),
@@ -57,17 +69,76 @@ class ExportsPdfScreen extends StatelessWidget {
             const SizedBox(height: AppTheme.spacingM),
             
             // Export PDF Traitements
-            MenuCard(
-              title: 'Export PDF Traitements',
-              subtitle: 'Générer un PDF des données de traitements',
-              icon: Icons.science,
-              color: AppTheme.warning,
-              onTap: () => Navigator.push(
+            _buildExportCard(
+              context,
+              'Export PDF Traitements',
+              'Générer un PDF des données de traitements',
+              Icons.science,
+              AppTheme.warning,
+              () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExportTraitementsScreen()),
               ),
             ),
           ],
+        ),
+      ),
+    ),
+    );
+  }
+
+  Widget _buildExportCard(
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AppTheme.glass(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spacingM),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: Icon(icon, color: color, size: AppTheme.iconSizeL),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTheme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppTheme.spacingXS),
+                    Text(
+                      subtitle,
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: AppTheme.textSecondary,
+                size: AppTheme.iconSizeS,
+              ),
+            ],
+          ),
         ),
       ),
     );

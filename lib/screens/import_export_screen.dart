@@ -13,6 +13,7 @@ import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -53,21 +54,26 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.surface,
       appBar: AppBar(
         title: const Text('Import/Export'),
-        backgroundColor: AppTheme.accent,
-        foregroundColor: AppTheme.onPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
         centerTitle: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          padding: AppTheme.padding(AppTheme.spacingM),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: Container(
+        decoration: BoxDecoration(gradient: AppTheme.appBgGradient),
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
+            padding: AppTheme.padding(AppTheme.spacingM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               _buildDataOverview(),
               SizedBox(height: AppTheme.spacingL),
               _buildExportSection(),
@@ -81,10 +87,11 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           ),
         ),
       ),
+    ),
     );
   }
   Widget _buildDataOverview() {
-    return ModernCard(
+    return AppTheme.glass(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -201,7 +208,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     );
   }
   Widget _buildExportSection() {
-    return ModernCard(
+    return AppTheme.glass(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -250,7 +257,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     );
   }
   Widget _buildImportSection() {
-    return ModernCard(
+    return AppTheme.glass(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -299,7 +306,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     );
   }
   Widget _buildActionsSection() {
-    return ModernCard(
+    return AppTheme.glass(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -788,7 +795,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     }
   }
   Widget _buildDebugSection() {
-    return ModernCard(
+    return AppTheme.glass(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
