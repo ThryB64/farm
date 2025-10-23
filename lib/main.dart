@@ -12,6 +12,7 @@ import 'providers/firebase_provider_v4.dart';
 import 'providers/theme_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/secure_login_screen.dart';
+import 'screens/debug_login_screen.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -251,7 +252,8 @@ class _AuthGateState extends State<AuthGate> {
               if (mounted) setState(() => _lastUid = null);
             });
           }
-          return const SecureLoginScreen();
+          // TEMPORAIRE: Afficher l'écran de diagnostic au lieu du login normal
+          return const DebugLoginScreen();
         }
         
         // user != null
