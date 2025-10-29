@@ -174,6 +174,9 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         for (var i = 0; i < lignesAffichage.length; i += 15) {
           final pageLignes = lignesAffichage.skip(i).take(15).toList();
           
+          // Compter les produits sur CETTE page uniquement
+          final produitsPageActuelle = pageLignes.where((l) => l['type'] == 'produit').length;
+          
           pdf.addPage(
             pw.Page(
               pageFormat: PdfPageFormat.a4.landscape,
@@ -315,7 +318,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                             ),
                           ),
                           pw.Text(
-                            'Produits utilisés: $nombreProduitsParcelle',
+                            'Produits (page): $produitsPageActuelle / Total: $nombreProduitsParcelle',
                             style: pw.TextStyle(
                               fontSize: 14,
                               fontWeight: pw.FontWeight.bold,
