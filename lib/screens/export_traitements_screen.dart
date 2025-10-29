@@ -375,7 +375,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                         // Coût total (produits + semences)
                         pw.TableRow(
                           decoration: pw.BoxDecoration(
-                            color: secondaryColor.withAlpha(50),
+                            color: PdfColor.fromHex('#E8F5E9'), // Vert très clair
                           ),
                           children: [
                             pw.Padding(
