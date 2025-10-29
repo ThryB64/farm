@@ -438,17 +438,31 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       double totalQuantiteDoses = produitsListe.fold(0.0, (sum, p) => sum + p['quantiteTotale']);
       double totalPrix = produitsListe.fold(0.0, (sum, p) => sum + p['prixTotal']);
       
-      // Paginer le résumé (20 lignes par page)
-      final int lignesParPage = 20;
-      final int nombrePages = (produitsListe.length / lignesParPage).ceil();
+      // Paginer le résumé
+      // Première page: 12 lignes (avec en-tête), pages suivantes: 18 lignes
+      final List<List<Map<String, dynamic>>> pagesProduits = [];
+      int indexCourant = 0;
+      
+      while (indexCourant < produitsListe.length) {
+        final isFirstPage = pagesProduits.isEmpty;
+        final lignesParPage = isFirstPage ? 12 : 18; // Moins sur la première page à cause de l'en-tête
+        final fin = (indexCourant + lignesParPage < produitsListe.length) 
+            ? indexCourant + lignesParPage 
+            : produitsListe.length;
+        
+        pagesProduits.add(produitsListe.sublist(indexCourant, fin));
+        indexCourant = fin;
+      }
+      
+      final nombrePages = pagesProduits.length;
+      print('Nombre de produits dans le résumé: ${produitsListe.length}');
+      print('Nombre de pages de résumé: $nombrePages');
       
       for (int pageIdx = 0; pageIdx < nombrePages; pageIdx++) {
-        final debut = pageIdx * lignesParPage;
-        final fin = (debut + lignesParPage < produitsListe.length) 
-            ? debut + lignesParPage 
-            : produitsListe.length;
-        final produitsPage = produitsListe.sublist(debut, fin);
+        final produitsPage = pagesProduits[pageIdx];
+        final isFirstPage = (pageIdx == 0);
         final isLastPage = (pageIdx == nombrePages - 1);
+        final debut = pageIdx == 0 ? 0 : (12 + (pageIdx - 1) * 18);
         numeroPage++; // Incrémenter pour chaque page de résumé
         
         pdf.addPage(
@@ -458,7 +472,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               final List<pw.Widget> children = [];
               
               // En-tête uniquement sur la première page du résumé
-              if (pageIdx == 0) {
+              if (isFirstPage) {
                 children.add(
                   pw.Container(
                     padding: const pw.EdgeInsets.all(15),
