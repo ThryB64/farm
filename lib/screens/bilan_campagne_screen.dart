@@ -69,7 +69,7 @@ class _BilanCampagneScreenState extends State<BilanCampagneScreen> {
     final years = <int>{};
     
     for (var chargement in provider.chargements) {
-      years.add(chargement.date.year);
+      years.add(chargement.dateChargement.year);
     }
     for (var vente in provider.ventes) {
       years.add(vente.date.year);

@@ -64,7 +64,7 @@ class _ExportBilanCampagneScreenState extends State<ExportBilanCampagneScreen> {
 
       // Charger les données
       final chargements = provider.chargements
-          .where((c) => c.date.year == annee)
+          .where((c) => c.dateChargement.year == annee)
           .toList();
       final ventes = provider.ventes
           .where((v) => v.date.year == annee)
@@ -324,9 +324,9 @@ class _ExportBilanCampagneScreenState extends State<ExportBilanCampagneScreen> {
     final rendementMoyen = surfaceTotaleReelle > 0 ? poidsNetTotal / surfaceTotaleReelle : 0.0;
 
     // VENTES
-    final tonnesVendues = ventes.fold<double>(0.0, (sum, v) => sum + v.poidsNet);
-    final caVentes = ventes.fold<double>(0.0, (sum, v) => sum + v.prix);
-    final ecartTotal = ventes.fold<double>(0.0, (sum, v) => sum + v.ecartPoidsNet);
+    final tonnesVendues = ventes.fold<double>(0.0, (sum, v) => sum + (v.poidsNet ?? 0.0));
+    final caVentes = ventes.fold<double>(0.0, (sum, v) => sum + (v.prix ?? 0.0));
+    final ecartTotal = ventes.fold<double>(0.0, (sum, v) => sum + (v.ecartPoidsNet ?? 0.0));
     final stockRestant = poidsNetTotal - tonnesVendues;
     final prixMoyenVendu = tonnesVendues > 0 ? caVentes / tonnesVendues : 0.0;
 
