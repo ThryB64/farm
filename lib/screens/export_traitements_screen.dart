@@ -310,12 +310,14 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         
         // Ajouter les variétés (semences)
         try {
-          final semisParcelle = semis.firstWhere(
+          final semisParcelles = semis.where(
             (s) => s.parcelleId == parcelle.firebaseId && s.date.year == _selectedYear,
-            orElse: () => null,
-          );
+          ).toList();
           
-          if (semisParcelle != null && semisParcelle.prixSemis > 0) {
+          if (semisParcelles.isNotEmpty) {
+            final semisParcelle = semisParcelles.first;
+            
+            if (semisParcelle.prixSemis > 0) {
             for (var vs in semisParcelle.varietesSurfaces) {
               final key = 'VARIÉTÉ: ${vs.nom}';
               if (!produitsAgreges.containsKey(key)) {
@@ -340,6 +342,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               produitsAgreges[key]!['surfaceTotale'] += vs.surface;
               produitsAgreges[key]!['nbUtilisations'] += 1;
               produitsAgreges[key]!['prixUnitaire'] = prixUnitaire; // Dernier prix unitaire
+            }
             }
           }
         } catch (e) {
