@@ -513,6 +513,12 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                       helperText: 'Quantité à appliquer par hectare de parcelle',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     onChanged: (value) {
                       setState(() {});
                     },

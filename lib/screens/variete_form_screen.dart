@@ -178,6 +178,12 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                               labelText: 'Prix de la dose (€)',
                             ),
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                              TextInputFormatter.withFunction((oldValue, newValue) {
+                                return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                              }),
+                            ],
                           ),
                         ),
                         SizedBox(width: AppTheme.spacingM),

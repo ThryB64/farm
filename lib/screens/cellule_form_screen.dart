@@ -125,6 +125,12 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     hintText: 'Ex: 150.5',
                   ),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                    TextInputFormatter.withFunction((oldValue, newValue) {
+                      return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                    }),
+                  ],
                   onChanged: (value) => _calculerCoutTotalGaz(),
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {
@@ -146,6 +152,12 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     hintText: 'Ex: 0.15',
                   ),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                    TextInputFormatter.withFunction((oldValue, newValue) {
+                      return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                    }),
+                  ],
                   onChanged: (value) => _calculerCoutTotalGaz(),
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {

@@ -308,6 +308,12 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       labelText: 'Poids plein (kg)',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer le poids plein';
@@ -327,6 +333,12 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       labelText: 'Poids vide (kg)',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer le poids vide';
@@ -346,6 +358,12 @@ class _ChargementFormScreenState extends State<ChargementFormScreen> {
                       labelText: 'Humidité (%)',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer l\'humidité';

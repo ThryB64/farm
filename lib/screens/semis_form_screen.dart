@@ -289,6 +289,12 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                         ? varieteSurface.surface.toString()
                         : '',
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     decoration: InputDecoration(
                       suffix: Text('ha'),
                       isDense: true,
@@ -627,6 +633,12 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                   hintText: 'Ex: 83000',
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                  TextInputFormatter.withFunction((oldValue, newValue) {
+                    return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                  }),
+                ],
                 onChanged: _onDensiteChanged,
                     validator: (value) {
                   if (value == null || value.isEmpty) {

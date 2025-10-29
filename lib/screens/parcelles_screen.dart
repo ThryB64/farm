@@ -420,6 +420,12 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 ),
                 style: TextStyle(color: colors.textPrimary),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                  TextInputFormatter.withFunction((oldValue, newValue) {
+                    return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                  }),
+                ],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer une surface';
@@ -515,6 +521,12 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                 ),
                 style: TextStyle(color: colors.textPrimary),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                  TextInputFormatter.withFunction((oldValue, newValue) {
+                    return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                  }),
+                ],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer une surface';

@@ -169,6 +169,12 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                             hint: 'Ex: 2.5',
                             icon: Icons.area_chart_rounded,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                              TextInputFormatter.withFunction((oldValue, newValue) {
+                                return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                              }),
+                            ],
                             colors: colors,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -264,6 +270,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
     required IconData icon,
     required AppThemeColors colors,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
     int maxLines = 1,
     String? Function(String?)? validator,
   }) {
@@ -278,6 +285,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           maxLines: maxLines,
           validator: validator,
           style: TextStyle(color: colors.textPrimary),

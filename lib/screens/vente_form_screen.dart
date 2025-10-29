@@ -267,6 +267,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                       labelText: 'Poids vide (kg) *',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Le poids vide est requis';
@@ -287,6 +293,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                       labelText: 'Poids plein (kg) *',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Le poids plein est requis';
@@ -324,6 +336,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                       helperText: 'Différence pesée par le client (+/-)',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,\-]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     onChanged: _calculatePoidsNetFinal,
                   ),
                 ),
@@ -364,6 +382,12 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                       helperText: 'Prix par tonne de maïs',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
+                      }),
+                    ],
                     onChanged: _calculatePrixTotal,
                   ),
                 ),
