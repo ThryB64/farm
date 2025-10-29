@@ -460,8 +460,13 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
         final parcelle = provider.getParcelleById(parcelleId);
         if (parcelle == null) continue;
         
-        // Calculer le coût total en multipliant par la surface
-        final coutTotalParcelle = _produits.fold<double>(0.0, (double sum, p) => sum + (p as ProduitTraitement).coutTotal) * parcelle.surface;
+        // Calculer le coût total : somme des (coût/ha × surface)
+        // Pour chaque produit: coutTotal est le coût par hectare (quantité × prix unitaire)
+        // On multiplie par la surface de la parcelle pour obtenir le coût réel
+        final coutTotalParcelle = _produits.fold<double>(
+          0.0, 
+          (double sum, p) => sum + ((p as ProduitTraitement).coutTotal * parcelle.surface)
+        );
         
         if (existingTraitement.id != 0) {
           // Mettre à jour le traitement existant
