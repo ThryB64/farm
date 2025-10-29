@@ -256,7 +256,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                             if (ligne['type'] == 'semis') {
                               final Semis semis = ligne['semis'];
                               final varietesText = semis.varietesSurfaces
-                                  .map((vs) => '${vs.varieteNom} (${vs.surface.toStringAsFixed(2)} ha)')
+                                  .map((vs) => '${vs.nom} (${vs.surface.toStringAsFixed(2)} ha)')
                                   .join(', ');
                               return pw.TableRow(
                                 decoration: pw.BoxDecoration(
@@ -265,10 +265,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                 children: [
                                   _buildDataCell('${semis.date.day}/${semis.date.month}'),
                                   _buildDataCell('SEMIS: $varietesText'),
-                                  _buildDataCell('${semis.densiteSemis.toStringAsFixed(2)}'),
+                                  _buildDataCell('${semis.densiteMais.toStringAsFixed(0)}'),
                                   _buildDataCell('${semis.prixSemis.toStringAsFixed(2)}'),
                                   _buildDataCell('${semis.prixSemis.toStringAsFixed(2)}'),
-                                  _buildDataCell('kg/ha'),
+                                  _buildDataCell('grains/ha'),
                                 ],
                               );
                             } else {
