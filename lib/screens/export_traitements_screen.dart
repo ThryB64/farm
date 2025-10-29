@@ -245,8 +245,13 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                               _buildHeaderCell('MESURE'),
                             ],
                           ),
-                          // Afficher toutes les lignes (semis + produits)
-                          ...pageLignes.map((ligne) {
+                          // Afficher toutes les lignes (semis + produits) avec couleurs alternées
+                          ...pageLignes.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final ligne = entry.value;
+                            // Couleur alternée : ligne paire = gris clair, ligne impaire = blanc
+                            final bgColor = index % 2 == 0 ? PdfColors.grey100 : PdfColors.white;
+                            
                             if (ligne['type'] == 'semis') {
                               final Semis semis = ligne['semis'];
                               final varietesText = semis.varietesSurfaces
@@ -254,7 +259,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                   .join(', ');
                               return pw.TableRow(
                                 decoration: pw.BoxDecoration(
-                                  color: PdfColors.grey200,
+                                  color: PdfColors.grey300, // Semis en gris foncé pour le distinguer
                                 ),
                                 children: [
                                   _buildDataCell('${semis.date.day}/${semis.date.month}'),
@@ -269,7 +274,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                               final ProduitTraitement produit = ligne['produit'];
                               return pw.TableRow(
                                 decoration: pw.BoxDecoration(
-                                  color: PdfColors.white,
+                                  color: bgColor,
                                 ),
                                 children: [
                                   _buildDataCell('${produit.date.day}/${produit.date.month}'),
@@ -292,7 +297,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           );
         }
       }
-      // Page de résumé global (même design que les autres pages)
+      // Page de résumé global en tableau
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a4.landscape,
@@ -300,113 +305,99 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
-                // En-tête avec le même style que les autres pages
+                // En-tête sans émoji
                 pw.Container(
                   padding: const pw.EdgeInsets.all(20),
                   decoration: pw.BoxDecoration(
                     color: mainColor,
-                    borderRadius: const pw.BorderRadius.only(
-                      topLeft: pw.Radius.circular(10),
-                      topRight: pw.Radius.circular(10),
-                    ),
                   ),
-                  child: pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.center,
-                    children: [
-                      pw.Icon(
-                        pw.IconData(0xe8b5), // Icône analytics
+                  child: pw.Center(
+                    child: pw.Text(
+                      'RÉSUMÉ GÉNÉRAL - TRAITEMENTS $_selectedYear',
+                      style: pw.TextStyle(
+                        fontSize: 28,
+                        fontWeight: pw.FontWeight.bold,
                         color: PdfColors.white,
-                        size: 24,
                       ),
-                      pw.SizedBox(width: 10),
-                      pw.Text(
-                        'RÉSUMÉ GÉNÉRAL - TRAITEMENTS $_selectedYear',
-                        style: pw.TextStyle(
-                          fontSize: 24,
-                          fontWeight: pw.FontWeight.bold,
-                          color: PdfColors.white,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 30),
                 
-                // Contenu principal avec le même style
-                pw.Expanded(
+                // Tableau récapitulatif
+                pw.Center(
                   child: pw.Container(
-                    margin: const pw.EdgeInsets.all(20),
-                    padding: const pw.EdgeInsets.all(20),
-                    decoration: pw.BoxDecoration(
-                      color: PdfColors.white,
-                      borderRadius: pw.BorderRadius.circular(10),
-                      border: pw.Border.all(color: mainColor, width: 2),
-                      // Note: BoxShadow non supporté dans le package PDF
-                    ),
-                    child: pw.Column(
+                    width: 500,
+                    child: pw.Table(
+                      border: pw.TableBorder.all(color: mainColor, width: 2),
+                      columnWidths: {
+                        0: const pw.FlexColumnWidth(3),
+                        1: const pw.FlexColumnWidth(2),
+                      },
                       children: [
-                        // Statistiques avec le même style que les cartes
-                        pw.Row(
+                        // En-tête du tableau
+                        pw.TableRow(
+                          decoration: pw.BoxDecoration(
+                            color: mainColor,
+                          ),
                           children: [
-                            pw.Expanded(
-                              child: _buildStatCard(
-                                'Traitements',
-                                '$nombreTraitementsTotal',
-                                'Traitements effectués',
-                                mainColor,
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(15),
+                              child: pw.Text(
+                                'DESCRIPTION',
+                                style: pw.TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: PdfColors.white,
+                                ),
                               ),
                             ),
-                            pw.SizedBox(width: 20),
-                            pw.Expanded(
-                              child: _buildStatCard(
-                                'Coût total',
-                                '${coutTotalGlobal.toStringAsFixed(2)}',
-                                'Coût des traitements',
-                                secondaryColor,
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(15),
+                              child: pw.Text(
+                                'VALEUR',
+                                textAlign: pw.TextAlign.right,
+                                style: pw.TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: PdfColors.white,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        pw.SizedBox(height: 20),
-                        pw.Row(
+                        // Année
+                        _buildSummaryRow('Année', '$_selectedYear', PdfColors.white),
+                        // Nombre de traitements
+                        _buildSummaryRow('Nombre de traitements', '$nombreTraitementsTotal', PdfColors.grey100),
+                        // Nombre de produits
+                        _buildSummaryRow('Produits utilisés', '$nombreProduitsTotal', PdfColors.white),
+                        // Coût total (produits + semences)
+                        pw.TableRow(
+                          decoration: pw.BoxDecoration(
+                            color: secondaryColor.withAlpha(50),
+                          ),
                           children: [
-                            pw.Expanded(
-                              child: _buildStatCard(
-                                'Produits',
-                                '$nombreProduitsTotal',
-                                'Produits utilisés',
-                                mainColor,
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(15),
+                              child: pw.Text(
+                                'Coût total (produits + semences)',
+                                style: pw.TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: mainColor,
+                                ),
                               ),
                             ),
-                            pw.SizedBox(width: 20),
-                            pw.Expanded(
-                              child: pw.Container(
-                                padding: const pw.EdgeInsets.all(20),
-                                decoration: pw.BoxDecoration(
-                                  color: headerBgColor,
-                                  borderRadius: pw.BorderRadius.circular(10),
-                                  border: pw.Border.all(color: mainColor, width: 1),
-                                ),
-                                child: pw.Column(
-                                  children: [
-                                    pw.Text(
-                                      'Année',
-                                      style: pw.TextStyle(
-                                        fontSize: 12,
-                                        color: mainColor,
-                                        fontWeight: pw.FontWeight.bold,
-                                      ),
-                                    ),
-                                    pw.SizedBox(height: 5),
-                                    pw.Text(
-                                      '$_selectedYear',
-                                      style: pw.TextStyle(
-                                        fontSize: 18,
-                                        color: mainColor,
-                                        fontWeight: pw.FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(15),
+                              child: pw.Text(
+                                '${coutTotalGlobal.toStringAsFixed(2)} €',
+                                textAlign: pw.TextAlign.right,
+                                style: pw.TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: pw.FontWeight.bold,
+                                  color: mainColor,
                                 ),
                               ),
                             ),
@@ -417,15 +408,13 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                   ),
                 ),
                 
-                // Pied de page avec le même style
+                pw.Spacer(),
+                
+                // Pied de page
                 pw.Container(
                   padding: const pw.EdgeInsets.all(15),
                   decoration: pw.BoxDecoration(
                     color: headerBgColor,
-                    borderRadius: const pw.BorderRadius.only(
-                      bottomLeft: pw.Radius.circular(10),
-                      bottomRight: pw.Radius.circular(10),
-                    ),
                   ),
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -493,48 +482,33 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       ),
     );
   }
-  pw.Widget _buildStatCard(String title, String value, String subtitle, PdfColor color) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(20),
+  pw.TableRow _buildSummaryRow(String label, String value, PdfColor bgColor) {
+    return pw.TableRow(
       decoration: pw.BoxDecoration(
-        color: PdfColors.white,
-        borderRadius: pw.BorderRadius.circular(10),
-        border: pw.Border.all(color: color, width: 1),
-        // Note: BoxShadow non supporté dans le package PDF
+        color: bgColor,
       ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
-        children: [
-          pw.Text(
-            title,
+      children: [
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(15),
+          child: pw.Text(
+            label,
+            style: const pw.TextStyle(
+              fontSize: 14,
+            ),
+          ),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(15),
+          child: pw.Text(
+            value,
+            textAlign: pw.TextAlign.right,
             style: pw.TextStyle(
               fontSize: 14,
-              color: color,
               fontWeight: pw.FontWeight.bold,
             ),
-            textAlign: pw.TextAlign.center,
           ),
-          pw.SizedBox(height: 8),
-          pw.Text(
-            value,
-            style: pw.TextStyle(
-              fontSize: 24,
-              color: color,
-              fontWeight: pw.FontWeight.bold,
-            ),
-            textAlign: pw.TextAlign.center,
-          ),
-          pw.SizedBox(height: 4),
-          pw.Text(
-            subtitle,
-            style: pw.TextStyle(
-              fontSize: 10,
-              color: PdfColors.grey600,
-            ),
-            textAlign: pw.TextAlign.center,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
   @override
