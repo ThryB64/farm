@@ -124,7 +124,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         if (traitementsP.isEmpty && (semisParcelle == null || semisParcelle.prixSemis <= 0)) continue;
         nombreTraitementsTotal += traitementsP.length;
         double coutTotalParcelle = 0;
-        int nombreProduitsParcelle = 0;
+        
         // Ajouter le coût du semis
         if (semisParcelle != null && semisParcelle.prixSemis > 0) {
           coutTotalParcelle += semisParcelle.prixSemis;
@@ -137,10 +137,8 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
             (sum, produit) => sum + produit.coutTotal,
           );
           coutTotalParcelle += coutParHectare * parcelle.surface;
-          nombreProduitsParcelle += t.produits.length;
         }
         coutTotalGlobal += coutTotalParcelle;
-        nombreProduitsTotal += nombreProduitsParcelle;
         
         // Créer une liste de toutes les lignes à afficher (produits)
         final List<Map<String, dynamic>> lignesAffichage = [];
@@ -167,6 +165,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         
         // Si aucune ligne à afficher, passer à la parcelle suivante
         if (lignesAffichage.isEmpty) continue;
+        
+        // Compter uniquement les produits (pas le semis) pour les statistiques
+        final nombreProduitsParcelle = lignesAffichage.where((l) => l['type'] == 'produit').length;
+        nombreProduitsTotal += nombreProduitsParcelle;
         
         // Diviser les lignes en pages de 15 lignes maximum (sécurité maximale)
         for (var i = 0; i < lignesAffichage.length; i += 15) {

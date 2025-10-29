@@ -198,22 +198,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Bouton raccourci
-          FloatingActionButton.extended(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const TraitementRaccourciScreen(),
-              ),
-            ),
-            icon: const Icon(Icons.speed),
-            label: const Text('Raccourci'),
-            backgroundColor: AppTheme.secondary,
-            foregroundColor: AppTheme.onPrimary,
-            heroTag: "raccourci",
-          ),
-          const SizedBox(height: 16),
-          // Bouton principal
+          // Bouton principal (en haut)
           FloatingActionButton.extended(
             onPressed: () => Navigator.push(
               context,
@@ -228,6 +213,21 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
             backgroundColor: AppTheme.primary,
             foregroundColor: AppTheme.onPrimary,
             heroTag: "nouveau",
+          ),
+          const SizedBox(height: 16),
+          // Bouton raccourci (en bas)
+          FloatingActionButton.extended(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TraitementRaccourciScreen(),
+              ),
+            ),
+            icon: const Icon(Icons.speed),
+            label: const Text('Raccourci'),
+            backgroundColor: AppTheme.secondary,
+            foregroundColor: AppTheme.onPrimary,
+            heroTag: "raccourci",
           ),
         ],
       ),
