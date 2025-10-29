@@ -44,7 +44,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
           final parcelles = provider.parcelles;
           final produits = provider.produits;
           final annees = _getAvailableYears(provider);
-          return Padding(
+          return SingleChildScrollView(
             padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -200,11 +200,11 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
               }).toList(),
             ),
           SizedBox(height: AppTheme.spacingS),
-          SizedBox(
-            height: 200,
-            child: ListView.builder(
-              itemCount: parcelles.length,
-              itemBuilder: (context, index) {
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: parcelles.length,
+            itemBuilder: (context, index) {
                 final parcelle = parcelles[index];
                 final isSelected = _selectedParcelleIds.contains(parcelle.firebaseId);
                 
@@ -224,7 +224,6 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                 );
               },
             ),
-          ),
         ],
       ),
     );
