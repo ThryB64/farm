@@ -184,6 +184,9 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               Expanded(
                 child: _buildTraitementsList(provider, traitements, parcelles),
               ),
+              
+              // Total global
+              _buildTotalSection(traitements),
             ],
           );
         },
@@ -275,45 +278,72 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Parcelle: ${parcelle.nom}'),
-                Text('Produits: ${traitement.produits.length}'),
-                if (traitement.produits.isNotEmpty)
-                  Text('Dates: ${traitement.produits.map((p) => _formatDate(p.date)).join(', ')}'),
-                if (traitement.notes != null && traitement.notes!.isNotEmpty)
-                  Text('Notes: ${traitement.notes}'),
-              ],
-            ),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+                SizedBox(height: 8),
                 Text(
-                  '${traitement.coutTotal.toStringAsFixed(2)} €',
-                  style: AppTheme.textTheme.titleMedium?.copyWith(
+                  'Surface: ${parcelle.surface.toStringAsFixed(2)} ha',
+                  style: AppTheme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Produits utilisés:',
+                  style: AppTheme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, size: 20),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TraitementFormScreen(
-                            traitement: traitement,
-                            annee: traitement.annee,
-                          ),
-                        ),
+                ...traitement.produits.map((produit) => Padding(
+                  padding: EdgeInsets.only(left: 8, top: 4),
+                  child: Text(
+                    '• ${produit.nomProduit}: ${produit.quantite} ${produit.mesure}/ha (${produit.prixUnitaire.toStringAsFixed(2)} €/${produit.mesure})',
+                    style: AppTheme.textTheme.bodySmall,
+                  ),
+                )).toList(),
+                SizedBox(height: 8),
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Coût total: ${traitement.coutTotal.toStringAsFixed(2)} €',
+                    style: AppTheme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.success,
+                    ),
+                  ),
+                ),
+                if (traitement.notes != null && traitement.notes!.isNotEmpty) ...[
+                  SizedBox(height: 8),
+                  Text(
+                    'Notes: ${traitement.notes}',
+                    style: AppTheme.textTheme.bodySmall?.copyWith(
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 20),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TraitementFormScreen(
+                        traitement: traitement,
+                        annee: traitement.annee,
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete, size: AppTheme.iconSizeM, color: AppTheme.error),
-                      onPressed: () => _confirmDelete(provider, traitement),
-                    ),
-                  ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, size: AppTheme.iconSizeM, color: AppTheme.error),
+                  onPressed: () => _confirmDelete(provider, traitement),
                 ),
               ],
             ),
@@ -374,6 +404,63 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
       ),
     );
   }
+  Widget _buildTotalSection(List<Traitement> traitements) {
+    // Filtrer les traitements selon les critères sélectionnés
+    var traitementsFiltres = traitements.where((t) {
+      if (_selectedYear != null && t.annee != _selectedYear) return false;
+      if (_selectedParcelleId != null && t.parcelleId != _selectedParcelleId) return false;
+      return true;
+    }).toList();
+    
+    if (traitementsFiltres.isEmpty) return const SizedBox.shrink();
+    
+    // Calculer le total
+    final totalCout = traitementsFiltres.fold<double>(
+      0.0,
+      (sum, traitement) => sum + traitement.coutTotal,
+    );
+    
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spacingM),
+      decoration: BoxDecoration(
+        color: AppTheme.primary.withOpacity(0.1),
+        border: Border(
+          top: BorderSide(color: AppTheme.primary, width: 2),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Total des traitements',
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              Text(
+                '${traitementsFiltres.length} traitement(s)',
+                style: AppTheme.textTheme.bodySmall?.copyWith(
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            '${totalCout.toStringAsFixed(2)} €',
+            style: AppTheme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }

@@ -200,30 +200,50 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
               }).toList(),
             ),
           SizedBox(height: AppTheme.spacingS),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: parcelles.length,
-            itemBuilder: (context, index) {
-                final parcelle = parcelles[index];
-                final isSelected = _selectedParcelleIds.contains(parcelle.firebaseId);
-                
-                return CheckboxListTile(
-                  title: Text(parcelle.nom),
-                  subtitle: Text('${parcelle.surface.toStringAsFixed(2)} ha'),
-                  value: isSelected,
-                  onChanged: (value) {
-                    setState(() {
-                      if (value == true) {
-                        _selectedParcelleIds.add(parcelle.firebaseId!);
-                      } else {
-                        _selectedParcelleIds.remove(parcelle.firebaseId);
-                      }
-                    });
-                  },
-                );
-              },
-            ),
+          Consumer<FirebaseProviderV4>(
+            builder: (context, provider, child) {
+              // Récupérer les parcelles qui ont déjà un traitement pour cette année
+              final parcellesAvecTraitement = provider.traitements
+                  .where((t) => t.annee == _selectedAnnee)
+                  .map((t) => t.parcelleId)
+                  .toSet();
+              
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: parcelles.length,
+                itemBuilder: (context, index) {
+                  final parcelle = parcelles[index];
+                  final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
+                  final isSelected = _selectedParcelleIds.contains(parcelleId);
+                  final aDejaTraitement = parcellesAvecTraitement.contains(parcelleId);
+                  
+                  return CheckboxListTile(
+                    title: Text(parcelle.nom),
+                    subtitle: Text(
+                      aDejaTraitement 
+                        ? '${parcelle.surface.toStringAsFixed(2)} ha - Traitement déjà existant pour $_selectedAnnee'
+                        : '${parcelle.surface.toStringAsFixed(2)} ha',
+                      style: TextStyle(
+                        color: aDejaTraitement ? AppTheme.error : null,
+                      ),
+                    ),
+                    value: isSelected,
+                    enabled: !aDejaTraitement,
+                    onChanged: aDejaTraitement ? null : (value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedParcelleIds.add(parcelleId);
+                        } else {
+                          _selectedParcelleIds.remove(parcelleId);
+                        }
+                      });
+                    },
+                  );
+                },
+              );
+            },
+          ),
         ],
       ),
     );
@@ -345,6 +365,10 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       ),
     );
   }
+  
+  double _calculerCoutTotalParHectare() {
+    return _produits.fold(0.0, (sum, p) => sum + p.coutTotal);
+  }
   List<int> _getAvailableYears(FirebaseProviderV4 provider) {
     final traitements = provider.traitements;
     final semis = provider.semis;
@@ -385,15 +409,24 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       _produits.removeAt(index);
     });
   }
-  
-  double _calculerCoutTotalParHectare() {
-    return _produits.fold(0.0, (sum, p) => sum + p.coutTotal);
-  }
   void _selectAllParcelles() {
     setState(() {
       final provider = Provider.of<FirebaseProviderV4>(context, listen: false);
+      
+      // Récupérer les parcelles qui ont déjà un traitement pour cette année
+      final parcellesAvecTraitement = provider.traitements
+          .where((t) => t.annee == _selectedAnnee)
+          .map((t) => t.parcelleId)
+          .toSet();
+      
       _selectedParcelleIds.clear();
-      _selectedParcelleIds.addAll(provider.parcelles.map((p) => p.firebaseId!).toList());
+      // N'ajouter que les parcelles qui n'ont pas encore de traitement
+      _selectedParcelleIds.addAll(
+        provider.parcelles
+          .where((p) => !parcellesAvecTraitement.contains(p.firebaseId ?? p.id.toString()))
+          .map((p) => p.firebaseId!)
+          .toList()
+      );
     });
   }
   void _deselectAllParcelles() {
