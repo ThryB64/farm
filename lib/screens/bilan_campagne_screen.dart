@@ -65,10 +65,27 @@ class _BilanCampagneScreenState extends State<BilanCampagneScreen> {
     );
   }
 
+  List<int> _getAvailableYears(FirebaseProviderV4 provider) {
+    final years = <int>{};
+    
+    for (var chargement in provider.chargements) {
+      years.add(chargement.date.year);
+    }
+    for (var vente in provider.ventes) {
+      years.add(vente.date.year);
+    }
+    for (var traitement in provider.traitements) {
+      years.add(traitement.annee);
+    }
+    
+    final sortedYears = years.toList()..sort((a, b) => b.compareTo(a));
+    return sortedYears;
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<FirebaseProviderV4>(context);
-    final years = provider.getAvailableYears();
+    final years = _getAvailableYears(provider);
 
     return Scaffold(
       appBar: AppBar(
@@ -90,7 +107,7 @@ class _BilanCampagneScreenState extends State<BilanCampagneScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
               child: Column(
                 children: [
@@ -126,7 +143,7 @@ class _BilanCampagneScreenState extends State<BilanCampagneScreen> {
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -174,7 +191,7 @@ class _BilanCampagneScreenState extends State<BilanCampagneScreen> {
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -225,7 +242,7 @@ class _BilanCampagneScreenState extends State<BilanCampagneScreen> {
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -279,7 +296,7 @@ class _BilanCampagneScreenState extends State<BilanCampagneScreen> {
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(AppTheme.spacingM),
@@ -339,7 +356,7 @@ class _BilanCampagneScreenState extends State<BilanCampagneScreen> {
                 foregroundColor: AppTheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                 ),
               ),
             ),

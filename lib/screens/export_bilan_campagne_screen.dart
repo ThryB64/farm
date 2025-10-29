@@ -64,10 +64,10 @@ class _ExportBilanCampagneScreenState extends State<ExportBilanCampagneScreen> {
 
       // Charger les données
       final chargements = provider.chargements
-          .where((c) => c.dateRecolte.year == annee)
+          .where((c) => c.date.year == annee)
           .toList();
       final ventes = provider.ventes
-          .where((v) => v.dateVente.year == annee)
+          .where((v) => v.date.year == annee)
           .toList();
       final traitements = provider.traitements
           .where((t) => t.annee == annee)
@@ -309,18 +309,9 @@ class _ExportBilanCampagneScreenState extends State<ExportBilanCampagneScreen> {
     int annee,
     Map<String, dynamic> params,
   ) {
-    // RÉCOLTE
-    final surfaceTotale = chargements.fold(0.0, (sum, c) {
-      final parcelle = parcelles.firstWhere(
-        (p) => (p.firebaseId ?? p.id.toString()) == c.parcelleId,
-        orElse: () => parcelles.first,
-      );
-      return sum;
-    });
-    
-    // Calculer surface unique
+    // RÉCOLTE - Calculer surface unique
     final parcellesRecoltees = chargements.map((c) => c.parcelleId).toSet();
-    final surfaceTotaleReelle = parcellesRecoltees.fold(0.0, (sum, parcelleId) {
+    final surfaceTotaleReelle = parcellesRecoltees.fold<double>(0.0, (sum, parcelleId) {
       final parcelle = parcelles.firstWhere(
         (p) => (p.firebaseId ?? p.id.toString()) == parcelleId,
         orElse: () => parcelles.first,
@@ -328,14 +319,14 @@ class _ExportBilanCampagneScreenState extends State<ExportBilanCampagneScreen> {
       return sum + parcelle.surface;
     });
 
-    final poidsNetTotal = chargements.fold(0.0, (sum, c) => sum + c.poidsNet);
-    final poidsNormesTotal = chargements.fold(0.0, (sum, c) => sum + c.poidsNorme);
+    final poidsNetTotal = chargements.fold<double>(0.0, (sum, c) => sum + c.poidsNet);
+    final poidsNormesTotal = chargements.fold<double>(0.0, (sum, c) => sum + c.poidsNormes);
     final rendementMoyen = surfaceTotaleReelle > 0 ? poidsNetTotal / surfaceTotaleReelle : 0.0;
 
     // VENTES
-    final tonnesVendues = ventes.fold(0.0, (sum, v) => sum + v.poidsNet);
-    final caVentes = ventes.fold(0.0, (sum, v) => sum + v.prixPaye);
-    final ecartTotal = ventes.fold(0.0, (sum, v) => sum + v.ecartPoidsNet);
+    final tonnesVendues = ventes.fold<double>(0.0, (sum, v) => sum + v.poidsNet);
+    final caVentes = ventes.fold<double>(0.0, (sum, v) => sum + v.prix);
+    final ecartTotal = ventes.fold<double>(0.0, (sum, v) => sum + v.ecartPoidsNet);
     final stockRestant = poidsNetTotal - tonnesVendues;
     final prixMoyenVendu = tonnesVendues > 0 ? caVentes / tonnesVendues : 0.0;
 
