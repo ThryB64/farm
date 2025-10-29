@@ -301,32 +301,44 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                   ),
                 )).toList(),
                 SizedBox(height: 8),
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.success.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Coût par hectare: ${(traitement.coutTotal / parcelle.surface).toStringAsFixed(2)} €/ha',
-                        style: AppTheme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textSecondary,
-                        ),
+                Builder(
+                  builder: (context) {
+                    // Calculer le coût par hectare à partir des produits
+                    final coutParHectare = traitement.produits.fold<double>(
+                      0.0,
+                      (sum, produit) => sum + produit.coutTotal,
+                    );
+                    // Calculer le coût total de la parcelle
+                    final coutTotalParcelle = coutParHectare * parcelle.surface;
+                    
+                    return Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.success.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Coût total parcelle: ${traitement.coutTotal.toStringAsFixed(2)} €',
-                        style: AppTheme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.success,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Coût par hectare: ${coutParHectare.toStringAsFixed(2)} €/ha',
+                            style: AppTheme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Coût total parcelle: ${coutTotalParcelle.toStringAsFixed(2)} €',
+                            style: AppTheme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.success,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 if (traitement.notes != null && traitement.notes!.isNotEmpty) ...[
                   SizedBox(height: 8),
@@ -435,11 +447,17 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
         final parcellesUniques = <String>{};
         
         for (final traitement in traitementsFiltres) {
-          totalCout += traitement.coutTotal;
           parcellesUniques.add(traitement.parcelleId);
           
           final parcelle = provider.getParcelleById(traitement.parcelleId);
           if (parcelle != null) {
+            // Calculer le coût par hectare à partir des produits
+            final coutParHectare = traitement.produits.fold<double>(
+              0.0,
+              (sum, produit) => sum + produit.coutTotal,
+            );
+            // Calculer le coût total de cette parcelle
+            totalCout += coutParHectare * parcelle.surface;
             surfaceTotale += parcelle.surface;
           }
         }

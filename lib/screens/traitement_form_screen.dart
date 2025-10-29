@@ -216,7 +216,7 @@ class _TraitementFormScreenState extends State<TraitementFormScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          '${produit.coutTotal.toStringAsFixed(2)} €',
+                          '${produit.coutTotal.toStringAsFixed(2)} €/ha',
                           style: AppTheme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primary,
