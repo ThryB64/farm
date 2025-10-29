@@ -53,6 +53,9 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       
       // Calculer le nombre total de pages AVANT de les créer
       int nombrePagesParcelles = 0;
+      Set<String> produitsUniques = {};
+      Set<String> varietesUniques = {};
+      
       for (var parcelle in parcelles) {
         final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
         final traitementsP = traitementsAnnee
@@ -69,6 +72,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           );
           if (semisParcelle.prixSemis > 0) {
             nombreLignes++;
+            // Ajouter les variétés
+            for (var vs in semisParcelle.varietesSurfaces) {
+              varietesUniques.add('VARIÉTÉ: ${vs.nom}');
+            }
           }
         } catch (e) {
           // Pas de semis
@@ -77,12 +84,30 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         // Produits
         for (var t in traitementsP) {
           nombreLignes += t.produits.length;
+          // Ajouter les produits uniques
+          for (var p in t.produits) {
+            produitsUniques.add(p.nomProduit);
+          }
         }
         
         if (nombreLignes > 0) {
           nombrePagesParcelles += (nombreLignes / 20).ceil();
         }
       }
+      
+      // Estimer le nombre de pages de résumé
+      final nombreProduitsResume = varietesUniques.length + produitsUniques.length;
+      int nombrePagesResume;
+      if (nombreProduitsResume == 0) {
+        nombrePagesResume = 0;
+      } else if (nombreProduitsResume <= 12) {
+        nombrePagesResume = 1;
+      } else {
+        nombrePagesResume = 1 + ((nombreProduitsResume - 12) / 18).ceil();
+      }
+      
+      // Calculer le nombre total de pages
+      final int totalPages = nombrePagesParcelles + nombrePagesResume;
       
       // Page de garde
       pdf.addPage(
@@ -489,18 +514,18 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         indexCourant = fin;
       }
       
-      final nombrePagesResume = pagesProduits.length;
-      // totalPages est déjà calculé plus haut
+      final nombrePagesResumeReel = pagesProduits.length;
       
       print('Nombre de pages parcelles: $nombrePagesParcelles');
-      print('Nombre de pages résumé: $nombrePagesResume');
+      print('Nombre de pages résumé estimé: $nombrePagesResume');
+      print('Nombre de pages résumé réel: $nombrePagesResumeReel');
       print('Total pages: $totalPages');
       print('Current page au début du résumé: $currentPageMain');
       
-      for (int pageIdx = 0; pageIdx < nombrePagesResume; pageIdx++) {
+      for (int pageIdx = 0; pageIdx < nombrePagesResumeReel; pageIdx++) {
         final produitsPage = pagesProduits[pageIdx];
         final isFirstPage = (pageIdx == 0);
-        final isLastPage = (pageIdx == nombrePagesResume - 1);
+        final isLastPage = (pageIdx == nombrePagesResumeReel - 1);
         final debut = pageIdx == 0 ? 0 : (12 + (pageIdx - 1) * 18);
         
         pdf.addPage(
