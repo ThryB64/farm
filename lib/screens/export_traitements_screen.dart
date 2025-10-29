@@ -140,14 +140,41 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           print('💰 Coût semis ajouté pour ${parcelle.nom}: ${semisParcelle.prixSemis}');
         }
         for (var t in traitementsP) {
-          coutTotalParcelle += t.coutTotal;
+          // Recalculer le coût à partir des produits (coût/ha × surface)
+          final coutParHectare = t.produits.fold<double>(
+            0.0,
+            (sum, produit) => sum + produit.coutTotal,
+          );
+          coutTotalParcelle += coutParHectare * parcelle.surface;
           nombreProduitsParcelle += t.produits.length;
         }
         coutTotalGlobal += coutTotalParcelle;
         nombreProduitsTotal += nombreProduitsParcelle;
-        // Diviser les traitements en pages de 25 lignes
-        for (var i = 0; i < traitementsP.length; i += 25) {
-          final pageTraitements = traitementsP.skip(i).take(25).toList();
+        
+        // Créer une liste de toutes les lignes à afficher (produits)
+        final List<Map<String, dynamic>> lignesAffichage = [];
+        
+        // Ajouter le semis si présent
+        if (semisParcelle != null && semisParcelle.prixSemis > 0) {
+          lignesAffichage.add({
+            'type': 'semis',
+            'semis': semisParcelle,
+          });
+        }
+        
+        // Ajouter tous les produits de tous les traitements
+        for (var traitement in traitementsP) {
+          for (var produit in traitement.produits) {
+            lignesAffichage.add({
+              'type': 'produit',
+              'produit': produit,
+            });
+          }
+        }
+        
+        // Diviser les lignes en pages de 25 lignes maximum
+        for (var i = 0; i < lignesAffichage.length; i += 25) {
+          final pageLignes = lignesAffichage.skip(i).take(25).toList();
           
           pdf.addPage(
             pw.Page(
@@ -224,30 +251,28 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                               _buildHeaderCell('MESURE'),
                             ],
                           ),
-                          // Ajouter le semis comme premier traitement
-                          ..._buildSemisAsTreatment(parcelle, semis, _selectedYear!),
-                          
-                          // Puis les traitements normaux
-                          ...pageTraitements.expand((traitement) {
-                            if (traitement.produits.isEmpty) {
-                              return [
-                                pw.TableRow(
-                                  decoration: pw.BoxDecoration(
-                                    color: PdfColors.white,
-                                  ),
-                                  children: [
-                                    _buildDataCell('${traitement.date.day}/${traitement.date.month}'),
-                                    _buildDataCell('Aucun produit'),
-                                    _buildDataCell('-'),
-                                    _buildDataCell('-'),
-                                    _buildDataCell('${traitement.coutTotal.toStringAsFixed(2)}'),
-                                    _buildDataCell('-'),
-                                  ],
+                          // Afficher toutes les lignes (semis + produits)
+                          ...pageLignes.map((ligne) {
+                            if (ligne['type'] == 'semis') {
+                              final Semis semis = ligne['semis'];
+                              final varietesText = semis.varietesSurfaces
+                                  .map((vs) => '${vs.varieteNom} (${vs.surface.toStringAsFixed(2)} ha)')
+                                  .join(', ');
+                              return pw.TableRow(
+                                decoration: pw.BoxDecoration(
+                                  color: PdfColors.grey200,
                                 ),
-                              ];
-                            }
-                            
-                            return traitement.produits.map((produit) {
+                                children: [
+                                  _buildDataCell('${semis.date.day}/${semis.date.month}'),
+                                  _buildDataCell('SEMIS: $varietesText'),
+                                  _buildDataCell('${semis.densiteSemis.toStringAsFixed(2)}'),
+                                  _buildDataCell('${semis.prixSemis.toStringAsFixed(2)}'),
+                                  _buildDataCell('${semis.prixSemis.toStringAsFixed(2)}'),
+                                  _buildDataCell('kg/ha'),
+                                ],
+                              );
+                            } else {
+                              final ProduitTraitement produit = ligne['produit'];
                               return pw.TableRow(
                                 decoration: pw.BoxDecoration(
                                   color: PdfColors.white,
@@ -261,7 +286,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                   _buildDataCell(produit.mesure),
                                 ],
                               );
-                            });
+                            }
                           }),
                         ],
                       ),

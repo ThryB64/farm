@@ -472,34 +472,35 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               top: BorderSide(color: AppTheme.primary, width: 2),
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
             children: [
-              // Informations générales
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'TOTAL GÉNÉRAL',
-                    style: AppTheme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '${parcellesUniques.length} parcelle(s) • ${traitementsFiltres.length} traitement(s) • ${surfaceTotale.toStringAsFixed(2)} ha',
-                    style: AppTheme.textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              
-              // Totaux financiers
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Flexible(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'TOTAL GÉNÉRAL',
+                          style: AppTheme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textPrimary,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          '${parcellesUniques.length} parcelle(s) • ${traitementsFiltres.length} traitement(s) • ${surfaceTotale.toStringAsFixed(2)} ha',
+                          style: AppTheme.textTheme.bodySmall?.copyWith(
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: AppTheme.spacingM),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -518,7 +519,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(width: AppTheme.spacingL),
+                  SizedBox(width: AppTheme.spacingM),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
