@@ -461,7 +461,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
         if (parcelle == null) continue;
         
         // Calculer le coût total en multipliant par la surface
-        final coutTotalParcelle = _produits.fold(0.0, (sum, p) => sum + (p as ProduitTraitement).coutTotal) * parcelle.surface;
+        final coutTotalParcelle = _produits.fold<double>(0.0, (double sum, p) => sum + (p as ProduitTraitement).coutTotal) * parcelle.surface;
         
         if (existingTraitement.id != 0) {
           // Mettre à jour le traitement existant
