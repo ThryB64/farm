@@ -475,73 +475,88 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               top: BorderSide(color: AppTheme.primary, width: 2),
             ),
           ),
-          child: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'TOTAL GÉNÉRAL',
-                          style: AppTheme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '${parcellesUniques.length} parcelle(s) • ${traitementsFiltres.length} traitement(s) • ${surfaceTotale.toStringAsFixed(2)} ha',
-                          style: AppTheme.textTheme.bodySmall?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
+              // Informations à gauche
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'TOTAL GÉNÉRAL',
+                      style: AppTheme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: 1.2,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: AppTheme.spacingM),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Coût total',
-                        style: AppTheme.textTheme.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                    SizedBox(height: 4),
+                    Text(
+                      '${parcellesUniques.length} parcelle(s) • ${traitementsFiltres.length} traitement(s) • ${surfaceTotale.toStringAsFixed(2)} ha',
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
                       ),
-                      Text(
-                        '${totalCout.toStringAsFixed(2)} €',
-                        style: AppTheme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primary,
-                        ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Coût total
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Coût total',
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
                       ),
-                    ],
-                  ),
-                  SizedBox(width: AppTheme.spacingM),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Prix moyen',
-                        style: AppTheme.textTheme.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                    ),
+                    Text(
+                      '${totalCout.toStringAsFixed(2)} €',
+                      style: AppTheme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
                       ),
-                      Text(
-                        '${coutMoyenParHa.toStringAsFixed(2)} €/ha',
-                        style: AppTheme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.success,
-                        ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              SizedBox(width: AppTheme.spacingM),
+              
+              // Prix moyen
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingM, vertical: AppTheme.spacingS),
+                decoration: BoxDecoration(
+                  color: AppTheme.success.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Prix moyen',
+                      style: AppTheme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    Text(
+                      '${coutMoyenParHa.toStringAsFixed(2)} €/ha',
+                      style: AppTheme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.success,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

@@ -155,17 +155,22 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         
         // Ajouter tous les produits de tous les traitements
         for (var traitement in traitementsP) {
-          for (var produit in traitement.produits) {
-            lignesAffichage.add({
-              'type': 'produit',
-              'produit': produit,
-            });
+          if (traitement.produits.isNotEmpty) {
+            for (var produit in traitement.produits) {
+              lignesAffichage.add({
+                'type': 'produit',
+                'produit': produit,
+              });
+            }
           }
         }
         
-        // Diviser les lignes en pages de 18 lignes maximum (pour éviter débordement)
-        for (var i = 0; i < lignesAffichage.length; i += 18) {
-          final pageLignes = lignesAffichage.skip(i).take(18).toList();
+        // Si aucune ligne à afficher, passer à la parcelle suivante
+        if (lignesAffichage.isEmpty) continue;
+        
+        // Diviser les lignes en pages de 15 lignes maximum (sécurité maximale)
+        for (var i = 0; i < lignesAffichage.length; i += 15) {
+          final pageLignes = lignesAffichage.skip(i).take(15).toList();
           
           pdf.addPage(
             pw.Page(
