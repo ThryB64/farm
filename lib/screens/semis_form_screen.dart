@@ -288,7 +288,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                     initialValue: varieteSurface.surface > 0
                         ? varieteSurface.surface.toString()
                         : '',
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
                       suffix: Text('ha'),
                       isDense: true,
@@ -626,7 +626,7 @@ class _SemisFormScreenState extends State<SemisFormScreen> {
                   labelText: 'Densité de maïs (graines/ha)',
                   hintText: 'Ex: 83000',
                 ),
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: _onDensiteChanged,
                     validator: (value) {
                   if (value == null || value.isEmpty) {

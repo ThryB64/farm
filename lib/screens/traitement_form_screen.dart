@@ -512,7 +512,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                       labelText: 'Quantité par hectare *',
                       helperText: 'Quantité à appliquer par hectare de parcelle',
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (value) {
                       setState(() {});
                     },

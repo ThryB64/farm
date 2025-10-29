@@ -266,7 +266,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                     decoration: AppTheme.createInputDecoration(
                       labelText: 'Poids vide (kg) *',
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Le poids vide est requis';
@@ -286,7 +286,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                     decoration: AppTheme.createInputDecoration(
                       labelText: 'Poids plein (kg) *',
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Le poids plein est requis';
@@ -311,7 +311,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                       labelText: 'Poids net (kg)',
                       helperText: 'Calculé automatiquement',
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     readOnly: true,
                   ),
                 ),
@@ -323,7 +323,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                       labelText: 'Écart client (kg)',
                       helperText: 'Différence pesée par le client (+/-)',
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     onChanged: _calculatePoidsNetFinal,
                   ),
                 ),
@@ -363,7 +363,7 @@ class _VenteFormScreenState extends State<VenteFormScreen> {
                       labelText: 'Prix (€/tonne)',
                       helperText: 'Prix par tonne de maïs',
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     onChanged: _calculatePrixTotal,
                   ),
                 ),

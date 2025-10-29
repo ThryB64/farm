@@ -505,7 +505,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     labelText: 'Quantité par hectare *',
                     helperText: 'Quantité appliquée par hectare',
                   ),
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (_) => _calculerCoutTotal(),
                 ),
                 SizedBox(height: AppTheme.spacingM),
@@ -516,7 +516,7 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     labelText: 'Prix unitaire',
                     helperText: 'Prix par unité du produit',
                   ),
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (value) {
                     _prixUnitaire = double.tryParse(value) ?? 0.0;
                     _calculerCoutTotal();

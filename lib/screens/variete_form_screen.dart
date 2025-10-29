@@ -177,7 +177,7 @@ class _VarieteFormScreenState extends State<VarieteFormScreen> {
                             decoration: AppTheme.createInputDecoration(
                               labelText: 'Prix de la dose (€)',
                             ),
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           ),
                         ),
                         SizedBox(width: AppTheme.spacingM),

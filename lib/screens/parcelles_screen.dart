@@ -419,7 +419,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   prefixIcon: Icons.area_chart_rounded,
                 ),
                 style: TextStyle(color: colors.textPrimary),
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer une surface';
@@ -514,7 +514,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> with TickerProviderSt
                   prefixIcon: Icons.area_chart_rounded,
                 ),
                 style: TextStyle(color: colors.textPrimary),
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer une surface';

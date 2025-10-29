@@ -204,7 +204,7 @@ class _ProduitFormScreenState extends State<ProduitFormScreen> {
                     decoration: AppTheme.createInputDecoration(
                       labelText: 'Prix (€)',
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   ),
                 ),
                 SizedBox(width: AppTheme.spacingM),

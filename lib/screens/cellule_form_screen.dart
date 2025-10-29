@@ -124,7 +124,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     labelText: 'Quantité de gaz utilisée (m³)',
                     hintText: 'Ex: 150.5',
                   ),
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (value) => _calculerCoutTotalGaz(),
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {
@@ -145,7 +145,7 @@ class _CelluleFormScreenState extends State<CelluleFormScreen> {
                     labelText: 'Prix du gaz (€/kWh)',
                     hintText: 'Ex: 0.15',
                   ),
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (value) => _calculerCoutTotalGaz(),
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {

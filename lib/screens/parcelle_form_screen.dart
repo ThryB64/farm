@@ -168,7 +168,7 @@ class _ParcelleFormScreenState extends State<ParcelleFormScreen> {
                             label: 'Surface (ha)',
                             hint: 'Ex: 2.5',
                             icon: Icons.area_chart_rounded,
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             colors: colors,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
