@@ -46,12 +46,44 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         return;
       }
       final pdf = pw.Document();
-      // Compteur de pages (la page de garde n'a pas de numéro)
-      int numeroPage = 0;
       // Couleurs personnalisées (même que récolte)
       final mainColor = PdfColor.fromHex('#2E7D32'); // Vert foncé
       final secondaryColor = PdfColor.fromHex('#81C784'); // Vert clair
       final headerBgColor = PdfColor.fromHex('#E8F5E9'); // Vert très clair
+      
+      // Calculer le nombre total de pages AVANT de les créer
+      int nombrePagesParcelles = 0;
+      for (var parcelle in parcelles) {
+        final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
+        final traitementsP = traitementsAnnee
+            .where((t) => t.parcelleId == parcelleId)
+            .toList();
+        
+        // Compter les lignes pour cette parcelle
+        int nombreLignes = 0;
+        
+        // Semis
+        try {
+          final semisParcelle = semis.firstWhere(
+            (s) => s.parcelleId == parcelle.firebaseId && s.date.year == _selectedYear,
+          );
+          if (semisParcelle.prixSemis > 0) {
+            nombreLignes++;
+          }
+        } catch (e) {
+          // Pas de semis
+        }
+        
+        // Produits
+        for (var t in traitementsP) {
+          nombreLignes += t.produits.length;
+        }
+        
+        if (nombreLignes > 0) {
+          nombrePagesParcelles += (nombreLignes / 20).ceil();
+        }
+      }
+      
       // Page de garde
       pdf.addPage(
         pw.Page(
@@ -102,6 +134,8 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       double coutTotalGlobal = 0;
       int nombreTraitementsTotal = 0;
       int nombreProduitsTotal = 0;
+      
+      int currentPageMain = 1; // Compteur pour la numérotation (commence après la page de garde)
       // Pour chaque parcelle
       for (var parcelle in parcelles) {
         final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
@@ -171,7 +205,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         // Diviser les lignes en pages de 20 lignes maximum (plus d'espace sans les totaux en bas)
         for (var i = 0; i < lignesAffichage.length; i += 20) {
           final pageLignes = lignesAffichage.skip(i).take(20).toList();
-          numeroPage++; // Incrémenter pour chaque page de parcelle
           
           pdf.addPage(
             pw.Page(
@@ -311,7 +344,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                             ),
                           ),
                           pw.Text(
-                            'Page $numeroPage',
+                            'Page ${currentPageMain++}/$totalPages',
                             style: pw.TextStyle(
                               fontSize: 11,
                               color: mainColor,
@@ -434,8 +467,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           return (a['nom'] as String).compareTo(b['nom'] as String);
         });
       
-      // Calculer le total global
-      double totalQuantiteDoses = produitsListe.fold(0.0, (sum, p) => sum + p['quantiteTotale']);
+      // Calculer le total global - SEULEMENT LES DOSES (variétés)
+      double totalQuantiteDoses = produitsListe
+          .where((p) => p['isVariete'] == true)
+          .fold(0.0, (sum, p) => sum + p['quantiteTotale']);
       double totalPrix = produitsListe.fold(0.0, (sum, p) => sum + p['prixTotal']);
       
       // Paginer le résumé
@@ -454,16 +489,19 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         indexCourant = fin;
       }
       
-      final nombrePages = pagesProduits.length;
-      print('Nombre de produits dans le résumé: ${produitsListe.length}');
-      print('Nombre de pages de résumé: $nombrePages');
+      final nombrePagesResume = pagesProduits.length;
+      // totalPages est déjà calculé plus haut
       
-      for (int pageIdx = 0; pageIdx < nombrePages; pageIdx++) {
+      print('Nombre de pages parcelles: $nombrePagesParcelles');
+      print('Nombre de pages résumé: $nombrePagesResume');
+      print('Total pages: $totalPages');
+      print('Current page au début du résumé: $currentPageMain');
+      
+      for (int pageIdx = 0; pageIdx < nombrePagesResume; pageIdx++) {
         final produitsPage = pagesProduits[pageIdx];
         final isFirstPage = (pageIdx == 0);
-        final isLastPage = (pageIdx == nombrePages - 1);
+        final isLastPage = (pageIdx == nombrePagesResume - 1);
         final debut = pageIdx == 0 ? 0 : (12 + (pageIdx - 1) * 18);
-        numeroPage++; // Incrémenter pour chaque page de résumé
         
         pdf.addPage(
           pw.Page(
@@ -626,7 +664,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                         ),
                       ),
                       pw.Text(
-                        'Page $numeroPage',
+                        'Page ${currentPageMain++}/$totalPages',
                         style: pw.TextStyle(
                           fontSize: 11,
                           color: mainColor,
