@@ -102,17 +102,8 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       int nombreProduitsTotal = 0;
       int currentPage = 1;
       int totalPages = 1;
-      // Calculer le nombre total de pages
-      for (var parcelle in parcelles) {
-        final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
-        final traitementsP = traitementsAnnee
-            .where((t) => t.parcelleId == parcelleId)
-            .toList();
-        if (traitementsP.isNotEmpty) {
-          totalPages += (traitementsP.length / 25).ceil();
-        }
-      }
-      if (parcelles.isNotEmpty) totalPages += 1; // Page de résumé
+      // Calculer le nombre total de pages (sera mis à jour dynamiquement)
+      // Note: le calcul exact sera fait pendant la génération des pages
       // Pour chaque parcelle
       for (var parcelle in parcelles) {
         final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
@@ -172,9 +163,9 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
           }
         }
         
-        // Diviser les lignes en pages de 25 lignes maximum
-        for (var i = 0; i < lignesAffichage.length; i += 25) {
-          final pageLignes = lignesAffichage.skip(i).take(25).toList();
+        // Diviser les lignes en pages de 18 lignes maximum (pour éviter débordement)
+        for (var i = 0; i < lignesAffichage.length; i += 18) {
+          final pageLignes = lignesAffichage.skip(i).take(18).toList();
           
           pdf.addPage(
             pw.Page(

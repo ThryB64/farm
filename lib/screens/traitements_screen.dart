@@ -84,7 +84,9 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
           builder: (context, provider, child) {
           final traitements = provider.traitements;
           final parcelles = provider.parcelles;
-          return Column(
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 140), // Espace pour les boutons flottants
+            child: Column(
             children: [
               // Filtres
               Container(
@@ -188,6 +190,7 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
               // Total global
               _buildTotalSection(traitements),
             ],
+            ),
           );
         },
         ),
