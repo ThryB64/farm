@@ -512,7 +512,9 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                       return newValue.copyWith(text: newValue.text.replaceAll(',', '.'));
                     }),
                   ],
-                  onChanged: (_) => _calculerCoutTotal(),
+                  onChanged: (_) {
+                    setState(() {});
+                  },
                 ),
                 SizedBox(height: AppTheme.spacingM),
                 // Prix unitaire
@@ -530,8 +532,9 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                     }),
                   ],
                   onChanged: (value) {
-                    _prixUnitaire = double.tryParse(value) ?? 0.0;
-                    _calculerCoutTotal();
+                    setState(() {
+                      _prixUnitaire = double.tryParse(value) ?? 0.0;
+                    });
                   },
                 ),
                 SizedBox(height: AppTheme.spacingM),
