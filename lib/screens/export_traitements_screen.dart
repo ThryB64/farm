@@ -46,6 +46,8 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         return;
       }
       final pdf = pw.Document();
+      // Compteur de pages (la page de garde n'a pas de numéro)
+      int numeroPage = 0;
       // Couleurs personnalisées (même que récolte)
       final mainColor = PdfColor.fromHex('#2E7D32'); // Vert foncé
       final secondaryColor = PdfColor.fromHex('#81C784'); // Vert clair
@@ -169,6 +171,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         // Diviser les lignes en pages de 20 lignes maximum (plus d'espace sans les totaux en bas)
         for (var i = 0; i < lignesAffichage.length; i += 20) {
           final pageLignes = lignesAffichage.skip(i).take(20).toList();
+          numeroPage++; // Incrémenter pour chaque page de parcelle
           
           pdf.addPage(
             pw.Page(
@@ -290,6 +293,34 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                         ],
                       ),
                     ),
+                    // Pied de page avec numérotation
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(10),
+                      decoration: pw.BoxDecoration(
+                        color: headerBgColor,
+                      ),
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'GAEC de la BARADE - Traitements $_selectedYear',
+                            style: pw.TextStyle(
+                              fontSize: 11,
+                              color: mainColor,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                          pw.Text(
+                            'Page $numeroPage',
+                            style: pw.TextStyle(
+                              fontSize: 11,
+                              color: mainColor,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 );
               },
@@ -323,13 +354,15 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               if (!produitsAgreges.containsKey(key)) {
                 produitsAgreges[key] = {
                   'nom': 'VARIÉTÉ: ${vs.nom}',
-                  'quantiteParHa': 0.0,
-                  'quantiteTotale': 0.0,
+                  'quantiteParHa': 0.0, // Pour les variétés: grains/ha
+                  'quantiteGrainsParHa': 0.0, // Nouvelle propriété pour les grains
+                  'quantiteTotale': 0.0, // En doses
                   'prixUnitaire': 0.0,
                   'prixTotal': 0.0,
-                  'mesure': 'dose',
+                  'mesure': 'grains/ha',
                   'surfaceTotale': 0.0,
                   'nbUtilisations': 0,
+                  'isVariete': true,
                 };
               }
               
@@ -338,6 +371,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               final prixUnitaire = semisParcelle.prixSemis > 0 ? semisParcelle.prixSemis / nombreDoses : 0.0;
               
               produitsAgreges[key]!['quantiteTotale'] += nombreDoses;
+              produitsAgreges[key]!['quantiteGrainsParHa'] += semisParcelle.densiteMais * vs.surface; // Total grains
               produitsAgreges[key]!['prixTotal'] += semisParcelle.prixSemis;
               produitsAgreges[key]!['surfaceTotale'] += vs.surface;
               produitsAgreges[key]!['nbUtilisations'] += 1;
@@ -358,12 +392,14 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               produitsAgreges[key] = {
                 'nom': produit.nomProduit,
                 'quantiteParHa': 0.0,
+                'quantiteGrainsParHa': 0.0,
                 'quantiteTotale': 0.0,
                 'prixUnitaire': produit.prixUnitaire,
                 'prixTotal': 0.0,
                 'mesure': produit.mesure,
                 'surfaceTotale': 0.0,
                 'nbUtilisations': 0,
+                'isVariete': false,
               };
             }
             
@@ -378,7 +414,13 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       // Calculer les moyennes par hectare
       produitsAgreges.forEach((key, value) {
         if (value['surfaceTotale'] > 0) {
-          value['quantiteParHa'] = value['quantiteTotale'] / value['surfaceTotale'];
+          if (value['isVariete'] == true) {
+            // Pour les variétés: quantiteParHa est en grains/ha
+            value['quantiteParHa'] = value['quantiteGrainsParHa'] / value['surfaceTotale'];
+          } else {
+            // Pour les produits: quantiteParHa normal
+            value['quantiteParHa'] = value['quantiteTotale'] / value['surfaceTotale'];
+          }
         }
       });
       
@@ -393,36 +435,148 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         });
       
       // Calculer le total global
-      double totalQuantite = produitsListe.fold(0.0, (sum, p) => sum + p['quantiteTotale']);
+      double totalQuantiteDoses = produitsListe.fold(0.0, (sum, p) => sum + p['quantiteTotale']);
       double totalPrix = produitsListe.fold(0.0, (sum, p) => sum + p['prixTotal']);
       
-      pdf.addPage(
-        pw.Page(
-          pageFormat: PdfPageFormat.a4.landscape,
-          build: (context) {
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-              children: [
-                // En-tête
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(15),
-                  decoration: pw.BoxDecoration(
-                    color: mainColor,
-                  ),
-                  child: pw.Center(
-                    child: pw.Text(
-                      'RÉSUMÉ - PRODUITS ET VARIÉTÉS $_selectedYear',
-                      style: pw.TextStyle(
-                        fontSize: 24,
-                        fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.white,
+      // Paginer le résumé (20 lignes par page)
+      final int lignesParPage = 20;
+      final int nombrePages = (produitsListe.length / lignesParPage).ceil();
+      
+      for (int pageIdx = 0; pageIdx < nombrePages; pageIdx++) {
+        final debut = pageIdx * lignesParPage;
+        final fin = (debut + lignesParPage < produitsListe.length) 
+            ? debut + lignesParPage 
+            : produitsListe.length;
+        final produitsPage = produitsListe.sublist(debut, fin);
+        final isLastPage = (pageIdx == nombrePages - 1);
+        numeroPage++; // Incrémenter pour chaque page de résumé
+        
+        pdf.addPage(
+          pw.Page(
+            pageFormat: PdfPageFormat.a4.landscape,
+            build: (context) {
+              final List<pw.Widget> children = [];
+              
+              // En-tête uniquement sur la première page du résumé
+              if (pageIdx == 0) {
+                children.add(
+                  pw.Container(
+                    padding: const pw.EdgeInsets.all(15),
+                    decoration: pw.BoxDecoration(
+                      color: mainColor,
+                    ),
+                    child: pw.Center(
+                      child: pw.Text(
+                        'RÉSUMÉ - PRODUITS ET VARIÉTÉS $_selectedYear',
+                        style: pw.TextStyle(
+                          fontSize: 24,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.white,
+                        ),
                       ),
                     ),
                   ),
+                );
+                children.add(pw.SizedBox(height: 10));
+              }
+              
+              // Tableau des produits
+              final tableChildren = <pw.TableRow>[
+                // En-tête du tableau
+                pw.TableRow(
+                  decoration: pw.BoxDecoration(color: mainColor),
+                  children: [
+                    _buildHeaderCell('PRODUIT'),
+                    _buildHeaderCell('QTÉ/HA MOY'),
+                    _buildHeaderCell('QTÉ TOTALE'),
+                    _buildHeaderCell('PRIX UNIT'),
+                    _buildHeaderCell('PRIX TOTAL'),
+                    _buildHeaderCell('MESURE'),
+                  ],
                 ),
-                pw.SizedBox(height: 10),
-                
-                // Tableau des produits
+                // Lignes de produits de cette page
+                ...produitsPage.asMap().entries.map((entry) {
+                  final indexLocal = entry.key;
+                  final indexGlobal = debut + indexLocal;
+                  final produit = entry.value;
+                  final bgColor = indexGlobal % 2 == 0 ? PdfColors.grey100 : PdfColors.white;
+                  final isVariete = produit['isVariete'] == true;
+                  
+                  // Pour les variétés: QTÉ/HA MOY en grains, QTÉ TOTALE en doses
+                  final qteHaDisplay = isVariete 
+                      ? '${produit['quantiteParHa'].toStringAsFixed(0)}' // grains/ha sans décimales
+                      : '${produit['quantiteParHa'].toStringAsFixed(2)}';
+                  
+                  final qteTotaleDisplay = '${produit['quantiteTotale'].toStringAsFixed(2)}';
+                  final qteTotaleLabel = isVariete ? '$qteTotaleDisplay doses' : qteTotaleDisplay;
+                  
+                  return pw.TableRow(
+                    decoration: pw.BoxDecoration(
+                      color: isVariete ? PdfColors.grey300 : bgColor,
+                    ),
+                    children: [
+                      _buildDataCell(produit['nom']),
+                      _buildDataCell(qteHaDisplay),
+                      _buildDataCell(qteTotaleLabel),
+                      _buildDataCell('${produit['prixUnitaire'].toStringAsFixed(2)}'),
+                      _buildDataCell('${produit['prixTotal'].toStringAsFixed(2)}'),
+                      _buildDataCell(produit['mesure']),
+                    ],
+                  );
+                }),
+              ];
+              
+              // Ajouter la ligne de total seulement sur la dernière page
+              if (isLastPage) {
+                tableChildren.add(
+                  pw.TableRow(
+                    decoration: pw.BoxDecoration(
+                      color: PdfColor.fromHex('#E8F5E9'),
+                    ),
+                    children: [
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text(
+                          'TOTAL GÉNÉRAL',
+                          style: pw.TextStyle(
+                            fontSize: 12,
+                            fontWeight: pw.FontWeight.bold,
+                            color: mainColor,
+                          ),
+                        ),
+                      ),
+                      _buildDataCell('-'),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text(
+                          '${totalQuantiteDoses.toStringAsFixed(2)} doses',
+                          style: pw.TextStyle(
+                            fontSize: 12,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                          textAlign: pw.TextAlign.center,
+                        ),
+                      ),
+                      _buildDataCell('-'),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text(
+                          '${totalPrix.toStringAsFixed(2)}',
+                          style: pw.TextStyle(
+                            fontSize: 12,
+                            fontWeight: pw.FontWeight.bold,
+                            color: mainColor,
+                          ),
+                          textAlign: pw.TextAlign.center,
+                        ),
+                      ),
+                      _buildDataCell('-'),
+                    ],
+                  ),
+                );
+              }
+              
+              children.add(
                 pw.Expanded(
                   child: pw.Table(
                     border: pw.TableBorder.all(color: mainColor, width: 1),
@@ -434,90 +588,13 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                       4: const pw.FlexColumnWidth(1.5),  // PRIX TOTAL
                       5: const pw.FlexColumnWidth(1),    // MESURE
                     },
-                    children: [
-                      // En-tête
-                      pw.TableRow(
-                        decoration: pw.BoxDecoration(color: mainColor),
-                        children: [
-                          _buildHeaderCell('PRODUIT'),
-                          _buildHeaderCell('QTÉ/HA MOY'),
-                          _buildHeaderCell('QTÉ TOTALE'),
-                          _buildHeaderCell('PRIX UNIT'),
-                          _buildHeaderCell('PRIX TOTAL'),
-                          _buildHeaderCell('MESURE'),
-                        ],
-                      ),
-                      // Lignes de produits
-                      ...produitsListe.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final produit = entry.value;
-                        final bgColor = index % 2 == 0 ? PdfColors.grey100 : PdfColors.white;
-                        final isVariete = (produit['nom'] as String).startsWith('VARIÉTÉ:');
-                        
-                        return pw.TableRow(
-                          decoration: pw.BoxDecoration(
-                            color: isVariete ? PdfColors.grey300 : bgColor,
-                          ),
-                          children: [
-                            _buildDataCell(produit['nom']),
-                            _buildDataCell('${produit['quantiteParHa'].toStringAsFixed(2)}'),
-                            _buildDataCell('${produit['quantiteTotale'].toStringAsFixed(2)}'),
-                            _buildDataCell('${produit['prixUnitaire'].toStringAsFixed(2)} €'),
-                            _buildDataCell('${produit['prixTotal'].toStringAsFixed(2)} €'),
-                            _buildDataCell(produit['mesure']),
-                          ],
-                        );
-                      }),
-                      // Ligne de total
-                      pw.TableRow(
-                        decoration: pw.BoxDecoration(
-                          color: PdfColor.fromHex('#E8F5E9'),
-                        ),
-                        children: [
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(8),
-                            child: pw.Text(
-                              'TOTAL GÉNÉRAL',
-                              style: pw.TextStyle(
-                                fontSize: 12,
-                                fontWeight: pw.FontWeight.bold,
-                                color: mainColor,
-                              ),
-                            ),
-                          ),
-                          _buildDataCell('-'),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(8),
-                            child: pw.Text(
-                              '${totalQuantite.toStringAsFixed(2)}',
-                              style: pw.TextStyle(
-                                fontSize: 12,
-                                fontWeight: pw.FontWeight.bold,
-                              ),
-                              textAlign: pw.TextAlign.center,
-                            ),
-                          ),
-                          _buildDataCell('-'),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.all(8),
-                            child: pw.Text(
-                              '${totalPrix.toStringAsFixed(2)} €',
-                              style: pw.TextStyle(
-                                fontSize: 12,
-                                fontWeight: pw.FontWeight.bold,
-                                color: mainColor,
-                              ),
-                              textAlign: pw.TextAlign.center,
-                            ),
-                          ),
-                          _buildDataCell('-'),
-                        ],
-                      ),
-                    ],
+                    children: tableChildren,
                   ),
                 ),
-                
-                // Pied de page
+              );
+              
+              // Pied de page avec numérotation
+              children.add(
                 pw.Container(
                   padding: const pw.EdgeInsets.all(10),
                   decoration: pw.BoxDecoration(
@@ -535,7 +612,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                         ),
                       ),
                       pw.Text(
-                        'Généré le ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+                        'Page $numeroPage',
                         style: pw.TextStyle(
                           fontSize: 11,
                           color: mainColor,
@@ -545,11 +622,16 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                     ],
                   ),
                 ),
-              ],
-            );
-          },
-        ),
-      );
+              );
+              
+              return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                children: children,
+              );
+            },
+          ),
+        );
+      }
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
         name: 'Traitements_$_selectedYear.pdf',
