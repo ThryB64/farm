@@ -288,9 +288,16 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                             ),
                           ),
                           Text(
-                            '${produit.quantite} ${produit.mesure} - ${produit.prixUnitaire.toStringAsFixed(2)} €/unité',
+                            '${produit.quantite} ${produit.mesure}/ha - ${produit.prixUnitaire.toStringAsFixed(2)} €/${produit.mesure}',
                             style: AppTheme.textTheme.bodySmall?.copyWith(
                               color: AppTheme.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            'Coût: ${produit.coutTotal.toStringAsFixed(2)} €/ha',
+                            style: AppTheme.textTheme.bodySmall?.copyWith(
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -304,6 +311,36 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                 ),
               );
             }).toList(),
+          if (_produits.isNotEmpty) ...[
+            SizedBox(height: AppTheme.spacingM),
+            Container(
+              padding: AppTheme.padding(AppTheme.spacingM),
+              decoration: BoxDecoration(
+                color: AppTheme.success.withOpacity(0.1),
+                borderRadius: AppTheme.radius(AppTheme.radiusMedium),
+                border: Border.all(color: AppTheme.success.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total par hectare:',
+                    style: AppTheme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.success,
+                    ),
+                  ),
+                  Text(
+                    '${_calculerCoutTotalParHectare().toStringAsFixed(2)} €/ha',
+                    style: AppTheme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.success,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -333,6 +370,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
       MaterialPageRoute(
         builder: (context) => _ProduitSelectionScreen(
           annee: _selectedAnnee,
+          produitsDejaAjoutes: _produits,
           onProduitSelected: (produit) {
             setState(() {
               _produits.add(produit);
@@ -346,6 +384,10 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
     setState(() {
       _produits.removeAt(index);
     });
+  }
+  
+  double _calculerCoutTotalParHectare() {
+    return _produits.fold(0.0, (sum, p) => sum + p.coutTotal);
   }
   void _selectAllParcelles() {
     setState(() {
@@ -438,9 +480,11 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
 // Écran de sélection de produit (réutilisé depuis TraitementFormScreen)
 class _ProduitSelectionScreen extends StatefulWidget {
   final int annee;
+  final List<ProduitTraitement> produitsDejaAjoutes;
   final Function(ProduitTraitement) onProduitSelected;
   const _ProduitSelectionScreen({
     required this.annee,
+    required this.produitsDejaAjoutes,
     required this.onProduitSelected,
   });
   @override
@@ -468,7 +512,14 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
       ),
       body: Consumer<FirebaseProviderV4>(
         builder: (context, provider, child) {
-          final produits = provider.produits;
+          // Filtrer les produits déjà ajoutés
+          final produitsDejaAjoutesIds = widget.produitsDejaAjoutes
+              .map((p) => p.produitId)
+              .toSet();
+          final produitsDisponibles = provider.produits
+              .where((p) => !produitsDejaAjoutesIds.contains(p.firebaseId ?? p.id.toString()))
+              .toList();
+          
           return Padding(
             padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
@@ -479,8 +530,11 @@ class _ProduitSelectionScreenState extends State<_ProduitSelectionScreen> {
                   value: _selectedProduit,
                   decoration: AppTheme.createInputDecoration(
                     labelText: 'Produit',
+                    helperText: produitsDisponibles.isEmpty 
+                        ? 'Tous les produits ont déjà été ajoutés'
+                        : null,
                   ),
-                  items: produits.map((produit) {
+                  items: produitsDisponibles.map((produit) {
                     return DropdownMenuItem(
                       value: produit,
                       child: Text(produit.nom),
