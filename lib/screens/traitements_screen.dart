@@ -307,12 +307,25 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
                     color: AppTheme.success.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
-                    'Coût total: ${traitement.coutTotal.toStringAsFixed(2)} €',
-                    style: AppTheme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.success,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Coût par hectare: ${(traitement.coutTotal / parcelle.surface).toStringAsFixed(2)} €/ha',
+                        style: AppTheme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Coût total parcelle: ${traitement.coutTotal.toStringAsFixed(2)} €',
+                        style: AppTheme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.success,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (traitement.notes != null && traitement.notes!.isNotEmpty) ...[
@@ -414,50 +427,89 @@ class _TraitementsScreenState extends State<TraitementsScreen> {
     
     if (traitementsFiltres.isEmpty) return const SizedBox.shrink();
     
-    // Calculer le total
-    final totalCout = traitementsFiltres.fold<double>(
-      0.0,
-      (sum, traitement) => sum + traitement.coutTotal,
-    );
-    
-    return Container(
-      padding: const EdgeInsets.all(AppTheme.spacingM),
-      decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.1),
-        border: Border(
-          top: BorderSide(color: AppTheme.primary, width: 2),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Consumer<FirebaseProviderV4>(
+      builder: (context, provider, child) {
+        // Calculer le total et la surface totale
+        double totalCout = 0.0;
+        double surfaceTotale = 0.0;
+        final parcellesUniques = <String>{};
+        
+        for (final traitement in traitementsFiltres) {
+          totalCout += traitement.coutTotal;
+          parcellesUniques.add(traitement.parcelleId);
+          
+          final parcelle = provider.getParcelleById(traitement.parcelleId);
+          if (parcelle != null) {
+            surfaceTotale += parcelle.surface;
+          }
+        }
+        
+        final coutMoyenParHa = surfaceTotale > 0 ? totalCout / surfaceTotale : 0.0;
+        
+        return Container(
+          padding: const EdgeInsets.all(AppTheme.spacingM),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withOpacity(0.1),
+            border: Border(
+              top: BorderSide(color: AppTheme.primary, width: 2),
+            ),
+          ),
+          child: Column(
             children: [
-              Text(
-                'Total des traitements',
-                style: AppTheme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              Text(
-                '${traitementsFiltres.length} traitement(s)',
-                style: AppTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'TOTAL GÉNÉRAL',
+                        style: AppTheme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '${parcellesUniques.length} parcelle(s) • ${traitementsFiltres.length} traitement(s)',
+                        style: AppTheme.textTheme.bodySmall?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        'Surface totale: ${surfaceTotale.toStringAsFixed(2)} ha',
+                        style: AppTheme.textTheme.bodySmall?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${totalCout.toStringAsFixed(2)} €',
+                        style: AppTheme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                      Text(
+                        '${coutMoyenParHa.toStringAsFixed(2)} €/ha',
+                        style: AppTheme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
-          Text(
-            '${totalCout.toStringAsFixed(2)} €',
-            style: AppTheme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primary,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
   

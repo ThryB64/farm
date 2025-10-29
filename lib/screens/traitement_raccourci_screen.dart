@@ -456,6 +456,13 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
             coutTotal: 0,
           ),
         );
+        // Récupérer la surface de la parcelle
+        final parcelle = provider.getParcelleById(parcelleId);
+        if (parcelle == null) continue;
+        
+        // Calculer le coût total en multipliant par la surface
+        final coutTotalParcelle = _produits.fold(0.0, (sum, p) => sum + (p as ProduitTraitement).coutTotal) * parcelle.surface;
+        
         if (existingTraitement.id != 0) {
           // Mettre à jour le traitement existant
           final updatedTraitement = Traitement(
@@ -468,7 +475,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
                 ? '${existingTraitement.notes}\n${_notesController.text}'.trim()
                 : existingTraitement.notes,
             produits: _produits,
-            coutTotal: _produits.fold(0.0, (sum, p) => sum + (p as ProduitTraitement).coutTotal),
+            coutTotal: coutTotalParcelle,
           );
           
           await provider.modifierTraitement(updatedTraitement);
@@ -481,7 +488,7 @@ class _TraitementRaccourciScreenState extends State<TraitementRaccourciScreen> {
             annee: _selectedAnnee,
             notes: _notesController.text,
             produits: _produits,
-            coutTotal: _produits.fold(0.0, (sum, p) => sum + (p as ProduitTraitement).coutTotal),
+            coutTotal: coutTotalParcelle,
           );
           
           await provider.ajouterTraitement(nouveauTraitement);
