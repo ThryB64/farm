@@ -100,10 +100,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
       double coutTotalGlobal = 0;
       int nombreTraitementsTotal = 0;
       int nombreProduitsTotal = 0;
-      int currentPage = 1;
-      int totalPages = 1;
-      // Calculer le nombre total de pages (sera mis à jour dynamiquement)
-      // Note: le calcul exact sera fait pendant la génération des pages
       // Pour chaque parcelle
       for (var parcelle in parcelles) {
         final parcelleId = parcelle.firebaseId ?? parcelle.id.toString();
@@ -170,12 +166,9 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         final nombreProduitsParcelle = lignesAffichage.where((l) => l['type'] == 'produit').length;
         nombreProduitsTotal += nombreProduitsParcelle;
         
-        // Diviser les lignes en pages de 15 lignes maximum (sécurité maximale)
-        for (var i = 0; i < lignesAffichage.length; i += 15) {
-          final pageLignes = lignesAffichage.skip(i).take(15).toList();
-          
-          // Compter les produits sur CETTE page uniquement
-          final produitsPageActuelle = pageLignes.where((l) => l['type'] == 'produit').length;
+        // Diviser les lignes en pages de 20 lignes maximum (plus d'espace sans les totaux en bas)
+        for (var i = 0; i < lignesAffichage.length; i += 20) {
+          final pageLignes = lignesAffichage.skip(i).take(20).toList();
           
           pdf.addPage(
             pw.Page(
@@ -290,51 +283,6 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                             }
                           }),
                         ],
-                      ),
-                    ),
-                    
-                    pw.Spacer(),
-                    
-                    // Totaux de la parcelle
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(10),
-                      child: pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: [
-                          pw.Text(
-                            'Total Traitements: ${traitementsP.length}',
-                            style: pw.TextStyle(
-                              fontSize: 14,
-                              fontWeight: pw.FontWeight.bold,
-                              color: mainColor,
-                            ),
-                          ),
-                          pw.Text(
-                            'Total Coût: ${coutTotalParcelle.toStringAsFixed(2)}',
-                            style: pw.TextStyle(
-                              fontSize: 14,
-                              fontWeight: pw.FontWeight.bold,
-                              color: mainColor,
-                            ),
-                          ),
-                          pw.Text(
-                            'Produits (page): $produitsPageActuelle / Total: $nombreProduitsParcelle',
-                            style: pw.TextStyle(
-                              fontSize: 14,
-                              fontWeight: pw.FontWeight.bold,
-                              color: mainColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    pw.Text(
-                      'Page ${currentPage++}/$totalPages',
-                      textAlign: pw.TextAlign.right,
-                      style: pw.TextStyle(
-                        color: PdfColors.grey700,
-                        fontSize: 12,
                       ),
                     ),
                   ],
