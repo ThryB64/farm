@@ -16,7 +16,6 @@ import 'package:flutter/services.dart';
 import 'export_ventes_screen.dart';
 import 'export_traitements_screen.dart';
 import 'export_recoltes_screen.dart';
-import 'bilan_campagne_screen.dart';
 
 class ExportsPdfScreen extends StatelessWidget {
   const ExportsPdfScreen({Key? key}) : super(key: key);
@@ -79,20 +78,6 @@ class ExportsPdfScreen extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExportTraitementsScreen()),
-              ),
-            ),
-            const SizedBox(height: AppTheme.spacingM),
-            
-            // Bilan de Campagne
-            _buildExportCard(
-              context,
-              'Bilan de Campagne',
-              'Analyse complète: Production, Intrants, Ventes & Marge',
-              Icons.assessment_rounded,
-              AppTheme.secondary,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const BilanCampagneScreen()),
               ),
             ),
           ],

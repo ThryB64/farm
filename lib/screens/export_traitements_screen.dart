@@ -319,7 +319,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                                   .map((vs) => '${vs.nom} (${vs.surface.toStringAsFixed(2)} ha)')
                                   .join(', ');
                               return pw.TableRow(
-                                decoration: pw.BoxDecoration(
+                                  decoration: pw.BoxDecoration(
                                   color: PdfColors.grey300, // Semis en gris foncé pour le distinguer
                                 ),
                                 children: [
@@ -528,19 +528,19 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
         final isLastPage = (pageIdx == nombrePagesResumeReel - 1);
         final debut = pageIdx == 0 ? 0 : (12 + (pageIdx - 1) * 18);
         
-        pdf.addPage(
-          pw.Page(
-            pageFormat: PdfPageFormat.a4.landscape,
-            build: (context) {
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4.landscape,
+          build: (context) {
               final List<pw.Widget> children = [];
               
               // En-tête uniquement sur la première page du résumé
               if (isFirstPage) {
                 children.add(
-                  pw.Container(
+                pw.Container(
                     padding: const pw.EdgeInsets.all(15),
-                    decoration: pw.BoxDecoration(
-                      color: mainColor,
+                  decoration: pw.BoxDecoration(
+                    color: mainColor,
                     ),
                     child: pw.Center(
                       child: pw.Text(
@@ -591,7 +591,7 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                     decoration: pw.BoxDecoration(
                       color: isVariete ? PdfColors.grey300 : bgColor,
                     ),
-                    children: [
+                      children: [
                       _buildDataCell(produit['nom']),
                       _buildDataCell(qteHaDisplay),
                       _buildDataCell(qteTotaleLabel),
@@ -607,18 +607,18 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               if (isLastPage) {
                 tableChildren.add(
                   pw.TableRow(
-                    decoration: pw.BoxDecoration(
+                                decoration: pw.BoxDecoration(
                       color: PdfColor.fromHex('#E8F5E9'),
-                    ),
-                    children: [
+                                ),
+                                  children: [
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(8),
                         child: pw.Text(
                           'TOTAL GÉNÉRAL',
-                          style: pw.TextStyle(
-                            fontSize: 12,
+                                      style: pw.TextStyle(
+                                        fontSize: 12,
                             fontWeight: pw.FontWeight.bold,
-                            color: mainColor,
+                                        color: mainColor,
                           ),
                         ),
                       ),
@@ -627,10 +627,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
                         padding: const pw.EdgeInsets.all(8),
                         child: pw.Text(
                           '${totalQuantiteDoses.toStringAsFixed(2)} doses',
-                          style: pw.TextStyle(
+                                      style: pw.TextStyle(
                             fontSize: 12,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
+                                        fontWeight: pw.FontWeight.bold,
+                                      ),
                           textAlign: pw.TextAlign.center,
                         ),
                       ),
@@ -704,10 +704,10 @@ class _ExportTraitementsScreenState extends State<ExportTraitementsScreen> {
               return pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: children,
-              );
-            },
-          ),
-        );
+            );
+          },
+        ),
+      );
       }
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),

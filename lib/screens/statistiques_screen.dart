@@ -805,15 +805,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     
     // Calculer les surfaces par variété pour l'année sélectionnée
     for (var semis in semis.where((s) => s.date.year == anneeSelectionnee)) {
-      final parcelle = parcelles.firstWhere(
-        (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
-        orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
-      );
-      final surfaceTotale = parcelle.surface;
-      
       for (var varieteSurface in semis.varietesSurfaces) {
-        final surfaceVariete = surfaceTotale * (varieteSurface.pourcentage / 100);
-        surfacesParVariete[varieteSurface.nom] = (surfacesParVariete[varieteSurface.nom] ?? 0) + surfaceVariete;
+        // La surface est maintenant directement en hectares dans le modèle
+        surfacesParVariete[varieteSurface.nom] = (surfacesParVariete[varieteSurface.nom] ?? 0) + varieteSurface.surface;
       }
     }
     
@@ -924,18 +918,9 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     final semisAnnee = semis.where((s) => s.date.year == anneeSelectionnee).toList();
     
     for (var semis in semisAnnee) {
-      final parcelle = parcelles.firstWhere(
-        (p) => (p.firebaseId ?? p.id.toString()) == semis.parcelleId,
-        orElse: () => Parcelle(id: 0, nom: 'Inconnu', surface: 0, dateCreation: DateTime.now()),
-      );
-      
-      // Calculer la surface totale de la parcelle
-      final surfaceTotale = parcelle.surface;
-      
-      // Pour chaque variété dans le semis, ajouter sa surface réelle
+      // Pour chaque variété dans le semis, ajouter sa surface réelle (déjà en hectares)
       for (var varieteSurface in semis.varietesSurfaces) {
-        final surfaceVariete = surfaceTotale * (varieteSurface.pourcentage / 100);
-        surfacesParVariete[varieteSurface.nom] = (surfacesParVariete[varieteSurface.nom] ?? 0) + surfaceVariete;
+        surfacesParVariete[varieteSurface.nom] = (surfacesParVariete[varieteSurface.nom] ?? 0) + varieteSurface.surface;
       }
     }
     
