@@ -1145,11 +1145,11 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         // Ligne 1: CA, Volume, Prix moyen
         Row(
           children: [
-            Expanded(child: _buildKPICard('CA Total', kpiA['ca'], kpiB['ca'], '€', true)),
+            Expanded(child: _buildKPICard('CA Total', kpiA['ca'] ?? 0, kpiB['ca'] ?? 0, '€', true)),
             SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Volume vendu', kpiA['volume'], kpiB['volume'], 't', false)),
+            Expanded(child: _buildKPICard('Volume vendu', kpiA['volume'] ?? 0, kpiB['volume'] ?? 0, 't', false)),
             SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Prix moyen', kpiA['prixMoyen'], kpiB['prixMoyen'], '€/t', true)),
+            Expanded(child: _buildKPICard('Prix moyen', kpiA['prixMoyen'] ?? 0, kpiB['prixMoyen'] ?? 0, '€/t', true)),
           ],
         ),
         SizedBox(height: AppTheme.spacingS),
@@ -1157,11 +1157,11 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         // Ligne 2: Surface, Rendement, Coûts
         Row(
           children: [
-            Expanded(child: _buildKPICard('Surface totale', kpiA['surface'], kpiB['surface'], 'ha', false)),
+            Expanded(child: _buildKPICard('Surface totale', kpiA['surface'] ?? 0, kpiB['surface'] ?? 0, 'ha', false)),
             SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Rendement', kpiA['rendement'], kpiB['rendement'], 't/ha', true)),
+            Expanded(child: _buildKPICard('Rendement', kpiA['rendement'] ?? 0, kpiB['rendement'] ?? 0, 't/ha', true)),
             SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Coûts variables', kpiA['coutsVariables'], kpiB['coutsVariables'], '€', false)),
+            Expanded(child: _buildKPICard('Coûts variables', kpiA['coutsVariables'] ?? 0, kpiB['coutsVariables'] ?? 0, '€', false)),
           ],
         ),
         SizedBox(height: AppTheme.spacingS),
@@ -1169,11 +1169,11 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         // Ligne 3: Marge brute, Prix équilibre
         Row(
           children: [
-            Expanded(child: _buildKPICard('Marge brute', kpiA['margeBrute'], kpiB['margeBrute'], '€', true)),
+            Expanded(child: _buildKPICard('Marge brute', kpiA['margeBrute'] ?? 0, kpiB['margeBrute'] ?? 0, '€', true)),
             SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Marge/ha', kpiA['margeParHa'], kpiB['margeParHa'], '€/ha', true)),
+            Expanded(child: _buildKPICard('Marge/ha', kpiA['margeParHa'] ?? 0, kpiB['margeParHa'] ?? 0, '€/ha', true)),
             SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Prix équilibre', kpiA['prixEquilibre'], kpiB['prixEquilibre'], '€/t', false)),
+            Expanded(child: _buildKPICard('Prix équilibre', kpiA['prixEquilibre'] ?? 0, kpiB['prixEquilibre'] ?? 0, '€/t', false)),
           ],
         ),
       ],
@@ -1181,7 +1181,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
   }
   
   Map<String, double> _calculateKPIs(FirebaseProviderV4 provider, int annee) {
-    final ventes = provider.ventes.where((v) => v.dateVente.year == annee).toList();
+    final ventes = provider.ventes.where((v) => v.date.year == annee).toList();
     final chargements = provider.chargements.where((c) => c.dateChargement.year == annee).toList();
     final semis = provider.semis.where((s) => s.date.year == annee).toList();
     final traitements = provider.traitements.where((t) => t.annee == annee).toList();
@@ -1191,8 +1191,10 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     double ca = 0;
     double volumeVendu = 0;
     for (var vente in ventes) {
-      ca += vente.prix * (vente.poidsNet / 1000); // Prix en € × tonnes
-      volumeVendu += vente.poidsNet / 1000; // En tonnes
+      final prix = vente.prix ?? 0;
+      final poidsNet = vente.poidsNet ?? 0;
+      ca += prix * (poidsNet / 1000); // Prix en € × tonnes
+      volumeVendu += poidsNet / 1000; // En tonnes
     }
     
     double prixMoyen = volumeVendu > 0 ? ca / volumeVendu : 0;
