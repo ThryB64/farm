@@ -931,6 +931,20 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     }
     final totalSurface = surfacesParVariete.values.reduce((a, b) => a + b);
     
+    // Définir une palette de couleurs pour les variétés
+    final List<Color> couleurs = [
+      AppTheme.primary,
+      AppTheme.secondary,
+      AppTheme.success,
+      AppTheme.warning,
+      AppTheme.error,
+      Colors.purple,
+      Colors.teal,
+      Colors.indigo,
+      Colors.pink,
+      Colors.cyan,
+    ];
+    
     return Column(
       children: [
         const Text(
@@ -942,12 +956,14 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           height: 300,
           child: PieChart(
             PieChartData(
-              sections: surfacesParVariete.entries.map((entry) {
+              sections: surfacesParVariete.entries.toList().asMap().entries.map((entry) {
+                final index = entry.key;
+                final varieteEntry = entry.value;
                 return PieChartSectionData(
-                  value: entry.value,
-                  title: '${(entry.value / totalSurface * 100).toStringAsFixed(1)}%',
+                  value: varieteEntry.value,
+                  title: '${(varieteEntry.value / totalSurface * 100).toStringAsFixed(1)}%',
                   radius: 100,
-                  color: Colors.orange,
+                  color: couleurs[index % couleurs.length],
                   titleStyle: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -961,18 +977,20 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
         SizedBox(height: 16),
         Wrap(
           spacing: 16,
-          children: surfacesParVariete.entries.map((entry) {
+          children: surfacesParVariete.entries.toList().asMap().entries.map((entry) {
+            final index = entry.key;
+            final varieteEntry = entry.value;
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 16,
                   height: 16,
-                  color: Colors.orange,
+                  color: couleurs[index % couleurs.length],
                 ),
                 SizedBox(width: 4),
                 Text(
-                  '${entry.key}: ${entry.value.toStringAsFixed(1)} ha',
+                  '${varieteEntry.key}: ${varieteEntry.value.toStringAsFixed(1)} ha',
                   style: TextStyle(fontSize: 12),
                 ),
               ],
