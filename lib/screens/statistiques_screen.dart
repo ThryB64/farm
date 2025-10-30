@@ -370,18 +370,18 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
     }
     
     final kpis = annees.map((a) => _calculateKPIs(provider, a)).toList();
-    final n = kpis.length;
+    final n = kpis.length.toDouble();
     
     return {
-      'ca': kpis.fold(0.0, (sum, k) => sum + k['ca']!) / n,
-      'volume': kpis.fold(0.0, (sum, k) => sum + k['volume']!) / n,
-      'prixMoyen': kpis.fold(0.0, (sum, k) => sum + k['prixMoyen']!) / n,
-      'surface': kpis.fold(0.0, (sum, k) => sum + k['surface']!) / n,
-      'rendement': kpis.fold(0.0, (sum, k) => sum + k['rendement']!) / n,
-      'coutsVariables': kpis.fold(0.0, (sum, k) => sum + k['coutsVariables']!) / n,
-      'coutsParHa': kpis.fold(0.0, (sum, k) => sum + k['coutsParHa']!) / n,
-      'margeBrute': kpis.fold(0.0, (sum, k) => sum + k['margeBrute']!) / n,
-      'margeParHa': kpis.fold(0.0, (sum, k) => sum + k['margeParHa']!) / n,
+      'ca': kpis.fold<double>(0.0, (sum, k) => sum + (k['ca'] as double)) / n,
+      'volume': kpis.fold<double>(0.0, (sum, k) => sum + (k['volume'] as double)) / n,
+      'prixMoyen': kpis.fold<double>(0.0, (sum, k) => sum + (k['prixMoyen'] as double)) / n,
+      'surface': kpis.fold<double>(0.0, (sum, k) => sum + (k['surface'] as double)) / n,
+      'rendement': kpis.fold<double>(0.0, (sum, k) => sum + (k['rendement'] as double)) / n,
+      'coutsVariables': kpis.fold<double>(0.0, (sum, k) => sum + (k['coutsVariables'] as double)) / n,
+      'coutsParHa': kpis.fold<double>(0.0, (sum, k) => sum + (k['coutsParHa'] as double)) / n,
+      'margeBrute': kpis.fold<double>(0.0, (sum, k) => sum + (k['margeBrute'] as double)) / n,
+      'margeParHa': kpis.fold<double>(0.0, (sum, k) => sum + (k['margeParHa'] as double)) / n,
     };
   }
   
