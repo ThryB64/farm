@@ -24,8 +24,13 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
   late TabController _tabController;
   int? _selectedYear;
   String? _selectedParcelleId;
-  int? _anneeA; // Année de référence
-  int? _anneeB; // Année de comparaison
+  
+  // Variables pour le simulateur What-if
+  double? _simPrixVente;
+  double? _simRendement;
+  Map<String, double> _simPrixProduits = {};
+  Map<String, double> _simQteProduits = {};
+  double? _beneficeCible;
   
   @override
   void initState() {
@@ -49,7 +54,7 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
             Tab(text: 'Vue générale'),
             Tab(text: 'Détail par parcelle'),
             Tab(text: 'Analyse variétés'),
-            Tab(text: 'Comparaison annuelle'),
+            Tab(text: 'Optimisation & What-if'),
           ],
           onTap: (index) {
             if (index != 1) {
@@ -228,14 +233,321 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
                         ],
                       ),
                     ),
-                    // Comparaison annuelle
-                    _buildComparaisonAnnuelle(provider, statsParAnnee),
+                    // Optimisation & What-if
+                    _buildOptimisationTab(provider, statsParAnnee),
                   ],
                 ),
               ),
             ],
           );
         },
+      ),
+    );
+  }
+  
+  Widget _buildOptimisationTab(FirebaseProviderV4 provider, Map<int, Map<String, dynamic>> statsParAnnee) {
+    if (_selectedYear == null) {
+      return Center(
+        child: Text('Sélectionnez une année', style: AppTheme.textTheme.titleLarge),
+      );
+    }
+    
+    // Calculer les KPIs pour l'année sélectionnée
+    final kpiAnnee = _calculateKPIs(provider, _selectedYear!);
+    
+    // Calculer la moyenne des autres années
+    final autresAnnees = statsParAnnee.keys.where((a) => a != _selectedYear).toList();
+    final kpiMoyenne = _calculateKPIMoyenne(provider, autresAnnees);
+    
+    return SingleChildScrollView(
+      padding: AppTheme.padding(AppTheme.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // KPIs de l'année
+          _buildKPIBanner(kpiAnnee),
+          SizedBox(height: AppTheme.spacingL),
+          
+          // Waterfall de décomposition
+          _buildWaterfallDecomposition(provider, kpiAnnee, kpiMoyenne),
+          SizedBox(height: AppTheme.spacingL),
+          
+          // Graphique Coût/ha par produit
+          _buildCoutParProduitChart(provider, statsParAnnee),
+          SizedBox(height: AppTheme.spacingL),
+          
+          // Targets
+          _buildTargetsSection(kpiAnnee),
+          SizedBox(height: AppTheme.spacingL),
+          
+          // Simulateur What-if
+          _buildSimulateurWhatIf(provider, kpiAnnee),
+        ],
+      ),
+    );
+  }
+  
+  Map<String, double> _calculateKPIs(FirebaseProviderV4 provider, int annee) {
+    final ventes = provider.ventes.where((v) => v.date.year == annee).toList();
+    final chargements = provider.chargements.where((c) => c.dateChargement.year == annee).toList();
+    final semis = provider.semis.where((s) => s.date.year == annee).toList();
+    final traitements = provider.traitements.where((t) => t.annee == annee).toList();
+    final parcelles = provider.parcelles;
+    
+    // CA et Volume vendu
+    double ca = 0;
+    double volumeVendu = 0;
+    for (var vente in ventes) {
+      final prix = vente.prix ?? 0;
+      final poidsNet = vente.poidsNet ?? 0;
+      ca += prix * (poidsNet / 1000);
+      volumeVendu += poidsNet / 1000;
+    }
+    
+    double prixMoyen = volumeVendu > 0 ? ca / volumeVendu : 0;
+    
+    // Production
+    double volumeProduit = 0;
+    for (var chargement in chargements) {
+      volumeProduit += chargement.poidsNormes / 1000;
+    }
+    
+    // Surface
+    double surfaceTotale = 0;
+    for (var s in semis) {
+      for (var vs in s.varietesSurfaces) {
+        surfaceTotale += vs.surface;
+      }
+    }
+    
+    double rendement = surfaceTotale > 0 ? volumeProduit / surfaceTotale : 0;
+    
+    // Coûts variables (semences + traitements)
+    double coutsVariables = 0;
+    
+    // Semences
+    for (var s in semis) {
+      coutsVariables += s.prixSemis;
+    }
+    
+    // Traitements
+    for (var traitement in traitements) {
+      final parcelle = parcelles.firstWhere(
+        (p) => (p.firebaseId ?? p.id.toString()) == traitement.parcelleId,
+        orElse: () => Parcelle(id: 0, nom: '', surface: 0, dateCreation: DateTime.now()),
+      );
+      final coutParHectare = traitement.produits.fold<double>(
+        0.0,
+        (sum, produit) => sum + produit.coutTotal,
+      );
+      coutsVariables += coutParHectare * parcelle.surface;
+    }
+    
+    double coutsParHa = surfaceTotale > 0 ? coutsVariables / surfaceTotale : 0;
+    double margeBrute = ca - coutsVariables;
+    double margeParHa = surfaceTotale > 0 ? margeBrute / surfaceTotale : 0;
+    
+    return {
+      'ca': ca,
+      'volume': volumeVendu,
+      'prixMoyen': prixMoyen,
+      'surface': surfaceTotale,
+      'rendement': rendement,
+      'coutsVariables': coutsVariables,
+      'coutsParHa': coutsParHa,
+      'margeBrute': margeBrute,
+      'margeParHa': margeParHa,
+    };
+  }
+  
+  Map<String, double> _calculateKPIMoyenne(FirebaseProviderV4 provider, List<int> annees) {
+    if (annees.isEmpty) {
+      return {
+        'ca': 0, 'volume': 0, 'prixMoyen': 0, 'surface': 0,
+        'rendement': 0, 'coutsVariables': 0, 'coutsParHa': 0,
+        'margeBrute': 0, 'margeParHa': 0,
+      };
+    }
+    
+    final kpis = annees.map((a) => _calculateKPIs(provider, a)).toList();
+    final n = kpis.length;
+    
+    return {
+      'ca': kpis.fold(0.0, (sum, k) => sum + k['ca']!) / n,
+      'volume': kpis.fold(0.0, (sum, k) => sum + k['volume']!) / n,
+      'prixMoyen': kpis.fold(0.0, (sum, k) => sum + k['prixMoyen']!) / n,
+      'surface': kpis.fold(0.0, (sum, k) => sum + k['surface']!) / n,
+      'rendement': kpis.fold(0.0, (sum, k) => sum + k['rendement']!) / n,
+      'coutsVariables': kpis.fold(0.0, (sum, k) => sum + k['coutsVariables']!) / n,
+      'coutsParHa': kpis.fold(0.0, (sum, k) => sum + k['coutsParHa']!) / n,
+      'margeBrute': kpis.fold(0.0, (sum, k) => sum + k['margeBrute']!) / n,
+      'margeParHa': kpis.fold(0.0, (sum, k) => sum + k['margeParHa']!) / n,
+    };
+  }
+  
+  Widget _buildKPIBanner(Map<String, double> kpi) {
+    return Card(
+      color: AppTheme.primary.withOpacity(0.1),
+      child: Padding(
+        padding: AppTheme.padding(AppTheme.spacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'KPIs année $_selectedYear',
+              style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: AppTheme.spacingM),
+            Wrap(
+              spacing: 24,
+              runSpacing: 12,
+              children: [
+                _buildKPIItem('CA', '${kpi['ca']!.toStringAsFixed(0)} €'),
+                _buildKPIItem('Prix moyen', '${kpi['prixMoyen']!.toStringAsFixed(1)} €/t'),
+                _buildKPIItem('Surface', '${kpi['surface']!.toStringAsFixed(1)} ha'),
+                _buildKPIItem('Rendement', '${kpi['rendement']!.toStringAsFixed(2)} t/ha'),
+                _buildKPIItem('Coûts/ha', '${kpi['coutsParHa']!.toStringAsFixed(0)} €/ha'),
+                _buildKPIItem('Bénéfice/ha', '${kpi['margeParHa']!.toStringAsFixed(0)} €/ha'),
+                _buildKPIItem('Bénéfice total', '${kpi['margeBrute']!.toStringAsFixed(0)} €'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildKPIItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTheme.textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+        Text(value, style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+  
+  Widget _buildWaterfallDecomposition(FirebaseProviderV4 provider, Map<String, double> kpiAnnee, Map<String, double> kpiMoyenne) {
+    return Card(
+      child: Padding(
+        padding: AppTheme.padding(AppTheme.spacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Décomposition ΔBénéfice (vs moyenne des autres années)',
+              style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: AppTheme.spacingM),
+            Text(
+              'Fonctionnalité en cours de développement...',
+              style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildCoutParProduitChart(FirebaseProviderV4 provider, Map<int, Map<String, dynamic>> statsParAnnee) {
+    return Card(
+      child: Padding(
+        padding: AppTheme.padding(AppTheme.spacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Coût/ha par produit (multi-années)',
+              style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: AppTheme.spacingM),
+            Text(
+              'Graphique en cours de développement...',
+              style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildTargetsSection(Map<String, double> kpi) {
+    return Card(
+      child: Padding(
+        padding: AppTheme.padding(AppTheme.spacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Targets - Objectifs',
+              style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: AppTheme.spacingM),
+            TextFormField(
+              decoration: AppTheme.createInputDecoration(
+                labelText: 'Bénéfice cible (€)',
+                hintText: 'Ex: 100000',
+              ),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                setState(() {
+                  _beneficeCible = double.tryParse(value);
+                });
+              },
+            ),
+            SizedBox(height: AppTheme.spacingM),
+            if (_beneficeCible != null) ...[
+              Text(
+                'Pour atteindre ${_beneficeCible!.toStringAsFixed(0)} € de bénéfice:',
+                style: AppTheme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: AppTheme.spacingS),
+              Text(
+                'Prix cible: ${_calculatePrixCible(kpi, _beneficeCible!).toStringAsFixed(1)} €/t',
+                style: AppTheme.textTheme.bodyLarge,
+              ),
+              Text(
+                'Rendement cible: ${_calculateRendementCible(kpi, _beneficeCible!).toStringAsFixed(2)} t/ha',
+                style: AppTheme.textTheme.bodyLarge,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+  
+  double _calculatePrixCible(Map<String, double> kpi, double beneficeCible) {
+    final volume = kpi['volume']!;
+    if (volume == 0) return 0;
+    return (kpi['coutsVariables']! + beneficeCible) / volume;
+  }
+  
+  double _calculateRendementCible(Map<String, double> kpi, double beneficeCible) {
+    final surface = kpi['surface']!;
+    final prix = kpi['prixMoyen']!;
+    if (surface == 0 || prix == 0) return 0;
+    return (kpi['coutsVariables']! + beneficeCible) / (prix * surface);
+  }
+  
+  Widget _buildSimulateurWhatIf(FirebaseProviderV4 provider, Map<String, double> kpi) {
+    return Card(
+      child: Padding(
+        padding: AppTheme.padding(AppTheme.spacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Simulateur What-if',
+              style: AppTheme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: AppTheme.spacingM),
+            Text(
+              'Simulateur interactif en cours de développement...',
+              style: AppTheme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1004,385 +1316,6 @@ class _StatistiquesScreenState extends State<StatistiquesScreen> with SingleTick
           }).toList(),
         ),
       ],
-    );
-  }
-  
-  Widget _buildComparaisonAnnuelle(FirebaseProviderV4 provider, Map<int, Map<String, dynamic>> statsParAnnee) {
-    final annees = statsParAnnee.keys.toList()..sort((a, b) => b.compareTo(a));
-    
-    // Initialiser les années A et B si non définies
-    if (_anneeA == null && annees.isNotEmpty) {
-      _anneeA = annees.length > 1 ? annees[1] : annees.first;
-    }
-    if (_anneeB == null && annees.isNotEmpty) {
-      _anneeB = annees.first;
-    }
-    
-    if (annees.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: AppTheme.padding(AppTheme.spacingXL),
-          child: Text(
-            'Aucune donnée disponible pour la comparaison',
-            style: AppTheme.textTheme.titleLarge,
-          ),
-        ),
-      );
-    }
-    
-    return SingleChildScrollView(
-      padding: AppTheme.padding(AppTheme.spacingM),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Filtres - Sélection des années
-          _buildAnneesSelector(annees),
-          SizedBox(height: AppTheme.spacingL),
-          
-          // KPI Cards
-          _buildKPICards(provider, statsParAnnee),
-          SizedBox(height: AppTheme.spacingL),
-          
-          // Analyse des écarts
-          _buildAnalyseEcarts(provider, statsParAnnee),
-          SizedBox(height: AppTheme.spacingL),
-          
-          // Tendances multi-années
-          _buildTendancesMultiAnnees(statsParAnnee),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildAnneesSelector(List<int> annees) {
-    return Card(
-      color: AppTheme.surface,
-      child: Padding(
-        padding: AppTheme.padding(AppTheme.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Sélection des années à comparer',
-              style: AppTheme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: AppTheme.spacingM),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    value: _anneeA,
-                    decoration: AppTheme.createInputDecoration(
-                      labelText: 'Année A (référence)',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: annees.map((year) {
-                      return DropdownMenuItem<int>(
-                        value: year,
-                        child: Text(year.toString()),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _anneeA = value;
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(width: AppTheme.spacingM),
-                Icon(Icons.compare_arrows, color: AppTheme.primary),
-                SizedBox(width: AppTheme.spacingM),
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    value: _anneeB,
-                    decoration: AppTheme.createInputDecoration(
-                      labelText: 'Année B (comparaison)',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: annees.map((year) {
-                      return DropdownMenuItem<int>(
-                        value: year,
-                        child: Text(year.toString()),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _anneeB = value;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildKPICards(FirebaseProviderV4 provider, Map<int, Map<String, dynamic>> statsParAnnee) {
-    if (_anneeA == null || _anneeB == null) {
-      return SizedBox.shrink();
-    }
-    
-    // Calculer les KPI pour chaque année
-    final kpiA = _calculateKPIs(provider, _anneeA!);
-    final kpiB = _calculateKPIs(provider, _anneeB!);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Indicateurs clés de performance',
-          style: AppTheme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: AppTheme.spacingM),
-        
-        // Ligne 1: CA, Volume, Prix moyen
-        Row(
-          children: [
-            Expanded(child: _buildKPICard('CA Total', kpiA['ca'] ?? 0, kpiB['ca'] ?? 0, '€', true)),
-            SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Volume vendu', kpiA['volume'] ?? 0, kpiB['volume'] ?? 0, 't', false)),
-            SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Prix moyen', kpiA['prixMoyen'] ?? 0, kpiB['prixMoyen'] ?? 0, '€/t', true)),
-          ],
-        ),
-        SizedBox(height: AppTheme.spacingS),
-        
-        // Ligne 2: Surface, Rendement, Coûts
-        Row(
-          children: [
-            Expanded(child: _buildKPICard('Surface totale', kpiA['surface'] ?? 0, kpiB['surface'] ?? 0, 'ha', false)),
-            SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Rendement', kpiA['rendement'] ?? 0, kpiB['rendement'] ?? 0, 't/ha', true)),
-            SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Coûts variables', kpiA['coutsVariables'] ?? 0, kpiB['coutsVariables'] ?? 0, '€', false)),
-          ],
-        ),
-        SizedBox(height: AppTheme.spacingS),
-        
-        // Ligne 3: Marge brute, Prix équilibre
-        Row(
-          children: [
-            Expanded(child: _buildKPICard('Marge brute', kpiA['margeBrute'] ?? 0, kpiB['margeBrute'] ?? 0, '€', true)),
-            SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Marge/ha', kpiA['margeParHa'] ?? 0, kpiB['margeParHa'] ?? 0, '€/ha', true)),
-            SizedBox(width: AppTheme.spacingS),
-            Expanded(child: _buildKPICard('Prix équilibre', kpiA['prixEquilibre'] ?? 0, kpiB['prixEquilibre'] ?? 0, '€/t', false)),
-          ],
-        ),
-      ],
-    );
-  }
-  
-  Map<String, double> _calculateKPIs(FirebaseProviderV4 provider, int annee) {
-    final ventes = provider.ventes.where((v) => v.date.year == annee).toList();
-    final chargements = provider.chargements.where((c) => c.dateChargement.year == annee).toList();
-    final semis = provider.semis.where((s) => s.date.year == annee).toList();
-    final traitements = provider.traitements.where((t) => t.annee == annee).toList();
-    final parcelles = provider.parcelles;
-    
-    // CA et Volume
-    double ca = 0;
-    double volumeVendu = 0;
-    for (var vente in ventes) {
-      final prix = vente.prix ?? 0;
-      final poidsNet = vente.poidsNet ?? 0;
-      ca += prix * (poidsNet / 1000); // Prix en € × tonnes
-      volumeVendu += poidsNet / 1000; // En tonnes
-    }
-    
-    double prixMoyen = volumeVendu > 0 ? ca / volumeVendu : 0;
-    
-    // Production
-    double volumeProduit = 0;
-    for (var chargement in chargements) {
-      volumeProduit += chargement.poidsNormes / 1000; // En tonnes
-    }
-    
-    // Surface
-    double surfaceTotale = 0;
-    for (var semis in semis) {
-      for (var vs in semis.varietesSurfaces) {
-        surfaceTotale += vs.surface;
-      }
-    }
-    
-    double rendement = surfaceTotale > 0 ? volumeProduit / surfaceTotale : 0;
-    
-    // Coûts variables (semences + traitements)
-    double coutsVariables = 0;
-    
-    // Semences
-    for (var semis in semis) {
-      coutsVariables += semis.prixSemis;
-    }
-    
-    // Traitements
-    for (var traitement in traitements) {
-      final parcelle = parcelles.firstWhere(
-        (p) => (p.firebaseId ?? p.id.toString()) == traitement.parcelleId,
-        orElse: () => Parcelle(id: 0, nom: '', surface: 0, dateCreation: DateTime.now()),
-      );
-      final coutParHectare = traitement.produits.fold<double>(
-        0.0,
-        (sum, produit) => sum + produit.coutTotal,
-      );
-      coutsVariables += coutParHectare * parcelle.surface;
-    }
-    
-    // Marge brute
-    double margeBrute = ca - coutsVariables;
-    double margeParHa = surfaceTotale > 0 ? margeBrute / surfaceTotale : 0;
-    
-    // Prix d'équilibre
-    double prixEquilibre = volumeVendu > 0 ? coutsVariables / volumeVendu : 0;
-    
-    return {
-      'ca': ca,
-      'volume': volumeVendu,
-      'prixMoyen': prixMoyen,
-      'surface': surfaceTotale,
-      'rendement': rendement,
-      'coutsVariables': coutsVariables,
-      'margeBrute': margeBrute,
-      'margeParHa': margeParHa,
-      'prixEquilibre': prixEquilibre,
-    };
-  }
-  
-  Widget _buildKPICard(String label, double valueA, double valueB, String unite, bool higherIsBetter) {
-    final delta = valueB - valueA;
-    final deltaPercent = valueA != 0 ? (delta / valueA) * 100 : 0;
-    final isPositive = higherIsBetter ? delta > 0 : delta < 0;
-    final color = delta == 0 ? AppTheme.textSecondary : (isPositive ? AppTheme.success : AppTheme.error);
-    
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: AppTheme.padding(AppTheme.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppTheme.textTheme.bodySmall?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            SizedBox(height: AppTheme.spacingXS),
-            Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${valueB.toStringAsFixed(1)} $unite',
-                      style: AppTheme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'vs ${valueA.toStringAsFixed(1)}',
-                      style: AppTheme.textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-                Spacer(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          delta > 0 ? Icons.arrow_upward : (delta < 0 ? Icons.arrow_downward : Icons.remove),
-                          color: color,
-                          size: 16,
-                        ),
-                        Text(
-                          '${delta.abs().toStringAsFixed(1)}',
-                          style: TextStyle(
-                            color: color,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '${deltaPercent >= 0 ? '+' : ''}${deltaPercent.toStringAsFixed(1)}%',
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildAnalyseEcarts(FirebaseProviderV4 provider, Map<int, Map<String, dynamic>> statsParAnnee) {
-    // TODO: Implémenter les analyses détaillées d'écarts
-    return Card(
-      child: Padding(
-        padding: AppTheme.padding(AppTheme.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Analyse des écarts',
-              style: AppTheme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: AppTheme.spacingM),
-            Text(
-              'Décomposition détaillée à venir : Prix/Volume, Surface/Rendement, etc.',
-              style: AppTheme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildTendancesMultiAnnees(Map<int, Map<String, dynamic>> statsParAnnee) {
-    // TODO: Implémenter les graphiques de tendances
-    return Card(
-      child: Padding(
-        padding: AppTheme.padding(AppTheme.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Tendances multi-années',
-              style: AppTheme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: AppTheme.spacingM),
-            Text(
-              'Graphiques de tendances à venir : CA, Rendement, Prix, etc.',
-              style: AppTheme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 } 
