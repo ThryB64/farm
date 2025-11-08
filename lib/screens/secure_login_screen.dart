@@ -16,7 +16,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/security_service.dart';
 import '../providers/theme_provider.dart';
 import 'package:provider/provider.dart';
-import 'farm_selection_screen.dart';
 class SecureLoginScreen extends StatefulWidget {
   const SecureLoginScreen({Key? key}) : super(key: key);
   @override
@@ -251,26 +250,6 @@ class _SecureLoginScreenState extends State<SecureLoginScreen> {
                             isLoading: _isLoading,
                             isFullWidth: true,
                             backgroundColor: AppTheme.primary,
-                          ),
-                          
-                          SizedBox(height: AppTheme.spacingM),
-                          
-                          // Bouton pour changer de ferme
-                          TextButton.icon(
-                            onPressed: _isLoading ? null : () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const FarmSelectionScreen(),
-                                ),
-                              );
-                            },
-                            icon: Icon(Icons.swap_horiz, color: AppTheme.textSecondary),
-                            label: Text(
-                              'Changer de ferme',
-                              style: AppTheme.textTheme.bodyMedium?.copyWith(
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
                           ),
                           
                         ],

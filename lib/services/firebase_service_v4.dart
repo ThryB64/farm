@@ -25,56 +25,32 @@ class FirebaseServiceV4 {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference? _farmRef;
   
-  // ID de la ferme partagée
+  // ID de la ferme - déterminé automatiquement selon l'utilisateur
   String _farmId = 'gaec_berard';
   static const String _storageKey = 'mais_tracker_data_v4';
-  static const String _farmIdStorageKey = 'agricorn_selected_farm';
+  
+  // Email de l'utilisateur démo
+  static const String _demoUserEmail = 'demo@agricorn.app';
+  static const String _demoFarmId = 'agricorn_demo';
+  
   bool _isInitialized = false;
   
   // Getter pour le farmId actuel
   String get farmId => _farmId;
   
-  // Changer de ferme
-  Future<void> setFarmId(String farmId) async {
-    if (_farmId == farmId) return;
-    
-    _farmId = farmId;
-    _isInitialized = false;
-    _isGloballyInitialized = false; // Réinitialiser pour permettre la réinitialisation
-    
-    // Sauvegarder le choix dans localStorage
-    if (kIsWeb) {
-      html.window.localStorage[_farmIdStorageKey] = farmId;
+  // Déterminer la ferme selon l'utilisateur
+  String _determineFarmId(String? userEmail) {
+    if (userEmail == _demoUserEmail) {
+      return _demoFarmId;
     }
-    
-    // Réinitialiser la référence
-    _farmRef = null;
-    
-    // Réinitialiser le service
-    await initialize();
-  }
-  
-  // Charger le farmId depuis le stockage local
-  void _loadFarmIdFromStorage() {
-    if (kIsWeb) {
-      final stored = html.window.localStorage[_farmIdStorageKey];
-      if (stored != null && stored.isNotEmpty) {
-        _farmId = stored;
-        print('FirebaseService V4: Loaded farmId from storage: $_farmId');
-      }
-    }
+    return 'gaec_berard';
   }
 
   // Initialiser le service
   Future<void> initialize() async {
-    // Charger le farmId depuis le stockage si disponible
-    _loadFarmIdFromStorage();
-    
     if (_isInitialized) return;
     
     try {
-      print('FirebaseService V4: Initializing for farm: $_farmId');
-      
       // Vérifier l'initialisation globale pour éviter les doublons
       if (_isGloballyInitialized) {
         print('FirebaseService V4: Already globally initialized, skipping...');
@@ -89,13 +65,15 @@ class FirebaseServiceV4 {
       final database = await FirebaseDatabase.instance;
       print('FirebaseService V4: Using singleton database instance');
 
-      // Vérifier l'authentification
+      // Vérifier l'authentification et déterminer la ferme
       final user = _auth.currentUser;
       if (user != null) {
         try {
+          // Déterminer la ferme selon l'email de l'utilisateur
+          _farmId = _determineFarmId(user.email);
           _farmRef = database.ref('farms/$_farmId');
           await _addUserToFarm(user.uid);
-          print('FirebaseService V4: User authenticated: ${user.uid} for farm $_farmId');
+          print('FirebaseService V4: User authenticated: ${user.uid} (${user.email}) for farm $_farmId');
         } catch (e) {
           print('FirebaseService V4: Auth setup failed: $e');
           // Continuer en mode hors ligne
