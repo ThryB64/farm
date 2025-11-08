@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '616599452364',
     projectId: 'farmgaec',
     storageBucket: 'farmgaec.firebasestorage.app',
-    iosBundleId: 'com.example.maisTracker',
+    iosBundleId: 'com.example.agricorn',
     databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
   );
 

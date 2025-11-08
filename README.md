@@ -1,4 +1,4 @@
-# 🌽 Maïs Tracker - PWA
+# 🌽 AgriCorn - PWA
 
 Application de gestion des récoltes de maïs - Progressive Web App
 
@@ -6,7 +6,7 @@ Application de gestion des récoltes de maïs - Progressive Web App
 
 ### Méthode 1: GitHub Pages (Recommandée)
 1. Ouvrez Safari sur votre iPhone
-2. Allez sur : `https://[votre-username].github.io/mais-tracker`
+2. Allez sur : `https://[votre-username].github.io/agricorn`
 3. Menu "Partager" → "Ajouter à l'écran d'accueil"
 4. L'app s'installe comme une app native !
 

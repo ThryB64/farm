@@ -1,6 +1,6 @@
 {
-  "name": "Maïs Tracker",
-  "short_name": "MaisTracker",
+  "name": "AgriCorn",
+  "short_name": "AgriCorn",
   "start_url": "/farm/",
   "scope": "/farm/",
   "display": "standalone",

@@ -135,7 +135,7 @@ class PlaceholderHome extends StatelessWidget {
             ),
             SizedBox(height: AppTheme.spacingS),
             Text(
-              'Maïs Tracker - Version Web',
+              'AgriCorn - Version Web',
               style: AppTheme.textTheme.bodyLarge?.copyWith(
                 color: AppTheme.onSurface.withOpacity(0.7),
               ),
