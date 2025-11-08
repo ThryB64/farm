@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_service_v4.dart';
-import '../services/demo_farm_initializer.dart';
 import '../models/parcelle.dart';
 import '../models/variete.dart';
 import '../models/cellule.dart';
@@ -942,19 +940,6 @@ class FirebaseProviderV4 extends ChangeNotifier {
     try {
       // Utiliser la méthode privée d'initialisation
       await _initialize();
-      
-      // Vérifier si c'est l'utilisateur démo et initialiser la ferme de démo si nécessaire
-      final user = FirebaseAuth.instance.currentUser;
-      if (user?.email == 'demo@agricorn.app') {
-        try {
-          final initializer = DemoFarmInitializer();
-          await initializer.initializeDemoFarm();
-          print('✅ FirebaseProvider V4: Demo farm initialized');
-        } catch (e) {
-          print('⚠️ FirebaseProvider V4: Demo farm initialization failed (may already exist): $e');
-          // Ne pas bloquer si la ferme existe déjà
-        }
-      }
       
       _initedUid = uid;
       _ready = true;
