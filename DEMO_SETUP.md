@@ -26,30 +26,24 @@ L'application AgriCorn supporte maintenant une ferme de démonstration complète
      [UID_DEMO_USER]: true
    ```
 
-### 3. Créer la structure de données de démo
+### 3. Initialisation automatique de la ferme de démo
 
-Dans Firebase Realtime Database, créez la structure suivante :
+**La ferme de démonstration sera créée automatiquement lors de la première connexion de l'utilisateur démo.**
 
-```
-farms/
-  agricorn_demo/
-    parcelles/
-      (données de démonstration)
-    cellules/
-      (données de démonstration)
-    chargements/
-      (données de démonstration)
-    semis/
-      (données de démonstration)
-    varietes/
-      (données de démonstration)
-    ventes/
-      (données de démonstration)
-    traitements/
-      (données de démonstration)
-    produits/
-      (données de démonstration)
-```
+Lorsque l'utilisateur `demo@agricorn.app` se connecte pour la première fois, l'application :
+- Détecte automatiquement qu'il s'agit de l'utilisateur démo
+- Vérifie si la ferme `agricorn_demo` existe déjà
+- Si elle n'existe pas, crée automatiquement toutes les données de démonstration :
+  - 3 variétés de maïs (DK 391, Pioneer P1234, LG 30.222)
+  - 3 parcelles (Nord, Sud, Est)
+  - 3 cellules de stockage
+  - Semis associés
+  - Chargements de maïs
+  - Produits de traitement
+  - Traitements effectués
+  - Ventes réalisées
+
+**Aucune action manuelle n'est nécessaire** - la ferme de démo est créée automatiquement !
 
 ### 4. Ajouter l'utilisateur comme membre de la ferme
 
@@ -76,7 +70,8 @@ Le système détecte automatiquement l'utilisateur démo par son email et utilis
 
 ## Notes
 
-- Les données de démonstration doivent être pré-remplies dans Firebase
+- **Les données de démonstration sont créées automatiquement** lors de la première connexion de l'utilisateur démo
 - L'email de l'utilisateur démo est codé en dur : `demo@agricorn.app`
 - Pour changer l'email de l'utilisateur démo, modifier la constante `_demoUserEmail` dans `lib/services/firebase_service_v4.dart`
+- Si vous souhaitez réinitialiser la ferme de démo, supprimez le nœud `farms/agricorn_demo` dans Firebase et reconnectez-vous avec l'utilisateur démo
 
