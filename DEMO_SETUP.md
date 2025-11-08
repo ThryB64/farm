@@ -33,17 +33,17 @@ L'application AgriCorn supporte maintenant une ferme de démonstration complète
 Lorsque l'utilisateur `demo@agricorn.app` se connecte pour la première fois, l'application :
 - Détecte automatiquement qu'il s'agit de l'utilisateur démo
 - Vérifie si la ferme `agricorn_demo` existe déjà
-- Si elle n'existe pas, crée automatiquement toutes les données de démonstration :
-  - 3 variétés de maïs (DK 391, Pioneer P1234, LG 30.222)
-  - 3 parcelles (Nord, Sud, Est)
-  - 3 cellules de stockage
-  - Semis associés
-  - Chargements de maïs
-  - Produits de traitement
-  - Traitements effectués
-  - Ventes réalisées
+- Si elle n'existe pas, crée automatiquement la structure vide de la ferme avec toutes les sections :
+  - `parcelles` (vide)
+  - `cellules` (vide)
+  - `chargements` (vide)
+  - `semis` (vide)
+  - `varietes` (vide)
+  - `ventes` (vide)
+  - `traitements` (vide)
+  - `produits` (vide)
 
-**Aucune action manuelle n'est nécessaire** - la ferme de démo est créée automatiquement !
+**La ferme est créée vide** - vous pouvez ensuite ajouter vos propres données de démonstration via l'interface de l'application.
 
 ### 4. Ajouter l'utilisateur comme membre de la ferme
 
@@ -70,8 +70,9 @@ Le système détecte automatiquement l'utilisateur démo par son email et utilis
 
 ## Notes
 
-- **Les données de démonstration sont créées automatiquement** lors de la première connexion de l'utilisateur démo
+- **La structure de la ferme de démonstration est créée automatiquement** (vide) lors de la première connexion de l'utilisateur démo
 - L'email de l'utilisateur démo est codé en dur : `demo@agricorn.app`
 - Pour changer l'email de l'utilisateur démo, modifier la constante `_demoUserEmail` dans `lib/services/firebase_service_v4.dart`
 - Si vous souhaitez réinitialiser la ferme de démo, supprimez le nœud `farms/agricorn_demo` dans Firebase et reconnectez-vous avec l'utilisateur démo
+- Les données de démonstration doivent être ajoutées manuellement via l'interface de l'application après la création de la ferme
 
