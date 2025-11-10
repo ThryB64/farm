@@ -25,13 +25,31 @@ class FirebaseServiceV4 {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference? _farmRef;
   
-  // ID de la ferme partagée
-  static const String _farmId = 'gaec_berard';
+  // ID de la ferme (déterminé automatiquement selon l'utilisateur)
+  String? _farmId;
+  String? _currentUserId;
   static const String _storageKey = 'mais_tracker_data_v4';
   bool _isInitialized = false;
 
+  // Réinitialiser le service (pour changement d'utilisateur)
+  void reset() {
+    _isInitialized = false;
+    _farmId = null;
+    _farmRef = null;
+    _currentUserId = null;
+    print('FirebaseService V4: Reset for new user');
+  }
+
   // Initialiser le service
   Future<void> initialize() async {
+    final user = _auth.currentUser;
+    
+    // Si l'utilisateur a changé, réinitialiser
+    if (_currentUserId != null && _currentUserId != user?.uid) {
+      print('FirebaseService V4: User changed, resetting...');
+      reset();
+    }
+    
     if (_isInitialized) return;
     
     try {
@@ -55,15 +73,25 @@ class FirebaseServiceV4 {
       final user = _auth.currentUser;
       if (user != null) {
         try {
+          // Récupérer la ferme assignée à cet utilisateur
+          _farmId = await _getUserFarm(user.uid);
+          
+          if (_farmId == null) {
+            print('FirebaseService V4: No farm assigned to user ${user.uid}');
+            throw Exception('Aucune ferme assignée à cet utilisateur');
+          }
+          
           _farmRef = database.ref('farms/$_farmId');
-          await _addUserToFarm(user.uid);
-          print('FirebaseService V4: User authenticated: ${user.uid}');
+          await _addUserToFarm(user.uid, _farmId!);
+          _currentUserId = user.uid;
+          print('FirebaseService V4: User authenticated: ${user.uid}, Farm: $_farmId');
         } catch (e) {
           print('FirebaseService V4: Auth setup failed: $e');
           // Continuer en mode hors ligne
         }
       } else {
         print('FirebaseService V4: No authenticated user - using local storage only');
+        _currentUserId = null;
         // En mode hors ligne, on utilise seulement le localStorage
       }
       
@@ -100,12 +128,31 @@ class FirebaseServiceV4 {
     }
   }
 
-  // Ajouter l'utilisateur comme membre de la ferme
-  Future<void> _addUserToFarm(String uid) async {
+  // Récupérer la ferme assignée à un utilisateur
+  Future<String?> _getUserFarm(String uid) async {
     try {
       final database = await FirebaseDatabase.instance;
-      await database.ref('farmMembers/$_farmId/$uid').set(true);
-      print('FirebaseService V4: User $uid added to farm $_farmId');
+      final snapshot = await database.ref('userFarms/$uid/farmId').get();
+      if (snapshot.exists && snapshot.value != null) {
+        final farmId = snapshot.value as String;
+        print('FirebaseService V4: User $uid assigned to farm $farmId');
+        return farmId;
+      } else {
+        print('FirebaseService V4: No farm assigned to user $uid');
+        return null;
+      }
+    } catch (e) {
+      print('FirebaseService V4: Failed to get user farm: $e');
+      return null;
+    }
+  }
+
+  // Ajouter l'utilisateur comme membre de la ferme
+  Future<void> _addUserToFarm(String uid, String farmId) async {
+    try {
+      final database = await FirebaseDatabase.instance;
+      await database.ref('farmMembers/$farmId/$uid').set(true);
+      print('FirebaseService V4: User $uid added to farm $farmId');
     } catch (e) {
       print('FirebaseService V4: Failed to add user to farm: $e');
     }
