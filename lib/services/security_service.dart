@@ -26,15 +26,15 @@ class SecurityService {
     return deviceId;
   }
 
-  /// Vérifie si l'utilisateur est dans la whitelist
+  /// Vérifie si l'utilisateur est autorisé (a une ferme assignée)
   Future<bool> isUserAllowed(String uid) async {
     try {
-      // Initialiser la base de données si nécessaire
+      // Vérifier si l'utilisateur a une ferme assignée
       final database = await FirebaseDatabase.instance;
-      final snapshot = await database.ref('allowedUsers/$uid').get();
-      return snapshot.exists && snapshot.value == true;
+      final snapshot = await database.ref('userFarms/$uid/farmId').get();
+      return snapshot.exists && snapshot.value != null;
     } catch (e) {
-      print('Error checking user whitelist: $e');
+      print('Error checking user authorization: $e');
       return false;
     }
   }

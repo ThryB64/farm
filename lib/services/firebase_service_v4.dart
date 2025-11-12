@@ -151,7 +151,14 @@ class FirebaseServiceV4 {
   Future<void> _addUserToFarm(String uid, String farmId) async {
     try {
       final database = await FirebaseDatabase.instance;
-      await database.ref('farmMembers/$farmId/$uid').set(true);
+      final user = _auth.currentUser;
+      
+      // Ajouter le membre dans farms/{farmId}/membres/{uid}
+      await database.ref('farms/$farmId/membres/$uid').set({
+        'email': user?.email ?? '',
+        'role': 'member',
+        'addedAt': ServerValue.timestamp,
+      });
       print('FirebaseService V4: User $uid added to farm $farmId');
     } catch (e) {
       print('FirebaseService V4: Failed to add user to farm: $e');

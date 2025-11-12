@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import '../lib/firebase_options.dart' as firebase_options;
 
 /// Script pour initialiser la ferme agricorn_demo dans Firebase
 /// 
@@ -21,9 +20,18 @@ Future<void> main() async {
   print('🚀 Initialisation de la ferme agricorn_demo...\n');
   
   try {
-    // Initialiser Firebase
+    // Initialiser Firebase avec les options web
     await Firebase.initializeApp(
-      options: firebase_options.DefaultFirebaseOptions.currentPlatform,
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyBCXUTiXNwvqsHMvct9917i0LbXg8Rej9A',
+        appId: '1:616599452364:web:2523a247431044dcb8e069',
+        messagingSenderId: '616599452364',
+        projectId: 'farmgaec',
+        authDomain: 'farmgaec.firebaseapp.com',
+        storageBucket: 'farmgaec.firebasestorage.app',
+        measurementId: 'G-L2B24EG6TJ',
+        databaseURL: 'https://farmgaec-default-rtdb.firebaseio.com',
+      ),
     );
     print('✅ Firebase initialisé\n');
     
@@ -66,8 +74,7 @@ Future<void> main() async {
     print('1. Créez un utilisateur dans Firebase Authentication');
     print('2. Dans Firebase Realtime Database, ajoutez:');
     print('   - userFarms/{uid}/farmId = "$farmId"');
-    print('   - farmMembers/$farmId/{uid} = true');
-    print('   - allowedUsers/{uid} = true');
+    print('   - farms/$farmId/membres/{uid} = {email: "...", role: "member", addedAt: timestamp}');
     print('\n3. L\'utilisateur pourra alors se connecter et accéder uniquement à cette ferme.\n');
     
     print('✅ Initialisation terminée!\n');

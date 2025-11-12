@@ -1,0 +1,29 @@
+{
+  "rules": {
+    "userFarms": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "farms": {
+      "$farmId": {
+        ".read": "auth != null && root.child('userFarms').child(auth.uid).child('farmId').val() === $farmId",
+        ".write": "auth != null && root.child('userFarms').child(auth.uid).child('farmId').val() === $farmId",
+        "membres": {
+          "$uid": {
+            ".read": "auth != null && root.child('userFarms').child(auth.uid).child('farmId').val() === $farmId",
+            ".write": "auth != null && root.child('userFarms').child(auth.uid).child('farmId').val() === $farmId"
+          }
+        }
+      }
+    },
+    "userDevices": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    }
+  }
+}
+
