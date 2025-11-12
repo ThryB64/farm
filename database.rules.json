@@ -1,12 +1,14 @@
 {
   "rules": {
     "farms": {
+      ".read": "auth != null",
       "$farmId": {
         ".read": "auth != null && root.child('farms').child($farmId).child('allowedUsers').child(auth.uid).val() === true",
         ".write": "auth != null && root.child('farms').child($farmId).child('allowedUsers').child(auth.uid).val() === true",
         "allowedUsers": {
+          ".read": "auth != null",
           "$uid": {
-            ".read": "auth != null && root.child('farms').child($farmId).child('allowedUsers').child(auth.uid).val() === true",
+            ".read": "auth != null",
             ".write": "auth != null && root.child('farms').child($farmId).child('allowedUsers').child(auth.uid).val() === true"
           }
         }
