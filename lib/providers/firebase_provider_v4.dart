@@ -754,7 +754,9 @@ class FirebaseProviderV4 extends ChangeNotifier {
     try {
       // ===== 1. CHARGEMENTS : Recalculer poidsNet et poidsNormes =====
       print('📦 Recalcul des chargements (poidsNet, poidsNormes)...');
-      for (final chargement in _chargementsMap.values) {
+      // Créer une copie de la liste pour éviter les modifications concurrentes
+      final chargementsList = _chargementsMap.values.toList();
+      for (final chargement in chargementsList) {
         // Recalculer poidsNet = poidsPlein - poidsVide
         final poidsNetCalcule = PoidsUtils.calculPoidsNet(chargement.poidsPlein, chargement.poidsVide);
         
@@ -790,7 +792,9 @@ class FirebaseProviderV4 extends ChangeNotifier {
       
       // ===== 2. VENTES : Recalculer ecartPoidsNet =====
       print('💰 Recalcul des ventes (ecartPoidsNet)...');
-      for (final vente in _ventesMap.values) {
+      // Créer une copie de la liste pour éviter les modifications concurrentes
+      final ventesList = _ventesMap.values.toList();
+      for (final vente in ventesList) {
         // Calculer le poids net à partir de poidsPlein - poidsVide
         final poidsNetCalcule = vente.poidsPlein - vente.poidsVide;
         
@@ -815,7 +819,9 @@ class FirebaseProviderV4 extends ChangeNotifier {
       
       // ===== 3. SEMIS : Recalculer prixSemis =====
       print('🌱 Recalcul des semis (prixSemis)...');
-      for (final semis in _semisMap.values) {
+      // Créer une copie de la liste pour éviter les modifications concurrentes
+      final semisList = _semisMap.values.toList();
+      for (final semis in semisList) {
         double totalPrix = 0.0;
         final annee = semis.date.year;
         
@@ -855,7 +861,9 @@ class FirebaseProviderV4 extends ChangeNotifier {
       
       // ===== 4. TRAITEMENTS : Recalculer coutTotal pour chaque ProduitTraitement et Traitement =====
       print('💊 Recalcul des traitements (coutTotal produits et traitements)...');
-      for (final traitement in _traitementsMap.values) {
+      // Créer une copie de la liste pour éviter les modifications concurrentes
+      final traitementsList = _traitementsMap.values.toList();
+      for (final traitement in traitementsList) {
         final parcelle = getParcelleById(traitement.parcelleId);
         if (parcelle == null) continue;
         
