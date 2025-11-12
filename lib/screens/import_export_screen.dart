@@ -130,35 +130,56 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
                               'Parcelles',
                               provider.parcelles.length,
                               Icons.landscape,
-                    AppTheme.primary,
+                              AppTheme.primary,
                             ),
-                  const SizedBox(height: AppTheme.spacingS),
+                            const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Cellules',
                               provider.cellules.length,
-                    Icons.grid_view,
-                    AppTheme.secondary,
+                              Icons.grid_view,
+                              AppTheme.secondary,
                             ),
-                  const SizedBox(height: AppTheme.spacingS),
+                            const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Chargements',
                               provider.chargements.length,
                               Icons.local_shipping,
-                    AppTheme.accent,
+                              AppTheme.accent,
                             ),
-                  const SizedBox(height: AppTheme.spacingS),
+                            const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Semis',
                               provider.semis.length,
-                    Icons.grass,
-                    AppTheme.success,
+                              Icons.grass,
+                              AppTheme.success,
                             ),
-                  const SizedBox(height: AppTheme.spacingS),
+                            const SizedBox(height: AppTheme.spacingS),
                             _buildDataSummary(
                               'Variétés',
                               provider.varietes.length,
                               Icons.eco,
-                    AppTheme.info,
+                              AppTheme.info,
+                            ),
+                            const SizedBox(height: AppTheme.spacingS),
+                            _buildDataSummary(
+                              'Ventes',
+                              provider.ventes.length,
+                              Icons.shopping_cart,
+                              AppTheme.warning,
+                            ),
+                            const SizedBox(height: AppTheme.spacingS),
+                            _buildDataSummary(
+                              'Traitements',
+                              provider.traitements.length,
+                              Icons.medical_services,
+                              AppTheme.error,
+                            ),
+                            const SizedBox(height: AppTheme.spacingS),
+                            _buildDataSummary(
+                              'Produits',
+                              provider.produits.length,
+                              Icons.inventory,
+                              AppTheme.primary,
                             ),
                           ],
                         );
@@ -345,10 +366,18 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
           ),
           SizedBox(height: AppTheme.spacingL),
           ModernButton(
-            text: 'Mettre à jour les poids aux normes',
+            text: 'Recalculer toutes les variables calculées',
             icon: Icons.calculate,
             backgroundColor: AppTheme.warning,
             onPressed: _updatePoidsNormes,
+            isFullWidth: true,
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          ModernButton(
+            text: 'Rafraîchir les données',
+            icon: Icons.refresh,
+            backgroundColor: AppTheme.info,
+            onPressed: _refreshData,
             isFullWidth: true,
           ),
         ],
@@ -818,14 +847,27 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       dateCreation: DateTime.tryParse(map['date_creation'].toString()) ?? DateTime.now(),
     );
   }
-  Future<void> _updatePoidsNormes() async {
+  Future<void> _refreshData() async {
     try {
-      await context.read<FirebaseProviderV4>().updateAllChargementsPoidsNormes();
+      // Afficher un indicateur de chargement
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
       
+      // Forcer le refresh
+      final provider = context.read<FirebaseProviderV4>();
+      await provider.forceRefresh();
+      
+      // Fermer le dialog
       if (mounted) {
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Poids aux normes mis à jour avec succès'),
+            content: const Text('Données rafraîchies avec succès'),
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -836,11 +878,188 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
       }
     } catch (e) {
       if (mounted) {
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur : $e'),
+            content: Text('Erreur lors du rafraîchissement: $e'),
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showDiagnostic() async {
+    try {
+      final provider = context.read<FirebaseProviderV4>();
+      final info = await provider.getDiagnosticInfo();
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Diagnostic Firebase'),
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.radius(AppTheme.radiusLarge),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildDiagnosticRow('Utilisateur', info['user']?.toString() ?? 'N/A'),
+                  _buildDiagnosticRow('Email', info['userEmail']?.toString() ?? 'N/A'),
+                  _buildDiagnosticRow('Farm ID', info['farmId']?.toString() ?? 'N/A'),
+                  _buildDiagnosticRow('Ferme existe', info['farmExists']?.toString() ?? 'N/A'),
+                  _buildDiagnosticRow('Nombre de collections', info['farmDataCount']?.toString() ?? 'N/A'),
+                  _buildDiagnosticRow('Initialisé', info['isInitialized']?.toString() ?? 'N/A'),
+                  _buildDiagnosticRow('LocalStorage', info['hasLocalStorage']?.toString() ?? 'N/A'),
+                  _buildDiagnosticRow('Taille localStorage', '${info['localStorageSize'] ?? 0} bytes'),
+                  if (info['error'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppTheme.spacingS),
+                      child: Text(
+                        'Erreur: ${info['error']}',
+                        style: AppTheme.textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.error,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            actions: [
+              ModernTextButton(
+                text: 'Fermer',
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur diagnostic: $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildDiagnosticRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppTheme.spacingS),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              '$label:',
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updatePoidsNormes() async {
+    try {
+      // Afficher un dialogue de confirmation
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Recalculer toutes les variables'),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppTheme.radius(AppTheme.radiusLarge),
+          ),
+          content: const Text(
+            'Cette action va recalculer toutes les variables calculées dans l\'application :\n\n'
+            '• Chargements : poidsNet, poidsNormes\n'
+            '• Ventes : ecartPoidsNet\n'
+            '• Semis : prixSemis\n'
+            '• Traitements : coutTotal (produits et traitements)\n\n'
+            'Cette opération peut prendre quelques instants. Continuer ?',
+          ),
+          actions: [
+            ModernTextButton(
+              text: 'Annuler',
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            ModernButton(
+              text: 'Recalculer',
+              backgroundColor: AppTheme.warning,
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      ) ?? false;
+      
+      if (!confirmed) return;
+      
+      // Afficher un indicateur de chargement
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      
+      // Appeler la méthode de recalcul global
+      await context.read<FirebaseProviderV4>().recalculAllCalculatedValues();
+      
+      // Fermer l'indicateur de chargement
+      if (mounted) {
+        Navigator.pop(context);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Toutes les variables calculées ont été mises à jour avec succès'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.radius(AppTheme.radiusMedium),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Fermer l'indicateur de chargement en cas d'erreur
+      if (mounted) {
+        Navigator.pop(context);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors du recalcul : $e'),
+            backgroundColor: AppTheme.error,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
             shape: RoundedRectangleBorder(
               borderRadius: AppTheme.radius(AppTheme.radiusMedium),
             ),
@@ -886,6 +1105,13 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
             ),
           ),
           SizedBox(height: AppTheme.spacingL),
+          ModernButton(
+            text: 'Afficher le diagnostic',
+            icon: Icons.bug_report,
+            backgroundColor: AppTheme.error,
+            onPressed: _showDiagnostic,
+            isFullWidth: true,
+          ),
         ],
       ),
     );

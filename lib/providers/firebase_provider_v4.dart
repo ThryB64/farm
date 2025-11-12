@@ -9,6 +9,10 @@ import '../models/semis.dart';
 import '../models/vente.dart';
 import '../models/traitement.dart';
 import '../models/produit.dart';
+import '../models/produit_traitement.dart';
+import '../models/variete_surface.dart';
+import '../utils/poids_utils.dart';
+import '../utils/cout_utils.dart';
 
 class FirebaseProviderV4 extends ChangeNotifier {
   final FirebaseServiceV4 _service = FirebaseServiceV4();
@@ -733,6 +737,184 @@ class FirebaseProviderV4 extends ChangeNotifier {
       print('✅ Poids aux normes recalculés avec succès');
     } catch (e) {
       print('❌ Erreur lors du recalcul des poids aux normes: $e');
+      rethrow;
+    }
+  }
+
+  // Méthode pour recalculer TOUTES les variables calculées dans l'application
+  Future<void> recalculAllCalculatedValues() async {
+    print('🔄 FirebaseProvider V4: Recalcul de toutes les variables calculées...');
+    
+    int countChargements = 0;
+    int countVentes = 0;
+    int countSemis = 0;
+    int countTraitements = 0;
+    int countProduitsTraitement = 0;
+    
+    try {
+      // ===== 1. CHARGEMENTS : Recalculer poidsNet et poidsNormes =====
+      print('📦 Recalcul des chargements (poidsNet, poidsNormes)...');
+      for (final chargement in _chargementsMap.values) {
+        // Recalculer poidsNet = poidsPlein - poidsVide
+        final poidsNetCalcule = PoidsUtils.calculPoidsNet(chargement.poidsPlein, chargement.poidsVide);
+        
+        // Recalculer poidsNormes si humidite > 0
+        double poidsNormesCalcule = 0;
+        if (chargement.humidite > 0 && poidsNetCalcule > 0) {
+          poidsNormesCalcule = PoidsUtils.calculPoidsNormes(poidsNetCalcule, chargement.humidite);
+        }
+        
+        // Créer un nouveau chargement avec les valeurs recalculées
+        final nouveauChargement = Chargement(
+          id: chargement.id,
+          firebaseId: chargement.firebaseId,
+          celluleId: chargement.celluleId,
+          parcelleId: chargement.parcelleId,
+          remorque: chargement.remorque,
+          dateChargement: chargement.dateChargement,
+          poidsPlein: chargement.poidsPlein,
+          poidsVide: chargement.poidsVide,
+          poidsNet: poidsNetCalcule,
+          poidsNormes: poidsNormesCalcule,
+          humidite: chargement.humidite,
+          variete: chargement.variete,
+        );
+        
+        // Mettre à jour dans Firebase
+        if (chargement.firebaseId != null) {
+          await _service.updateChargement(nouveauChargement);
+          countChargements++;
+        }
+      }
+      print('✅ $countChargements chargements recalculés');
+      
+      // ===== 2. VENTES : Recalculer ecartPoidsNet =====
+      print('💰 Recalcul des ventes (ecartPoidsNet)...');
+      for (final vente in _ventesMap.values) {
+        // Calculer le poids net à partir de poidsPlein - poidsVide
+        final poidsNetCalcule = vente.poidsPlein - vente.poidsVide;
+        
+        // Calculer l'écart si poidsNet est saisi
+        double? ecartCalcule;
+        if (vente.poidsNet != null) {
+          ecartCalcule = poidsNetCalcule - vente.poidsNet!;
+        }
+        
+        // Créer une nouvelle vente avec l'écart recalculé
+        final nouvelleVente = vente.copyWith(
+          ecartPoidsNet: ecartCalcule,
+        );
+        
+        // Mettre à jour dans Firebase
+        if (vente.firebaseId != null) {
+          await _service.updateVente(nouvelleVente);
+          countVentes++;
+        }
+      }
+      print('✅ $countVentes ventes recalculées');
+      
+      // ===== 3. SEMIS : Recalculer prixSemis =====
+      print('🌱 Recalcul des semis (prixSemis)...');
+      for (final semis in _semisMap.values) {
+        double totalPrix = 0.0;
+        final annee = semis.date.year;
+        
+        // Pour chaque varieteSurface, calculer le coût
+        for (final varieteSurface in semis.varietesSurfaces) {
+          // Trouver la variété
+          final variete = getVarieteById(varieteSurface.varieteId);
+          
+          if (variete != null && variete.prixParAnnee.containsKey(annee)) {
+            final prixDose = variete.prixParAnnee[annee]!;
+            // Calculer le coût total pour cette variété : cout/ha × surface
+            final coutParHectare = CoutUtils.calculerCoutSemisParHectare(prixDose, semis.densiteMais);
+            final coutTotal = CoutUtils.calculerCoutTotalSemis(prixDose, semis.densiteMais, varieteSurface.surface);
+            totalPrix += coutTotal;
+          }
+        }
+        
+        // Créer un nouveau semis avec le prix recalculé
+        final nouveauSemis = Semis(
+          id: semis.id,
+          firebaseId: semis.firebaseId,
+          parcelleId: semis.parcelleId,
+          date: semis.date,
+          varietesSurfaces: semis.varietesSurfaces,
+          notes: semis.notes,
+          densiteMais: semis.densiteMais,
+          prixSemis: totalPrix,
+        );
+        
+        // Mettre à jour dans Firebase
+        if (semis.firebaseId != null) {
+          await _service.updateSemis(nouveauSemis);
+          countSemis++;
+        }
+      }
+      print('✅ $countSemis semis recalculés');
+      
+      // ===== 4. TRAITEMENTS : Recalculer coutTotal pour chaque ProduitTraitement et Traitement =====
+      print('💊 Recalcul des traitements (coutTotal produits et traitements)...');
+      for (final traitement in _traitementsMap.values) {
+        final parcelle = getParcelleById(traitement.parcelleId);
+        if (parcelle == null) continue;
+        
+        // Recalculer coutTotal pour chaque ProduitTraitement
+        final produitsRecalcules = traitement.produits.map((produit) {
+          // coutTotal = quantite * prixUnitaire (coût par hectare)
+          final coutTotal = produit.quantite * produit.prixUnitaire;
+          
+          return ProduitTraitement(
+            produitId: produit.produitId,
+            nomProduit: produit.nomProduit,
+            quantite: produit.quantite,
+            mesure: produit.mesure,
+            prixUnitaire: produit.prixUnitaire,
+            coutTotal: coutTotal,
+            date: produit.date,
+          );
+        }).toList();
+        
+        countProduitsTraitement += produitsRecalcules.length;
+        
+        // Recalculer coutTotal du traitement = somme des (coutTotal produit × surface parcelle)
+        final coutTotalTraitement = produitsRecalcules.fold<double>(
+          0.0,
+          (sum, produit) => sum + (produit.coutTotal * parcelle.surface),
+        );
+        
+        // Créer un nouveau traitement avec les coûts recalculés
+        final nouveauTraitement = Traitement(
+          id: traitement.id,
+          firebaseId: traitement.firebaseId,
+          parcelleId: traitement.parcelleId,
+          date: traitement.date,
+          annee: traitement.annee,
+          notes: traitement.notes,
+          produits: produitsRecalcules,
+          coutTotal: coutTotalTraitement,
+        );
+        
+        // Mettre à jour dans Firebase
+        if (traitement.firebaseId != null) {
+          await _service.modifierTraitement(nouveauTraitement);
+          countTraitements++;
+        }
+      }
+      print('✅ $countTraitements traitements recalculés ($countProduitsTraitement produits)');
+      
+      // Résumé
+      print('✅ Recalcul terminé :');
+      print('   - $countChargements chargements');
+      print('   - $countVentes ventes');
+      print('   - $countSemis semis');
+      print('   - $countTraitements traitements ($countProduitsTraitement produits)');
+      
+      // Notifier les listeners pour mettre à jour l'UI
+      notifyListeners();
+      
+    } catch (e) {
+      print('❌ Erreur lors du recalcul des variables calculées: $e');
       rethrow;
     }
   }
