@@ -1,19 +1,13 @@
 {
   "rules": {
-    "userFarms": {
-      "$uid": {
-        ".read": "$uid === auth.uid",
-        ".write": "$uid === auth.uid"
-      }
-    },
     "farms": {
       "$farmId": {
-        ".read": "auth != null && root.child('userFarms').child(auth.uid).child('farmId').val() === $farmId",
-        ".write": "auth != null && root.child('userFarms').child(auth.uid).child('farmId').val() === $farmId",
-        "membres": {
+        ".read": "auth != null && root.child('farms').child($farmId).child('allowedUsers').child(auth.uid).val() === true",
+        ".write": "auth != null && root.child('farms').child($farmId).child('allowedUsers').child(auth.uid).val() === true",
+        "allowedUsers": {
           "$uid": {
-            ".read": "auth != null && root.child('userFarms').child(auth.uid).child('farmId').val() === $farmId",
-            ".write": "auth != null && root.child('userFarms').child(auth.uid).child('farmId').val() === $farmId"
+            ".read": "auth != null && root.child('farms').child($farmId).child('allowedUsers').child(auth.uid).val() === true",
+            ".write": "auth != null && root.child('farms').child($farmId).child('allowedUsers').child(auth.uid).val() === true"
           }
         }
       }
@@ -26,4 +20,3 @@
     }
   }
 }
-

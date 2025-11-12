@@ -81,6 +81,7 @@ class FirebaseServiceV4 {
             throw Exception('Aucune ferme assignée à cet utilisateur');
           }
           
+          // Utiliser farms/{farmId} comme chemin (ex: farms/agricorn_demo)
           _farmRef = database.ref('farms/$_farmId');
           await _addUserToFarm(user.uid, _farmId!);
           _currentUserId = user.uid;
@@ -128,38 +129,48 @@ class FirebaseServiceV4 {
     }
   }
 
-  // Récupérer la ferme assignée à un utilisateur
+  // Récupérer la ferme assignée à un utilisateur (chercher dans farms/{farmId}/allowedUsers/{uid})
   Future<String?> _getUserFarm(String uid) async {
     try {
       final database = await FirebaseDatabase.instance;
-      final snapshot = await database.ref('userFarms/$uid/farmId').get();
-      if (snapshot.exists && snapshot.value != null) {
-        final farmId = snapshot.value as String;
-        print('FirebaseService V4: User $uid assigned to farm $farmId');
-        return farmId;
-      } else {
-        print('FirebaseService V4: No farm assigned to user $uid');
-        return null;
+      
+      // Parcourir toutes les fermes pour trouver celle où l'utilisateur est dans allowedUsers
+      final farmsSnapshot = await database.ref('farms').get();
+      
+      if (farmsSnapshot.exists && farmsSnapshot.value != null) {
+        final farms = farmsSnapshot.value as Map;
+        
+        for (final entry in farms.entries) {
+          final farmId = entry.key as String;
+          final farmData = entry.value as Map?;
+          
+          if (farmData != null) {
+            // Vérifier si allowedUsers existe et contient cet utilisateur
+            final allowedUsers = farmData['allowedUsers'] as Map?;
+            if (allowedUsers != null && allowedUsers.containsKey(uid)) {
+              print('FirebaseService V4: User $uid found in farm $farmId');
+              return farmId;
+            }
+          }
+        }
       }
+      
+      print('FirebaseService V4: No farm assigned to user $uid');
+      return null;
     } catch (e) {
       print('FirebaseService V4: Failed to get user farm: $e');
       return null;
     }
   }
 
-  // Ajouter l'utilisateur comme membre de la ferme
+  // Ajouter l'utilisateur dans allowedUsers de la ferme
   Future<void> _addUserToFarm(String uid, String farmId) async {
     try {
       final database = await FirebaseDatabase.instance;
-      final user = _auth.currentUser;
       
-      // Ajouter le membre dans farms/{farmId}/membres/{uid}
-      await database.ref('farms/$farmId/membres/$uid').set({
-        'email': user?.email ?? '',
-        'role': 'member',
-        'addedAt': ServerValue.timestamp,
-      });
-      print('FirebaseService V4: User $uid added to farm $farmId');
+      // Ajouter l'utilisateur dans farms/{farmId}/allowedUsers/{uid}
+      await database.ref('farms/$farmId/allowedUsers/$uid').set(true);
+      print('FirebaseService V4: User $uid added to farm $farmId/allowedUsers');
     } catch (e) {
       print('FirebaseService V4: Failed to add user to farm: $e');
     }
@@ -927,15 +938,27 @@ class FirebaseServiceV4 {
       final user = _auth.currentUser;
       final database = await FirebaseDatabase.instance;
       
+      // Trouver la ferme de l'utilisateur en cherchant dans farms/{farmId}/allowedUsers/{uid}
       String? userFarmId;
       if (user != null) {
-        final snapshot = await database.ref('userFarms/${user.uid}/farmId').get();
-        if (snapshot.exists) {
-          userFarmId = snapshot.value as String?;
+        final farmsSnapshot = await database.ref('farms').get();
+        if (farmsSnapshot.exists && farmsSnapshot.value != null) {
+          final farms = farmsSnapshot.value as Map;
+          for (final entry in farms.entries) {
+            final farmId = entry.key as String;
+            final farmData = entry.value as Map?;
+            if (farmData != null) {
+              final allowedUsers = farmData['allowedUsers'] as Map?;
+              if (allowedUsers != null && allowedUsers.containsKey(user.uid)) {
+                userFarmId = farmId;
+                break;
+              }
+            }
+          }
         }
       }
       
-      // Vérifier si la ferme existe
+      // Vérifier si la ferme existe dans farms/{farmId}
       bool farmExists = false;
       int? dataCount = 0;
       if (userFarmId != null) {

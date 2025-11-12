@@ -26,13 +26,28 @@ class SecurityService {
     return deviceId;
   }
 
-  /// Vérifie si l'utilisateur est autorisé (a une ferme assignée)
+  /// Vérifie si l'utilisateur est autorisé (trouvé dans farms/{farmId}/allowedUsers/{uid})
   Future<bool> isUserAllowed(String uid) async {
     try {
-      // Vérifier si l'utilisateur a une ferme assignée
+      // Parcourir toutes les fermes pour trouver celle où l'utilisateur est dans allowedUsers
       final database = await FirebaseDatabase.instance;
-      final snapshot = await database.ref('userFarms/$uid/farmId').get();
-      return snapshot.exists && snapshot.value != null;
+      final farmsSnapshot = await database.ref('farms').get();
+      
+      if (farmsSnapshot.exists && farmsSnapshot.value != null) {
+        final farms = farmsSnapshot.value as Map;
+        
+        for (final entry in farms.entries) {
+          final farmData = entry.value as Map?;
+          if (farmData != null) {
+            final allowedUsers = farmData['allowedUsers'] as Map?;
+            if (allowedUsers != null && allowedUsers.containsKey(uid)) {
+              return true;
+            }
+          }
+        }
+      }
+      
+      return false;
     } catch (e) {
       print('Error checking user authorization: $e');
       return false;
