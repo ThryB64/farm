@@ -32,8 +32,11 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
       final parcelles = db.parcelles;
       final semis = db.semis;
       
+      // Utiliser l'année sélectionnée ou la première disponible
+      final anneeSelectionnee = _selectedYear ?? ventes.map((v) => v.annee).toSet().toList()..sort((a, b) => b.compareTo(a)).first;
+      
       final ventesAnnee = ventes
-          .where((v) => v.annee == _selectedYear)
+          .where((v) => v.annee == anneeSelectionnee)
           .toList();
       
       if (ventesAnnee.isEmpty) {
@@ -82,7 +85,7 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
                   ),
                   pw.SizedBox(height: 60),
                   pw.Text(
-                    'Année $_selectedYear',
+                    'Année $anneeSelectionnee',
                     style: const pw.TextStyle(
                       fontSize: 30,
                       color: PdfColors.black,
@@ -403,8 +406,8 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
               prixTotal += v.prix ?? 0.0;
               ecartTotal += v.ecartPoidsNet ?? 0.0;
             }
-            final stockRestant = db.getStockRestantParAnnee(_selectedYear!);
-            final chiffreAffaires = db.getChiffreAffairesParAnnee(_selectedYear!);
+            final stockRestant = db.getStockRestantParAnnee(anneeSelectionnee);
+            final chiffreAffaires = db.getChiffreAffairesParAnnee(anneeSelectionnee);
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
@@ -455,19 +458,10 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
           },
         ),
       );
-      final bytes = await pdf.save();
-      await Printing.sharePdf(
-        bytes: bytes,
-        filename: 'ventes_${_selectedYear}.pdf',
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: 'ventes_$anneeSelectionnee.pdf',
       );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('PDF des ventes généré avec succès'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -551,13 +545,23 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
               child: Text('Aucune donnée de vente disponible pour l\'export'),
             );
           }
+          
+          // Sélectionner automatiquement la première année si aucune n'est sélectionnée
+          if (_selectedYear == null && years.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                _selectedYear = years.first;
+              });
+            });
+          }
+          
           return Padding(
             padding: AppTheme.padding(AppTheme.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 DropdownButtonFormField<int>(
-                  value: _selectedYear,
+                  value: _selectedYear ?? years.first,
                   decoration: AppTheme.createInputDecoration(
                     labelText: 'Année',
                   ),
@@ -575,7 +579,7 @@ class _ExportVentesScreenState extends State<ExportVentesScreen> {
                 ),
                 SizedBox(height: AppTheme.spacingL),
                 ElevatedButton.icon(
-                  onPressed: _selectedYear == null
+                  onPressed: years.isEmpty
                       ? null
                       : () => _generatePDF(),
                   style: AppTheme.buttonStyle(
