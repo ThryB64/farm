@@ -11,6 +11,7 @@ import '../models/parcelle.dart';
 import '../widgets/modern_card.dart';
 import '../widgets/modern_buttons.dart';
 import '../theme/app_theme.dart';
+import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -451,34 +452,71 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     }
   }
   // 4) IMPORT — remplacement direct dans Firebase (sans reconstruction)
-  Future<void> _importExactJsonReplace(String jsonString) async {
+  Future<void> _importExactJsonReplace(String jsonString, FirebaseProviderV4 provider) async {
     try {
       print('🔄 Remplacement direct dans Firebase...');
       
       final farmId = await _resolveFarmId();
       final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
+      final currentUserId = FirebaseAuth.instance.currentUser!.uid;
       
-      // URL REST directe vers Firebase (URL fixe)
+      // 1) Sauvegarder allowedUsers avant l'import
+      print('💾 Sauvegarde de allowedUsers...');
+      final allowedUsersUrl = 'https://farmgaec-default-rtdb.firebaseio.com/farms/$farmId/allowedUsers.json?auth=$idToken';
+      final allowedUsersRes = await http.get(Uri.parse(allowedUsersUrl));
+      
+      Map<String, dynamic>? savedAllowedUsers;
+      if (allowedUsersRes.statusCode == 200 && allowedUsersRes.body != 'null') {
+        try {
+          savedAllowedUsers = Map<String, dynamic>.from(
+            json.decode(allowedUsersRes.body) as Map
+          );
+          print('✅ allowedUsers sauvegardé: ${savedAllowedUsers.keys.length} utilisateurs');
+        } catch (e) {
+          print('⚠️ allowedUsers vide ou invalide, création d\'un nouveau');
+        }
+      }
+      
+      // Si allowedUsers n'existe pas, créer une entrée pour l'utilisateur actuel
+      if (savedAllowedUsers == null) {
+        savedAllowedUsers = {};
+      }
+      
+      // S'assurer que l'utilisateur actuel est dans allowedUsers
+      savedAllowedUsers[currentUserId] = true;
+      
+      // 2) Parser le JSON importé et fusionner avec allowedUsers
+      print('📦 Fusion des données importées avec allowedUsers...');
+      final importedData = json.decode(jsonString) as Map<String, dynamic>;
+      
+      // Fusionner : données importées + allowedUsers sauvegardé
+      importedData['allowedUsers'] = savedAllowedUsers;
+      
+      // 3) Importer les données fusionnées
       final url = 'https://farmgaec-default-rtdb.firebaseio.com/farms/$farmId.json?auth=$idToken';
-      
       print('📡 URL REST: $url');
       
       final res = await http.put(
         Uri.parse(url),
         headers: {'content-type': 'application/json'},
-        body: jsonString, // JSON brut tel quel
+        body: json.encode(importedData), // JSON avec allowedUsers préservé
       );
       
       if (res.statusCode >= 400) {
         throw Exception('Remplacement échoué: ${res.statusCode} ${res.body}');
       }
       
-      print('✅ Remplacement terminé');
+      print('✅ Remplacement terminé avec allowedUsers préservé');
+      
+      // Rafraîchir les données après l'import
+      print('🔄 Rafraîchissement des données après import...');
+      await provider.forceRefresh();
+      print('✅ Données rafraîchies');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Import réussi - Base de données remplacée directement'),
+            content: const Text('Import réussi - Base de données remplacée avec permissions préservées'),
             backgroundColor: AppTheme.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -525,7 +563,8 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
               if (!confirmed) return;
               
               // Import direct du JSON Firebase (sans validation de structure)
-              await _importExactJsonReplace(jsonString);
+              final provider = context.read<FirebaseProviderV4>();
+              await _importExactJsonReplace(jsonString, provider);
             } catch (e) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
