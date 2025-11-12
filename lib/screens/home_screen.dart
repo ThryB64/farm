@@ -644,8 +644,7 @@ class _HomeScreenState extends State<HomeScreen>
                               children: [
                                 Text('Utilisateur: ${info['user']}'),
                                 Text('Email: ${info['userEmail']}'),
-                                Text('Farm ID (service): ${info['farmId']}'),
-                                Text('Farm ID (userFarms): ${info['userFarmId']}'),
+                                Text('Farm ID: ${info['farmId']}'),
                                 Text('Ferme existe: ${info['farmExists']}'),
                                 Text('Nombre de collections: ${info['farmDataCount']}'),
                                 Text('Initialisé: ${info['isInitialized']}'),

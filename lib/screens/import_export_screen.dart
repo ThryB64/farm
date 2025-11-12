@@ -18,6 +18,7 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/firebase_provider_v4.dart';
+import '../services/firebase_service_v4.dart';
 class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({Key? key}) : super(key: key);
   @override
@@ -395,10 +396,25 @@ class _ImportExportScreenState extends State<ImportExportScreen> with TickerProv
     }
   }
   // ===== API REST FIREBASE (IDENTIQUE CONSOLE) =====
-  // 1) Utiliser le farmId par défaut (pas de récupération via API)
+  // 1) Récupérer le farmId de l'utilisateur connecté
   Future<String> _resolveFarmId() async {
-    // Utiliser directement le farmId par défaut
-    return 'gaec_berard';
+    final service = FirebaseServiceV4();
+    final farmId = service.farmId;
+    
+    if (farmId == null || farmId.isEmpty) {
+      // Si le farmId n'est pas encore chargé, essayer de l'obtenir via le diagnostic
+      final provider = context.read<FirebaseProviderV4>();
+      final diagnosticInfo = await provider.getDiagnosticInfo();
+      final farmIdFromDiagnostic = diagnosticInfo['farmId'] as String?;
+      
+      if (farmIdFromDiagnostic == null || farmIdFromDiagnostic == 'null' || farmIdFromDiagnostic.isEmpty) {
+        throw Exception('Aucune ferme assignée à cet utilisateur. Veuillez vous reconnecter.');
+      }
+      
+      return farmIdFromDiagnostic;
+    }
+    
+    return farmId;
   }
   // 3) EXPORT — téléchargement direct depuis Firebase (sans reconstruction)
   Future<void> _exportExactJsonAndDownload() async {

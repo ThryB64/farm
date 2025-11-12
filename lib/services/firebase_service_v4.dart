@@ -31,6 +31,9 @@ class FirebaseServiceV4 {
   static const String _storageKey = 'mais_tracker_data_v4';
   bool _isInitialized = false;
 
+  // Getter pour obtenir le farmId actuel
+  String? get farmId => _farmId;
+
   // Réinitialiser le service (pour changement d'utilisateur)
   void reset() {
     _isInitialized = false;
@@ -938,31 +941,14 @@ class FirebaseServiceV4 {
       final user = _auth.currentUser;
       final database = await FirebaseDatabase.instance;
       
-      // Trouver la ferme de l'utilisateur en cherchant dans farms/{farmId}/allowedUsers/{uid}
-      String? userFarmId;
-      if (user != null) {
-        final farmsSnapshot = await database.ref('farms').get();
-        if (farmsSnapshot.exists && farmsSnapshot.value != null) {
-          final farms = farmsSnapshot.value as Map;
-          for (final entry in farms.entries) {
-            final farmId = entry.key as String;
-            final farmData = entry.value as Map?;
-            if (farmData != null) {
-              final allowedUsers = farmData['allowedUsers'] as Map?;
-              if (allowedUsers != null && allowedUsers.containsKey(user.uid)) {
-                userFarmId = farmId;
-                break;
-              }
-            }
-          }
-        }
-      }
+      // Utiliser le farmId du service (déjà déterminé lors de l'initialisation)
+      final currentFarmId = _farmId;
       
       // Vérifier si la ferme existe dans farms/{farmId}
       bool farmExists = false;
       int? dataCount = 0;
-      if (userFarmId != null) {
-        final farmSnapshot = await database.ref('farms/$userFarmId').get();
+      if (currentFarmId != null) {
+        final farmSnapshot = await database.ref('farms/$currentFarmId').get();
         farmExists = farmSnapshot.exists;
         if (farmExists && farmSnapshot.value != null) {
           final farmData = farmSnapshot.value as Map?;
@@ -982,7 +968,6 @@ class FirebaseServiceV4 {
         'user': user?.uid ?? 'null',
         'userEmail': user?.email ?? 'null',
         'farmId': _farmId ?? 'null',
-        'userFarmId': userFarmId ?? 'null',
         'farmExists': farmExists,
         'farmDataCount': dataCount,
         'isInitialized': _isInitialized,
