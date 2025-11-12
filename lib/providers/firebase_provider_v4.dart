@@ -1020,6 +1020,45 @@ class FirebaseProviderV4 extends ChangeNotifier {
     }
   }
 
+  // Forcer un refresh complet des données
+  Future<void> forceRefresh() async {
+    try {
+      print('🔄 FirebaseProvider V4: Forcing complete refresh...');
+      
+      // Annuler les subscriptions actuelles
+      await _parcellesSub?.cancel();
+      await _cellulesSub?.cancel();
+      await _chargementsSub?.cancel();
+      await _semisSub?.cancel();
+      await _varietesSub?.cancel();
+      await _ventesSub?.cancel();
+      await _traitementsSub?.cancel();
+      await _produitsSub?.cancel();
+      
+      // Vider les maps locales
+      _clearAllInternal();
+      
+      // Réinitialiser le service
+      _isInitialized = false;
+      await _service.forceRefresh();
+      
+      // Réinitialiser les streams
+      await _initialize();
+      
+      print('✅ FirebaseProvider V4: Complete refresh done');
+    } catch (e) {
+      _error = 'Erreur lors du refresh: $e';
+      print('❌ FirebaseProvider V4: Refresh failed: $e');
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Obtenir des informations de diagnostic
+  Future<Map<String, dynamic>> getDiagnosticInfo() async {
+    return await _service.getDiagnosticInfo();
+  }
+
   @override
   void dispose() {
     // Annuler tous les StreamSubscriptions

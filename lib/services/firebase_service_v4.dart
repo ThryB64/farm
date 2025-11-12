@@ -875,4 +875,94 @@ class FirebaseServiceV4 {
       print('❌ FirebaseService V4: Error disposing listeners: $e');
     }
   }
+
+  // Vider le cache localStorage
+  Future<void> clearLocalStorage() async {
+    try {
+      if (kIsWeb) {
+        html.window.localStorage.remove(_storageKey);
+        print('✅ FirebaseService V4: LocalStorage cleared');
+      }
+    } catch (e) {
+      print('❌ FirebaseService V4: Error clearing localStorage: $e');
+    }
+  }
+
+  // Forcer le refresh des données en réinitialisant les références
+  Future<void> forceRefresh() async {
+    try {
+      print('🔄 FirebaseService V4: Forcing refresh...');
+      
+      // Réinitialiser l'état
+      _isInitialized = false;
+      _isGloballyInitialized = false;
+      
+      // Vider le cache localStorage
+      await clearLocalStorage();
+      
+      // Réinitialiser les références
+      _farmRef = null;
+      _farmId = null;
+      
+      // Réinitialiser complètement
+      await initialize();
+      
+      print('✅ FirebaseService V4: Refresh completed');
+    } catch (e) {
+      print('❌ FirebaseService V4: Error during refresh: $e');
+      rethrow;
+    }
+  }
+
+  // Diagnostic: obtenir des informations sur l'état actuel
+  Future<Map<String, dynamic>> getDiagnosticInfo() async {
+    try {
+      final user = _auth.currentUser;
+      final database = await FirebaseDatabase.instance;
+      
+      String? userFarmId;
+      if (user != null) {
+        final snapshot = await database.ref('userFarms/${user.uid}/farmId').get();
+        if (snapshot.exists) {
+          userFarmId = snapshot.value as String?;
+        }
+      }
+      
+      // Vérifier si la ferme existe
+      bool farmExists = false;
+      int? dataCount = 0;
+      if (userFarmId != null) {
+        final farmSnapshot = await database.ref('farms/$userFarmId').get();
+        farmExists = farmSnapshot.exists;
+        if (farmExists && farmSnapshot.value != null) {
+          final farmData = farmSnapshot.value as Map?;
+          if (farmData != null) {
+            dataCount = farmData.length;
+          }
+        }
+      }
+      
+      // Vérifier le localStorage
+      String? localStorageData;
+      if (kIsWeb) {
+        localStorageData = html.window.localStorage[_storageKey];
+      }
+      
+      return {
+        'user': user?.uid ?? 'null',
+        'userEmail': user?.email ?? 'null',
+        'farmId': _farmId ?? 'null',
+        'userFarmId': userFarmId ?? 'null',
+        'farmExists': farmExists,
+        'farmDataCount': dataCount,
+        'isInitialized': _isInitialized,
+        'hasLocalStorage': localStorageData != null,
+        'localStorageSize': localStorageData?.length ?? 0,
+      };
+    } catch (e) {
+      return {
+        'error': e.toString(),
+      };
+    }
+  }
 }
